@@ -5,3 +5,8 @@ node_modules
 dist
 coverage
 *.tsbuildinfo
+
+.vercel
+.env*
+!.env.example
+tmp/

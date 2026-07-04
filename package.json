@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "fitment:report": "node scripts/fitment/import-wiper-fitments.mjs --report-only",
+    "fitment:import": "node scripts/fitment/import-wiper-fitments.mjs --apply",
+    "fitment:check": "node scripts/fitment/check-fitment-counts.mjs"
   },
   "dependencies": {
     "@stripe/stripe-js": "^4.10.0",
@@ -27,6 +30,7 @@
     "eslint-config-next": "^15.1.0",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.17",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "xlsx": "^0.18.5"
   }
 }
