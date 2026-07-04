@@ -2,6 +2,7 @@ import Image from "next/image";
 import { PlayCircle, ShieldCheck, Truck, Wrench } from "lucide-react";
 import { notFound } from "next/navigation";
 import { ProductConfigurator } from "@/components/product-configurator";
+import { WiperFitmentFinder } from "@/components/wiper-fitment-finder";
 import { formatMoney } from "@/lib/catalog";
 import { productDetailContent, productImage } from "@/lib/product-content";
 import { getProductAttributes, getProductBySlug, listCategories, listProductVariants } from "@/lib/queries/catalog";
@@ -56,6 +57,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
             <p className="mt-5 text-3xl font-black">{formatMoney(product.price)}</p>
           </div>
           <ProductConfigurator product={product} attributes={attributes} variants={variants} />
+          {product.category === "wiper" ? <WiperFitmentFinder compact /> : null}
         </section>
       </section>
 

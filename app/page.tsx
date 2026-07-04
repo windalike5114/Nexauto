@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, BadgeCheck, PackageCheck, Search, ShieldCheck, Truck, Wrench } from "lucide-react";
 import { ProductCard } from "@/components/product-card";
+import { WiperFitmentFinder } from "@/components/wiper-fitment-finder";
 import { listCategories, listProducts } from "@/lib/queries/catalog";
 import { productImage } from "@/lib/product-content";
 
@@ -73,6 +74,12 @@ export default async function HomePage() {
           <TrustItem icon={<Truck className="h-5 w-5" />} title="Fast dispatch" text="Ready-to-ship consumables." />
           <TrustItem icon={<ShieldCheck className="h-5 w-5" />} title="Secure checkout" text="Stripe payment flow." />
           <TrustItem icon={<PackageCheck className="h-5 w-5" />} title="SKU stock" text="Variant-level availability." />
+        </div>
+      </section>
+
+      <section className="border-b border-black/10 bg-zinc-50">
+        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+          <WiperFitmentFinder />
         </div>
       </section>
 

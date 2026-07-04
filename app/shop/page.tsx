@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { SlidersHorizontal } from "lucide-react";
 import { ProductCard } from "@/components/product-card";
+import { WiperFitmentFinder } from "@/components/wiper-fitment-finder";
 import { formatMoney } from "@/lib/catalog";
 import { listCategories, listProducts } from "@/lib/queries/catalog";
 import type { Product } from "@/lib/types";
@@ -103,6 +104,8 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
         </aside>
 
         <section>
+          {params.category === "wiper" ? <div className="mb-5"><WiperFitmentFinder /></div> : null}
+
           <div className="mb-5 flex flex-col gap-3 rounded-lg border border-black/10 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
             <div className="flex flex-wrap gap-2">
               <ControlLink href={buildShopHref(params, { sort: "latest" })} active={(params.sort ?? "latest") === "latest"} label="Latest" />
