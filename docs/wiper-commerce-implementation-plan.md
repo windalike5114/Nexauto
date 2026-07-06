@@ -65,11 +65,11 @@ Rules:
 
 - `WP` = wiper.
 - `FP` = front pair.
-- long blade length comes first.
-- short blade length comes second.
+- longer blade length comes first when the two sides differ.
+- if both sides use the same front length, the length is repeated, for example `18 + 18 -> WPFP1818`.
 - connector is not encoded in the customer-facing SKU.
 - rear blade is not included in the front-pair SKU.
-- equal-length rows in source fitment data are not customer-facing front-pair SKUs under the current "one long, one short" business rule.
+- only combinations that actually exist in fitment data are generated.
 
 Optional later:
 

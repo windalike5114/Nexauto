@@ -46,8 +46,6 @@ export async function getWiperSetByLengths(driverLengthIn: number, passengerLeng
   const longLength = Math.max(driverLengthIn, passengerLengthIn);
   const shortLength = Math.min(driverLengthIn, passengerLengthIn);
 
-  if (longLength === shortLength) return null;
-
   const { data, error } = await supabase
     .from("wiper_sets")
     .select("id,sku,slug,name,set_type,driver_length_in,passenger_length_in,rear_length_in,price,compare_at_price,active")

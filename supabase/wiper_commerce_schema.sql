@@ -159,7 +159,6 @@ select distinct
 from wiper_length_fitments
 where driver_length_in is not null
   and passenger_length_in is not null
-  and driver_length_in <> passenger_length_in
 on conflict (slug) do update set
   sku = excluded.sku,
   name = excluded.name,
