@@ -41,3 +41,26 @@ export type CartItem = {
   price: number;
   attributes: SelectedAttributes;
 };
+
+export type WiperSet = {
+  id: string;
+  sku: string;
+  slug: string;
+  name: string;
+  setType: "front_pair" | "front_rear_set";
+  driverLengthIn: number;
+  passengerLengthIn: number;
+  rearLengthIn: number | null;
+  price: number;
+  compareAtPrice: number | null;
+  active: boolean;
+};
+
+export type WiperRearAddon = {
+  id: string;
+  slug: string;
+  name: string;
+  rearLengthIn: number;
+  price: number;
+  active: boolean;
+};

@@ -9,7 +9,8 @@
     "lint": "next lint",
     "fitment:report": "node scripts/fitment/import-wiper-fitments.mjs --report-only",
     "fitment:import": "node scripts/fitment/import-wiper-fitments.mjs --apply",
-    "fitment:check": "node scripts/fitment/check-fitment-counts.mjs"
+    "fitment:check": "node scripts/fitment/check-fitment-counts.mjs",
+    "wiper-commerce:check": "node scripts/fitment/check-wiper-commerce.mjs"
   },
   "dependencies": {
     "@stripe/stripe-js": "^4.10.0",
