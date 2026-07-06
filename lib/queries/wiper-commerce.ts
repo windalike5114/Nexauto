@@ -63,6 +63,24 @@ export async function getWiperSetByLengths(driverLengthIn: number, passengerLeng
   return mapWiperSet(data as WiperSetRow);
 }
 
+export async function getWiperSetBySku(sku: string) {
+  const supabase = getSupabaseOrThrow();
+  const { data, error } = await supabase
+    .from("wiper_sets")
+    .select("id,sku,slug,name,set_type,driver_length_in,passenger_length_in,rear_length_in,price,compare_at_price,active")
+    .eq("sku", sku.toUpperCase())
+    .eq("set_type", "front_pair")
+    .eq("active", true)
+    .single();
+
+  if (error) {
+    if (error.code === "PGRST116") return null;
+    throw error;
+  }
+
+  return mapWiperSet(data as WiperSetRow);
+}
+
 export async function getWiperSetsByIds(ids: string[]) {
   if (ids.length === 0) return [];
 
@@ -85,6 +103,25 @@ export async function getWiperRearAddonByLength(rearLengthIn: number | null) {
     .from("wiper_rear_addons")
     .select("id,slug,name,rear_length_in,price,active")
     .eq("rear_length_in", rearLengthIn)
+    .eq("active", true)
+    .single();
+
+  if (error) {
+    if (error.code === "PGRST116") return null;
+    throw error;
+  }
+
+  return mapWiperRearAddon(data as WiperRearAddonRow);
+}
+
+export async function getWiperRearAddonById(id: string | null | undefined) {
+  if (!id) return null;
+
+  const supabase = getSupabaseOrThrow();
+  const { data, error } = await supabase
+    .from("wiper_rear_addons")
+    .select("id,slug,name,rear_length_in,price,active")
+    .eq("id", id)
     .eq("active", true)
     .single();
 

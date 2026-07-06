@@ -1,12 +1,11 @@
 import Link from "next/link";
 import { Mail, MapPin, Phone, Clock } from "lucide-react";
 
-const categories = [
-  ["Wipers", "/shop?category=wiper"],
-  ["Bulbs", "/shop?category=bulb"],
-  ["Brake Pads", "/shop?category=brake-pad"],
-  ["Filters", "/shop?category=filter"],
-  ["Batteries", "/shop?category=battery"]
+const wiperLinks = [
+  ["Wiper finder", "/shop?category=wiper"],
+  ["Blade details", "/products/universal-wiper-blade"],
+  ["Cart", "/cart"],
+  ["Customer account", "/account"]
 ];
 
 export function SiteFooter() {
@@ -19,7 +18,7 @@ export function SiteFooter() {
             <span className="text-lg font-black">NexAuto</span>
           </div>
           <p className="mt-4 text-sm leading-7 text-white/70">
-            Online automotive consumables store for spec-first replacement parts, built for retail and future trade accounts.
+            Vehicle-based wiper lookup and front pair checkout for retail customers, with fulfillment data ready for connector handling.
           </p>
         </section>
 
@@ -56,9 +55,9 @@ export function SiteFooter() {
         </section>
 
         <section>
-          <h3 className="font-black">Product Category</h3>
+          <h3 className="font-black">Wiper Tools</h3>
           <div className="mt-4 grid gap-2 text-sm text-white/70">
-            {categories.map(([label, href]) => (
+            {wiperLinks.map(([label, href]) => (
               <Link key={href} href={href as never} className="hover:text-white">
                 {label}
               </Link>
@@ -68,7 +67,7 @@ export function SiteFooter() {
       </div>
       <div className="border-t border-white/10">
         <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-4 text-xs font-bold text-white/55 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
-          <span>NexAuto NZ © 2026. All rights reserved.</span>
+          <span>NexAuto NZ (c) 2026. All rights reserved.</span>
           <span>Secure checkout powered by Stripe.</span>
         </div>
       </div>

@@ -1,138 +1,85 @@
-import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, BadgeCheck, PackageCheck, Search, ShieldCheck, Truck, Wrench } from "lucide-react";
+import { ArrowRight, BadgeCheck, CarFront, ClipboardCheck, PackageCheck, ShieldCheck, Truck } from "lucide-react";
 import { ProductCard } from "@/components/product-card";
 import { WiperFitmentFinder } from "@/components/wiper-fitment-finder";
-import { listCategories, listProducts } from "@/lib/queries/catalog";
-import { productImage } from "@/lib/product-content";
+import { listProducts } from "@/lib/queries/catalog";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const { categories, products, error } = await loadHomeData();
-  const categoryNameBySlug = new Map(categories.map((category) => [category.slug, category.name]));
-  const heroProduct = products.find((product) => product.category === "wiper") ?? products[0];
+  const { products, error } = await loadHomeData();
 
   return (
     <main>
       <section className="bg-ink text-white">
         <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-3 text-sm font-bold sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
-          <span>Online auto consumables store</span>
-          <span className="text-white/75">Wipers and bulbs live now. More categories ready in database.</span>
+          <span>Vehicle-based wiper finder</span>
+          <span className="text-white/75">Front pair kits live now. Connector handling is prepared for fulfillment.</span>
         </div>
       </section>
 
-      <section className="border-b border-black/10 bg-white">
-        <div className="mx-auto grid max-w-7xl gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[0.95fr_1.05fr] lg:px-8 lg:py-14">
+      <section className="border-b border-black/10 bg-zinc-50">
+        <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[0.78fr_1.22fr] lg:px-8 lg:py-14">
           <div className="flex flex-col justify-center">
-            <p className="text-sm font-black uppercase tracking-[0.2em] text-signal">Spec-first auto parts</p>
+            <p className="text-sm font-black uppercase tracking-[0.2em] text-signal">NexAuto wiper tools</p>
             <h1 className="mt-4 max-w-3xl text-4xl font-black leading-tight sm:text-6xl">
-              Buy the right consumables by size, base, and SKU.
+              Find the right front wiper pair by vehicle.
             </h1>
             <p className="mt-5 max-w-2xl text-lg leading-8 text-steel">
-              A clean ecommerce flow for common replacement parts, built around real stock, real variants, and fast repeat ordering.
+              Search your make, model, and year to get the matched front pair SKU. Rear blade is handled as an optional add-on when data is available.
             </p>
-            <div className="mt-7 flex max-w-xl items-center gap-3 rounded-lg border border-black/10 bg-zinc-50 p-3">
-              <Search className="h-5 w-5 text-steel" aria-hidden />
-              <input className="w-full bg-transparent outline-none" placeholder="Search wiper length, H7, H11..." />
-            </div>
             <div className="mt-7 flex flex-wrap gap-3">
-              <Link href="/shop" className="inline-flex h-12 items-center gap-2 rounded bg-signal px-5 font-black text-white hover:bg-red-700">
-                Shop parts
+              <Link href="/shop?category=wiper" className="inline-flex h-12 items-center gap-2 rounded bg-signal px-5 font-black text-white hover:bg-red-700">
+                Open wiper shop
                 <ArrowRight className="h-4 w-4" />
               </Link>
-              <Link href="/account" className="inline-flex h-12 items-center rounded border border-black/10 px-5 font-black text-ink hover:border-ink">
-                Customer account
+              <Link href="/products/universal-wiper-blade" className="inline-flex h-12 items-center rounded border border-black/10 bg-white px-5 font-black text-ink hover:border-ink">
+                Blade information
               </Link>
             </div>
           </div>
 
-          <div className="relative min-h-[360px] overflow-hidden rounded-lg bg-zinc-100">
-            {heroProduct ? (
-              <Image
-                src={productImage(heroProduct)}
-                alt={heroProduct.name}
-                fill
-                priority
-                className="object-cover"
-                sizes="(min-width: 1024px) 52vw, 100vw"
-              />
-            ) : null}
-            <div className="absolute bottom-4 left-4 right-4 rounded bg-white/92 p-4 shadow-panel backdrop-blur">
-              <p className="text-xs font-black uppercase tracking-[0.16em] text-signal">Featured range</p>
-              <p className="mt-1 text-xl font-black text-ink">{heroProduct?.name ?? "Auto consumables"}</p>
-              <p className="mt-1 text-sm font-bold text-steel">Attribute-driven variants with SKU-level stock.</p>
-            </div>
-          </div>
+          <WiperFitmentFinder />
         </div>
       </section>
 
       {error ? <SetupNotice message={error} /> : null}
 
-      <section className="border-b border-black/10 bg-zinc-50">
+      <section className="border-b border-black/10 bg-white">
         <div className="mx-auto grid max-w-7xl gap-3 px-4 py-5 sm:grid-cols-3 sm:px-6 lg:px-8">
-          <TrustItem icon={<Truck className="h-5 w-5" />} title="Fast dispatch" text="Ready-to-ship consumables." />
-          <TrustItem icon={<ShieldCheck className="h-5 w-5" />} title="Secure checkout" text="Stripe payment flow." />
-          <TrustItem icon={<PackageCheck className="h-5 w-5" />} title="SKU stock" text="Variant-level availability." />
-        </div>
-      </section>
-
-      <section className="border-b border-black/10 bg-zinc-50">
-        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-          <WiperFitmentFinder />
+          <TrustItem icon={<CarFront className="h-5 w-5" />} title="Vehicle lookup" text="Make, model, and year driven." />
+          <TrustItem icon={<PackageCheck className="h-5 w-5" />} title="Pair SKU" text="Front blades sold as a matched kit." />
+          <TrustItem icon={<Truck className="h-5 w-5" />} title="Fulfillment ready" text="Vehicle context travels with cart." />
         </div>
       </section>
 
       <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="mb-6 flex items-end justify-between">
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-sm font-black uppercase tracking-[0.18em] text-signal">Categories</p>
-            <h2 className="mt-2 text-3xl font-black">Shop by part type</h2>
+            <p className="text-sm font-black uppercase tracking-[0.18em] text-signal">Current range</p>
+            <h2 className="mt-2 text-3xl font-black">Wiper products</h2>
           </div>
-          <Link href="/shop" className="hidden rounded bg-ink px-4 py-2 text-sm font-black text-white hover:bg-black sm:inline-flex">
-            View all
+          <Link href="/shop?category=wiper" className="inline-flex h-11 items-center justify-center rounded bg-ink px-4 text-sm font-black text-white hover:bg-black">
+            View wiper catalog
           </Link>
         </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-          {categories.map((category) => (
-            <Link
-              key={category.slug}
-              href={`/shop?category=${category.slug}`}
-              className="group rounded-lg border border-black/10 bg-white p-5 shadow-sm hover:border-ink"
-            >
-              <div className="grid h-11 w-11 place-items-center rounded bg-zinc-100 text-ink group-hover:bg-ink group-hover:text-white">
-                <Wrench className="h-5 w-5" />
-              </div>
-              <p className="mt-5 text-xl font-black">{category.name}</p>
-              <p className="mt-2 text-sm leading-6 text-steel">{category.description}</p>
-            </Link>
-          ))}
-        </div>
-      </section>
 
-      <section className="mx-auto max-w-7xl px-4 pb-14 sm:px-6 lg:px-8">
-        <div className="mb-6 flex items-end justify-between">
-          <div>
-            <p className="text-sm font-black uppercase tracking-[0.18em] text-signal">Popular now</p>
-            <h2 className="mt-2 text-3xl font-black">Replacement essentials</h2>
-          </div>
-        </div>
         {products.length > 0 ? (
           <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
             {products.map((product) => (
-              <ProductCard key={product.id} product={product} categoryName={categoryNameBySlug.get(product.category)} />
+              <ProductCard key={product.id} product={product} categoryName="Wipers" />
             ))}
           </div>
         ) : (
-          <EmptyState text="No active products found in Supabase yet." />
+          <EmptyState text="No active wiper products found in Supabase yet." />
         )}
       </section>
 
-      <section className="bg-white">
+      <section className="bg-zinc-50">
         <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 lg:grid-cols-3 lg:px-8">
-          <ValueBlock icon={<BadgeCheck className="h-5 w-5" />} title="Choose attributes" text="Select length, connector, base type, or voltage on the product page." />
-          <ValueBlock icon={<PackageCheck className="h-5 w-5" />} title="Match a SKU" text="The storefront resolves the selection to an active variant with stock." />
-          <ValueBlock icon={<ShieldCheck className="h-5 w-5" />} title="Pay securely" text="Checkout is handled through Stripe with order records stored in Supabase." />
+          <ValueBlock icon={<ClipboardCheck className="h-5 w-5" />} title="Search vehicle" text="Use the finder to resolve blade lengths from fitment data." />
+          <ValueBlock icon={<BadgeCheck className="h-5 w-5" />} title="Review SKU" text="Open the recommended front pair page before adding to cart." />
+          <ValueBlock icon={<ShieldCheck className="h-5 w-5" />} title="Checkout" text="Pay securely while vehicle details remain attached to the order." />
         </div>
       </section>
     </main>
@@ -141,20 +88,19 @@ export default async function HomePage() {
 
 async function loadHomeData() {
   try {
-    const [categories, products] = await Promise.all([listCategories(), listProducts()]);
-    return { categories, products, error: "" };
+    const products = await listProducts("wiper");
+    return { products, error: "" };
   } catch (error) {
     return {
-      categories: [],
       products: [],
-      error: error instanceof Error ? error.message : "Could not load Supabase catalog data."
+      error: error instanceof Error ? error.message : "Could not load Supabase wiper data."
     };
   }
 }
 
 function TrustItem({ icon, title, text }: { icon: React.ReactNode; title: string; text: string }) {
   return (
-    <div className="flex items-center gap-3 rounded bg-white p-4">
+    <div className="flex items-center gap-3 rounded bg-zinc-50 p-4">
       <div className="grid h-10 w-10 place-items-center rounded bg-mint/10 text-mint">{icon}</div>
       <div>
         <p className="font-black">{title}</p>

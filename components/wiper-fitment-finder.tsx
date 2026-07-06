@@ -2,9 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowRight, CarFront, Check, Loader2, Search, ShoppingBag } from "lucide-react";
+import { ArrowRight, CarFront, Loader2, Search } from "lucide-react";
 import { formatMoney } from "@/lib/catalog";
-import { useCart } from "./cart-provider";
 
 type FinderOption = {
   id: string;
@@ -27,6 +26,7 @@ type FitmentResult = {
 type WiperSetResult = {
   id: string;
   sku: string;
+  slug: string;
   name: string;
   driverLengthIn: number;
   passengerLengthIn: number;
@@ -50,8 +50,6 @@ export function WiperFitmentFinder({ compact = false }: { compact?: boolean }) {
   const [fitments, setFitments] = useState<FitmentResult[]>([]);
   const [loading, setLoading] = useState("makes");
   const [error, setError] = useState("");
-  const [addedSku, setAddedSku] = useState("");
-  const { addItem } = useCart();
 
   useEffect(() => {
     let active = true;
@@ -159,47 +157,7 @@ export function WiperFitmentFinder({ compact = false }: { compact?: boolean }) {
   const selectedModel = useMemo(() => models.find((entry) => entry.id === modelId)?.name ?? "", [modelId, models]);
   const busy = Boolean(loading);
   const primaryFitment = fitments[0];
-
-  function markAdded(sku: string) {
-    setAddedSku(sku);
-    window.setTimeout(() => setAddedSku(""), 1600);
-  }
-
-  function addFrontPairToCart(frontPair: WiperSetResult) {
-    addItem({
-      productId: "wiper_set",
-      variantId: frontPair.id,
-      sku: frontPair.sku,
-      name: frontPair.name,
-      category: "wiper",
-      qty: 1,
-      price: frontPair.price,
-      attributes: {
-        driver_length: `${frontPair.driverLengthIn}"`,
-        passenger_length: `${frontPair.passengerLengthIn}"`,
-        vehicle: `${selectedMake} ${selectedModel} ${year}`.trim()
-      }
-    });
-    markAdded(frontPair.sku);
-  }
-
-  function addRearAddonToCart(rearAddon: WiperRearAddonResult) {
-    const sku = `WPR${rearAddon.rearLengthIn}`;
-    addItem({
-      productId: "wiper_rear_addon",
-      variantId: rearAddon.id,
-      sku,
-      name: rearAddon.name,
-      category: "wiper",
-      qty: 1,
-      price: rearAddon.price,
-      attributes: {
-        rear_length: `${rearAddon.rearLengthIn}"`,
-        vehicle: `${selectedMake} ${selectedModel} ${year}`.trim()
-      }
-    });
-    markAdded(sku);
-  }
+  const selectedVehicle = `${selectedMake} ${selectedModel} ${year}`.trim();
 
   return (
     <section className={`rounded-lg border border-black/10 bg-white shadow-sm ${compact ? "p-5" : "p-6 sm:p-7"}`}>
@@ -278,14 +236,13 @@ export function WiperFitmentFinder({ compact = false }: { compact?: boolean }) {
                       </div>
                       <p className="shrink-0 text-lg font-black">{formatMoney(primaryFitment.frontPair.price)}</p>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => addFrontPairToCart(primaryFitment.frontPair as WiperSetResult)}
+                    <Link
+                      href={buildWiperSkuHref(primaryFitment.frontPair, selectedVehicle, primaryFitment.rearAddon) as never}
                       className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded bg-signal px-4 text-sm font-black text-white hover:bg-red-700"
                     >
-                      {addedSku === primaryFitment.frontPair.sku ? <Check className="h-4 w-4" /> : <ShoppingBag className="h-4 w-4" />}
-                      {addedSku === primaryFitment.frontPair.sku ? "Added" : "Add front pair"}
-                    </button>
+                      View this SKU
+                      <ArrowRight className="h-4 w-4" />
+                    </Link>
                   </div>
                 ) : (
                   <div className="rounded bg-zinc-50 p-3 text-sm font-bold text-steel">
@@ -302,14 +259,9 @@ export function WiperFitmentFinder({ compact = false }: { compact?: boolean }) {
                       </div>
                       <p className="shrink-0 font-black">{formatMoney(primaryFitment.rearAddon.price)}</p>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => addRearAddonToCart(primaryFitment.rearAddon as WiperRearAddonResult)}
-                      className="mt-3 inline-flex h-10 w-full items-center justify-center gap-2 rounded border border-black/10 px-4 text-sm font-black text-ink hover:border-ink"
-                    >
-                      {addedSku === `WPR${primaryFitment.rearAddon.rearLengthIn}` ? <Check className="h-4 w-4" /> : <ShoppingBag className="h-4 w-4" />}
-                      {addedSku === `WPR${primaryFitment.rearAddon.rearLengthIn}` ? "Added" : "Add rear blade"}
-                    </button>
+                    <p className="mt-3 rounded bg-zinc-50 p-3 text-xs font-bold leading-5 text-steel">
+                      Rear blade can be selected on the SKU page before checkout.
+                    </p>
                   </div>
                 ) : null}
 
@@ -379,4 +331,13 @@ async function fetchJson<T>(url: string): Promise<T> {
   }
 
   return data as T;
+}
+
+function buildWiperSkuHref(frontPair: WiperSetResult, vehicle: string, rearAddon: WiperRearAddonResult | null) {
+  const params = new URLSearchParams();
+  if (vehicle) params.set("vehicle", vehicle);
+  if (rearAddon) params.set("rearAddonId", rearAddon.id);
+
+  const query = params.toString();
+  return query ? `/wipers/${frontPair.sku}?${query}` : `/wipers/${frontPair.sku}`;
 }

@@ -2,14 +2,12 @@ import Link from "next/link";
 import { SlidersHorizontal } from "lucide-react";
 import { ProductCard } from "@/components/product-card";
 import { WiperFitmentFinder } from "@/components/wiper-fitment-finder";
-import { formatMoney } from "@/lib/catalog";
-import { listCategories, listProducts } from "@/lib/queries/catalog";
+import { listProducts } from "@/lib/queries/catalog";
 import type { Product } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
 type ShopSearchParams = {
-  category?: string;
   sort?: string;
   min?: string;
   max?: string;
@@ -19,8 +17,7 @@ type ShopSearchParams = {
 
 export default async function ShopPage({ searchParams }: { searchParams: Promise<ShopSearchParams> }) {
   const params = await searchParams;
-  const { categories, products, error } = await loadShopData(params.category);
-  const categoryNameBySlug = new Map(categories.map((entry) => [entry.slug, entry.name]));
+  const { products, error } = await loadShopData();
   const filteredProducts = applyShopFilters(products, params);
   const showCount = Number(params.show ?? 12);
   const visibleProducts = filteredProducts.slice(0, Number.isFinite(showCount) ? showCount : 12);
@@ -29,49 +26,31 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
     <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
       <div className="mb-8 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="text-sm font-black uppercase tracking-[0.18em] text-signal">Shop</p>
-          <h1 className="mt-2 text-4xl font-black">Parts catalog</h1>
+          <p className="text-sm font-black uppercase tracking-[0.18em] text-signal">Wiper shop</p>
+          <h1 className="mt-2 text-4xl font-black">Find and buy front wiper pairs</h1>
           <p className="mt-3 text-sm font-bold text-steel">
-            Showing {visibleProducts.length} of {filteredProducts.length} products
+            Showing {visibleProducts.length} of {filteredProducts.length} wiper products
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <FilterLink href={buildShopHref(params, { category: undefined })} active={!params.category} label="All" />
-          {categories.slice(0, 5).map((entry) => (
-            <FilterLink
-              key={entry.slug}
-              href={buildShopHref(params, { category: entry.slug })}
-              active={params.category === entry.slug}
-              label={entry.name}
-            />
-          ))}
-        </div>
+        <Link href="/" className="inline-flex h-11 items-center justify-center rounded border border-black/10 bg-white px-4 text-sm font-black text-ink hover:border-ink">
+          Vehicle finder
+        </Link>
       </div>
 
       {error ? <div className="mb-6 rounded-lg border border-signal/30 bg-white p-5 text-sm font-bold text-signal">{error}</div> : null}
+
+      <div className="mb-8">
+        <WiperFitmentFinder />
+      </div>
 
       <div className="grid gap-8 lg:grid-cols-[280px_1fr]">
         <aside className="space-y-5">
           <section className="rounded-lg border border-black/10 bg-white p-5 shadow-sm">
             <div className="flex items-center gap-2">
               <SlidersHorizontal className="h-5 w-5 text-signal" />
-              <h2 className="font-black">Filter products</h2>
+              <h2 className="font-black">Wiper filters</h2>
             </div>
             <div className="mt-5 space-y-5">
-              <FilterGroup title="Categories">
-                <div className="grid gap-2">
-                  <SidebarLink href={buildShopHref(params, { category: undefined })} active={!params.category} label="All categories" />
-                  {categories.map((entry) => (
-                    <SidebarLink
-                      key={entry.slug}
-                      href={buildShopHref(params, { category: entry.slug })}
-                      active={params.category === entry.slug}
-                      label={entry.name}
-                    />
-                  ))}
-                </div>
-              </FilterGroup>
-
               <FilterGroup title="Price">
                 <div className="grid grid-cols-2 gap-2">
                   <PriceLink params={params} min="0" max="20" label="Under $20" />
@@ -91,21 +70,16 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
           </section>
 
           <section className="rounded-lg border border-black/10 bg-white p-5 shadow-sm">
-            <h2 className="font-black">Featured</h2>
-            <div className="mt-4 space-y-3">
-              {products.slice(0, 3).map((product) => (
-                <Link key={product.id} href={`/products/${product.slug}`} className="block border-b border-black/5 pb-3 last:border-0 last:pb-0">
-                  <p className="text-sm font-black">{product.name}</p>
-                  <p className="mt-1 text-sm font-bold text-signal">{formatMoney(product.price)}</p>
-                </Link>
-              ))}
+            <h2 className="font-black">How buying works</h2>
+            <div className="mt-4 space-y-3 text-sm font-bold leading-6 text-steel">
+              <p>1. Search your vehicle.</p>
+              <p>2. Open the recommended front pair SKU.</p>
+              <p>3. Add rear blade only when shown.</p>
             </div>
           </section>
         </aside>
 
         <section>
-          {params.category === "wiper" ? <div className="mb-5"><WiperFitmentFinder /></div> : null}
-
           <div className="mb-5 flex flex-col gap-3 rounded-lg border border-black/10 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
             <div className="flex flex-wrap gap-2">
               <ControlLink href={buildShopHref(params, { sort: "latest" })} active={(params.sort ?? "latest") === "latest"} label="Latest" />
@@ -127,12 +101,12 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
           {visibleProducts.length > 0 ? (
             <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
               {visibleProducts.map((product) => (
-                <ProductCard key={product.id} product={product} categoryName={categoryNameBySlug.get(product.category)} />
+                <ProductCard key={product.id} product={product} categoryName="Wipers" />
               ))}
             </div>
           ) : (
             <div className="rounded-lg border border-black/10 bg-white p-8 text-center font-bold text-steel">
-              No products match these filters.
+              No wiper products match these filters.
             </div>
           )}
         </section>
@@ -141,15 +115,14 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
   );
 }
 
-async function loadShopData(category?: string) {
+async function loadShopData() {
   try {
-    const [categories, products] = await Promise.all([listCategories(), listProducts(category)]);
-    return { categories, products, error: "" };
+    const products = await listProducts("wiper");
+    return { products, error: "" };
   } catch (error) {
     return {
-      categories: [],
       products: [],
-      error: error instanceof Error ? error.message : "Could not load Supabase catalog data."
+      error: error instanceof Error ? error.message : "Could not load Supabase wiper data."
     };
   }
 }
@@ -179,14 +152,6 @@ function buildShopHref(params: ShopSearchParams, changes: Partial<ShopSearchPara
 
   const query = next.toString();
   return query ? `/shop?${query}` : "/shop";
-}
-
-function FilterLink({ href, active, label }: { href: string; active: boolean; label: string }) {
-  return (
-    <Link href={href as never} className={`rounded px-4 py-2 text-sm font-black ${active ? "bg-ink text-white" : "bg-white text-steel"}`}>
-      {label}
-    </Link>
-  );
 }
 
 function SidebarLink({ href, active, label }: { href: string; active: boolean; label: string }) {

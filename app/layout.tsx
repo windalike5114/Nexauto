@@ -6,8 +6,8 @@ import { SiteFooter } from "@/components/site-footer";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "NexAuto Parts",
-  description: "Attribute-driven auto consumables storefront for wipers and bulbs."
+  title: "NexAuto Wipers",
+  description: "Vehicle-based wiper finder and front pair checkout for New Zealand drivers."
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -25,11 +25,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                   <span className="text-lg font-black tracking-normal">NexAuto</span>
                 </Link>
                 <div className="flex items-center gap-2 text-sm font-semibold text-steel">
-                  <Link className="rounded px-3 py-2 hover:bg-black/5" href="/shop">
-                    Shop
+                  <Link className="rounded px-3 py-2 hover:bg-black/5" href="/shop?category=wiper">
+                    Wiper finder
                   </Link>
-                  <Link className="hidden rounded px-3 py-2 hover:bg-black/5 md:inline-flex" href="/promotion">
-                    Promotion
+                  <Link className="hidden rounded px-3 py-2 hover:bg-black/5 md:inline-flex" href="/products/universal-wiper-blade">
+                    Blade details
                   </Link>
                   <Link className="hidden rounded px-3 py-2 hover:bg-black/5 lg:inline-flex" href="/about">
                     About
