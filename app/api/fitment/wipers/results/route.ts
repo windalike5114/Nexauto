@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { findWiperLengthFitments } from "@/lib/queries/wiper-fitment";
+import { getWiperRearAddonByLength, getWiperSetByLengths } from "@/lib/queries/wiper-commerce";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -13,7 +14,24 @@ export async function GET(request: Request) {
 
   try {
     const fitments = await findWiperLengthFitments(makeId, modelId, year);
-    return NextResponse.json({ fitments });
+    const enrichedFitments = await Promise.all(
+      fitments.map(async (fitment) => {
+        const [frontPair, rearAddon] = await Promise.all([
+          fitment.driverLengthIn && fitment.passengerLengthIn
+            ? getWiperSetByLengths(fitment.driverLengthIn, fitment.passengerLengthIn)
+            : Promise.resolve(null),
+          getWiperRearAddonByLength(fitment.rearLengthIn)
+        ]);
+
+        return {
+          ...fitment,
+          frontPair,
+          rearAddon
+        };
+      })
+    );
+
+    return NextResponse.json({ fitments: enrichedFitments });
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Could not load wiper fitment." },

@@ -1,7 +1,18 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { getVariantsByIds } from "@/lib/queries/catalog";
+import { getWiperRearAddonsByIds, getWiperSetsByIds } from "@/lib/queries/wiper-commerce";
 import type { CartItem } from "@/lib/types";
+
+type ValidatedCheckoutItem = {
+  cartItem: CartItem;
+  id: string;
+  productId: string;
+  sku: string;
+  name: string;
+  price: number;
+  attributes: Record<string, string | number>;
+};
 
 export async function POST(request: Request) {
   const { items } = (await request.json()) as { items?: CartItem[] };
@@ -17,17 +28,32 @@ export async function POST(request: Request) {
     );
   }
 
-  const requestedByVariantId = new Map(items.map((item) => [item.variantId, item]));
-  const dbVariants = await getVariantsByIds([...requestedByVariantId.keys()]);
+  const standardItems = items.filter((item) => item.productId !== "wiper_set" && item.productId !== "wiper_rear_addon");
+  const wiperSetItems = items.filter((item) => item.productId === "wiper_set");
+  const rearAddonItems = items.filter((item) => item.productId === "wiper_rear_addon");
+
+  const requestedByVariantId = new Map(standardItems.map((item) => [item.variantId, item]));
+  const requestedByWiperSetId = new Map(wiperSetItems.map((item) => [item.variantId, item]));
+  const requestedByRearAddonId = new Map(rearAddonItems.map((item) => [item.variantId, item]));
+
+  const [dbVariants, dbWiperSets, dbRearAddons] = await Promise.all([
+    getVariantsByIds([...requestedByVariantId.keys()]),
+    getWiperSetsByIds([...requestedByWiperSetId.keys()]),
+    getWiperRearAddonsByIds([...requestedByRearAddonId.keys()])
+  ]);
 
   if (dbVariants.length !== requestedByVariantId.size) {
     return NextResponse.json({ error: "One or more cart items are no longer available." }, { status: 409 });
   }
 
-  let lineItems;
+  if (dbWiperSets.length !== requestedByWiperSetId.size || dbRearAddons.length !== requestedByRearAddonId.size) {
+    return NextResponse.json({ error: "One or more wiper kit items are no longer available." }, { status: 409 });
+  }
+
+  let validatedItems: ValidatedCheckoutItem[];
 
   try {
-    lineItems = dbVariants.map((variant) => {
+    const variantItems = dbVariants.map((variant) => {
       const cartItem = requestedByVariantId.get(variant.id);
 
       if (!cartItem) {
@@ -40,9 +66,51 @@ export async function POST(request: Request) {
 
       return {
         cartItem,
-        variant
+        id: variant.id,
+        productId: variant.product_id,
+        sku: variant.sku,
+        name: getProductName(variant.products) ?? cartItem.name,
+        price: Number(variant.price),
+        attributes: variant.attributes
       };
     });
+
+    const wiperSetLineItems = dbWiperSets.map((wiperSet) => {
+      const cartItem = requestedByWiperSetId.get(wiperSet.id);
+      if (!cartItem) throw new Error(`Cart item missing for wiper set ${wiperSet.id}`);
+
+      return {
+        cartItem,
+        id: wiperSet.id,
+        productId: "wiper_set",
+        sku: wiperSet.sku,
+        name: wiperSet.name,
+        price: wiperSet.price,
+        attributes: {
+          driver_length: `${wiperSet.driverLengthIn}"`,
+          passenger_length: `${wiperSet.passengerLengthIn}"`
+        }
+      };
+    });
+
+    const rearAddonLineItems = dbRearAddons.map((rearAddon) => {
+      const cartItem = requestedByRearAddonId.get(rearAddon.id);
+      if (!cartItem) throw new Error(`Cart item missing for rear add-on ${rearAddon.id}`);
+
+      return {
+        cartItem,
+        id: rearAddon.id,
+        productId: "wiper_rear_addon",
+        sku: `WPR${rearAddon.rearLengthIn}`,
+        name: rearAddon.name,
+        price: rearAddon.price,
+        attributes: {
+          rear_length: `${rearAddon.rearLengthIn}"`
+        }
+      };
+    });
+
+    validatedItems = [...variantItems, ...wiperSetLineItems, ...rearAddonLineItems];
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Cart item validation failed." },
@@ -59,32 +127,32 @@ export async function POST(request: Request) {
     shipping_address_collection: {
       allowed_countries: ["NZ", "AU", "US"]
     },
-    line_items: lineItems.map(({ cartItem, variant }) => ({
-      quantity: cartItem.qty,
+    line_items: validatedItems.map((item) => ({
+      quantity: item.cartItem.qty,
       price_data: {
         currency: "nzd",
-        unit_amount: Math.round(Number(variant.price) * 100),
+        unit_amount: Math.round(item.price * 100),
         product_data: {
-          name: getProductName(variant.products) ?? cartItem.name,
-          description: `${variant.sku} | ${Object.entries(variant.attributes)
+          name: item.name,
+          description: `${item.sku} | ${Object.entries(item.attributes)
             .map(([key, value]) => `${key}: ${value}`)
             .join(", ")}`,
           metadata: {
-            product_id: variant.product_id,
-            variant_id: variant.id,
-            sku: variant.sku
+            product_id: item.productId,
+            variant_id: item.id,
+            sku: item.sku
           }
         }
       }
     })),
     metadata: {
       items: JSON.stringify(
-        lineItems.map(({ cartItem, variant }) => ({
-          product_id: variant.product_id,
-          variant_id: variant.id,
-          sku: variant.sku,
-          qty: cartItem.qty,
-          price: Number(variant.price)
+        validatedItems.map((item) => ({
+          product_id: item.productId,
+          variant_id: item.id,
+          sku: item.sku,
+          qty: item.cartItem.qty,
+          price: item.price
         }))
       ),
       source: "nexauto"

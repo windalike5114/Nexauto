@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowRight, CarFront, Loader2, Search } from "lucide-react";
+import { ArrowRight, CarFront, Check, Loader2, Search, ShoppingBag } from "lucide-react";
+import { formatMoney } from "@/lib/catalog";
+import { useCart } from "./cart-provider";
 
 type FinderOption = {
   id: string;
@@ -18,6 +20,24 @@ type FitmentResult = {
   driverLengthIn: number | null;
   passengerLengthIn: number | null;
   rearLengthIn: number | null;
+  frontPair: WiperSetResult | null;
+  rearAddon: WiperRearAddonResult | null;
+};
+
+type WiperSetResult = {
+  id: string;
+  sku: string;
+  name: string;
+  driverLengthIn: number;
+  passengerLengthIn: number;
+  price: number;
+};
+
+type WiperRearAddonResult = {
+  id: string;
+  name: string;
+  rearLengthIn: number;
+  price: number;
 };
 
 export function WiperFitmentFinder({ compact = false }: { compact?: boolean }) {
@@ -30,6 +50,8 @@ export function WiperFitmentFinder({ compact = false }: { compact?: boolean }) {
   const [fitments, setFitments] = useState<FitmentResult[]>([]);
   const [loading, setLoading] = useState("makes");
   const [error, setError] = useState("");
+  const [addedSku, setAddedSku] = useState("");
+  const { addItem } = useCart();
 
   useEffect(() => {
     let active = true;
@@ -136,6 +158,48 @@ export function WiperFitmentFinder({ compact = false }: { compact?: boolean }) {
   const selectedMake = useMemo(() => makes.find((entry) => entry.id === makeId)?.name ?? "", [makeId, makes]);
   const selectedModel = useMemo(() => models.find((entry) => entry.id === modelId)?.name ?? "", [modelId, models]);
   const busy = Boolean(loading);
+  const primaryFitment = fitments[0];
+
+  function markAdded(sku: string) {
+    setAddedSku(sku);
+    window.setTimeout(() => setAddedSku(""), 1600);
+  }
+
+  function addFrontPairToCart(frontPair: WiperSetResult) {
+    addItem({
+      productId: "wiper_set",
+      variantId: frontPair.id,
+      sku: frontPair.sku,
+      name: frontPair.name,
+      category: "wiper",
+      qty: 1,
+      price: frontPair.price,
+      attributes: {
+        driver_length: `${frontPair.driverLengthIn}"`,
+        passenger_length: `${frontPair.passengerLengthIn}"`,
+        vehicle: `${selectedMake} ${selectedModel} ${year}`.trim()
+      }
+    });
+    markAdded(frontPair.sku);
+  }
+
+  function addRearAddonToCart(rearAddon: WiperRearAddonResult) {
+    const sku = `WPR${rearAddon.rearLengthIn}`;
+    addItem({
+      productId: "wiper_rear_addon",
+      variantId: rearAddon.id,
+      sku,
+      name: rearAddon.name,
+      category: "wiper",
+      qty: 1,
+      price: rearAddon.price,
+      attributes: {
+        rear_length: `${rearAddon.rearLengthIn}"`,
+        vehicle: `${selectedMake} ${selectedModel} ${year}`.trim()
+      }
+    });
+    markAdded(sku);
+  }
 
   return (
     <section className={`rounded-lg border border-black/10 bg-white shadow-sm ${compact ? "p-5" : "p-6 sm:p-7"}`}>
@@ -188,28 +252,75 @@ export function WiperFitmentFinder({ compact = false }: { compact?: boolean }) {
 
       {year && !busy && !error ? (
         <div className="mt-5">
-          {fitments.length ? (
-            <div className="grid gap-3 lg:grid-cols-[1fr_auto] lg:items-center">
+          {primaryFitment ? (
+            <div className="grid gap-3 lg:grid-cols-[1fr_320px] lg:items-stretch">
               <div className="rounded border border-black/10 bg-zinc-50 p-4">
                 <p className="text-sm font-black">
                   {selectedMake} {selectedModel} {year}
                 </p>
                 <div className="mt-3 grid gap-2 sm:grid-cols-3">
-                  <LengthPill label="Driver" value={fitments[0].driverLengthIn} />
-                  <LengthPill label="Passenger" value={fitments[0].passengerLengthIn} />
-                  <LengthPill label="Rear" value={fitments[0].rearLengthIn} />
+                  <LengthPill label="Driver" value={primaryFitment.driverLengthIn} />
+                  <LengthPill label="Passenger" value={primaryFitment.passengerLengthIn} />
+                  <LengthPill label="Rear" value={primaryFitment.rearLengthIn} />
                 </div>
                 <p className="mt-3 text-xs font-bold text-steel">
-                  Fitment range: {fitments[0].startRaw ?? "?"} - {fitments[0].endRaw ?? "?"}. Connector type is checked separately.
+                  Fitment range: {primaryFitment.startRaw ?? "?"} - {primaryFitment.endRaw ?? "?"}. Connector type is checked separately.
                 </p>
               </div>
-              <Link
-                href="/products/universal-wiper-blade"
-                className="inline-flex h-12 items-center justify-center gap-2 rounded bg-signal px-5 text-sm font-black text-white hover:bg-red-700"
-              >
-                Choose wipers
-                <ArrowRight className="h-4 w-4" />
-              </Link>
+              <div className="rounded border border-black/10 bg-white p-4">
+                {primaryFitment.frontPair ? (
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-[0.14em] text-steel">Recommended front pair</p>
+                    <div className="mt-2 flex items-start justify-between gap-3">
+                      <div>
+                        <p className="font-black">{primaryFitment.frontPair.name}</p>
+                        <p className="mt-1 font-mono text-xs font-bold text-steel">{primaryFitment.frontPair.sku}</p>
+                      </div>
+                      <p className="shrink-0 text-lg font-black">{formatMoney(primaryFitment.frontPair.price)}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => addFrontPairToCart(primaryFitment.frontPair as WiperSetResult)}
+                      className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded bg-signal px-4 text-sm font-black text-white hover:bg-red-700"
+                    >
+                      {addedSku === primaryFitment.frontPair.sku ? <Check className="h-4 w-4" /> : <ShoppingBag className="h-4 w-4" />}
+                      {addedSku === primaryFitment.frontPair.sku ? "Added" : "Add front pair"}
+                    </button>
+                  </div>
+                ) : (
+                  <div className="rounded bg-zinc-50 p-3 text-sm font-bold text-steel">
+                    Front pair product is not available for this length combination yet.
+                  </div>
+                )}
+
+                {primaryFitment.rearAddon ? (
+                  <div className="mt-4 border-t border-black/10 pt-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-xs font-black uppercase tracking-[0.14em] text-steel">Optional rear blade</p>
+                        <p className="mt-1 font-bold">{primaryFitment.rearAddon.name}</p>
+                      </div>
+                      <p className="shrink-0 font-black">{formatMoney(primaryFitment.rearAddon.price)}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => addRearAddonToCart(primaryFitment.rearAddon as WiperRearAddonResult)}
+                      className="mt-3 inline-flex h-10 w-full items-center justify-center gap-2 rounded border border-black/10 px-4 text-sm font-black text-ink hover:border-ink"
+                    >
+                      {addedSku === `WPR${primaryFitment.rearAddon.rearLengthIn}` ? <Check className="h-4 w-4" /> : <ShoppingBag className="h-4 w-4" />}
+                      {addedSku === `WPR${primaryFitment.rearAddon.rearLengthIn}` ? "Added" : "Add rear blade"}
+                    </button>
+                  </div>
+                ) : null}
+
+                <Link
+                  href="/products/universal-wiper-blade"
+                  className="mt-4 inline-flex h-10 w-full items-center justify-center gap-2 rounded bg-ink px-4 text-sm font-black text-white hover:bg-black"
+                >
+                  View details
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </div>
             </div>
           ) : (
             <div className="rounded border border-black/10 bg-zinc-50 p-4 text-sm font-bold text-steel">
