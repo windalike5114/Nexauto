@@ -50,6 +50,9 @@ export function WiperFitmentFinder({ compact = false }: { compact?: boolean }) {
   const [fitments, setFitments] = useState<FitmentResult[]>([]);
   const [loading, setLoading] = useState("makes");
   const [error, setError] = useState("");
+  const [accountEmail, setAccountEmail] = useState("");
+  const [garageMessage, setGarageMessage] = useState("");
+  const [savingVehicle, setSavingVehicle] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -63,6 +66,22 @@ export function WiperFitmentFinder({ compact = false }: { compact?: boolean }) {
       })
       .finally(() => {
         if (active) setLoading("");
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+
+    fetchJson<{ profile: { email: string } }>("/api/account")
+      .then((data) => {
+        if (active) setAccountEmail(data.profile.email);
+      })
+      .catch(() => {
+        if (active) setAccountEmail("");
       });
 
     return () => {
@@ -159,6 +178,31 @@ export function WiperFitmentFinder({ compact = false }: { compact?: boolean }) {
   const primaryFitment = fitments[0];
   const selectedVehicle = `${selectedMake} ${selectedModel} ${year}`.trim();
 
+  async function saveVehicleToGarage() {
+    if (!primaryFitment || !year) return;
+
+    setSavingVehicle(true);
+    setGarageMessage("");
+
+    try {
+      await fetchJson("/api/account/vehicles", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          applicationId: primaryFitment.applicationId,
+          make: selectedMake,
+          model: selectedModel,
+          year
+        })
+      });
+      setGarageMessage("Saved to your garage.");
+    } catch (nextError) {
+      setGarageMessage(nextError instanceof Error ? nextError.message : "Could not save vehicle.");
+    } finally {
+      setSavingVehicle(false);
+    }
+  }
+
   return (
     <section className={`rounded-lg border border-black/10 bg-white shadow-sm ${compact ? "p-5" : "p-6 sm:p-7"}`}>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -224,6 +268,26 @@ export function WiperFitmentFinder({ compact = false }: { compact?: boolean }) {
                 <p className="mt-3 text-xs font-bold text-steel">
                   Fitment range: {primaryFitment.startRaw ?? "?"} - {primaryFitment.endRaw ?? "?"}. Connector type is checked separately.
                 </p>
+                <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center">
+                  {accountEmail ? (
+                    <button
+                      type="button"
+                      disabled={savingVehicle}
+                      onClick={saveVehicleToGarage}
+                      className="inline-flex h-10 items-center justify-center rounded border border-black/10 bg-white px-4 text-sm font-black text-ink hover:border-ink disabled:text-steel"
+                    >
+                      {savingVehicle ? "Saving..." : "Save to my garage"}
+                    </button>
+                  ) : (
+                    <Link
+                      href="/account"
+                      className="inline-flex h-10 items-center justify-center rounded border border-black/10 bg-white px-4 text-sm font-black text-ink hover:border-ink"
+                    >
+                      Sign in to save vehicle
+                    </Link>
+                  )}
+                  {garageMessage ? <p className="text-xs font-bold text-steel">{garageMessage}</p> : null}
+                </div>
               </div>
               <div className="rounded border border-black/10 bg-white p-4">
                 {primaryFitment.frontPair ? (
@@ -322,8 +386,8 @@ function LengthPill({ label, value }: { label: string; value: number | null }) {
   );
 }
 
-async function fetchJson<T>(url: string): Promise<T> {
-  const response = await fetch(url);
+async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
+  const response = await fetch(url, init);
   const data = await response.json();
 
   if (!response.ok) {
