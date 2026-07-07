@@ -1,0 +1,441 @@
+import { createSupabaseAdminClient } from "@/lib/supabase";
+import { createClient } from "@/utils/supabase/server";
+
+export type AdminCheck =
+  | { ok: true; email: string }
+  | { ok: false; reason: "signed_out" | "forbidden" | "not_configured"; email?: string };
+
+export type AdminOrder = {
+  id: string;
+  email: string | null;
+  customerName: string | null;
+  subtotal: number;
+  currency: string;
+  status: string;
+  createdAt: string;
+  stripeSessionId: string | null;
+  items: AdminOrderItem[];
+  vehicle: AdminVehicleSnapshot | null;
+  fulfillment: AdminWiperFulfillment | null;
+};
+
+export type AdminOrderItem = {
+  id: string;
+  orderId: string;
+  sku: string;
+  productName: string;
+  attributes: Record<string, unknown>;
+  qty: number;
+  unitPrice: number;
+  lineTotal: number;
+};
+
+export type AdminVehicleSnapshot = {
+  id: string;
+  orderId: string;
+  make: string;
+  model: string;
+  year: number;
+};
+
+export type AdminWiperFulfillment = {
+  id: string;
+  orderId: string;
+  orderItemId: string | null;
+  wiperSetId: string | null;
+  driverLengthIn: number | null;
+  passengerLengthIn: number | null;
+  rearLengthIn: number | null;
+  driverConnector: string | null;
+  passengerConnector: string | null;
+  rearConnector: string | null;
+  connectorStatus: string;
+  adminNote: string | null;
+};
+
+export type AdminProduct = {
+  id: string;
+  slug: string;
+  name: string;
+  category: string;
+  price: number;
+  description: string;
+  active: boolean;
+  videoUrl: string | null;
+  detailSections: unknown[];
+};
+
+export type AdminVariant = {
+  id: string;
+  productId: string;
+  sku: string;
+  price: number;
+  stock: number;
+  active: boolean;
+  productName: string;
+};
+
+export type AdminWiperSet = {
+  id: string;
+  sku: string;
+  name: string;
+  driverLengthIn: number;
+  passengerLengthIn: number;
+  price: number;
+  active: boolean;
+};
+
+export type AdminRearAddon = {
+  id: string;
+  name: string;
+  rearLengthIn: number;
+  price: number;
+  active: boolean;
+};
+
+type OrderRow = {
+  id: string;
+  email: string | null;
+  customer_name: string | null;
+  subtotal: string | number;
+  currency: string;
+  status: string;
+  created_at: string;
+  stripe_session_id: string | null;
+};
+
+type OrderItemRow = {
+  id: string;
+  order_id: string;
+  sku: string;
+  product_name: string;
+  attributes: Record<string, unknown>;
+  qty: number;
+  unit_price: string | number;
+  line_total: string | number;
+};
+
+type VehicleSnapshotRow = {
+  id: string;
+  order_id: string;
+  make_snapshot: string;
+  model_snapshot: string;
+  year: number;
+};
+
+type FulfillmentRow = {
+  id: string;
+  order_id: string;
+  order_item_id: string | null;
+  wiper_set_id: string | null;
+  driver_length_in: string | number | null;
+  passenger_length_in: string | number | null;
+  rear_length_in: string | number | null;
+  driver_connector: string | null;
+  passenger_connector: string | null;
+  rear_connector: string | null;
+  connector_status: string;
+  admin_note: string | null;
+};
+
+type ProductRow = {
+  id: string;
+  slug: string;
+  name: string;
+  category_slug: string;
+  price: string | number;
+  description: string | null;
+  active: boolean;
+  video_url: string | null;
+  detail_sections: unknown[] | null;
+};
+
+type VariantRow = {
+  id: string;
+  product_id: string;
+  sku: string;
+  price: string | number;
+  stock: number;
+  active: boolean;
+  products: { name: string } | Array<{ name: string }> | null;
+};
+
+type WiperSetRow = {
+  id: string;
+  sku: string;
+  name: string;
+  driver_length_in: string | number;
+  passenger_length_in: string | number;
+  price: string | number;
+  active: boolean;
+};
+
+type RearAddonRow = {
+  id: string;
+  name: string;
+  rear_length_in: string | number;
+  price: string | number;
+  active: boolean;
+};
+
+export async function checkAdminAccess(): Promise<AdminCheck> {
+  const allowedEmails = getAllowedAdminEmails();
+
+  if (!allowedEmails.length) {
+    return { ok: false, reason: "not_configured" };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user }
+  } = await supabase.auth.getUser();
+  const email = user?.email?.toLowerCase();
+
+  if (!email) {
+    return { ok: false, reason: "signed_out" };
+  }
+
+  if (!allowedEmails.includes(email)) {
+    return { ok: false, reason: "forbidden", email };
+  }
+
+  return { ok: true, email };
+}
+
+export async function requireAdminAccess() {
+  const access = await checkAdminAccess();
+  if (!access.ok) throw new Error("Admin access denied.");
+  return access;
+}
+
+export async function loadAdminDashboardData() {
+  await requireAdminAccess();
+
+  const supabase = getAdminOrThrow();
+  const { data: ordersData, error: ordersError } = await supabase
+    .from("orders")
+    .select("id,email,customer_name,subtotal,currency,status,created_at,stripe_session_id")
+    .order("created_at", { ascending: false })
+    .limit(50);
+
+  if (ordersError) throw ordersError;
+
+  const orders = (ordersData ?? []) as OrderRow[];
+  const orderIds = orders.map((order) => order.id);
+  const [items, vehicles, fulfillments, products, variants, wiperSets, rearAddons] = await Promise.all([
+    listOrderItems(orderIds),
+    listOrderVehicles(orderIds),
+    listFulfillments(orderIds),
+    listAdminProducts(),
+    listAdminVariants(),
+    listAdminWiperSets(),
+    listAdminRearAddons()
+  ]);
+
+  const itemsByOrder = groupBy(items, (item) => item.orderId);
+  const vehicleByOrder = new Map(vehicles.map((vehicle) => [vehicle.orderId, vehicle]));
+  const fulfillmentByOrder = new Map(fulfillments.map((fulfillment) => [fulfillment.orderId, fulfillment]));
+  const mappedOrders = orders.map((order): AdminOrder => ({
+    id: order.id,
+    email: order.email,
+    customerName: order.customer_name,
+    subtotal: Number(order.subtotal),
+    currency: order.currency,
+    status: order.status,
+    createdAt: order.created_at,
+    stripeSessionId: order.stripe_session_id,
+    items: itemsByOrder.get(order.id) ?? [],
+    vehicle: vehicleByOrder.get(order.id) ?? null,
+    fulfillment: fulfillmentByOrder.get(order.id) ?? null
+  }));
+
+  return {
+    orders: mappedOrders,
+    products,
+    variants,
+    wiperSets,
+    rearAddons
+  };
+}
+
+async function listOrderItems(orderIds: string[]) {
+  if (!orderIds.length) return [];
+
+  const supabase = getAdminOrThrow();
+  const { data, error } = await supabase
+    .from("order_items")
+    .select("id,order_id,sku,product_name,attributes,qty,unit_price,line_total")
+    .in("order_id", orderIds)
+    .order("created_at", { ascending: true });
+
+  if (error) throw error;
+  return ((data ?? []) as OrderItemRow[]).map((row): AdminOrderItem => ({
+    id: row.id,
+    orderId: row.order_id,
+    sku: row.sku,
+    productName: row.product_name,
+    attributes: row.attributes ?? {},
+    qty: row.qty,
+    unitPrice: Number(row.unit_price),
+    lineTotal: Number(row.line_total)
+  }));
+}
+
+async function listOrderVehicles(orderIds: string[]) {
+  if (!orderIds.length) return [];
+
+  const supabase = getAdminOrThrow();
+  const { data, error } = await supabase
+    .from("order_vehicle_snapshots")
+    .select("id,order_id,make_snapshot,model_snapshot,year")
+    .in("order_id", orderIds);
+
+  if (error) throw error;
+  return ((data ?? []) as VehicleSnapshotRow[]).map((row): AdminVehicleSnapshot => ({
+    id: row.id,
+    orderId: row.order_id,
+    make: row.make_snapshot,
+    model: row.model_snapshot,
+    year: row.year
+  }));
+}
+
+async function listFulfillments(orderIds: string[]) {
+  if (!orderIds.length) return [];
+
+  const supabase = getAdminOrThrow();
+  const { data, error } = await supabase
+    .from("order_wiper_fulfillment")
+    .select("id,order_id,order_item_id,wiper_set_id,driver_length_in,passenger_length_in,rear_length_in,driver_connector,passenger_connector,rear_connector,connector_status,admin_note")
+    .in("order_id", orderIds);
+
+  if (error) throw error;
+  return ((data ?? []) as FulfillmentRow[]).map((row): AdminWiperFulfillment => ({
+    id: row.id,
+    orderId: row.order_id,
+    orderItemId: row.order_item_id,
+    wiperSetId: row.wiper_set_id,
+    driverLengthIn: toNullableNumber(row.driver_length_in),
+    passengerLengthIn: toNullableNumber(row.passenger_length_in),
+    rearLengthIn: toNullableNumber(row.rear_length_in),
+    driverConnector: row.driver_connector,
+    passengerConnector: row.passenger_connector,
+    rearConnector: row.rear_connector,
+    connectorStatus: row.connector_status,
+    adminNote: row.admin_note
+  }));
+}
+
+async function listAdminProducts() {
+  const supabase = getAdminOrThrow();
+  const { data, error } = await supabase
+    .from("products")
+    .select("id,slug,name,category_slug,price,description,active,video_url,detail_sections")
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+  return ((data ?? []) as ProductRow[]).map((row): AdminProduct => ({
+    id: row.id,
+    slug: row.slug,
+    name: row.name,
+    category: row.category_slug,
+    price: Number(row.price),
+    description: row.description ?? "",
+    active: row.active,
+    videoUrl: row.video_url,
+    detailSections: row.detail_sections ?? []
+  }));
+}
+
+async function listAdminVariants() {
+  const supabase = getAdminOrThrow();
+  const { data, error } = await supabase
+    .from("product_variants")
+    .select("id,product_id,sku,price,stock,active,products(name)")
+    .order("sku");
+
+  if (error) throw error;
+  return ((data ?? []) as unknown as VariantRow[]).map((row): AdminVariant => ({
+    id: row.id,
+    productId: row.product_id,
+    sku: row.sku,
+    price: Number(row.price),
+    stock: row.stock,
+    active: row.active,
+    productName: getProductName(row.products) ?? row.product_id
+  }));
+}
+
+async function listAdminWiperSets() {
+  const supabase = getAdminOrThrow();
+  const { data, error } = await supabase
+    .from("wiper_sets")
+    .select("id,sku,name,driver_length_in,passenger_length_in,price,active")
+    .order("driver_length_in")
+    .order("passenger_length_in");
+
+  if (error) throw error;
+  return ((data ?? []) as WiperSetRow[]).map((row): AdminWiperSet => ({
+    id: row.id,
+    sku: row.sku,
+    name: row.name,
+    driverLengthIn: Number(row.driver_length_in),
+    passengerLengthIn: Number(row.passenger_length_in),
+    price: Number(row.price),
+    active: row.active
+  }));
+}
+
+async function listAdminRearAddons() {
+  const supabase = getAdminOrThrow();
+  const { data, error } = await supabase
+    .from("wiper_rear_addons")
+    .select("id,name,rear_length_in,price,active")
+    .order("rear_length_in");
+
+  if (error) throw error;
+  return ((data ?? []) as RearAddonRow[]).map((row): AdminRearAddon => ({
+    id: row.id,
+    name: row.name,
+    rearLengthIn: Number(row.rear_length_in),
+    price: Number(row.price),
+    active: row.active
+  }));
+}
+
+function getAllowedAdminEmails() {
+  return (process.env.ADMIN_EMAILS ?? "")
+    .split(",")
+    .map((email) => email.trim().toLowerCase())
+    .filter(Boolean);
+}
+
+function getAdminOrThrow() {
+  const supabase = createSupabaseAdminClient();
+  if (!supabase) throw new Error("SUPABASE_SERVICE_ROLE_KEY is required for admin.");
+  return supabase;
+}
+
+function groupBy<T>(items: T[], getKey: (item: T) => string) {
+  const map = new Map<string, T[]>();
+  for (const item of items) {
+    const key = getKey(item);
+    map.set(key, [...(map.get(key) ?? []), item]);
+  }
+  return map;
+}
+
+function getProductName(value: unknown) {
+  if (!value) return null;
+  if (Array.isArray(value)) return getProductName(value[0]);
+  if (typeof value === "object" && "name" in value) {
+    return String((value as { name: string }).name);
+  }
+  return null;
+}
+
+function toNullableNumber(value: string | number | null) {
+  if (value === null) return null;
+  const number = Number(value);
+  return Number.isFinite(number) ? number : null;
+}
