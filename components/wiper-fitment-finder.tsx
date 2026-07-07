@@ -301,7 +301,16 @@ export function WiperFitmentFinder({ compact = false }: { compact?: boolean }) {
                       <p className="shrink-0 text-lg font-black">{formatMoney(primaryFitment.frontPair.price)}</p>
                     </div>
                     <Link
-                      href={buildWiperSkuHref(primaryFitment.frontPair, selectedVehicle, primaryFitment.rearAddon) as never}
+                      href={
+                        buildWiperSkuHref({
+                          frontPair: primaryFitment.frontPair,
+                          fitment: primaryFitment,
+                          make: selectedMake,
+                          model: selectedModel,
+                          year,
+                          rearAddon: primaryFitment.rearAddon
+                        }) as never
+                      }
                       className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded bg-signal px-4 text-sm font-black text-white hover:bg-red-700"
                     >
                       View this SKU
@@ -397,9 +406,29 @@ async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
   return data as T;
 }
 
-function buildWiperSkuHref(frontPair: WiperSetResult, vehicle: string, rearAddon: WiperRearAddonResult | null) {
+function buildWiperSkuHref({
+  frontPair,
+  fitment,
+  make,
+  model,
+  year,
+  rearAddon
+}: {
+  frontPair: WiperSetResult;
+  fitment: FitmentResult;
+  make: string;
+  model: string;
+  year: string;
+  rearAddon: WiperRearAddonResult | null;
+}) {
   const params = new URLSearchParams();
+  const vehicle = `${make} ${model} ${year}`.trim();
+
   if (vehicle) params.set("vehicle", vehicle);
+  if (fitment.applicationId) params.set("applicationId", fitment.applicationId);
+  if (make) params.set("make", make);
+  if (model) params.set("model", model);
+  if (year) params.set("year", year);
   if (rearAddon) params.set("rearAddonId", rearAddon.id);
 
   const query = params.toString();

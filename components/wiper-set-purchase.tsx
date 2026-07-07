@@ -10,11 +10,18 @@ import { useCart } from "./cart-provider";
 export function WiperSetPurchase({
   wiperSet,
   rearAddon,
-  vehicle
+  vehicle,
+  vehicleContext
 }: {
   wiperSet: WiperSet;
   rearAddon: WiperRearAddon | null;
   vehicle: string;
+  vehicleContext: {
+    applicationId: string;
+    make: string;
+    model: string;
+    year: number;
+  } | null;
 }) {
   const [qty, setQty] = useState(1);
   const [includeRear, setIncludeRear] = useState(Boolean(rearAddon));
@@ -33,7 +40,15 @@ export function WiperSetPurchase({
       attributes: {
         driver_length: `${wiperSet.driverLengthIn}"`,
         passenger_length: `${wiperSet.passengerLengthIn}"`,
-        ...(vehicle ? { vehicle } : {})
+        ...(vehicle ? { vehicle } : {}),
+        ...(vehicleContext
+          ? {
+              vehicle_application_id: vehicleContext.applicationId,
+              vehicle_make: vehicleContext.make,
+              vehicle_model: vehicleContext.model,
+              vehicle_year: vehicleContext.year
+            }
+          : {})
       }
     });
 
@@ -48,7 +63,15 @@ export function WiperSetPurchase({
         price: rearAddon.price,
         attributes: {
           rear_length: `${rearAddon.rearLengthIn}"`,
-          ...(vehicle ? { vehicle } : {})
+          ...(vehicle ? { vehicle } : {}),
+          ...(vehicleContext
+            ? {
+                vehicle_application_id: vehicleContext.applicationId,
+                vehicle_make: vehicleContext.make,
+                vehicle_model: vehicleContext.model,
+                vehicle_year: vehicleContext.year
+              }
+            : {})
         }
       });
     }

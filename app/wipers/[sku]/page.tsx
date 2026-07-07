@@ -9,6 +9,10 @@ export const dynamic = "force-dynamic";
 
 type WiperSkuSearchParams = {
   vehicle?: string;
+  applicationId?: string;
+  make?: string;
+  model?: string;
+  year?: string;
   rearAddonId?: string;
 };
 
@@ -27,7 +31,20 @@ export default async function WiperSkuPage({
 
   if (!wiperSet) notFound();
 
-  const vehicle = query.vehicle ? decodeURIComponent(query.vehicle) : "";
+  const vehicleContext =
+    query.applicationId && query.make && query.model && query.year
+      ? {
+          applicationId: query.applicationId,
+          make: decodeURIComponent(query.make),
+          model: decodeURIComponent(query.model),
+          year: Number(query.year)
+        }
+      : null;
+  const vehicle = vehicleContext
+    ? `${vehicleContext.make} ${vehicleContext.model} ${vehicleContext.year}`
+    : query.vehicle
+      ? decodeURIComponent(query.vehicle)
+      : "";
 
   return (
     <main>
@@ -60,7 +77,7 @@ export default async function WiperSkuPage({
             <p className="mt-5 text-3xl font-black">{formatMoney(wiperSet.price)}</p>
           </div>
 
-          <WiperSetPurchase wiperSet={wiperSet} rearAddon={rearAddon} vehicle={vehicle} />
+          <WiperSetPurchase wiperSet={wiperSet} rearAddon={rearAddon} vehicle={vehicle} vehicleContext={vehicleContext} />
         </section>
       </section>
 

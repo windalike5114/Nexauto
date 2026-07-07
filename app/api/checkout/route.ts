@@ -87,6 +87,7 @@ export async function POST(request: Request) {
         name: wiperSet.name,
         price: wiperSet.price,
         attributes: {
+          ...cartItem.attributes,
           driver_length: `${wiperSet.driverLengthIn}"`,
           passenger_length: `${wiperSet.passengerLengthIn}"`
         }
@@ -105,6 +106,7 @@ export async function POST(request: Request) {
         name: rearAddon.name,
         price: rearAddon.price,
         attributes: {
+          ...cartItem.attributes,
           rear_length: `${rearAddon.rearLengthIn}"`
         }
       };
@@ -148,13 +150,14 @@ export async function POST(request: Request) {
     metadata: {
       items: JSON.stringify(
         validatedItems.map((item) => ({
-          product_id: item.productId,
-          variant_id: item.id,
-          sku: item.sku,
-          qty: item.cartItem.qty,
-          price: item.price
+          p: item.productId,
+          v: item.id,
+          s: item.sku,
+          q: item.cartItem.qty,
+          pr: item.price
         }))
       ),
+      vehicle: JSON.stringify(buildVehicleMetadata(validatedItems)),
       source: "nexauto"
     },
     success_url: `${siteUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
@@ -162,6 +165,19 @@ export async function POST(request: Request) {
   });
 
   return NextResponse.json({ url: session.url });
+}
+
+function buildVehicleMetadata(items: ValidatedCheckoutItem[]) {
+  const attributes = items.map((item) => item.attributes).find((entry) => entry.vehicle_application_id);
+
+  if (!attributes) return null;
+
+  return {
+    a: attributes.vehicle_application_id,
+    m: attributes.vehicle_make,
+    d: attributes.vehicle_model,
+    y: attributes.vehicle_year
+  };
 }
 
 function getProductName(value: unknown) {

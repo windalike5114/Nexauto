@@ -78,6 +78,26 @@ export async function getOrCreateCustomerProfile(user: User) {
   return mapProfile(data as CustomerProfileRow);
 }
 
+export async function getOrCreateCustomerProfileByEmail(emailInput: string, name: string | null = null) {
+  const email = emailInput.toLowerCase();
+  const supabase = getAdminOrThrow();
+  const { data, error } = await supabase
+    .from("customer_profiles")
+    .upsert(
+      {
+        email,
+        name,
+        updated_at: new Date().toISOString()
+      },
+      { onConflict: "email" }
+    )
+    .select("id,auth_user_id,email,name")
+    .single();
+
+  if (error) throw error;
+  return mapProfile(data as CustomerProfileRow);
+}
+
 export async function listCustomerVehicles(profileId: string) {
   const supabase = getAdminOrThrow();
   const { data, error } = await supabase
@@ -107,6 +127,38 @@ export async function saveCustomerVehicle(user: User, vehicle: CustomerVehicleIn
         model_snapshot: vehicle.model,
         year: vehicle.year,
         source: "fitment_lookup",
+        last_used_at: new Date().toISOString()
+      },
+      { onConflict: "email,vehicle_application_id,year" }
+    )
+    .select("id,vehicle_application_id,make_snapshot,model_snapshot,year,source,last_used_at")
+    .single();
+
+  if (error) throw error;
+
+  return {
+    profile,
+    vehicle: mapVehicle(data as CustomerVehicleRow)
+  };
+}
+
+export async function saveCustomerVehicleByEmail(emailInput: string, vehicle: CustomerVehicleInput, name: string | null = null) {
+  const profile = await getOrCreateCustomerProfileByEmail(emailInput, name);
+  const supabase = getAdminOrThrow();
+  const email = profile.email.toLowerCase();
+
+  const { data, error } = await supabase
+    .from("customer_vehicles")
+    .upsert(
+      {
+        customer_profile_id: profile.id,
+        auth_user_id: profile.authUserId,
+        email,
+        vehicle_application_id: vehicle.applicationId,
+        make_snapshot: vehicle.make,
+        model_snapshot: vehicle.model,
+        year: vehicle.year,
+        source: "checkout",
         last_used_at: new Date().toISOString()
       },
       { onConflict: "email,vehicle_application_id,year" }
