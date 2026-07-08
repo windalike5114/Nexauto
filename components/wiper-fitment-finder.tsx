@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { ArrowRight, CarFront, Loader2, Search } from "lucide-react";
 
@@ -39,7 +40,8 @@ type WiperRearAddonResult = {
   price: number;
 };
 
-export function WiperFitmentFinder({ compact = false }: { compact?: boolean }) {
+export function WiperFitmentFinder({ compact = false, directToProduct = false }: { compact?: boolean; directToProduct?: boolean }) {
+  const router = useRouter();
   const [makes, setMakes] = useState<FinderOption[]>([]);
   const [models, setModels] = useState<FinderOption[]>([]);
   const [years, setYears] = useState<number[]>([]);
@@ -52,6 +54,7 @@ export function WiperFitmentFinder({ compact = false }: { compact?: boolean }) {
   const [accountEmail, setAccountEmail] = useState("");
   const [garageMessage, setGarageMessage] = useState("");
   const [savingVehicle, setSavingVehicle] = useState(false);
+  const [searching, setSearching] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -73,6 +76,8 @@ export function WiperFitmentFinder({ compact = false }: { compact?: boolean }) {
   }, []);
 
   useEffect(() => {
+    if (directToProduct) return;
+
     let active = true;
 
     fetchJson<{ profile: { email: string } }>("/api/account")
@@ -86,7 +91,7 @@ export function WiperFitmentFinder({ compact = false }: { compact?: boolean }) {
     return () => {
       active = false;
     };
-  }, []);
+  }, [directToProduct]);
 
   useEffect(() => {
     if (!makeId) {
@@ -152,6 +157,11 @@ export function WiperFitmentFinder({ compact = false }: { compact?: boolean }) {
       return;
     }
 
+    if (directToProduct) {
+      setFitments([]);
+      return;
+    }
+
     let active = true;
     setLoading("results");
     setError("");
@@ -169,7 +179,7 @@ export function WiperFitmentFinder({ compact = false }: { compact?: boolean }) {
     return () => {
       active = false;
     };
-  }, [makeId, modelId, year]);
+  }, [directToProduct, makeId, modelId, year]);
 
   const selectedMake = useMemo(() => makes.find((entry) => entry.id === makeId)?.name ?? "", [makeId, makes]);
   const selectedModel = useMemo(() => models.find((entry) => entry.id === modelId)?.name ?? "", [modelId, models]);
@@ -199,6 +209,43 @@ export function WiperFitmentFinder({ compact = false }: { compact?: boolean }) {
       setGarageMessage(nextError instanceof Error ? nextError.message : "Could not save vehicle.");
     } finally {
       setSavingVehicle(false);
+    }
+  }
+
+  async function findAndGoToProduct() {
+    if (!makeId || !modelId || !year) {
+      setError("Select make, model, and year first.");
+      return;
+    }
+
+    setSearching(true);
+    setError("");
+
+    try {
+      const data = await fetchJson<{ fitments: FitmentResult[] }>(
+        `/api/fitment/wipers/results?makeId=${makeId}&modelId=${modelId}&year=${year}`
+      );
+      const nextFitment = data.fitments.find((entry) => entry.frontPair);
+
+      if (!nextFitment?.frontPair) {
+        setError("No active wiper kit exists for this vehicle yet.");
+        return;
+      }
+
+      router.push(
+        buildWiperSkuHref({
+          frontPair: nextFitment.frontPair,
+          fitment: nextFitment,
+          make: selectedMake,
+          model: selectedModel,
+          year,
+          rearAddon: nextFitment.rearAddon
+        }) as never
+      );
+    } catch (nextError) {
+      setError(nextError instanceof Error ? nextError.message : "Could not find wipers for this vehicle.");
+    } finally {
+      setSearching(false);
     }
   }
 
@@ -249,9 +296,21 @@ export function WiperFitmentFinder({ compact = false }: { compact?: boolean }) {
         </SelectControl>
       </div>
 
+      {directToProduct ? (
+        <button
+          type="button"
+          disabled={!makeId || !modelId || !year || searching}
+          onClick={findAndGoToProduct}
+          className="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded bg-signal px-5 text-sm font-black text-white hover:bg-red-700 disabled:bg-zinc-300"
+        >
+          {searching ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+          Find wipers for my car
+        </button>
+      ) : null}
+
       {error ? <div className="mt-4 rounded border border-signal/30 bg-red-50 p-3 text-sm font-bold text-signal">{error}</div> : null}
 
-      {year && !busy && !error ? (
+      {!directToProduct && year && !busy && !error ? (
         <div className="mt-5">
           {primaryFitment ? (
             <div className="grid gap-3 lg:grid-cols-[1fr_320px] lg:items-stretch">

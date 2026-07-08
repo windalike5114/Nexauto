@@ -43,7 +43,7 @@ export default async function HomePage() {
           </div>
 
           <div className="self-center">
-            <WiperFitmentFinder />
+            <WiperFitmentFinder directToProduct />
           </div>
         </div>
       </section>
