@@ -290,20 +290,35 @@ export function WiperFitmentFinder({ compact = false }: { compact?: boolean }) {
               </div>
               <div className="flex flex-col justify-between rounded border border-black/10 bg-white p-4">
                 <div>
-                  <p className="text-xs font-black uppercase tracking-[0.14em] text-steel">Next step</p>
-                  <h3 className="mt-2 text-xl font-black">View your vehicle result</h3>
+                  <p className="text-xs font-black uppercase tracking-[0.14em] text-steel">Matched result</p>
+                  <h3 className="mt-2 text-xl font-black">Your wiper kit is ready</h3>
                   <p className="mt-2 text-sm font-bold leading-6 text-steel">
-                    We will show the matched blade lengths, recommended front pair, rear option, and add-to-cart controls on the vehicle page.
+                    Continue to the product page with your vehicle, blade lengths, rear option, and add-to-cart controls already configured.
                   </p>
                 </div>
 
-                <Link
-                  href={buildVehicleHref(selectedMake, selectedModel, year) as never}
-                  className="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded bg-signal px-4 text-sm font-black text-white hover:bg-red-700"
-                >
-                  View wiper result
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
+                {primaryFitment.frontPair ? (
+                  <Link
+                    href={
+                      buildWiperSkuHref({
+                        frontPair: primaryFitment.frontPair,
+                        fitment: primaryFitment,
+                        make: selectedMake,
+                        model: selectedModel,
+                        year,
+                        rearAddon: primaryFitment.rearAddon
+                      }) as never
+                    }
+                    className="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded bg-signal px-4 text-sm font-black text-white hover:bg-red-700"
+                  >
+                    Find wipers for my car
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                ) : (
+                  <div className="mt-5 rounded bg-zinc-50 p-3 text-sm font-bold text-steel">
+                    No active SKU exists for this blade combination yet.
+                  </div>
+                )}
               </div>
             </div>
           ) : (
@@ -365,15 +380,31 @@ async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
   return data as T;
 }
 
-function buildVehicleHref(make: string, model: string, year: string) {
-  return `/${slugifyVehiclePart(make)}/${slugifyVehiclePart(model)}/${encodeURIComponent(year)}`;
-}
+function buildWiperSkuHref({
+  frontPair,
+  fitment,
+  make,
+  model,
+  year,
+  rearAddon
+}: {
+  frontPair: WiperSetResult;
+  fitment: FitmentResult;
+  make: string;
+  model: string;
+  year: string;
+  rearAddon: WiperRearAddonResult | null;
+}) {
+  const params = new URLSearchParams();
+  const vehicle = `${make} ${model} ${year}`.trim();
 
-function slugifyVehiclePart(value: string) {
-  return value
-    .toLowerCase()
-    .trim()
-    .replace(/&/g, " and ")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
+  if (vehicle) params.set("vehicle", vehicle);
+  if (fitment.applicationId) params.set("applicationId", fitment.applicationId);
+  if (make) params.set("make", make);
+  if (model) params.set("model", model);
+  if (year) params.set("year", year);
+  if (rearAddon) params.set("rearAddonId", rearAddon.id);
+
+  const query = params.toString();
+  return query ? `/wipers/${frontPair.sku}?${query}` : `/wipers/${frontPair.sku}`;
 }

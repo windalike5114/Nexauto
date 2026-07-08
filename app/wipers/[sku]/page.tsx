@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { PlayCircle, ShieldCheck, Truck, Wrench } from "lucide-react";
+import { CarFront, CheckCircle2, PlayCircle, ShieldCheck, Truck, Wrench } from "lucide-react";
 import { WiperSetPurchase } from "@/components/wiper-set-purchase";
 import { formatMoney } from "@/lib/catalog";
 import { getWiperRearAddonById, getWiperSetBySku } from "@/lib/queries/wiper-commerce";
@@ -72,10 +72,41 @@ export default async function WiperSkuPage({
             <p className="text-sm font-black uppercase tracking-[0.18em] text-signal">Wipers</p>
             <h1 className="mt-3 text-4xl font-black leading-tight sm:text-5xl">{wiperSet.name}</h1>
             <p className="mt-4 text-lg leading-8 text-steel">
-              Matched front pair generated from fitment data. This kit includes the driver and passenger blades as one sellable SKU.
+              Matched front pair generated from fitment data. Customers only select a vehicle; blade lengths and connector handling stay with the system.
             </p>
             <p className="mt-5 text-3xl font-black">{formatMoney(wiperSet.price)}</p>
           </div>
+
+          {vehicle ? (
+            <section className="rounded-lg border border-black/10 bg-zinc-50 p-5">
+              <div className="flex items-start gap-3">
+                <div className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-signal text-white">
+                  <CarFront className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-xs font-black uppercase tracking-[0.14em] text-signal">Selected vehicle</p>
+                  <h2 className="mt-1 text-2xl font-black">{vehicle}</h2>
+                  <p className="mt-2 text-sm font-bold leading-6 text-steel">
+                    This vehicle will be saved with the cart and order for internal SKU and connector fulfillment.
+                  </p>
+                </div>
+              </div>
+              <div className="mt-5 grid gap-3 sm:grid-cols-3">
+                <FitmentTile label="Driver blade" value={`${wiperSet.driverLengthIn}"`} />
+                <FitmentTile label="Passenger blade" value={`${wiperSet.passengerLengthIn}"`} />
+                <FitmentTile label="Rear blade" value={rearAddon ? `${rearAddon.rearLengthIn}" optional` : "Not listed"} />
+              </div>
+            </section>
+          ) : (
+            <section className="rounded-lg border border-black/10 bg-zinc-50 p-5">
+              <div className="flex items-center gap-3">
+                <CheckCircle2 className="h-5 w-5 text-signal" />
+                <p className="text-sm font-bold text-steel">
+                  Buying manually from the catalog. For the safest fitment, search your vehicle first.
+                </p>
+              </div>
+            </section>
+          )}
 
           <WiperSetPurchase wiperSet={wiperSet} rearAddon={rearAddon} vehicle={vehicle} vehicleContext={vehicleContext} />
         </section>
@@ -128,6 +159,15 @@ function MediaTile({ icon, text }: { icon: React.ReactNode; text: string }) {
     <div className="flex min-h-16 flex-col items-center justify-center gap-1 rounded border border-black/10 bg-white text-sm font-black text-steel">
       {icon}
       <span>{text}</span>
+    </div>
+  );
+}
+
+function FitmentTile({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-lg border border-black/10 bg-white p-4">
+      <p className="text-xs font-black uppercase tracking-[0.14em] text-steel">{label}</p>
+      <p className="mt-2 text-2xl font-black text-ink">{value}</p>
     </div>
   );
 }
