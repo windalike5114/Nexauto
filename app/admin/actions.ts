@@ -100,6 +100,7 @@ export async function updateProductContentAction(formData: FormData) {
   const supabase = getAdminOrThrow();
   const id = requiredString(formData, "productId");
   const price = Number(requiredString(formData, "price"));
+  const detailSections = parseDetailSections(optionalString(formData, "detailSections"));
 
   if (!Number.isFinite(price)) {
     throw new Error("Price must be a valid number.");
@@ -111,6 +112,7 @@ export async function updateProductContentAction(formData: FormData) {
       name: requiredString(formData, "name"),
       price,
       description: optionalString(formData, "description") ?? "",
+      detail_sections: detailSections,
       video_url: optionalString(formData, "videoUrl"),
       active: formData.get("active") === "on",
       updated_at: new Date().toISOString()
@@ -140,4 +142,23 @@ function optionalString(formData: FormData, key: string) {
   if (typeof value !== "string") return null;
   const trimmed = value.trim();
   return trimmed ? trimmed : null;
+}
+
+function parseDetailSections(value: string | null) {
+  if (!value) return [];
+
+  try {
+    const parsed = JSON.parse(value) as unknown;
+    if (!Array.isArray(parsed)) throw new Error("detailSections must be an array.");
+
+    return parsed.map((entry) => {
+      if (!entry || typeof entry !== "object") throw new Error("Each detail section must be an object.");
+      const title = "title" in entry ? String((entry as { title: unknown }).title ?? "").trim() : "";
+      const body = "body" in entry ? String((entry as { body: unknown }).body ?? "").trim() : "";
+      if (!title || !body) throw new Error("Each detail section needs title and body.");
+      return { title, body };
+    });
+  } catch (error) {
+    throw new Error(error instanceof Error ? error.message : "Detail sections JSON is invalid.");
+  }
 }

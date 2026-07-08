@@ -320,6 +320,14 @@ function ContentPanel({ products }: { products: Awaited<ReturnType<typeof loadAd
             </label>
             <Field label="Video URL" name="videoUrl" defaultValue={product.videoUrl ?? ""} />
           </div>
+          <label className="mt-4 block">
+            <span className="text-xs font-black uppercase tracking-[0.14em] text-steel">Detail sections JSON</span>
+            <textarea
+              name="detailSections"
+              defaultValue={JSON.stringify(product.detailSections, null, 2)}
+              className="mt-2 min-h-40 w-full rounded border border-black/10 p-3 font-mono text-xs font-bold"
+            />
+          </label>
           <button type="submit" className="mt-4 h-11 rounded bg-ink px-5 text-sm font-black text-white">Save content</button>
         </form>
       ))}

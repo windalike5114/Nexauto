@@ -1,5 +1,5 @@
 import { createSupabaseServerClient } from "@/lib/supabase";
-import type { Category, Product, ProductAttributes, ProductVariant } from "@/lib/types";
+import type { Category, Product, ProductAttributes, ProductDetailSection, ProductVariant } from "@/lib/types";
 
 type ProductRow = {
   id: string;
@@ -8,6 +8,8 @@ type ProductRow = {
   category_slug: string;
   price: string | number;
   description: string | null;
+  detail_sections: unknown[] | null;
+  video_url: string | null;
   images: string[] | null;
   active: boolean;
 };
@@ -50,6 +52,8 @@ function mapProduct(row: ProductRow): Product {
     category: row.category_slug,
     price: Number(row.price),
     description: row.description ?? "",
+    detailSections: parseDetailSections(row.detail_sections),
+    videoUrl: row.video_url,
     images: row.images ?? [],
     active: row.active
   };
@@ -87,7 +91,7 @@ export async function listProducts(categorySlug?: string) {
   const supabase = getSupabaseOrThrow();
   let query = supabase
     .from("products")
-    .select("id,slug,name,category_slug,price,description,images,active")
+    .select("id,slug,name,category_slug,price,description,detail_sections,video_url,images,active")
     .eq("active", true)
     .order("created_at", { ascending: false });
 
@@ -105,7 +109,7 @@ export async function getProductBySlug(slug: string) {
   const supabase = getSupabaseOrThrow();
   const { data, error } = await supabase
     .from("products")
-    .select("id,slug,name,category_slug,price,description,images,active")
+    .select("id,slug,name,category_slug,price,description,detail_sections,video_url,images,active")
     .eq("slug", slug)
     .eq("active", true)
     .single();
@@ -170,4 +174,18 @@ export async function getVariantsByIds(variantIds: string[]) {
 
   if (error) throw error;
   return data as unknown as CheckoutVariantRow[];
+}
+
+function parseDetailSections(value: unknown[] | null): ProductDetailSection[] {
+  if (!Array.isArray(value)) return [];
+
+  return value
+    .map((entry) => {
+      if (!entry || typeof entry !== "object") return null;
+      const title = "title" in entry ? String((entry as { title: unknown }).title ?? "") : "";
+      const body = "body" in entry ? String((entry as { body: unknown }).body ?? "") : "";
+      if (!title.trim() || !body.trim()) return null;
+      return { title, body };
+    })
+    .filter((entry): entry is ProductDetailSection => Boolean(entry));
 }

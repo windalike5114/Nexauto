@@ -7,8 +7,15 @@ export type Product = {
   category: CategorySlug;
   price: number;
   description: string;
+  detailSections: ProductDetailSection[];
+  videoUrl: string | null;
   images: string[];
   active: boolean;
+};
+
+export type ProductDetailSection = {
+  title: string;
+  body: string;
 };
 
 export type AttributeValue = string | number;

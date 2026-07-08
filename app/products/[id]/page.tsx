@@ -89,8 +89,20 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
                 <h3 className="text-lg font-black">Installation overview</h3>
               </div>
               <p className="mt-3 leading-7 text-white/75">
-                A short product walkthrough can sit here for installation notes, connector checks, and buyer confidence.
+                {product.videoUrl
+                  ? "Video link is available for installation notes, connector checks, and buyer confidence."
+                  : "A short product walkthrough can sit here for installation notes, connector checks, and buyer confidence."}
               </p>
+              {product.videoUrl ? (
+                <a
+                  href={product.videoUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-4 inline-flex h-10 items-center rounded bg-white px-4 text-sm font-black text-ink"
+                >
+                  Open video
+                </a>
+              ) : null}
             </article>
           </div>
         </div>
