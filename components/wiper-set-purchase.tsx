@@ -93,8 +93,8 @@ export function WiperSetPurchase({
       </div>
 
       <div className="mt-5 grid grid-cols-2 gap-3">
-        <SpecTile label="Driver side" value={`${wiperSet.driverLengthIn}"`} />
-        <SpecTile label="Passenger side" value={`${wiperSet.passengerLengthIn}"`} />
+        <SpecTile label="Driver side" lengthIn={wiperSet.driverLengthIn} />
+        <SpecTile label="Passenger side" lengthIn={wiperSet.passengerLengthIn} />
       </div>
 
       {vehicle ? (
@@ -114,7 +114,7 @@ export function WiperSetPurchase({
           <span className="flex-1">
             <span className="block text-sm font-black">Add rear blade</span>
             <span className="mt-1 block text-sm font-bold text-steel">
-              {rearAddon.name} - {formatMoney(rearAddon.price)}
+              {rearAddon.name} ({toMillimetres(rearAddon.rearLengthIn)} mm) - {formatMoney(rearAddon.price)}
             </span>
           </span>
         </label>
@@ -147,11 +147,16 @@ export function WiperSetPurchase({
   );
 }
 
-function SpecTile({ label, value }: { label: string; value: string }) {
+function SpecTile({ label, lengthIn }: { label: string; lengthIn: number }) {
   return (
     <div className="rounded border border-black/10 bg-zinc-50 p-3">
       <p className="text-xs font-black uppercase tracking-[0.14em] text-steel">{label}</p>
-      <p className="mt-1 text-2xl font-black">{value}</p>
+      <p className="mt-1 text-2xl font-black">{lengthIn}"</p>
+      <p className="mt-1 text-xs font-black text-steel">{toMillimetres(lengthIn)} mm</p>
     </div>
   );
+}
+
+function toMillimetres(lengthIn: number) {
+  return Math.round(lengthIn * 25.4);
 }

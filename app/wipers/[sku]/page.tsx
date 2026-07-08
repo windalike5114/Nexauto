@@ -4,6 +4,7 @@ import { CarFront, CheckCircle2, PlayCircle, ShieldCheck, Truck, Wrench } from "
 import { WiperSetPurchase } from "@/components/wiper-set-purchase";
 import { formatMoney } from "@/lib/catalog";
 import { getWiperRearAddonById, getWiperSetBySku } from "@/lib/queries/wiper-commerce";
+import { getWiperSetPreviewImage } from "@/lib/wiper-product-images";
 
 export const dynamic = "force-dynamic";
 
@@ -45,6 +46,7 @@ export default async function WiperSkuPage({
     : query.vehicle
       ? decodeURIComponent(query.vehicle)
       : "";
+  const productImage = getWiperSetPreviewImage(wiperSet);
 
   return (
     <main>
@@ -52,11 +54,11 @@ export default async function WiperSkuPage({
         <div className="space-y-4 lg:sticky lg:top-28 lg:self-start">
           <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-zinc-200">
             <Image
-              src="/products/wiper-blade.png"
+              src={productImage}
               alt={wiperSet.name}
               fill
               priority
-              className="object-cover"
+              className="object-contain p-8"
               sizes="(min-width: 1024px) 50vw, 100vw"
             />
           </div>
@@ -92,9 +94,9 @@ export default async function WiperSkuPage({
                 </div>
               </div>
               <div className="mt-5 grid gap-3 sm:grid-cols-3">
-                <FitmentTile label="Driver blade" value={`${wiperSet.driverLengthIn}"`} />
-                <FitmentTile label="Passenger blade" value={`${wiperSet.passengerLengthIn}"`} />
-                <FitmentTile label="Rear blade" value={rearAddon ? `${rearAddon.rearLengthIn}" optional` : "Not listed"} />
+                <FitmentTile label="Driver blade" lengthIn={wiperSet.driverLengthIn} />
+                <FitmentTile label="Passenger blade" lengthIn={wiperSet.passengerLengthIn} />
+                <FitmentTile label="Rear blade" lengthIn={rearAddon?.rearLengthIn ?? null} suffix={rearAddon ? "optional" : undefined} />
               </div>
             </section>
           ) : (
@@ -118,12 +120,15 @@ export default async function WiperSkuPage({
             <p className="text-sm font-black uppercase tracking-[0.18em] text-signal">Built for daily visibility</p>
             <h2 className="mt-3 text-3xl font-black">Product details</h2>
             <p className="mt-4 leading-8 text-steel">
-              A practical front pair replacement kit for customers who searched by vehicle. The SKU keeps the long and short blade combination together while leaving connector handling available for fulfillment.
+              The high-toughness memory steel strip ensures a tight fit to the windshield. Advanced craftsmanship and high-quality materials guarantee the rubber strip remains highly lubricated, even after long periods of use, without generating noise.
+            </p>
+            <p className="mt-4 leading-8 text-steel">
+              While ensuring excellent performance in silence, durability, high temperature resistance, anti-freeze, anti-oxidation, and even pressure distribution, this wiper blade still maintains an astonishingly low price. The 17 different types of adapters available allow it to perfectly fit 99% of vehicle models on the market.
             </p>
             <div className="mt-6 flex flex-wrap gap-2">
               {[
-                `${wiperSet.driverLengthIn}" driver blade`,
-                `${wiperSet.passengerLengthIn}" passenger blade`,
+                `${wiperSet.driverLengthIn}" / ${toMillimetres(wiperSet.driverLengthIn)} mm driver blade`,
+                `${wiperSet.passengerLengthIn}" / ${toMillimetres(wiperSet.passengerLengthIn)} mm passenger blade`,
                 "Vehicle context saved",
                 "Rear blade optional"
               ].map((item) => (
@@ -150,9 +155,78 @@ export default async function WiperSkuPage({
           </div>
         </div>
       </section>
+
+      <section className="border-t border-black/10 bg-zinc-50">
+        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+          <div className="mb-6 max-w-3xl">
+            <p className="text-sm font-black uppercase tracking-[0.18em] text-signal">Adapters</p>
+            <h2 className="mt-3 text-3xl font-black">Adapter coverage for common wiper arms</h2>
+            <p className="mt-4 text-sm font-bold leading-7 text-steel">
+              Customers do not need to select the connector. Vehicle information travels with the order so the correct adapter can be matched before dispatch.
+            </p>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {adapterImages.map((adapter) => (
+              <article key={adapter.title} className="overflow-hidden rounded-lg border border-black/10 bg-white shadow-sm">
+                <div className="relative aspect-[4/3] bg-white">
+                  <Image
+                    src={adapter.src}
+                    alt={adapter.title}
+                    fill
+                    className="object-contain p-4"
+                    sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
+                  />
+                </div>
+                <div className="border-t border-black/10 p-4">
+                  <h3 className="font-black">{adapter.title}</h3>
+                  <p className="mt-1 text-sm font-bold text-steel">{adapter.text}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="border-t border-black/10 bg-white">
+        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+          <div className="mb-6 max-w-3xl">
+            <p className="text-sm font-black uppercase tracking-[0.18em] text-signal">Installation videos</p>
+            <h2 className="mt-3 text-3xl font-black">Quick installation guides</h2>
+            <p className="mt-4 text-sm font-bold leading-7 text-steel">
+              Short adapter installation videos help confirm the fitting process before or after purchase.
+            </p>
+          </div>
+          <div className="grid gap-4 lg:grid-cols-3">
+            {installationVideos.map((video) => (
+              <article key={video.title} className="overflow-hidden rounded-lg border border-black/10 bg-white shadow-sm">
+                <video className="aspect-video w-full bg-black" controls preload="metadata">
+                  <source src={video.src} type="video/mp4" />
+                </video>
+                <div className="p-4">
+                  <h3 className="font-black">{video.title}</h3>
+                  <p className="mt-1 text-sm font-bold text-steel">{video.text}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
     </main>
   );
 }
+
+const adapterImages = [
+  { src: "/yj-wiper/adapters/adapter-m6.png", title: "Adapter style M6", text: "Common connector profile for selected wiper arms." },
+  { src: "/yj-wiper/adapters/adapter-m8.png", title: "Adapter style M8", text: "Alternative connector profile handled during fulfillment." },
+  { src: "/yj-wiper/adapters/adapter-p6.png", title: "Adapter style P6", text: "Low-profile fitting option for compatible arms." },
+  { src: "/yj-wiper/adapters/adapter-p8.png", title: "Adapter style P8", text: "Extended fitment option for matching vehicle applications." }
+];
+
+const installationVideos = [
+  { src: "/yj-wiper/install-videos/install-adapter-1.mp4", title: "Adapter installation 1", text: "Short guide for connector setup." },
+  { src: "/yj-wiper/install-videos/install-adapter-2.mp4", title: "Adapter installation 2", text: "Quick fitting process overview." },
+  { src: "/yj-wiper/install-videos/install-adapter-3.mp4", title: "Adapter installation 3", text: "Additional adapter installation reference." }
+];
 
 function MediaTile({ icon, text }: { icon: React.ReactNode; text: string }) {
   return (
@@ -163,11 +237,20 @@ function MediaTile({ icon, text }: { icon: React.ReactNode; text: string }) {
   );
 }
 
-function FitmentTile({ label, value }: { label: string; value: string }) {
+function FitmentTile({ label, lengthIn, suffix }: { label: string; lengthIn: number | null; suffix?: string }) {
   return (
     <div className="rounded-lg border border-black/10 bg-white p-4">
       <p className="text-xs font-black uppercase tracking-[0.14em] text-steel">{label}</p>
-      <p className="mt-2 text-2xl font-black text-ink">{value}</p>
+      {lengthIn ? (
+        <>
+          <p className="mt-2 text-2xl font-black text-ink">
+            {lengthIn}"{suffix ? <span className="ml-1 text-sm text-steel">{suffix}</span> : null}
+          </p>
+          <p className="mt-1 text-xs font-black text-steel">{toMillimetres(lengthIn)} mm</p>
+        </>
+      ) : (
+        <p className="mt-2 text-2xl font-black text-ink">Not listed</p>
+      )}
     </div>
   );
 }
@@ -179,4 +262,8 @@ function DetailBlock({ title, text }: { title: string; text: string }) {
       <p className="mt-3 text-sm font-bold leading-6 text-steel">{text}</p>
     </article>
   );
+}
+
+function toMillimetres(lengthIn: number) {
+  return Math.round(lengthIn * 25.4);
 }
