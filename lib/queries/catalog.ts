@@ -8,8 +8,8 @@ type ProductRow = {
   category_slug: string;
   price: string | number;
   description: string | null;
-  detail_sections: unknown[] | null;
-  video_url: string | null;
+  detail_sections?: unknown[] | null;
+  video_url?: string | null;
   images: string[] | null;
   active: boolean;
 };
@@ -52,8 +52,8 @@ function mapProduct(row: ProductRow): Product {
     category: row.category_slug,
     price: Number(row.price),
     description: row.description ?? "",
-    detailSections: parseDetailSections(row.detail_sections),
-    videoUrl: row.video_url,
+    detailSections: parseDetailSections(row.detail_sections ?? null),
+    videoUrl: row.video_url ?? null,
     images: row.images ?? [],
     active: row.active
   };
@@ -89,17 +89,19 @@ export async function listCategories() {
 
 export async function listProducts(categorySlug?: string) {
   const supabase = getSupabaseOrThrow();
-  let query = supabase
-    .from("products")
-    .select("id,slug,name,category_slug,price,description,detail_sections,video_url,images,active")
-    .eq("active", true)
-    .order("created_at", { ascending: false });
+  const selectColumns = "id,slug,name,category_slug,price,description,detail_sections,video_url,images,active";
+  const fallbackSelectColumns = "id,slug,name,category_slug,price,description,images,active";
+  let query = buildProductsQuery(supabase, selectColumns, categorySlug);
 
-  if (categorySlug) {
-    query = query.eq("category_slug", categorySlug);
+  const result = await query;
+  let data: unknown[] | null = result.data;
+  let error = result.error;
+
+  if (isMissingOptionalProductContentColumn(error)) {
+    const fallback = await buildProductsQuery(supabase, fallbackSelectColumns, categorySlug);
+    data = fallback.data;
+    error = fallback.error;
   }
-
-  const { data, error } = await query;
 
   if (error) throw error;
   return (data as ProductRow[]).map(mapProduct);
@@ -107,12 +109,25 @@ export async function listProducts(categorySlug?: string) {
 
 export async function getProductBySlug(slug: string) {
   const supabase = getSupabaseOrThrow();
-  const { data, error } = await supabase
+  const result = await supabase
     .from("products")
     .select("id,slug,name,category_slug,price,description,detail_sections,video_url,images,active")
     .eq("slug", slug)
     .eq("active", true)
     .single();
+  let data: unknown | null = result.data;
+  let error = result.error;
+
+  if (isMissingOptionalProductContentColumn(error)) {
+    const fallback = await supabase
+      .from("products")
+      .select("id,slug,name,category_slug,price,description,images,active")
+      .eq("slug", slug)
+      .eq("active", true)
+      .single();
+    data = fallback.data;
+    error = fallback.error;
+  }
 
   if (error) {
     if (error.code === "PGRST116") return null;
@@ -174,6 +189,25 @@ export async function getVariantsByIds(variantIds: string[]) {
 
   if (error) throw error;
   return data as unknown as CheckoutVariantRow[];
+}
+
+function buildProductsQuery(
+  supabase: ReturnType<typeof getSupabaseOrThrow>,
+  columns: string,
+  categorySlug?: string
+) {
+  let query = supabase.from("products").select(columns).eq("active", true).order("created_at", { ascending: false });
+
+  if (categorySlug) {
+    query = query.eq("category_slug", categorySlug);
+  }
+
+  return query;
+}
+
+function isMissingOptionalProductContentColumn(error: { code?: string; message?: string } | null) {
+  if (!error) return false;
+  return error.code === "42703" && (error.message?.includes("detail_sections") || error.message?.includes("video_url"));
 }
 
 function parseDetailSections(value: unknown[] | null): ProductDetailSection[] {

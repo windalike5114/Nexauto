@@ -146,8 +146,8 @@ type ProductRow = {
   price: string | number;
   description: string | null;
   active: boolean;
-  video_url: string | null;
-  detail_sections: unknown[] | null;
+  video_url?: string | null;
+  detail_sections?: unknown[] | null;
 };
 
 type VariantRow = {
@@ -328,10 +328,21 @@ async function listFulfillments(orderIds: string[]) {
 
 async function listAdminProducts() {
   const supabase = getAdminOrThrow();
-  const { data, error } = await supabase
+  const result = await supabase
     .from("products")
     .select("id,slug,name,category_slug,price,description,active,video_url,detail_sections")
     .order("created_at", { ascending: false });
+  let data: unknown[] | null = result.data;
+  let error = result.error;
+
+  if (isMissingOptionalProductContentColumn(error)) {
+    const fallback = await supabase
+      .from("products")
+      .select("id,slug,name,category_slug,price,description,active")
+      .order("created_at", { ascending: false });
+    data = fallback.data;
+    error = fallback.error;
+  }
 
   if (error) throw error;
   return ((data ?? []) as ProductRow[]).map((row): AdminProduct => ({
@@ -342,7 +353,7 @@ async function listAdminProducts() {
     price: Number(row.price),
     description: row.description ?? "",
     active: row.active,
-    videoUrl: row.video_url,
+    videoUrl: row.video_url ?? null,
     detailSections: row.detail_sections ?? []
   }));
 }
@@ -432,6 +443,11 @@ function getProductName(value: unknown) {
     return String((value as { name: string }).name);
   }
   return null;
+}
+
+function isMissingOptionalProductContentColumn(error: { code?: string; message?: string } | null) {
+  if (!error) return false;
+  return error.code === "42703" && (error.message?.includes("detail_sections") || error.message?.includes("video_url"));
 }
 
 function toNullableNumber(value: string | number | null) {
