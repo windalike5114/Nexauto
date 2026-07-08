@@ -5,6 +5,7 @@ import { WiperFitmentFinder } from "@/components/wiper-fitment-finder";
 import { formatMoney } from "@/lib/catalog";
 import { listWiperSets } from "@/lib/queries/wiper-commerce";
 import type { WiperSet } from "@/lib/types";
+import { getWiperSetPreviewImage } from "@/lib/wiper-product-images";
 
 export const dynamic = "force-dynamic";
 
@@ -135,19 +136,32 @@ function TrustPill({ icon, text }: { icon: React.ReactNode; text: string }) {
 }
 
 function PopularSkuCard({ wiperSet }: { wiperSet: WiperSet }) {
+  const image = getWiperSetPreviewImage(wiperSet);
+
   return (
-    <article className="min-w-[240px] rounded-lg border border-black/10 bg-white p-5 shadow-sm sm:min-w-[260px]">
-      <p className="font-mono text-sm font-black text-signal">{wiperSet.sku}</p>
-      <h3 className="mt-2 text-lg font-black">{wiperSet.name}</h3>
-      <div className="mt-4 grid grid-cols-2 gap-2">
-        <MiniSpec label="Long" value={`${wiperSet.driverLengthIn}"`} />
-        <MiniSpec label="Short" value={`${wiperSet.passengerLengthIn}"`} />
+    <article className="min-w-[240px] overflow-hidden rounded-lg border border-black/10 bg-white shadow-sm sm:min-w-[260px]">
+      <div className="relative aspect-[4/3] bg-zinc-50">
+        <Image
+          src={image}
+          alt={`${wiperSet.name} preview`}
+          fill
+          className="object-contain p-5"
+          sizes="260px"
+        />
       </div>
-      <div className="mt-4 flex items-center justify-between gap-3">
-        <p className="text-lg font-black">{formatMoney(wiperSet.price)}</p>
-        <Link href={`/wipers/${wiperSet.sku}`} className="inline-flex h-10 items-center rounded bg-ink px-3 text-sm font-black text-white hover:bg-black">
-          View
-        </Link>
+      <div className="p-5">
+        <p className="font-mono text-sm font-black text-signal">{wiperSet.sku}</p>
+        <h3 className="mt-2 text-lg font-black">{wiperSet.name}</h3>
+        <div className="mt-4 grid grid-cols-2 gap-2">
+          <MiniSpec label="Long" value={`${wiperSet.driverLengthIn}"`} />
+          <MiniSpec label="Short" value={`${wiperSet.passengerLengthIn}"`} />
+        </div>
+        <div className="mt-4 flex items-center justify-between gap-3">
+          <p className="text-lg font-black">{formatMoney(wiperSet.price)}</p>
+          <Link href={`/wipers/${wiperSet.sku}`} className="inline-flex h-10 items-center rounded bg-ink px-3 text-sm font-black text-white hover:bg-black">
+            View
+          </Link>
+        </div>
       </div>
     </article>
   );
