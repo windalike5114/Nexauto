@@ -184,10 +184,6 @@ function WiperSetCard({ wiperSet }: { wiperSet: WiperSet }) {
           </div>
           <p className="shrink-0 text-lg font-black">{formatMoney(wiperSet.price)}</p>
         </div>
-        <div className="mt-4 grid grid-cols-2 gap-3">
-          <Spec label="Long blade" value={`${wiperSet.driverLengthIn}"`} />
-          <Spec label="Short blade" value={`${wiperSet.passengerLengthIn}"`} />
-        </div>
         <Link
           href={`/wipers/${wiperSet.sku}` as never}
           className="mt-5 inline-flex h-11 w-full items-center justify-center gap-2 rounded bg-ink px-4 text-sm font-black text-white hover:bg-black"
@@ -197,15 +193,6 @@ function WiperSetCard({ wiperSet }: { wiperSet: WiperSet }) {
         </Link>
       </div>
     </article>
-  );
-}
-
-function Spec({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded border border-black/10 bg-zinc-50 p-3">
-      <p className="text-xs font-black uppercase tracking-[0.14em] text-steel">{label}</p>
-      <p className="mt-1 text-2xl font-black">{value}</p>
-    </div>
   );
 }
 

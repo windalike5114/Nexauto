@@ -152,10 +152,6 @@ function PopularSkuCard({ wiperSet }: { wiperSet: WiperSet }) {
       <div className="p-5">
         <p className="font-mono text-sm font-black text-signal">{wiperSet.sku}</p>
         <h3 className="mt-2 text-lg font-black">{wiperSet.name}</h3>
-        <div className="mt-4 grid grid-cols-2 gap-2">
-          <MiniSpec label="Long" value={`${wiperSet.driverLengthIn}"`} />
-          <MiniSpec label="Short" value={`${wiperSet.passengerLengthIn}"`} />
-        </div>
         <div className="mt-4 flex items-center justify-between gap-3">
           <p className="text-lg font-black">{formatMoney(wiperSet.price)}</p>
           <Link href={`/wipers/${wiperSet.sku}`} className="inline-flex h-10 items-center rounded bg-ink px-3 text-sm font-black text-white hover:bg-black">
@@ -164,15 +160,6 @@ function PopularSkuCard({ wiperSet }: { wiperSet: WiperSet }) {
         </div>
       </div>
     </article>
-  );
-}
-
-function MiniSpec({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded bg-zinc-50 p-3">
-      <p className="text-xs font-black uppercase tracking-[0.12em] text-steel">{label}</p>
-      <p className="mt-1 text-xl font-black">{value}</p>
-    </div>
   );
 }
 
