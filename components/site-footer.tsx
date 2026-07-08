@@ -2,7 +2,8 @@ import Link from "next/link";
 import { Mail, MapPin, Phone, Clock } from "lucide-react";
 
 const wiperLinks = [
-  ["Wiper finder", "/shop?category=wiper"],
+  ["Vehicle finder", "/"],
+  ["Parts catalog", "/shop"],
   ["Blade details", "/products/universal-wiper-blade"],
   ["Cart", "/cart"],
   ["Customer account", "/account"]
@@ -35,7 +36,7 @@ export function SiteFooter() {
             </p>
             <p className="flex gap-3">
               <Mail className="mt-0.5 h-4 w-4 text-signal" />
-              sales@nexauto.co.nz
+              sales@nexautoparts.co.nz
             </p>
             <p className="flex gap-3">
               <Clock className="mt-0.5 h-4 w-4 text-signal" />

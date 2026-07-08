@@ -7,7 +7,7 @@ const config: Config = {
       colors: {
         ink: "#1b1f24",
         steel: "#51606f",
-        signal: "#d82c2c",
+        signal: "#D71920",
         mint: "#1f8a70"
       },
       boxShadow: {

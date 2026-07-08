@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { ArrowRight, CarFront, Loader2, Search } from "lucide-react";
-import { formatMoney } from "@/lib/catalog";
 
 type FinderOption = {
   id: string;
@@ -266,7 +265,7 @@ export function WiperFitmentFinder({ compact = false }: { compact?: boolean }) {
                   <LengthPill label="Rear" value={primaryFitment.rearLengthIn} />
                 </div>
                 <p className="mt-3 text-xs font-bold text-steel">
-                  Fitment range: {primaryFitment.startRaw ?? "?"} - {primaryFitment.endRaw ?? "?"}. Connector type is checked separately.
+                  Fitment range: {primaryFitment.startRaw ?? "?"} - {primaryFitment.endRaw ?? "?"}. Connector is handled internally.
                 </p>
                 <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center">
                   {accountEmail ? (
@@ -289,60 +288,20 @@ export function WiperFitmentFinder({ compact = false }: { compact?: boolean }) {
                   {garageMessage ? <p className="text-xs font-bold text-steel">{garageMessage}</p> : null}
                 </div>
               </div>
-              <div className="rounded border border-black/10 bg-white p-4">
-                {primaryFitment.frontPair ? (
-                  <div>
-                    <p className="text-xs font-black uppercase tracking-[0.14em] text-steel">Recommended front pair</p>
-                    <div className="mt-2 flex items-start justify-between gap-3">
-                      <div>
-                        <p className="font-black">{primaryFitment.frontPair.name}</p>
-                        <p className="mt-1 font-mono text-xs font-bold text-steel">{primaryFitment.frontPair.sku}</p>
-                      </div>
-                      <p className="shrink-0 text-lg font-black">{formatMoney(primaryFitment.frontPair.price)}</p>
-                    </div>
-                    <Link
-                      href={
-                        buildWiperSkuHref({
-                          frontPair: primaryFitment.frontPair,
-                          fitment: primaryFitment,
-                          make: selectedMake,
-                          model: selectedModel,
-                          year,
-                          rearAddon: primaryFitment.rearAddon
-                        }) as never
-                      }
-                      className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded bg-signal px-4 text-sm font-black text-white hover:bg-red-700"
-                    >
-                      View this SKU
-                      <ArrowRight className="h-4 w-4" />
-                    </Link>
-                  </div>
-                ) : (
-                  <div className="rounded bg-zinc-50 p-3 text-sm font-bold text-steel">
-                    Front pair product is not available for this length combination yet.
-                  </div>
-                )}
-
-                {primaryFitment.rearAddon ? (
-                  <div className="mt-4 border-t border-black/10 pt-4">
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <p className="text-xs font-black uppercase tracking-[0.14em] text-steel">Optional rear blade</p>
-                        <p className="mt-1 font-bold">{primaryFitment.rearAddon.name}</p>
-                      </div>
-                      <p className="shrink-0 font-black">{formatMoney(primaryFitment.rearAddon.price)}</p>
-                    </div>
-                    <p className="mt-3 rounded bg-zinc-50 p-3 text-xs font-bold leading-5 text-steel">
-                      Rear blade can be selected on the SKU page before checkout.
-                    </p>
-                  </div>
-                ) : null}
+              <div className="flex flex-col justify-between rounded border border-black/10 bg-white p-4">
+                <div>
+                  <p className="text-xs font-black uppercase tracking-[0.14em] text-steel">Next step</p>
+                  <h3 className="mt-2 text-xl font-black">View your vehicle result</h3>
+                  <p className="mt-2 text-sm font-bold leading-6 text-steel">
+                    We will show the matched blade lengths, recommended front pair, rear option, and add-to-cart controls on the vehicle page.
+                  </p>
+                </div>
 
                 <Link
-                  href="/products/universal-wiper-blade"
-                  className="mt-4 inline-flex h-10 w-full items-center justify-center gap-2 rounded bg-ink px-4 text-sm font-black text-white hover:bg-black"
+                  href={buildVehicleHref(selectedMake, selectedModel, year) as never}
+                  className="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded bg-signal px-4 text-sm font-black text-white hover:bg-red-700"
                 >
-                  View details
+                  View wiper result
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>
@@ -406,31 +365,15 @@ async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
   return data as T;
 }
 
-function buildWiperSkuHref({
-  frontPair,
-  fitment,
-  make,
-  model,
-  year,
-  rearAddon
-}: {
-  frontPair: WiperSetResult;
-  fitment: FitmentResult;
-  make: string;
-  model: string;
-  year: string;
-  rearAddon: WiperRearAddonResult | null;
-}) {
-  const params = new URLSearchParams();
-  const vehicle = `${make} ${model} ${year}`.trim();
+function buildVehicleHref(make: string, model: string, year: string) {
+  return `/${slugifyVehiclePart(make)}/${slugifyVehiclePart(model)}/${encodeURIComponent(year)}`;
+}
 
-  if (vehicle) params.set("vehicle", vehicle);
-  if (fitment.applicationId) params.set("applicationId", fitment.applicationId);
-  if (make) params.set("make", make);
-  if (model) params.set("model", model);
-  if (year) params.set("year", year);
-  if (rearAddon) params.set("rearAddonId", rearAddon.id);
-
-  const query = params.toString();
-  return query ? `/wipers/${frontPair.sku}?${query}` : `/wipers/${frontPair.sku}`;
+function slugifyVehiclePart(value: string) {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/&/g, " and ")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }

@@ -7,6 +7,7 @@ import { formatAttributeName, formatMoney } from "@/lib/catalog";
 
 export default function CartPage() {
   const { items, subtotal, updateQty, removeItem } = useCart();
+  const selectedVehicle = getSelectedVehicle(items);
 
   async function checkout() {
     const response = await fetch("/api/checkout", {
@@ -39,6 +40,16 @@ export default function CartPage() {
       ) : (
         <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
           <div className="space-y-3">
+            {selectedVehicle ? (
+              <section className="rounded-lg border border-black/10 bg-zinc-50 p-5">
+                <p className="text-xs font-black uppercase tracking-[0.14em] text-signal">Selected vehicle</p>
+                <p className="mt-2 text-2xl font-black text-ink">{selectedVehicle}</p>
+                <p className="mt-2 text-sm font-bold text-steel">
+                  This vehicle will be included with the order for fitment and connector fulfillment.
+                </p>
+              </section>
+            ) : null}
+
             {items.map((item) => (
               <article key={item.sku} className="rounded-lg border border-black/10 bg-white p-5">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -46,7 +57,7 @@ export default function CartPage() {
                     <p className="text-lg font-black">{item.name}</p>
                     <p className="mt-1 font-mono text-sm font-bold text-steel">{item.sku}</p>
                     <div className="mt-3 flex flex-wrap gap-2">
-                      {Object.entries(item.attributes).map(([key, value]) => (
+                      {Object.entries(item.attributes).filter(([key]) => isCustomerVisibleAttribute(key)).map(([key, value]) => (
                         <span key={key} className="rounded bg-zinc-100 px-3 py-1 text-xs font-bold text-steel">
                           {formatAttributeName(key)}: {String(value)}
                         </span>
@@ -97,4 +108,21 @@ export default function CartPage() {
       )}
     </main>
   );
+}
+
+function getSelectedVehicle(items: ReturnType<typeof useCart>["items"]) {
+  for (const item of items) {
+    const vehicle = item.attributes.vehicle;
+    if (typeof vehicle === "string" && vehicle.trim()) return vehicle;
+  }
+
+  const make = items.find((item) => typeof item.attributes.vehicle_make === "string")?.attributes.vehicle_make;
+  const model = items.find((item) => typeof item.attributes.vehicle_model === "string")?.attributes.vehicle_model;
+  const year = items.find((item) => typeof item.attributes.vehicle_year !== "undefined")?.attributes.vehicle_year;
+  const vehicle = [make, model, year].filter(Boolean).join(" ");
+  return vehicle || "";
+}
+
+function isCustomerVisibleAttribute(key: string) {
+  return !["vehicle", "vehicle_application_id", "vehicle_make", "vehicle_model", "vehicle_year"].includes(key);
 }

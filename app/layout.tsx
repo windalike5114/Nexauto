@@ -25,8 +25,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                   <span className="text-lg font-black tracking-normal">NexAuto</span>
                 </Link>
                 <div className="flex items-center gap-2 text-sm font-semibold text-steel">
-                  <Link className="rounded px-3 py-2 hover:bg-black/5" href="/shop?category=wiper">
-                    Wiper finder
+                  <Link className="rounded px-3 py-2 hover:bg-black/5" href="/">
+                    Finder
+                  </Link>
+                  <Link className="rounded px-3 py-2 hover:bg-black/5" href="/shop">
+                    Shop
                   </Link>
                   <Link className="hidden rounded px-3 py-2 hover:bg-black/5 md:inline-flex" href="/products/universal-wiper-blade">
                     Blade details

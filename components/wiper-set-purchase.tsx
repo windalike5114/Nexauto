@@ -114,7 +114,7 @@ export function WiperSetPurchase({
           <span className="flex-1">
             <span className="block text-sm font-black">Add rear blade</span>
             <span className="mt-1 block text-sm font-bold text-steel">
-              {rearAddon.name} · {formatMoney(rearAddon.price)}
+              {rearAddon.name} - {formatMoney(rearAddon.price)}
             </span>
           </span>
         </label>
@@ -136,7 +136,7 @@ export function WiperSetPurchase({
           className="inline-flex h-12 flex-1 items-center justify-center gap-2 rounded bg-signal px-5 font-black text-white hover:bg-red-700"
         >
           {added ? <Check className="h-5 w-5" /> : <ShoppingBag className="h-5 w-5" />}
-          {added ? "Added" : `Add to cart · ${formatMoney(total)}`}
+          {added ? "Added" : `Add to cart - ${formatMoney(total)}`}
         </button>
       </div>
 

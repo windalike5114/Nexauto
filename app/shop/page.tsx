@@ -26,10 +26,10 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
     <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
       <div className="mb-8 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="text-sm font-black uppercase tracking-[0.18em] text-signal">Wiper shop</p>
-          <h1 className="mt-2 text-4xl font-black">Find and buy front wiper pairs</h1>
+          <p className="text-sm font-black uppercase tracking-[0.18em] text-signal">Parts catalog</p>
+          <h1 className="mt-2 text-4xl font-black">Wiper products</h1>
           <p className="mt-3 text-sm font-bold text-steel">
-            Showing {visibleProducts.length} of {filteredProducts.length} wiper products
+            The vehicle finder is the best way to buy. This catalog remains available for product information and future parts.
           </p>
         </div>
         <Link href="/" className="inline-flex h-11 items-center justify-center rounded border border-black/10 bg-white px-4 text-sm font-black text-ink hover:border-ink">
@@ -70,11 +70,11 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
           </section>
 
           <section className="rounded-lg border border-black/10 bg-white p-5 shadow-sm">
-            <h2 className="font-black">How buying works</h2>
+            <h2 className="font-black">Best way to buy</h2>
             <div className="mt-4 space-y-3 text-sm font-bold leading-6 text-steel">
               <p>1. Search your vehicle.</p>
-              <p>2. Open the recommended front pair SKU.</p>
-              <p>3. Add rear blade only when shown.</p>
+              <p>2. Review the vehicle result page.</p>
+              <p>3. Add the matched kit to cart.</p>
             </div>
           </section>
         </aside>

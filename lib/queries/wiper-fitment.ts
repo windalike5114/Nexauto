@@ -127,6 +127,25 @@ export async function listWiperFitmentYears(makeId: string, modelId: string) {
   return [...years].sort((a, b) => b - a);
 }
 
+export async function findWiperFitmentsByVehiclePath(makeSlug: string, modelSlug: string, year: number) {
+  const makes = await listWiperFitmentMakes();
+  const make = makes.find((entry) => slugifyVehiclePart(entry.name) === makeSlug);
+
+  if (!make) {
+    return { make: null, model: null, fitments: [] as WiperFitmentResult[] };
+  }
+
+  const models = await listWiperFitmentModels(make.id);
+  const model = models.find((entry) => slugifyVehiclePart(entry.name) === modelSlug);
+
+  if (!model) {
+    return { make, model: null, fitments: [] as WiperFitmentResult[] };
+  }
+
+  const fitments = await findWiperLengthFitments(make.id, model.id, year);
+  return { make, model, fitments };
+}
+
 export async function findWiperLengthFitments(makeId: string, modelId: string, year: number) {
   const supabase = getSupabaseOrThrow();
   const { data, error } = await supabase
@@ -165,6 +184,15 @@ export async function findWiperLengthFitments(makeId: string, modelId: string, y
       };
     })
     .filter((entry): entry is WiperFitmentResult => Boolean(entry));
+}
+
+export function slugifyVehiclePart(value: string) {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/&/g, " and ")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }
 
 function toNumber(value: string | number | null) {

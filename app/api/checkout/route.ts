@@ -123,6 +123,7 @@ export async function POST(request: Request) {
 
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const vehicleMetadata = buildVehicleMetadata(validatedItems);
   const supabase = await createClient();
   const {
     data: { user }
@@ -163,7 +164,12 @@ export async function POST(request: Request) {
           pr: item.price
         }))
       ),
-      vehicle: JSON.stringify(buildVehicleMetadata(validatedItems)),
+      vehicle: JSON.stringify(vehicleMetadata),
+      vehicle_make: vehicleMetadata?.make ?? "",
+      vehicle_model: vehicleMetadata?.model ?? "",
+      vehicle_year: vehicleMetadata?.year ? String(vehicleMetadata.year) : "",
+      vehicle_series: "",
+      vehicle_body: "",
       source: "nexauto"
     },
     success_url: `${siteUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
@@ -182,7 +188,12 @@ function buildVehicleMetadata(items: ValidatedCheckoutItem[]) {
     a: attributes.vehicle_application_id,
     m: attributes.vehicle_make,
     d: attributes.vehicle_model,
-    y: attributes.vehicle_year
+    y: attributes.vehicle_year,
+    make: attributes.vehicle_make,
+    model: attributes.vehicle_model,
+    year: attributes.vehicle_year,
+    series: "",
+    body: ""
   };
 }
 
