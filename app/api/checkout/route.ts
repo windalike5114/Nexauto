@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { getVariantsByIds } from "@/lib/queries/catalog";
 import { getWiperRearAddonsByIds, getWiperSetsByIds } from "@/lib/queries/wiper-commerce";
+import { createClient } from "@/utils/supabase/server";
 import type { CartItem } from "@/lib/types";
 
 type ValidatedCheckoutItem = {
@@ -122,9 +123,14 @@ export async function POST(request: Request) {
 
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const supabase = await createClient();
+  const {
+    data: { user }
+  } = await supabase.auth.getUser();
 
   const session = await stripe.checkout.sessions.create({
     mode: "payment",
+    customer_email: user?.email,
     billing_address_collection: "required",
     shipping_address_collection: {
       allowed_countries: ["NZ", "AU", "US"]
