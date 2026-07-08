@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, BadgeCheck, CheckCircle2, Gauge, ShieldCheck, Sparkles, Truck, Wrench } from "lucide-react";
+import { ArrowRight, CheckCircle2, ShieldCheck, Truck, Wrench } from "lucide-react";
 import { WiperFitmentFinder } from "@/components/wiper-fitment-finder";
 import { formatMoney } from "@/lib/catalog";
 import { listWiperSets } from "@/lib/queries/wiper-commerce";
@@ -68,32 +68,42 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 lg:grid-cols-2 lg:px-8">
-        <ContentSection
-          icon={<BadgeCheck className="h-5 w-5" />}
-          title="Why Choose Our Wipers"
-          text="Our wiper flow starts with fitment data, not guesswork. Customers search the vehicle first, then the system maps the correct front pair SKU and carries that vehicle through cart and checkout."
-          points={["Vehicle-first buying path", "NZ-focused fitment data", "Order notes ready for fulfillment"]}
+      <div className="bg-white">
+        <FeatureSection
+          eyebrow="Premium Performance"
+          title="Premium Beam Wiper Blades"
+          text="Engineered for smooth, quiet and streak-free wiping in all weather conditions."
+          image="/home/premium-performance.png"
+          imageAlt="Close-up of beam wiper blades clearing rain from a windshield"
+          points={["High-toughness memory steel", "Premium natural rubber", "Long-lasting performance"]}
         />
-        <ContentSection
-          icon={<Gauge className="h-5 w-5" />}
-          title="Beam Wiper Benefits"
-          text="Beam-style blades are built for even screen pressure, clean contact, and reliable performance in changing New Zealand weather."
-          points={["Even pressure across the glass", "Low-profile modern design", "Good wet-weather visibility"]}
+        <FeatureSection
+          eyebrow="Built for NZ Roads"
+          title="Designed for New Zealand Driving"
+          text="Reliable performance through rain, frost and changing weather conditions."
+          image="/home/nz-roads.png"
+          imageAlt="Vehicle driving on a wet New Zealand road"
+          points={["All-season durability", "Heat & frost resistant", "Even pressure across the windshield"]}
+          reverse
         />
-        <ContentSection
-          icon={<Sparkles className="h-5 w-5" />}
-          title="Product Advantages"
-          text="Front blades are sold as matched long-and-short pairs, making the buying experience simpler while keeping internal SKU mapping clear."
-          points={["Matched front pair kits", "Simple SKU format", "Rear blade add-on when available"]}
+        <FeatureSection
+          eyebrow="Perfect Fit, Every Time"
+          title="Vehicle-Matched Fitment"
+          text="Simply select your vehicle and we'll match the correct blades and adapters automatically."
+          image="/home/vehicle-fitment.png"
+          imageAlt="Wiper blade adapter and connector installation detail"
+          points={["Up to 17 adapter types", "Fits 99% of vehicles", "No guesswork required"]}
         />
-        <ContentSection
-          icon={<CheckCircle2 className="h-5 w-5" />}
-          title="Easy Installation & Perfect Fit"
-          text="Customers do not choose blade length or connector manually. The selected vehicle stays attached to the order so the team can confirm connector handling before dispatch."
-          points={["No manual length selection", "Connector handled internally", "Vehicle saved with the order"]}
+        <FeatureSection
+          eyebrow="Local Service You Can Trust"
+          title="Proudly Based in New Zealand"
+          text="Fast local dispatch with friendly support from a NZ-based team."
+          image="/home/local-service.png"
+          imageAlt="Local warehouse packing wiper blades for dispatch"
+          points={["NZ local business", "Fast nationwide shipping", "Responsive customer support"]}
+          reverse
         />
-      </section>
+      </div>
     </main>
   );
 }
@@ -152,32 +162,52 @@ function MiniSpec({ label, value }: { label: string; value: string }) {
   );
 }
 
-function ContentSection({
-  icon,
+function FeatureSection({
+  eyebrow,
   title,
   text,
-  points
+  image,
+  imageAlt,
+  points,
+  reverse = false
 }: {
-  icon: React.ReactNode;
+  eyebrow: string;
   title: string;
   text: string;
+  image: string;
+  imageAlt: string;
   points: string[];
+  reverse?: boolean;
 }) {
   return (
-    <article className="rounded-lg border border-black/10 bg-white p-6 shadow-sm">
-      <div className="flex items-center gap-3">
-        <div className="grid h-11 w-11 place-items-center rounded-lg bg-signal text-white">{icon}</div>
-        <h2 className="text-2xl font-black">{title}</h2>
-      </div>
-      <p className="mt-4 text-sm font-semibold leading-7 text-steel">{text}</p>
-      <div className="mt-5 grid gap-2">
-        {points.map((point) => (
-          <div key={point} className="flex items-center gap-2 text-sm font-black text-ink">
-            <CheckCircle2 className="h-4 w-4 text-signal" />
-            <span>{point}</span>
+    <section className="border-b border-black/10">
+      <div className={`mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 lg:grid-cols-2 lg:items-center lg:px-8 lg:py-16 ${reverse ? "lg:[&>*:first-child]:order-2" : ""}`}>
+        <div className="relative aspect-[16/10] overflow-hidden rounded-lg bg-zinc-100 shadow-panel">
+          <Image
+            src={image}
+            alt={imageAlt}
+            fill
+            className="object-cover"
+            sizes="(min-width: 1024px) 50vw, 100vw"
+          />
+        </div>
+
+        <div>
+          <p className="text-sm font-black uppercase tracking-[0.18em] text-signal">{eyebrow}</p>
+          <h2 className="mt-3 text-3xl font-black leading-tight text-ink sm:text-4xl">{title}</h2>
+          <p className="mt-4 text-base font-semibold leading-8 text-steel">{text}</p>
+          <div className="mt-6 grid gap-3">
+            {points.map((point) => (
+              <div key={point} className="flex items-center gap-3 text-sm font-black text-ink">
+                <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-signal text-white">
+                  <CheckCircle2 className="h-4 w-4" />
+                </span>
+                <span>{point}</span>
+              </div>
+            ))}
           </div>
-        ))}
+        </div>
       </div>
-    </article>
+    </section>
   );
 }
