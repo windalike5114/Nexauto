@@ -131,6 +131,10 @@ export async function POST(request: Request) {
 
   const session = await stripe.checkout.sessions.create({
     mode: "payment",
+    payment_method_types: ["card"],
+    adaptive_pricing: {
+      enabled: false
+    },
     customer_email: user?.email,
     billing_address_collection: "required",
     shipping_address_collection: {
