@@ -40,7 +40,15 @@ type WiperRearAddonResult = {
   price: number;
 };
 
-export function WiperFitmentFinder({ compact = false, directToProduct = false }: { compact?: boolean; directToProduct?: boolean }) {
+export function WiperFitmentFinder({
+  compact = false,
+  directToProduct = false,
+  onVehicleSaved
+}: {
+  compact?: boolean;
+  directToProduct?: boolean;
+  onVehicleSaved?: () => void;
+}) {
   const router = useRouter();
   const [makes, setMakes] = useState<FinderOption[]>([]);
   const [models, setModels] = useState<FinderOption[]>([]);
@@ -205,6 +213,7 @@ export function WiperFitmentFinder({ compact = false, directToProduct = false }:
         })
       });
       setGarageMessage("Saved to your garage.");
+      onVehicleSaved?.();
     } catch (nextError) {
       setGarageMessage(nextError instanceof Error ? nextError.message : "Could not save vehicle.");
     } finally {

@@ -25,6 +25,16 @@ export type CustomerVehicle = {
   lastUsedAt: string;
 };
 
+export type CustomerOrder = {
+  id: string;
+  orderNumber: string;
+  orderDate: string;
+  status: string;
+  vehicle: string | null;
+  products: string[];
+  total: number;
+};
+
 type CustomerProfileRow = {
   id: string;
   auth_user_id: string | null;
@@ -40,6 +50,27 @@ type CustomerVehicleRow = {
   year: number;
   source: string;
   last_used_at: string;
+};
+
+type CustomerOrderRow = {
+  id: string;
+  subtotal: string | number;
+  status: string;
+  created_at: string;
+};
+
+type CustomerOrderItemRow = {
+  order_id: string;
+  product_name: string;
+  sku: string;
+  qty: number;
+};
+
+type CustomerOrderVehicleRow = {
+  order_id: string;
+  make_snapshot: string;
+  model_snapshot: string;
+  year: number;
 };
 
 function getAdminOrThrow() {
@@ -110,6 +141,57 @@ export async function listCustomerVehicles(profileId: string) {
   return (data as CustomerVehicleRow[]).map(mapVehicle);
 }
 
+export async function listCustomerOrders(emailInput: string) {
+  const email = emailInput.toLowerCase();
+  const supabase = getAdminOrThrow();
+  const { data, error } = await supabase
+    .from("orders")
+    .select("id,subtotal,status,created_at")
+    .eq("email", email)
+    .order("created_at", { ascending: false })
+    .limit(50);
+
+  if (error) throw error;
+
+  const orders = (data ?? []) as CustomerOrderRow[];
+  const orderIds = orders.map((order) => order.id);
+
+  if (!orderIds.length) return [];
+
+  const [itemsResult, vehiclesResult] = await Promise.all([
+    supabase
+      .from("order_items")
+      .select("order_id,product_name,sku,qty")
+      .in("order_id", orderIds)
+      .order("created_at", { ascending: true }),
+    supabase
+      .from("order_vehicle_snapshots")
+      .select("order_id,make_snapshot,model_snapshot,year")
+      .in("order_id", orderIds)
+  ]);
+
+  if (itemsResult.error) throw itemsResult.error;
+  if (vehiclesResult.error) throw vehiclesResult.error;
+
+  const itemsByOrder = groupBy((itemsResult.data ?? []) as CustomerOrderItemRow[], (item) => item.order_id);
+  const vehicleByOrder = new Map(
+    ((vehiclesResult.data ?? []) as CustomerOrderVehicleRow[]).map((vehicle) => [
+      vehicle.order_id,
+      `${vehicle.make_snapshot} ${vehicle.model_snapshot} ${vehicle.year}`
+    ])
+  );
+
+  return orders.map((order): CustomerOrder => ({
+    id: order.id,
+    orderNumber: order.id.slice(0, 8).toUpperCase(),
+    orderDate: order.created_at,
+    status: order.status,
+    vehicle: vehicleByOrder.get(order.id) ?? null,
+    products: (itemsByOrder.get(order.id) ?? []).map((item) => `${item.product_name} x${item.qty}`),
+    total: Number(order.subtotal)
+  }));
+}
+
 export async function saveCustomerVehicle(user: User, vehicle: CustomerVehicleInput) {
   const profile = await getOrCreateCustomerProfile(user);
   const supabase = getAdminOrThrow();
@@ -140,6 +222,20 @@ export async function saveCustomerVehicle(user: User, vehicle: CustomerVehicleIn
     profile,
     vehicle: mapVehicle(data as CustomerVehicleRow)
   };
+}
+
+export async function removeCustomerVehicle(user: User, vehicleId: string) {
+  const profile = await getOrCreateCustomerProfile(user);
+  const supabase = getAdminOrThrow();
+  const { error } = await supabase
+    .from("customer_vehicles")
+    .delete()
+    .eq("id", vehicleId)
+    .eq("customer_profile_id", profile.id);
+
+  if (error) throw error;
+
+  return { ok: true };
 }
 
 export async function saveCustomerVehicleByEmail(emailInput: string, vehicle: CustomerVehicleInput, name: string | null = null) {
@@ -193,4 +289,13 @@ function mapVehicle(row: CustomerVehicleRow): CustomerVehicle {
     source: row.source,
     lastUsedAt: row.last_used_at
   };
+}
+
+function groupBy<T>(items: T[], getKey: (item: T) => string) {
+  const map = new Map<string, T[]>();
+  for (const item of items) {
+    const key = getKey(item);
+    map.set(key, [...(map.get(key) ?? []), item]);
+  }
+  return map;
 }

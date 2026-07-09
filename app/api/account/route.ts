@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
-import { getOrCreateCustomerProfile, listCustomerVehicles } from "@/lib/queries/account";
+import { getOrCreateCustomerProfile, listCustomerOrders, listCustomerVehicles } from "@/lib/queries/account";
 
 export async function GET() {
   const supabase = await createClient();
@@ -15,7 +15,10 @@ export async function GET() {
 
   try {
     const profile = await getOrCreateCustomerProfile(user);
-    const vehicles = await listCustomerVehicles(profile.id);
+    const [vehicles, orders] = await Promise.all([
+      listCustomerVehicles(profile.id),
+      listCustomerOrders(profile.email)
+    ]);
 
     return NextResponse.json({
       user: {
@@ -23,7 +26,8 @@ export async function GET() {
         email: user.email
       },
       profile,
-      vehicles
+      vehicles,
+      orders
     });
   } catch (nextError) {
     return NextResponse.json(
