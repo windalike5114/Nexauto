@@ -19,6 +19,7 @@ const footerGroups = [
       ["Shipping Information", "/shipping"],
       ["Returns & Refunds", "/returns"],
       ["Warranty", "/warranty"],
+      ["Installation Guides", "/wiper-installation-guides"],
       ["FAQs", "/faq"],
       ["Contact Us", "/contact"],
       ["Track Your Order", "/account"]

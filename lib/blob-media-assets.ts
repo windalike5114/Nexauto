@@ -1,5 +1,6 @@
 const blobBaseUrl = "https://p5cvrz9hmwqxi7ak.public.blob.vercel-storage.com/website-media";
 const brandBaseUrl = "https://p5cvrz9hmwqxi7ak.public.blob.vercel-storage.com/brand";
+const installationGuideBaseUrl = "https://p5cvrz9hmwqxi7ak.public.blob.vercel-storage.com/installation-guides";
 
 export const blobMediaAssets = {
   brand: {
@@ -66,34 +67,14 @@ export const blobMediaAssets = {
       url: `${blobBaseUrl}/nexautowiper5.png`
     }
   ],
-  videos: [
-    {
-      name: "topstar-01",
-      url: `${blobBaseUrl}/topstar-01.mp4`
-    },
-    {
-      name: "topstar-02",
-      url: `${blobBaseUrl}/topstar-02.mp4`
-    },
-    {
-      name: "topstar-04",
-      url: `${blobBaseUrl}/topstar-04.mp4`
-    },
-    {
-      name: "topstar-07",
-      url: `${blobBaseUrl}/topstar-07.mp4`
-    },
-    {
-      name: "topstar-08",
-      url: `${blobBaseUrl}/topstar-08.mp4`
-    },
-    {
-      name: "topstar-11",
-      url: `${blobBaseUrl}/topstar-11.mp4`
-    },
-    {
-      name: "topstar-13",
-      url: `${blobBaseUrl}/topstar-13.mp4`
-    }
-  ]
+  installationGuides: {
+    adapterVehicleChart: `${installationGuideBaseUrl}/adapter-vehicle-chart.jpg`,
+    videos: Array.from({ length: 16 }, (_, index) => {
+      const number = String(index + 1).padStart(2, "0");
+      return {
+        number,
+        url: `${installationGuideBaseUrl}/guide-${number}.mp4`
+      };
+    })
+  }
 } as const;
