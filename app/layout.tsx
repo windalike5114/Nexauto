@@ -63,9 +63,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                   <Link className="rounded px-3 py-2 hover:bg-black/5" href="/shop">
                     Shop
                   </Link>
-                  <Link className="hidden rounded px-3 py-2 hover:bg-black/5 md:inline-flex" href="/products/universal-wiper-blade">
-                    Wiper Blades
-                  </Link>
                   <Link className="hidden rounded px-3 py-2 hover:bg-black/5 lg:inline-flex" href="/about">
                     About
                   </Link>

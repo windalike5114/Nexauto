@@ -1,7 +1,10 @@
+import { blobMediaAssets } from "@/lib/blob-media-assets";
 import type { Product } from "@/lib/types";
 
+const mainWiperProductImage = blobMediaAssets.images.find((asset) => asset.name === "nexautowiper1")?.url ?? "/products/wiper-blade.png";
+
 export function productImage(product: Product) {
-  if (product.category === "wiper") return "/products/wiper-blade.png";
+  if (product.category === "wiper") return mainWiperProductImage;
   if (product.category === "bulb") return "/products/halogen-bulb.png";
   return product.images[0] ?? "";
 }
