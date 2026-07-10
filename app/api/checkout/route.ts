@@ -136,6 +136,7 @@ export async function POST(request: Request) {
       enabled: false
     },
     customer_email: user?.email,
+    customer_creation: "if_required",
     billing_address_collection: "required",
     shipping_address_collection: {
       allowed_countries: ["NZ", "AU", "US"]
