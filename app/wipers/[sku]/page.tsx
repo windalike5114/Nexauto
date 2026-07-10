@@ -59,7 +59,7 @@ export default async function WiperSkuPage({
 
   return (
     <main>
-      <section className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[0.95fr_1.05fr] lg:px-8">
+      <section className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[1.15fr_0.85fr] lg:px-8">
         <div className="space-y-4 lg:sticky lg:top-28 lg:self-start">
           <WiperProductGallery images={galleryImages} />
         </div>

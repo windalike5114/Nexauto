@@ -30,7 +30,7 @@ export function WiperProductGallery({ images }: { images: GalleryImage[] }) {
   return (
     <div className="space-y-4">
       <div
-        className="group relative aspect-[4/3] overflow-hidden rounded-lg border border-black/10 bg-white shadow-panel"
+        className="group relative aspect-[16/11] overflow-hidden rounded-lg border border-black/10 bg-white shadow-panel"
         onTouchStart={(event) => setTouchStartX(event.touches[0]?.clientX ?? null)}
         onTouchEnd={(event) => handleTouchEnd(event.changedTouches[0]?.clientX ?? 0)}
       >
@@ -39,8 +39,8 @@ export function WiperProductGallery({ images }: { images: GalleryImage[] }) {
           alt={activeImage.alt}
           fill
           priority
-          className="object-contain p-8 transition duration-300 md:group-hover:scale-[1.035]"
-          sizes="(min-width: 1024px) 50vw, 100vw"
+          className="object-contain p-4 transition duration-300 sm:p-5 md:group-hover:scale-[1.035]"
+          sizes="(min-width: 1280px) 58vw, (min-width: 1024px) 54vw, 100vw"
         />
         <button
           type="button"
