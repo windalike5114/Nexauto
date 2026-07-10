@@ -1,6 +1,21 @@
 const blobBaseUrl = "https://p5cvrz9hmwqxi7ak.public.blob.vercel-storage.com/website-media";
+const brandBaseUrl = "https://p5cvrz9hmwqxi7ak.public.blob.vercel-storage.com/brand";
 
 export const blobMediaAssets = {
+  brand: {
+    mainLogo: `${brandBaseUrl}/nexautoparts-main-logo-b1.png`,
+    circleIcon: `${brandBaseUrl}/nexautoparts-icon-circle-b1.png`,
+    squareIcon: `${brandBaseUrl}/nexautoparts-icon-square-b1.png`,
+    favicons: {
+      icon16: `${brandBaseUrl}/nexautoparts-favicon-b1-16.png`,
+      icon32: `${brandBaseUrl}/nexautoparts-favicon-b1-32.png`,
+      icon48: `${brandBaseUrl}/nexautoparts-favicon-b1-48.png`,
+      icon64: `${brandBaseUrl}/nexautoparts-favicon-b1-64.png`,
+      apple180: `${brandBaseUrl}/nexautoparts-favicon-b1-180.png`,
+      android192: `${brandBaseUrl}/nexautoparts-favicon-b1-192.png`,
+      android512: `${brandBaseUrl}/nexautoparts-favicon-b1-512.png`
+    }
+  },
   images: [
     {
       name: "nexautoclip1",

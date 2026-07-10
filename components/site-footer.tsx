@@ -1,5 +1,7 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Clock, Mail, MapPin } from "lucide-react";
+import { blobMediaAssets } from "@/lib/blob-media-assets";
 
 const footerGroups = [
   {
@@ -39,8 +41,15 @@ export function SiteFooter() {
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 md:grid-cols-2 lg:grid-cols-5 lg:px-8">
         <section className="lg:col-span-2">
           <div className="flex items-center gap-3">
-            <span className="grid h-10 w-10 place-items-center rounded bg-white text-sm font-black text-ink">NX</span>
-            <span className="text-lg font-black">NexAutoParts</span>
+            <div className="rounded bg-white px-3 py-2">
+              <Image
+                src={blobMediaAssets.brand.mainLogo}
+                alt="NexAutoParts"
+                width={220}
+                height={44}
+                className="h-8 w-auto object-contain"
+              />
+            </div>
           </div>
           <p className="mt-4 max-w-sm text-sm leading-7 text-white/70">
             NexAutoParts is committed to providing quality automotive replacement parts and excellent customer service across New Zealand.
