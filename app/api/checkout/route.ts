@@ -16,7 +16,8 @@ type ValidatedCheckoutItem = {
 };
 
 export async function POST(request: Request) {
-  const { items } = (await request.json()) as { items?: CartItem[] };
+  const { items, couponCode } = (await request.json()) as { items?: CartItem[]; couponCode?: string };
+  const normalizedCouponCode = couponCode?.trim();
 
   if (!items?.length) {
     return NextResponse.json({ error: "Cart is empty." }, { status: 400 });
@@ -122,6 +123,12 @@ export async function POST(request: Request) {
   }
 
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+  const promotionCode = normalizedCouponCode ? await findActivePromotionCode(stripe, normalizedCouponCode) : null;
+
+  if (normalizedCouponCode && !promotionCode) {
+    return NextResponse.json({ error: "Coupon code is not valid or has expired." }, { status: 400 });
+  }
+
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
   const vehicleMetadata = buildVehicleMetadata(validatedItems);
   const supabase = await createClient();
@@ -129,12 +136,15 @@ export async function POST(request: Request) {
     data: { user }
   } = await supabase.auth.getUser();
 
-  const session = await stripe.checkout.sessions.create({
+  const sessionParams: Stripe.Checkout.SessionCreateParams = {
     mode: "payment",
+    locale: "en",
     payment_method_types: ["card", "afterpay_clearpay"],
     adaptive_pricing: {
       enabled: false
     },
+    allow_promotion_codes: promotionCode ? undefined : true,
+    discounts: promotionCode ? [{ promotion_code: promotionCode.id }] : undefined,
     customer_email: user?.email,
     customer_creation: "if_required",
     billing_address_collection: "required",
@@ -175,13 +185,26 @@ export async function POST(request: Request) {
       vehicle_year: vehicleMetadata?.year ? String(vehicleMetadata.year) : "",
       vehicle_series: "",
       vehicle_body: "",
+      coupon_code: normalizedCouponCode ?? "",
       source: "nexauto"
     },
     success_url: `${siteUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${siteUrl}/checkout/cancel`
-  });
+  };
+
+  const session = await stripe.checkout.sessions.create(sessionParams);
 
   return NextResponse.json({ url: session.url });
+}
+
+async function findActivePromotionCode(stripe: Stripe, code: string) {
+  const promotionCodes = await stripe.promotionCodes.list({
+    active: true,
+    code,
+    limit: 1
+  });
+
+  return promotionCodes.data[0] ?? null;
 }
 
 function buildVehicleMetadata(items: ValidatedCheckoutItem[]) {

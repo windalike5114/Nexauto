@@ -1,19 +1,22 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { Trash2 } from "lucide-react";
 import { useCart } from "@/components/cart-provider";
 import { formatAttributeName, formatMoney } from "@/lib/catalog";
 
 export default function CartPage() {
   const { items, subtotal, updateQty, removeItem } = useCart();
+  const [couponDraft, setCouponDraft] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState("");
   const selectedVehicle = getSelectedVehicle(items);
 
   async function checkout() {
     const response = await fetch("/api/checkout", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ items })
+      body: JSON.stringify({ items, couponCode: appliedCoupon || undefined })
     });
     const data = (await response.json()) as { url?: string; error?: string };
     if (data.url) {
@@ -21,6 +24,16 @@ export default function CartPage() {
       return;
     }
     alert(data.error ?? "Checkout is not configured yet.");
+  }
+
+  function applyCoupon() {
+    const nextCoupon = couponDraft.trim();
+    if (!nextCoupon) {
+      setAppliedCoupon("");
+      return;
+    }
+
+    setAppliedCoupon(nextCoupon);
   }
 
   return (
@@ -94,6 +107,45 @@ export default function CartPage() {
             <div className="flex justify-between text-lg font-black">
               <span>Subtotal</span>
               <span>{formatMoney(subtotal)}</span>
+            </div>
+            <div className="mt-5 rounded-lg border border-black/10 bg-zinc-50 p-4">
+              <label htmlFor="coupon" className="text-xs font-black uppercase tracking-[0.14em] text-steel">
+                Coupon code
+              </label>
+              <div className="mt-2 flex gap-2">
+                <input
+                  id="coupon"
+                  value={couponDraft}
+                  onChange={(event) => setCouponDraft(event.target.value)}
+                  placeholder="Enter code"
+                  className="h-11 min-w-0 flex-1 rounded border border-black/10 bg-white px-3 text-sm font-bold text-ink outline-none focus:border-ink"
+                />
+                <button
+                  type="button"
+                  onClick={applyCoupon}
+                  className="h-11 rounded bg-ink px-4 text-sm font-black text-white transition hover:-translate-y-0.5 hover:bg-black"
+                >
+                  Apply
+                </button>
+              </div>
+              {appliedCoupon ? (
+                <div className="mt-3 flex items-center justify-between gap-3 rounded border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-bold text-emerald-800">
+                  <span>Applied: {appliedCoupon}</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAppliedCoupon("");
+                      setCouponDraft("");
+                    }}
+                    className="text-xs font-black uppercase tracking-[0.12em] text-emerald-900 hover:text-ink"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ) : null}
+              <p className="mt-3 text-xs font-bold leading-5 text-steel">
+                Discounts are validated and calculated securely in Stripe Checkout.
+              </p>
             </div>
             <p className="mt-3 text-sm leading-6 text-steel">Shipping and tax are collected in Stripe Checkout.</p>
             <button
