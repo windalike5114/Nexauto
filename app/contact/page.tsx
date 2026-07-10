@@ -1,4 +1,10 @@
 import { Clock, Mail, MapPin, Phone } from "lucide-react";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Contact Us",
+  description: "Contact NexAutoParts for help with vehicle fitment, orders, shipping, returns, warranty claims, and auto parts support."
+};
 
 export default function ContactPage() {
   return (
@@ -7,13 +13,13 @@ export default function ContactPage() {
         <p className="text-sm font-black uppercase tracking-[0.18em] text-signal">Contact us</p>
         <h1 className="mt-3 text-4xl font-black sm:text-5xl">Need help choosing a part?</h1>
         <p className="mt-5 leading-8 text-steel">
-          Send the product type, visible specification, and any SKU or part number you already have. We will use that to guide the next catalog entry.
+          Send your vehicle details, product type, visible specification, and any SKU or part number you already have. Our New Zealand-based team will help where possible before or after purchase.
         </p>
         <div className="mt-8 grid gap-4">
           <ContactItem icon={<MapPin className="h-5 w-5" />} title="Location" text="Auckland, New Zealand" />
           <ContactItem icon={<Phone className="h-5 w-5" />} title="Phone" text="09-000 0000" />
-          <ContactItem icon={<Mail className="h-5 w-5" />} title="Email" text="sales@nexauto.co.nz" />
-          <ContactItem icon={<Clock className="h-5 w-5" />} title="Hours" text="Mon - Fri / 9:00 AM - 5:00 PM" />
+          <ContactItem icon={<Mail className="h-5 w-5" />} title="Email" text="support@nexautoparts.co.nz" />
+          <ContactItem icon={<Clock className="h-5 w-5" />} title="Hours" text="Monday - Friday / 9:00 AM - 5:00 PM" />
         </div>
       </section>
 

@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { Metadata } from "next";
 import { ArrowRight, CheckCircle2, ShieldCheck, Truck, Wrench } from "lucide-react";
 import { WiperFitmentFinder } from "@/components/wiper-fitment-finder";
 import { formatMoney } from "@/lib/catalog";
@@ -8,6 +9,12 @@ import type { WiperSet } from "@/lib/types";
 import { getWiperSetPreviewImage } from "@/lib/wiper-product-images";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Quality Auto Parts for New Zealand Drivers",
+  description:
+    "Find the right replacement parts with confidence. Shop premium wiper blades and essential auto maintenance parts from NexAutoParts."
+};
 
 export default async function HomePage() {
   const popularWiperSets = await loadPopularWiperSets();
@@ -27,18 +34,18 @@ export default async function HomePage() {
 
         <div className="relative mx-auto grid min-h-[calc(100vh-73px)] max-w-7xl content-center gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[0.84fr_1.16fr] lg:px-8">
           <div className="flex flex-col justify-center text-white">
-            <p className="text-sm font-black uppercase tracking-[0.18em] text-white/80">NZ wiper fitment tool</p>
+            <p className="text-sm font-black uppercase tracking-[0.18em] text-white/80">NZ auto parts and wiper fitment</p>
             <h1 className="mt-4 max-w-3xl text-4xl font-black leading-tight sm:text-6xl">
-              Find the correct wiper blades for your vehicle.
+              Quality Auto Parts for New Zealand Drivers
             </h1>
             <p className="mt-5 max-w-2xl text-lg font-semibold leading-8 text-white/78">
-              Select your make, model, and year. NexAuto matches the blade lengths and keeps connector handling internal for fulfillment.
+              Find the right replacement parts with confidence. From premium wiper blades to essential maintenance components, NexAutoParts makes it easy to keep your vehicle performing at its best.
             </p>
 
             <div className="mt-8 grid gap-3 sm:grid-cols-3">
-              <TrustPill icon={<Wrench className="h-4 w-4" />} text="Fitment first" />
-              <TrustPill icon={<ShieldCheck className="h-4 w-4" />} text="Secure checkout" />
-              <TrustPill icon={<Truck className="h-4 w-4" />} text="NZ focused" />
+              <TrustPill icon={<Wrench className="h-4 w-4" />} text="Premium Quality" />
+              <TrustPill icon={<Truck className="h-4 w-4" />} text="Fast NZ Shipping" />
+              <TrustPill icon={<ShieldCheck className="h-4 w-4" />} text="Vehicle Fitment Support" />
             </div>
           </div>
 
@@ -65,6 +72,23 @@ export default async function HomePage() {
             {popularWiperSets.map((wiperSet) => (
               <PopularSkuCard key={wiperSet.id} wiperSet={wiperSet} />
             ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="border-b border-black/10 bg-white">
+        <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-start lg:px-8">
+          <div>
+            <p className="text-sm font-black uppercase tracking-[0.18em] text-signal">Keeping New Zealand Moving</p>
+            <h2 className="mt-3 text-3xl font-black leading-tight sm:text-4xl">Maintaining your vehicle should not be complicated.</h2>
+          </div>
+          <div className="space-y-4 text-base font-semibold leading-8 text-steel">
+            <p>
+              At NexAutoParts, we believe maintaining your vehicle should not be complicated or expensive. Whether you are replacing worn wiper blades, servicing your family car, or sourcing reliable replacement parts, we are here to make the process simple.
+            </p>
+            <p>
+              Our goal is to provide quality automotive parts, straightforward vehicle compatibility information, competitive pricing, and dependable customer support. Every order is handled with care because reliable transportation matters.
+            </p>
           </div>
         </div>
       </section>
