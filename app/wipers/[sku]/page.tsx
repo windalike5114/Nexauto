@@ -1,10 +1,12 @@
 import Image from "next/image";
+import Link from "next/link";
 import { notFound } from "next/navigation";
-import { CarFront, CheckCircle2, PlayCircle, ShieldCheck, Truck, Wrench } from "lucide-react";
+import { CarFront, CheckCircle2, CircleHelp, CreditCard, LifeBuoy, Truck } from "lucide-react";
 import { WiperSetPurchase } from "@/components/wiper-set-purchase";
+import { WiperProductGallery } from "@/components/wiper-product-gallery";
 import { formatMoney } from "@/lib/catalog";
+import { blobMediaAssets } from "@/lib/blob-media-assets";
 import { getWiperRearAddonById, getWiperSetBySku } from "@/lib/queries/wiper-commerce";
-import { getWiperSetPreviewImage } from "@/lib/wiper-product-images";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +18,9 @@ type WiperSkuSearchParams = {
   year?: string;
   rearAddonId?: string;
 };
+
+const productGalleryImages = ["nexautowiper1", "nexautowiper2", "nexautowiper3", "nexautowiper4", "nexautowiper5"];
+const adapterImageNames = ["nexautoclip1", "nexautoclip11", "nexautoclip13", "nexautoclip2", "nexautoclip4", "nexautoclip7", "nexautoclip8"];
 
 export default async function WiperSkuPage({
   params,
@@ -46,35 +51,25 @@ export default async function WiperSkuPage({
     : query.vehicle
       ? decodeURIComponent(query.vehicle)
       : "";
-  const productImage = getWiperSetPreviewImage(wiperSet);
+  const title = `Front Windscreen Wiper Blade Pair - ${wiperSet.driverLengthIn}" + ${wiperSet.passengerLengthIn}"`;
+  const galleryImages = productGalleryImages.map((name) => ({
+    src: getImageUrl(name),
+    alt: `${title} product image`
+  }));
 
   return (
     <main>
       <section className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[0.95fr_1.05fr] lg:px-8">
         <div className="space-y-4 lg:sticky lg:top-28 lg:self-start">
-          <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-zinc-200">
-            <Image
-              src={productImage}
-              alt={wiperSet.name}
-              fill
-              priority
-              className="object-contain p-8"
-              sizes="(min-width: 1024px) 50vw, 100vw"
-            />
-          </div>
-          <div className="grid grid-cols-3 gap-3">
-            <MediaTile icon={<Truck className="h-4 w-4" />} text="Dispatch" />
-            <MediaTile icon={<ShieldCheck className="h-4 w-4" />} text="Secure pay" />
-            <MediaTile icon={<Wrench className="h-4 w-4" />} text="SKU fit" />
-          </div>
+          <WiperProductGallery images={galleryImages} />
         </div>
 
         <section className="space-y-6">
           <div>
             <p className="text-sm font-black uppercase tracking-[0.18em] text-signal">Wipers</p>
-            <h1 className="mt-3 text-4xl font-black leading-tight sm:text-5xl">{wiperSet.name}</h1>
-            <p className="mt-4 text-lg leading-8 text-steel">
-              Matched front pair generated from fitment data. Customers only select a vehicle; blade lengths and connector handling stay with the system.
+            <h1 className="mt-3 text-4xl font-black leading-tight sm:text-5xl">{title}</h1>
+            <p className="mt-4 text-lg font-semibold leading-8 text-steel">
+              Smooth, quiet and reliable wiping performance designed for everyday New Zealand driving.
             </p>
             <p className="mt-5 text-3xl font-black">{formatMoney(wiperSet.price)}</p>
           </div>
@@ -89,98 +84,110 @@ export default async function WiperSkuPage({
                   <p className="text-xs font-black uppercase tracking-[0.14em] text-signal">Selected vehicle</p>
                   <h2 className="mt-1 text-2xl font-black">{vehicle}</h2>
                   <p className="mt-2 text-sm font-bold leading-6 text-steel">
-                    This vehicle will be saved with the cart and order for internal SKU and connector fulfillment.
+                    This vehicle will be included with your order to help confirm the correct wiper configuration.
                   </p>
                 </div>
-              </div>
-              <div className="mt-5 grid gap-3 sm:grid-cols-3">
-                <FitmentTile label="Driver blade" lengthIn={wiperSet.driverLengthIn} />
-                <FitmentTile label="Passenger blade" lengthIn={wiperSet.passengerLengthIn} />
-                <FitmentTile label="Rear blade" lengthIn={rearAddon?.rearLengthIn ?? null} suffix={rearAddon ? "optional" : undefined} />
               </div>
             </section>
           ) : (
             <section className="rounded-lg border border-black/10 bg-zinc-50 p-5">
-              <div className="flex items-center gap-3">
-                <CheckCircle2 className="h-5 w-5 text-signal" />
-                <p className="text-sm font-bold text-steel">
-                  Buying manually from the catalog. For the safest fitment, search your vehicle first.
-                </p>
+              <div className="flex items-start gap-3">
+                <CircleHelp className="mt-0.5 h-5 w-5 shrink-0 text-signal" />
+                <div>
+                  <p className="text-sm font-black text-ink">Buying manually from the catalog</p>
+                  <p className="mt-1 text-sm font-bold leading-6 text-steel">
+                    For the safest fitment, search your vehicle before ordering.
+                  </p>
+                </div>
               </div>
             </section>
           )}
 
+          <div className="grid gap-3 sm:grid-cols-2">
+            <FitmentTile label="Driver side" lengthIn={wiperSet.driverLengthIn} />
+            <FitmentTile label="Passenger side" lengthIn={wiperSet.passengerLengthIn} />
+          </div>
+
+          <div className="flex flex-col gap-3 rounded-lg border border-black/10 bg-[#F8FAFC] p-4 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm font-bold leading-6 text-steel">
+              Not sure whether these sizes fit your vehicle? Use our Vehicle Finder before ordering to confirm compatibility.
+            </p>
+            <Link href="/#vehicle-finder" className="inline-flex h-11 shrink-0 items-center justify-center rounded bg-ink px-4 text-sm font-black text-white transition hover:-translate-y-0.5 hover:bg-black">
+              Check My Vehicle
+            </Link>
+          </div>
+
           <WiperSetPurchase wiperSet={wiperSet} rearAddon={rearAddon} vehicle={vehicle} vehicleContext={vehicleContext} />
+
+          <div className="grid gap-3 sm:grid-cols-3">
+            <TrustPoint icon={<CarFront className="h-4 w-4" />} text="Vehicle-Matched Fitment" />
+            <TrustPoint icon={<Truck className="h-4 w-4" />} text="Fast NZ Dispatch" />
+            <TrustPoint icon={<CreditCard className="h-4 w-4" />} text="Secure Checkout" />
+          </div>
         </section>
       </section>
 
       <section className="border-t border-black/10 bg-white">
         <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 lg:grid-cols-[0.85fr_1.15fr] lg:px-8">
           <div>
-            <p className="text-sm font-black uppercase tracking-[0.18em] text-signal">Built for daily visibility</p>
-            <h2 className="mt-3 text-3xl font-black">Product details</h2>
-            <p className="mt-4 leading-8 text-steel">
-              The high-toughness memory steel strip ensures a tight fit to the windshield. Advanced craftsmanship and high-quality materials guarantee the rubber strip remains highly lubricated, even after long periods of use, without generating noise.
-            </p>
-            <p className="mt-4 leading-8 text-steel">
-              While ensuring excellent performance in silence, durability, high temperature resistance, anti-freeze, anti-oxidation, and even pressure distribution, this wiper blade still maintains an astonishingly low price. The 17 different types of adapters available allow it to perfectly fit 99% of vehicle models on the market.
-            </p>
-            <div className="mt-6 flex flex-wrap gap-2">
-              {[
-                `${wiperSet.driverLengthIn}" / ${toMillimetres(wiperSet.driverLengthIn)} mm driver blade`,
-                `${wiperSet.passengerLengthIn}" / ${toMillimetres(wiperSet.passengerLengthIn)} mm passenger blade`,
-                "Vehicle context saved",
-                "Rear blade optional"
-              ].map((item) => (
-                <span key={item} className="rounded bg-zinc-100 px-3 py-2 text-sm font-bold text-steel">
-                  {item}
-                </span>
-              ))}
-            </div>
+            <p className="text-sm font-black uppercase tracking-[0.18em] text-signal">Reliable Everyday Wiping Performance</p>
+            <h2 className="mt-3 text-3xl font-black">Built for daily visibility</h2>
           </div>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <DetailBlock title="What is included" text="One front driver-side blade and one front passenger-side blade as a matched pair." />
-            <DetailBlock title="Connector handling" text="Connector fitment is kept separate from blade length. Our backend can record connector choice before dispatch." />
-            <DetailBlock title="Vehicle context" text="When opened from the finder, your selected vehicle is carried into cart metadata for fulfillment." />
-            <article className="rounded-lg border border-black/10 bg-ink p-5 text-white">
-              <div className="flex items-center gap-3">
-                <PlayCircle className="h-6 w-6 text-signal" />
-                <h3 className="text-lg font-black">Installation overview</h3>
-              </div>
-              <p className="mt-3 leading-7 text-white/75">
-                A short product walkthrough can sit here for blade replacement, connector confirmation, and buyer confidence.
-              </p>
-            </article>
+          <div className="space-y-4 text-base font-semibold leading-8 text-steel">
+            <p>NexAutoParts front wiper blades are designed to provide smooth, quiet and consistent wiping performance for everyday driving.</p>
+            <p>The flexible memory steel structure helps distribute pressure evenly across the windscreen, allowing the rubber wiping edge to maintain reliable contact with the glass.</p>
+            <p>The durable rubber blade helps reduce common wiping issues such as streaking, skipping, vibration and uneven contact.</p>
+            <p>Designed for changing New Zealand weather conditions, the blades provide dependable visibility through rain, heat, cold temperatures and regular daily use.</p>
           </div>
         </div>
       </section>
 
-      <section className="border-t border-black/10 bg-zinc-50">
+      <section className="border-t border-black/10 bg-[#F8FAFC]">
+        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <FeatureCard title="Smooth and Quiet Operation" text="Designed to provide smooth movement across the windscreen while helping reduce vibration and unnecessary wiping noise." />
+            <FeatureCard title="Even Windscreen Contact" text="The flexible internal structure helps distribute pressure across the blade for consistent contact with the windscreen." />
+            <FeatureCard title="Durable Rubber Wiping Edge" text="Designed for reliable everyday use while helping reduce streaks and uneven wiping." />
+            <FeatureCard title="Suitable for New Zealand Conditions" text="Built for regular use through changing weather conditions including rain, heat and cold temperatures." />
+          </div>
+        </div>
+      </section>
+
+      <section className="border-t border-black/10 bg-white">
+        <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 lg:grid-cols-[0.85fr_1.15fr] lg:px-8">
+          <div>
+            <p className="text-sm font-black uppercase tracking-[0.18em] text-signal">Correct Adapters Included</p>
+            <h2 className="mt-3 text-3xl font-black">Matched for your selected vehicle</h2>
+          </div>
+          <div className="space-y-4 text-base font-semibold leading-8 text-steel">
+            <p>Different vehicles use different wiper arm connection styles.</p>
+            <p>When a vehicle is selected through the NexAutoParts Vehicle Finder, the compatible adapter configuration is matched according to the available vehicle fitment information.</p>
+            <p>No technical connector knowledge is required.</p>
+            <p>The appropriate adapter option will be included where required.</p>
+            <p className="font-black text-ink">Vehicle fitment should be confirmed through the Vehicle Finder before ordering.</p>
+          </div>
+        </div>
+      </section>
+
+      <section className="border-t border-black/10 bg-[#F8FAFC]">
         <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
           <div className="mb-6 max-w-3xl">
-            <p className="text-sm font-black uppercase tracking-[0.18em] text-signal">Adapters</p>
-            <h2 className="mt-3 text-3xl font-black">Adapter coverage for common wiper arms</h2>
+            <p className="text-sm font-black uppercase tracking-[0.18em] text-signal">Adapter support</p>
+            <h2 className="mt-3 text-3xl font-black">Adapter Coverage for Common Wiper Arms</h2>
             <p className="mt-4 text-sm font-bold leading-7 text-steel">
-              Customers do not need to select the connector. Vehicle information travels with the order so the correct adapter can be matched before dispatch.
+              A range of adapter styles is available to support many commonly used wiper arm connections. Select your vehicle through our Vehicle Finder and we will help match the suitable wiper configuration.
             </p>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {adapterImages.map((adapter) => (
-              <article key={adapter.title} className="overflow-hidden rounded-lg border border-black/10 bg-white shadow-sm">
-                <div className="relative aspect-[4/3] bg-white">
-                  <Image
-                    src={adapter.src}
-                    alt={adapter.title}
-                    fill
-                    className="object-contain p-4"
-                    sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
-                  />
-                </div>
-                <div className="border-t border-black/10 p-4">
-                  <h3 className="font-black">{adapter.title}</h3>
-                  <p className="mt-1 text-sm font-bold text-steel">{adapter.text}</p>
-                </div>
+          <div className="flex gap-4 overflow-x-auto pb-2">
+            {adapterImageNames.map((name, index) => (
+              <article key={name} className="relative aspect-[4/3] min-w-[42%] overflow-hidden rounded-lg border border-black/10 bg-white shadow-sm sm:min-w-[220px] lg:min-w-0 lg:flex-1">
+                <Image
+                  src={getImageUrl(name)}
+                  alt={`Common wiper arm adapter style ${index + 1}`}
+                  fill
+                  className="object-contain p-5"
+                  sizes="(min-width: 1024px) 14vw, 42vw"
+                />
               </article>
             ))}
           </div>
@@ -188,81 +195,134 @@ export default async function WiperSkuPage({
       </section>
 
       <section className="border-t border-black/10 bg-white">
-        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-          <div className="mb-6 max-w-3xl">
-            <p className="text-sm font-black uppercase tracking-[0.18em] text-signal">Installation videos</p>
-            <h2 className="mt-3 text-3xl font-black">Quick installation guides</h2>
-            <p className="mt-4 text-sm font-bold leading-7 text-steel">
-              Short adapter installation videos help confirm the fitting process before or after purchase.
+        <div className="mx-auto grid max-w-7xl gap-6 px-4 py-12 sm:px-6 lg:grid-cols-[1fr_360px] lg:items-center lg:px-8">
+          <div>
+            <p className="text-sm font-black uppercase tracking-[0.18em] text-signal">Installation support</p>
+            <h2 className="mt-3 text-3xl font-black">Need Help Installing Your Wipers?</h2>
+            <p className="mt-4 max-w-3xl text-base font-semibold leading-8 text-steel">
+              Different vehicles may use different wiper arm connections. Visit our Installation Guide Centre to view step-by-step fitting instructions and select the guide that matches your adapter type.
             </p>
           </div>
-          <div className="grid gap-4 lg:grid-cols-3">
-            {installationVideos.map((video) => (
-              <article key={video.title} className="overflow-hidden rounded-lg border border-black/10 bg-white shadow-sm">
-                <video className="aspect-video w-full bg-black" controls preload="metadata">
-                  <source src={video.src} type="video/mp4" />
-                </video>
-                <div className="p-4">
-                  <h3 className="font-black">{video.title}</h3>
-                  <p className="mt-1 text-sm font-bold text-steel">{video.text}</p>
+          <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
+            <Link href="/wiper-installation-guides" className="inline-flex h-12 items-center justify-center rounded bg-signal px-5 font-black text-white transition hover:-translate-y-0.5 hover:bg-red-700">
+              View Installation Guides
+            </Link>
+            <Link href="/contact" className="inline-flex h-12 items-center justify-center gap-2 rounded border border-black/10 bg-white px-5 font-black text-ink transition hover:-translate-y-0.5 hover:border-ink">
+              <LifeBuoy className="h-4 w-4" />
+              Contact Fitment Support
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="border-t border-black/10 bg-[#F8FAFC]">
+        <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
+          <p className="text-sm font-black uppercase tracking-[0.18em] text-signal">Product help</p>
+          <h2 className="mt-3 text-3xl font-black">Frequently Asked Questions</h2>
+          <div className="mt-6 divide-y divide-black/10 overflow-hidden rounded-lg border border-black/10 bg-white">
+            {productFaqs.map((faq) => (
+              <details key={faq.question} className="group p-5">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-black">
+                  {faq.question}
+                  <span className="text-signal group-open:rotate-45">+</span>
+                </summary>
+                <div className="mt-3 text-sm font-bold leading-7 text-steel">
+                  <p>{faq.answer}</p>
+                  {faq.guideLink ? (
+                    <Link href="/wiper-installation-guides" className="mt-3 inline-flex font-black text-signal hover:text-ink">
+                      View Installation Guides
+                    </Link>
+                  ) : null}
                 </div>
-              </article>
+              </details>
             ))}
           </div>
+        </div>
+      </section>
+
+      <section className="border-t border-black/10 bg-white">
+        <div className="mx-auto grid max-w-7xl gap-4 px-4 py-10 sm:px-6 md:grid-cols-3 lg:px-8">
+          <InfoTile title="Shipping" text="Fast nationwide dispatch from New Zealand. Shipping options are shown at checkout." />
+          <InfoTile title="Returns" text="Contact us before installation if you believe the product is not suitable for your vehicle." />
+          <InfoTile title="Related products" text="Browse all front wiper blade pair combinations in the parts catalog." href="/shop" />
         </div>
       </section>
     </main>
   );
 }
 
-const adapterImages = [
-  { src: "/yj-wiper/adapters/adapter-m6.png", title: "Adapter style M6", text: "Common connector profile for selected wiper arms." },
-  { src: "/yj-wiper/adapters/adapter-m8.png", title: "Adapter style M8", text: "Alternative connector profile handled during fulfillment." },
-  { src: "/yj-wiper/adapters/adapter-p6.png", title: "Adapter style P6", text: "Low-profile fitting option for compatible arms." },
-  { src: "/yj-wiper/adapters/adapter-p8.png", title: "Adapter style P8", text: "Extended fitment option for matching vehicle applications." }
-];
+function getImageUrl(name: string) {
+  const image = blobMediaAssets.images.find((asset) => asset.name === name);
+  if (!image) throw new Error(`Missing Blob image asset: ${name}`);
+  return image.url;
+}
 
-const installationVideos = [
-  { src: "/yj-wiper/install-videos/install-adapter-1.mp4", title: "Adapter installation 1", text: "Short guide for connector setup." },
-  { src: "/yj-wiper/install-videos/install-adapter-2.mp4", title: "Adapter installation 2", text: "Quick fitting process overview." },
-  { src: "/yj-wiper/install-videos/install-adapter-3.mp4", title: "Adapter installation 3", text: "Additional adapter installation reference." }
-];
-
-function MediaTile({ icon, text }: { icon: React.ReactNode; text: string }) {
+function FitmentTile({ label, lengthIn }: { label: string; lengthIn: number }) {
   return (
-    <div className="flex min-h-16 flex-col items-center justify-center gap-1 rounded border border-black/10 bg-white text-sm font-black text-steel">
-      {icon}
+    <div className="rounded-lg border border-black/10 bg-white p-4 shadow-sm">
+      <p className="text-xs font-black uppercase tracking-[0.14em] text-steel">{label}</p>
+      <p className="mt-2 text-xl font-black text-ink">
+        {lengthIn}" <span className="text-sm font-bold text-steel">/ approximately {toMillimetres(lengthIn)} mm</span>
+      </p>
+    </div>
+  );
+}
+
+function TrustPoint({ icon, text }: { icon: React.ReactNode; text: string }) {
+  return (
+    <div className="flex min-h-14 items-center gap-2 rounded-lg border border-black/10 bg-white px-4 text-sm font-black text-ink shadow-sm">
+      <span className="text-signal">{icon}</span>
       <span>{text}</span>
     </div>
   );
 }
 
-function FitmentTile({ label, lengthIn, suffix }: { label: string; lengthIn: number | null; suffix?: string }) {
+function FeatureCard({ title, text }: { title: string; text: string }) {
   return (
-    <div className="rounded-lg border border-black/10 bg-white p-4">
-      <p className="text-xs font-black uppercase tracking-[0.14em] text-steel">{label}</p>
-      {lengthIn ? (
-        <>
-          <p className="mt-2 text-2xl font-black text-ink">
-            {lengthIn}"{suffix ? <span className="ml-1 text-sm text-steel">{suffix}</span> : null}
-          </p>
-          <p className="mt-1 text-xs font-black text-steel">{toMillimetres(lengthIn)} mm</p>
-        </>
-      ) : (
-        <p className="mt-2 text-2xl font-black text-ink">Not listed</p>
-      )}
-    </div>
-  );
-}
-
-function DetailBlock({ title, text }: { title: string; text: string }) {
-  return (
-    <article className="rounded-lg border border-black/10 bg-white p-5">
-      <h2 className="font-black">{title}</h2>
-      <p className="mt-3 text-sm font-bold leading-6 text-steel">{text}</p>
+    <article className="rounded-lg border border-black/10 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-panel">
+      <div className="grid h-9 w-9 place-items-center rounded-full bg-signal text-white">
+        <CheckCircle2 className="h-5 w-5" />
+      </div>
+      <h3 className="mt-4 text-lg font-black">{title}</h3>
+      <p className="mt-3 text-sm font-bold leading-7 text-steel">{text}</p>
     </article>
   );
 }
+
+function InfoTile({ title, text, href }: { title: string; text: string; href?: "/shop" }) {
+  const content = (
+    <article className="h-full rounded-lg border border-black/10 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+      <h3 className="font-black">{title}</h3>
+      <p className="mt-2 text-sm font-bold leading-6 text-steel">{text}</p>
+    </article>
+  );
+
+  return href ? <Link href={href}>{content}</Link> : content;
+}
+
+const productFaqs = [
+  {
+    question: "Does this product include both front wiper blades?",
+    answer: "Yes. This product includes one driver-side blade and one passenger-side blade in the sizes shown on the product page."
+  },
+  {
+    question: "Are adapters included?",
+    answer: "Compatible adapter options are included where required. Vehicle fitment should be confirmed through the Vehicle Finder before ordering."
+  },
+  {
+    question: "Do I need to select an adapter?",
+    answer: "No. Customers normally do not need to identify or select an adapter manually. Use the Vehicle Finder to confirm the vehicle application."
+  },
+  {
+    question: "Can I install the wipers myself?",
+    answer: "Most installations can be completed without specialist tools. Visit our Installation Guide Centre for adapter-specific instructions.",
+    guideLink: true
+  },
+  {
+    question: "What should I do if I am unsure about fitment?",
+    answer: "Use our Vehicle Finder or contact NexAutoParts before installation."
+  }
+];
 
 function toMillimetres(lengthIn: number) {
   return Math.round(lengthIn * 25.4);

@@ -49,7 +49,7 @@ export default async function HomePage() {
             </div>
           </div>
 
-          <div className="self-center">
+          <div id="vehicle-finder" className="scroll-mt-24 self-center">
             <WiperFitmentFinder directToProduct />
           </div>
         </div>
