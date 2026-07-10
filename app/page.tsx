@@ -55,14 +55,14 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="border-b border-black/10 bg-white">
+      <section className="border-b border-black/10 bg-[#F8FAFC]">
         <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
           <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-sm font-black uppercase tracking-[0.18em] text-signal">Popular Products</p>
               <h2 className="mt-2 text-3xl font-black">Bestselling front pair SKUs</h2>
             </div>
-            <Link href="/shop" className="inline-flex h-11 items-center gap-2 rounded-lg border border-black/10 bg-white px-4 text-sm font-black text-ink hover:border-ink">
+            <Link href="/shop" className="inline-flex h-11 items-center gap-2 rounded-lg border border-black/10 bg-white px-4 text-sm font-black text-ink shadow-sm transition hover:-translate-y-0.5 hover:border-ink hover:shadow-md">
               View all SKUs
               <ArrowRight className="h-4 w-4" />
             </Link>
@@ -76,13 +76,13 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="border-b border-black/10 bg-white">
-        <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-start lg:px-8">
+      <section className="bg-ink text-white">
+        <div className="mx-auto grid max-w-7xl gap-8 px-4 py-16 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-start lg:px-8 lg:py-20">
           <div>
             <p className="text-sm font-black uppercase tracking-[0.18em] text-signal">Keeping New Zealand Moving</p>
-            <h2 className="mt-3 text-3xl font-black leading-tight sm:text-4xl">Maintaining your vehicle should not be complicated.</h2>
+            <h2 className="mt-4 text-4xl font-black leading-tight sm:text-5xl">Maintaining your vehicle should not be complicated.</h2>
           </div>
-          <div className="space-y-4 text-base font-semibold leading-8 text-steel">
+          <div className="space-y-5 text-lg font-semibold leading-9 text-white/76">
             <p>
               At NexAutoParts, we believe maintaining your vehicle should not be complicated or expensive. Whether you are replacing worn wiper blades, servicing your family car, or sourcing reliable replacement parts, we are here to make the process simple.
             </p>
@@ -93,7 +93,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <div className="bg-white">
+      <div>
         <FeatureSection
           eyebrow="Premium Performance"
           title="Premium Beam Wiper Blades"
@@ -110,6 +110,7 @@ export default async function HomePage() {
           imageAlt="Vehicle driving on a wet New Zealand road"
           points={["All-season durability", "Heat & frost resistant", "Even pressure across the windshield"]}
           reverse
+          background="soft"
         />
         <FeatureSection
           eyebrow="Perfect Fit, Every Time"
@@ -127,6 +128,7 @@ export default async function HomePage() {
           imageAlt="Local warehouse packing wiper blades for dispatch"
           points={["NZ local business", "Fast nationwide shipping", "Responsive customer support"]}
           reverse
+          background="soft"
         />
       </div>
     </main>
@@ -163,7 +165,7 @@ function PopularSkuCard({ wiperSet }: { wiperSet: WiperSet }) {
   const image = getWiperSetPreviewImage(wiperSet);
 
   return (
-    <article className="min-w-[240px] overflow-hidden rounded-lg border border-black/10 bg-white shadow-sm sm:min-w-[260px]">
+    <article className="min-w-[240px] overflow-hidden rounded-lg border border-black/10 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-panel sm:min-w-[260px]">
       <div className="relative aspect-[4/3] bg-zinc-50">
         <Image
           src={image}
@@ -178,7 +180,7 @@ function PopularSkuCard({ wiperSet }: { wiperSet: WiperSet }) {
         <h3 className="mt-2 text-lg font-black">{wiperSet.name}</h3>
         <div className="mt-4 flex items-center justify-between gap-3">
           <p className="text-lg font-black">{formatMoney(wiperSet.price)}</p>
-          <Link href={`/wipers/${wiperSet.sku}`} className="inline-flex h-10 items-center rounded bg-ink px-3 text-sm font-black text-white hover:bg-black">
+          <Link href={`/wipers/${wiperSet.sku}`} className="inline-flex h-10 items-center rounded bg-ink px-3 text-sm font-black text-white transition hover:-translate-y-0.5 hover:bg-black">
             View
           </Link>
         </div>
@@ -194,7 +196,8 @@ function FeatureSection({
   image,
   imageAlt,
   points,
-  reverse = false
+  reverse = false,
+  background = "white"
 }: {
   eyebrow: string;
   title: string;
@@ -203,11 +206,12 @@ function FeatureSection({
   imageAlt: string;
   points: string[];
   reverse?: boolean;
+  background?: "white" | "soft";
 }) {
   return (
-    <section className="border-b border-black/10">
+    <section className={`border-b border-black/10 ${background === "soft" ? "bg-[#F8FAFC]" : "bg-white"}`}>
       <div className={`mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 lg:grid-cols-2 lg:items-center lg:px-8 lg:py-16 ${reverse ? "lg:[&>*:first-child]:order-2" : ""}`}>
-        <div className="relative aspect-[16/10] overflow-hidden rounded-lg bg-zinc-100 shadow-panel">
+        <div className="relative aspect-[16/10] overflow-hidden rounded-lg bg-zinc-100 shadow-panel transition hover:-translate-y-1">
           <Image
             src={image}
             alt={imageAlt}

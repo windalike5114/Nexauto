@@ -259,8 +259,8 @@ export function WiperFitmentFinder({
   }
 
   return (
-    <section className={`rounded-lg border border-black/10 bg-white shadow-sm ${compact ? "p-5" : "p-6 sm:p-7"}`}>
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <section className={`rounded-2xl border border-black/10 bg-white shadow-panel ${compact ? "p-5" : "p-7 sm:p-8"}`}>
+      <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <div className="flex items-center gap-2 text-sm font-black uppercase tracking-[0.16em] text-signal">
             <CarFront className="h-4 w-4" />
@@ -271,12 +271,12 @@ export function WiperFitmentFinder({
             Select make, model, and year to check blade lengths before choosing your wiper variant.
           </p>
         </div>
-        <div className="hidden h-12 w-12 shrink-0 place-items-center rounded bg-ink text-white sm:grid">
+        <div className="hidden h-12 w-12 shrink-0 place-items-center rounded-xl bg-ink text-white shadow-sm sm:grid">
           {busy ? <Loader2 className="h-5 w-5 animate-spin" /> : <Search className="h-5 w-5" />}
         </div>
       </div>
 
-      <div className={`mt-5 grid gap-3 ${compact ? "grid-cols-1" : "md:grid-cols-3"}`}>
+      <div className={`mt-6 grid gap-4 ${compact ? "grid-cols-1" : "md:grid-cols-3"}`}>
         <SelectControl label="Make" value={makeId} disabled={busy && loading === "makes"} onChange={setMakeId}>
           <option value="">Select make</option>
           {makes.map((entry) => (
@@ -310,7 +310,7 @@ export function WiperFitmentFinder({
           type="button"
           disabled={!makeId || !modelId || !year || searching}
           onClick={findAndGoToProduct}
-          className="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded bg-signal px-5 text-sm font-black text-white hover:bg-red-700 disabled:bg-zinc-300"
+          className="mt-6 inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-xl bg-signal px-5 py-4 text-sm font-black text-white shadow-lg shadow-red-900/15 transition hover:-translate-y-0.5 hover:bg-red-700 hover:shadow-xl disabled:translate-y-0 disabled:bg-zinc-300 disabled:shadow-none"
         >
           {searching ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
           Find wipers for my car
