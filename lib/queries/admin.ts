@@ -93,6 +93,20 @@ export type AdminRearAddon = {
   active: boolean;
 };
 
+export type AdminProductsData = {
+  variants: AdminVariant[];
+  wiperSets: AdminWiperSet[];
+  rearAddons: AdminRearAddon[];
+};
+
+export type AdminOverviewData = {
+  orders: AdminOrder[];
+  variants: AdminVariant[];
+  emailEvents: AdminEmailEvent[];
+  customers: AdminCustomer[];
+  enquiries: AdminEnquiry[];
+};
+
 export type AdminEmailEvent = {
   id: string;
   type: string;
@@ -286,6 +300,93 @@ export async function requireAdminAccess() {
 
 export async function loadAdminDashboardData() {
   await requireAdminAccess();
+  const [orders, productsData, products, emailEvents, customers, enquiries] = await Promise.all([
+    loadAdminOrdersDataInternal(),
+    loadAdminProductsDataInternal(),
+    listAdminProducts(),
+    listAdminEmailEvents(),
+    listAdminCustomers(),
+    listAdminEnquiries()
+  ]);
+
+  return {
+    orders,
+    products,
+    variants: productsData.variants,
+    wiperSets: productsData.wiperSets,
+    rearAddons: productsData.rearAddons,
+    emailEvents,
+    customers,
+    enquiries
+  };
+}
+
+export async function loadAdminOverviewData(): Promise<AdminOverviewData> {
+  await requireAdminAccess();
+  const [orders, variants, emailEvents, customers, enquiries] = await Promise.all([
+    loadAdminOrdersDataInternal(),
+    listAdminVariants(),
+    listAdminEmailEvents(),
+    listAdminCustomers(),
+    listAdminEnquiries()
+  ]);
+
+  return { orders, variants, emailEvents, customers, enquiries };
+}
+
+export async function loadAdminOrdersData() {
+  await requireAdminAccess();
+  return loadAdminOrdersDataInternal();
+}
+
+export async function loadAdminProductsData(): Promise<AdminProductsData> {
+  await requireAdminAccess();
+  return loadAdminProductsDataInternal();
+}
+
+export async function loadAdminContentData() {
+  await requireAdminAccess();
+  return listAdminProducts();
+}
+
+export async function loadAdminEmailEventsData() {
+  await requireAdminAccess();
+  return listAdminEmailEvents();
+}
+
+export async function loadAdminCustomersData() {
+  await requireAdminAccess();
+  return listAdminCustomers();
+}
+
+export async function loadAdminEnquiriesData() {
+  await requireAdminAccess();
+  return listAdminEnquiries();
+}
+
+async function loadAdminOrdersDataInternal() {
+  const orders = await listAdminOrderRows();
+  const orderIds = orders.map((order) => order.id);
+  const [items, vehicles, fulfillments] = await Promise.all([
+    listOrderItems(orderIds),
+    listOrderVehicles(orderIds),
+    listFulfillments(orderIds)
+  ]);
+
+  return mapAdminOrders(orders, items, vehicles, fulfillments);
+}
+
+async function loadAdminProductsDataInternal(): Promise<AdminProductsData> {
+  const [variants, wiperSets, rearAddons] = await Promise.all([
+    listAdminVariants(),
+    listAdminWiperSets(),
+    listAdminRearAddons()
+  ]);
+
+  return { variants, wiperSets, rearAddons };
+}
+
+async function listAdminOrderRows() {
 
   const supabase = getAdminOrThrow();
   const { data: ordersData, error: ordersError } = await supabase
@@ -296,25 +397,19 @@ export async function loadAdminDashboardData() {
 
   if (ordersError) throw ordersError;
 
-  const orders = (ordersData ?? []) as OrderRow[];
-  const orderIds = orders.map((order) => order.id);
-  const [items, vehicles, fulfillments, products, variants, wiperSets, rearAddons, emailEvents, customers, enquiries] = await Promise.all([
-    listOrderItems(orderIds),
-    listOrderVehicles(orderIds),
-    listFulfillments(orderIds),
-    listAdminProducts(),
-    listAdminVariants(),
-    listAdminWiperSets(),
-    listAdminRearAddons(),
-    listAdminEmailEvents(),
-    listAdminCustomers(orders),
-    listAdminEnquiries()
-  ]);
+  return (ordersData ?? []) as OrderRow[];
+}
 
+function mapAdminOrders(
+  orders: OrderRow[],
+  items: AdminOrderItem[],
+  vehicles: AdminVehicleSnapshot[],
+  fulfillments: AdminWiperFulfillment[]
+) {
   const itemsByOrder = groupBy(items, (item) => item.orderId);
   const vehicleByOrder = new Map(vehicles.map((vehicle) => [vehicle.orderId, vehicle]));
   const fulfillmentByOrder = new Map(fulfillments.map((fulfillment) => [fulfillment.orderId, fulfillment]));
-  const mappedOrders = orders.map((order): AdminOrder => ({
+  return orders.map((order): AdminOrder => ({
     id: order.id,
     email: order.email,
     customerName: order.customer_name,
@@ -327,17 +422,6 @@ export async function loadAdminDashboardData() {
     vehicle: vehicleByOrder.get(order.id) ?? null,
     fulfillment: fulfillmentByOrder.get(order.id) ?? null
   }));
-
-  return {
-    orders: mappedOrders,
-    products,
-    variants,
-    wiperSets,
-    rearAddons,
-    emailEvents,
-    customers,
-    enquiries
-  };
 }
 
 async function listOrderItems(orderIds: string[]) {
@@ -522,19 +606,27 @@ async function listAdminEmailEvents() {
   }));
 }
 
-async function listAdminCustomers(orders: OrderRow[]) {
+async function listAdminCustomers() {
   const supabase = getAdminOrThrow();
-  const { data, error } = await supabase
+  const [{ data, error }, { data: ordersData, error: ordersError }] = await Promise.all([
+    supabase
     .from("customer_profiles")
     .select("id,email,name,created_at")
     .order("created_at", { ascending: false })
-    .limit(100);
+      .limit(100),
+    supabase
+      .from("orders")
+      .select("email,subtotal")
+      .not("email", "is", null)
+      .limit(500)
+  ]);
 
   if (isMissingTable(error, "customer_profiles")) return [];
   if (error) throw error;
+  if (ordersError) throw ordersError;
 
   const totalsByEmail = new Map<string, { orderCount: number; totalSpent: number }>();
-  for (const order of orders) {
+  for (const order of (ordersData ?? []) as Array<{ email: string | null; subtotal: string | number }>) {
     const email = order.email?.toLowerCase();
     if (!email) continue;
     const current = totalsByEmail.get(email) ?? { orderCount: 0, totalSpent: 0 };

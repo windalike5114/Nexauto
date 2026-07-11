@@ -18,11 +18,21 @@ import {
 import { formatMoney } from "@/lib/catalog";
 import {
   checkAdminAccess,
-  loadAdminDashboardData,
+  loadAdminContentData,
+  loadAdminCustomersData,
+  loadAdminEmailEventsData,
+  loadAdminEnquiriesData,
+  loadAdminOrdersData,
+  loadAdminOverviewData,
+  loadAdminProductsData,
   type AdminCustomer,
   type AdminEmailEvent,
   type AdminEnquiry,
-  type AdminOrder
+  type AdminOrder,
+  type AdminProduct,
+  type AdminRearAddon,
+  type AdminVariant,
+  type AdminWiperSet
 } from "@/lib/queries/admin";
 import {
   updateFulfillmentAction,
@@ -85,7 +95,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
     return <AdminGate reason={access.reason} email={access.email} />;
   }
 
-  const { orders, products, variants, wiperSets, rearAddons, emailEvents, customers, enquiries } = await loadAdminDashboardData();
+  const tabData = await loadAdminTabData(activeTab);
 
   return (
     <main className="min-h-screen bg-[#F6F7F9] text-ink">
@@ -96,28 +106,71 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
 
           {activeTab === "overview" ? (
             <OverviewPanel
-              orders={orders}
-              variants={variants}
-              emailEvents={emailEvents}
-              customers={customers}
-              enquiries={enquiries}
+              orders={tabData.orders}
+              variants={tabData.variants}
+              emailEvents={tabData.emailEvents}
+              customers={tabData.customers}
+              enquiries={tabData.enquiries}
             />
           ) : null}
-          {activeTab === "orders" ? <OrdersPanel orders={orders} /> : null}
-          {activeTab === "fulfillment" ? <FulfillmentPanel orders={orders} /> : null}
+          {activeTab === "orders" ? <OrdersPanel orders={tabData.orders} /> : null}
+          {activeTab === "fulfillment" ? <FulfillmentPanel orders={tabData.orders} /> : null}
           {activeTab === "products" ? (
-            <ProductsPanel variants={variants} wiperSets={wiperSets} rearAddons={rearAddons} />
+            <ProductsPanel variants={tabData.variants} wiperSets={tabData.wiperSets} rearAddons={tabData.rearAddons} />
           ) : null}
           {activeTab === "fitment" ? <PlaceholderPanel title="Vehicle fitment" text="Fitment review tools are reserved for the next admin phase. Current fitment lookup remains database-driven on the storefront." /> : null}
-          {activeTab === "customers" ? <CustomersPanel customers={customers} /> : null}
-          {activeTab === "enquiries" ? <EnquiriesPanel enquiries={enquiries} /> : null}
-          {activeTab === "content" ? <ContentPanel products={products} /> : null}
-          {activeTab === "emails" ? <EmailHistoryPanel emailEvents={emailEvents} /> : null}
+          {activeTab === "customers" ? <CustomersPanel customers={tabData.customers} /> : null}
+          {activeTab === "enquiries" ? <EnquiriesPanel enquiries={tabData.enquiries} /> : null}
+          {activeTab === "content" ? <ContentPanel products={tabData.products} /> : null}
+          {activeTab === "emails" ? <EmailHistoryPanel emailEvents={tabData.emailEvents} /> : null}
           {activeTab === "settings" ? <SettingsPanel /> : null}
         </section>
       </div>
     </main>
   );
+}
+
+async function loadAdminTabData(activeTab: string) {
+  const empty = {
+    orders: [] as AdminOrder[],
+    products: [] as AdminProduct[],
+    variants: [] as AdminVariant[],
+    wiperSets: [] as AdminWiperSet[],
+    rearAddons: [] as AdminRearAddon[],
+    emailEvents: [] as AdminEmailEvent[],
+    customers: [] as AdminCustomer[],
+    enquiries: [] as AdminEnquiry[]
+  };
+
+  if (activeTab === "overview") {
+    return { ...empty, ...(await loadAdminOverviewData()) };
+  }
+
+  if (activeTab === "orders" || activeTab === "fulfillment") {
+    return { ...empty, orders: await loadAdminOrdersData() };
+  }
+
+  if (activeTab === "products") {
+    return { ...empty, ...(await loadAdminProductsData()) };
+  }
+
+  if (activeTab === "content") {
+    return { ...empty, products: await loadAdminContentData() };
+  }
+
+  if (activeTab === "customers") {
+    return { ...empty, customers: await loadAdminCustomersData() };
+  }
+
+  if (activeTab === "enquiries") {
+    return { ...empty, enquiries: await loadAdminEnquiriesData() };
+  }
+
+  if (activeTab === "emails") {
+    return { ...empty, emailEvents: await loadAdminEmailEventsData() };
+  }
+
+  return empty;
 }
 
 function AdminSidebar({ activeTab }: { activeTab: string }) {
@@ -190,7 +243,7 @@ function OverviewPanel({
   enquiries
 }: {
   orders: AdminOrder[];
-  variants: Awaited<ReturnType<typeof loadAdminDashboardData>>["variants"];
+  variants: AdminVariant[];
   emailEvents: AdminEmailEvent[];
   customers: AdminCustomer[];
   enquiries: AdminEnquiry[];
@@ -400,9 +453,9 @@ function ProductsPanel({
   wiperSets,
   rearAddons
 }: {
-  variants: Awaited<ReturnType<typeof loadAdminDashboardData>>["variants"];
-  wiperSets: Awaited<ReturnType<typeof loadAdminDashboardData>>["wiperSets"];
-  rearAddons: Awaited<ReturnType<typeof loadAdminDashboardData>>["rearAddons"];
+  variants: AdminVariant[];
+  wiperSets: AdminWiperSet[];
+  rearAddons: AdminRearAddon[];
 }) {
   return (
     <section className="mt-8 grid gap-6">
@@ -468,7 +521,7 @@ function ProductsPanel({
   );
 }
 
-function ContentPanel({ products }: { products: Awaited<ReturnType<typeof loadAdminDashboardData>>["products"] }) {
+function ContentPanel({ products }: { products: AdminProduct[] }) {
   return (
     <section className="mt-8 grid gap-4">
       <div className="rounded-lg border border-black/10 bg-white p-5 shadow-sm">
