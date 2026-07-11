@@ -1,5 +1,6 @@
 import { Clock, Mail, MapPin, Phone } from "lucide-react";
 import type { Metadata } from "next";
+import { ContactForm } from "@/components/forms/contact-form";
 
 export const metadata: Metadata = {
   title: "Contact Us",
@@ -23,18 +24,7 @@ export default function ContactPage() {
         </div>
       </section>
 
-      <section className="rounded-lg border border-black/10 bg-white p-6 shadow-panel">
-        <h2 className="text-xl font-black">Message us</h2>
-        <form className="mt-5 space-y-4">
-          <input className="h-12 w-full rounded border border-black/10 px-3 outline-none focus:border-ink" placeholder="Name" />
-          <input className="h-12 w-full rounded border border-black/10 px-3 outline-none focus:border-ink" placeholder="Email" />
-          <input className="h-12 w-full rounded border border-black/10 px-3 outline-none focus:border-ink" placeholder="Part or SKU" />
-          <textarea className="min-h-36 w-full rounded border border-black/10 p-3 outline-none focus:border-ink" placeholder="How can we help?" />
-          <button type="button" className="h-12 w-full rounded bg-signal px-5 font-black text-white hover:bg-red-700">
-            Send enquiry
-          </button>
-        </form>
-      </section>
+      <ContactForm sourcePage="Contact page" />
     </main>
   );
 }

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createSupabaseAdminClient } from "@/lib/supabase";
 import { getOrCreateCustomerProfileByEmail, saveCustomerVehicleByEmail } from "@/lib/queries/account";
+import { sendOrderConfirmationEmail } from "@/lib/email/templates/order-confirmation";
 
 type CheckoutMetadataItem = {
   p?: string;
@@ -198,6 +199,40 @@ export async function POST(request: Request) {
 
     if (fulfillmentError) {
       return NextResponse.json({ error: fulfillmentError.message }, { status: 500 });
+    }
+  }
+
+  if (email) {
+    try {
+      await sendOrderConfirmationEmail({
+        orderId: order.id as string,
+        email,
+        customerName,
+        createdAt: new Date().toISOString(),
+        currency: session.currency ?? "nzd",
+        subtotal,
+        total: session.amount_total ? session.amount_total / 100 : subtotal,
+        status: "paid",
+        shippingAddress: (session.shipping_details?.address ?? {}) as Record<string, unknown>,
+        billingAddress: (session.customer_details?.address ?? {}) as Record<string, unknown>,
+        items: orderItems.map((item) => ({
+          sku: item.sku,
+          productName: item.product_name,
+          qty: item.qty,
+          unitPrice: item.unit_price,
+          lineTotal: item.line_total,
+          attributes: item.attributes
+        })),
+        vehicle: vehicleContext
+          ? {
+              make: vehicleContext.make,
+              model: vehicleContext.model,
+              year: vehicleContext.year
+            }
+          : null
+      });
+    } catch (error) {
+      console.error("Order confirmation email failed", error);
     }
   }
 

@@ -27,7 +27,7 @@ import { formatMoney } from "@/lib/catalog";
 import { WiperFitmentFinder } from "@/components/wiper-fitment-finder";
 import { createClient } from "@/utils/supabase/client";
 
-type Mode = "sign-in" | "sign-up";
+type Mode = "sign-in" | "sign-up" | "reset-password";
 
 type AccountResponse = {
   user: {
@@ -144,9 +144,11 @@ export function AccountAuth() {
 
     const supabase = createClient();
     const action =
-      mode === "sign-in"
-        ? supabase.auth.signInWithPassword({ email, password })
-        : supabase.auth.signUp({ email, password });
+      mode === "reset-password"
+        ? supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/account` })
+        : mode === "sign-in"
+          ? supabase.auth.signInWithPassword({ email, password })
+          : supabase.auth.signUp({ email, password });
     const { error } = await action;
 
     setLoading(false);
@@ -156,7 +158,13 @@ export function AccountAuth() {
       return;
     }
 
-    setMessage(mode === "sign-in" ? "Signed in successfully." : "Account created. Check email if confirmation is enabled.");
+    setMessage(
+      mode === "reset-password"
+        ? "Password reset email sent. Check your inbox for the secure link."
+        : mode === "sign-in"
+          ? "Signed in successfully."
+          : "Account created. Check email if confirmation is enabled."
+    );
     await loadAccount();
   }
 
@@ -419,11 +427,25 @@ function AuthCard({
 
       <form onSubmit={submit} className="mt-6 space-y-4">
         <TextInput id="email" label="Email" type="email" value={email} onChange={setEmail} required />
-        <TextInput id="password" label="Password" type="password" value={password} onChange={setPassword} required minLength={6} />
+        {mode !== "reset-password" ? (
+          <TextInput id="password" label="Password" type="password" value={password} onChange={setPassword} required minLength={6} />
+        ) : null}
         <button type="submit" disabled={loading} className="h-12 w-full rounded bg-signal px-5 font-black text-white hover:bg-red-700 disabled:bg-zinc-300">
-          {loading ? "Working..." : mode === "sign-in" ? "Sign in" : "Create account"}
+          {loading ? "Working..." : mode === "reset-password" ? "Send reset link" : mode === "sign-in" ? "Sign in" : "Create account"}
         </button>
       </form>
+
+      <div className="mt-4 flex justify-center">
+        {mode === "reset-password" ? (
+          <button type="button" onClick={() => setMode("sign-in")} className="text-sm font-black text-steel hover:text-ink">
+            Back to sign in
+          </button>
+        ) : (
+          <button type="button" onClick={() => setMode("reset-password")} className="text-sm font-black text-steel hover:text-ink">
+            Forgot password?
+          </button>
+        )}
+      </div>
 
       {message ? <p className="mt-4 rounded bg-zinc-50 p-3 text-sm font-bold text-steel">{message}</p> : null}
     </div>

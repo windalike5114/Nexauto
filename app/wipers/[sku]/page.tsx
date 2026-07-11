@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { CarFront, CheckCircle2, CircleHelp, CreditCard, LifeBuoy, Truck } from "lucide-react";
 import { WiperSetPurchase } from "@/components/wiper-set-purchase";
 import { WiperProductGallery } from "@/components/wiper-product-gallery";
+import { ContactForm } from "@/components/forms/contact-form";
 import { formatMoney } from "@/lib/catalog";
 import { blobMediaAssets } from "@/lib/blob-media-assets";
 import { getWiperRearAddonById, getWiperSetBySku } from "@/lib/queries/wiper-commerce";
@@ -245,6 +246,17 @@ export default async function WiperSkuPage({
           <InfoTile title="Shipping" text="Fast nationwide dispatch from New Zealand. Shipping options are shown at checkout." />
           <InfoTile title="Returns" text="Contact us before installation if you believe the product is not suitable for your vehicle." />
           <InfoTile title="Related products" text="Browse all front wiper blade pair combinations in the parts catalog." href="/shop" />
+        </div>
+      </section>
+
+      <section className="border-t border-black/10 bg-[#F8FAFC]">
+        <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
+          <ContactForm
+            sourcePage="Wiper product page"
+            productName={title}
+            productSku={wiperSet.sku}
+            defaultPartOrSku={wiperSet.sku}
+          />
         </div>
       </section>
     </main>

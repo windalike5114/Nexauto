@@ -93,6 +93,20 @@ export type AdminRearAddon = {
   active: boolean;
 };
 
+export type AdminEmailEvent = {
+  id: string;
+  type: string;
+  recipient: string;
+  subject: string | null;
+  status: string;
+  errorCode: string | null;
+  resendEmailId: string | null;
+  orderId: string | null;
+  createdAt: string;
+  sentAt: string | null;
+  updatedAt: string;
+};
+
 type OrderRow = {
   id: string;
   email: string | null;
@@ -178,6 +192,20 @@ type RearAddonRow = {
   active: boolean;
 };
 
+type EmailEventRow = {
+  id: string;
+  type: string;
+  recipient: string;
+  subject: string | null;
+  status: string;
+  error_code: string | null;
+  resend_email_id: string | null;
+  order_id: string | null;
+  created_at: string;
+  sent_at: string | null;
+  updated_at: string;
+};
+
 export async function checkAdminAccess(): Promise<AdminCheck> {
   const allowedEmails = getAllowedAdminEmails();
 
@@ -222,14 +250,15 @@ export async function loadAdminDashboardData() {
 
   const orders = (ordersData ?? []) as OrderRow[];
   const orderIds = orders.map((order) => order.id);
-  const [items, vehicles, fulfillments, products, variants, wiperSets, rearAddons] = await Promise.all([
+  const [items, vehicles, fulfillments, products, variants, wiperSets, rearAddons, emailEvents] = await Promise.all([
     listOrderItems(orderIds),
     listOrderVehicles(orderIds),
     listFulfillments(orderIds),
     listAdminProducts(),
     listAdminVariants(),
     listAdminWiperSets(),
-    listAdminRearAddons()
+    listAdminRearAddons(),
+    listAdminEmailEvents()
   ]);
 
   const itemsByOrder = groupBy(items, (item) => item.orderId);
@@ -254,7 +283,8 @@ export async function loadAdminDashboardData() {
     products,
     variants,
     wiperSets,
-    rearAddons
+    rearAddons,
+    emailEvents
   };
 }
 
@@ -414,6 +444,32 @@ async function listAdminRearAddons() {
   }));
 }
 
+async function listAdminEmailEvents() {
+  const supabase = getAdminOrThrow();
+  const { data, error } = await supabase
+    .from("email_events")
+    .select("id,type,recipient,subject,status,error_code,resend_email_id,order_id,created_at,sent_at,updated_at")
+    .order("created_at", { ascending: false })
+    .limit(100);
+
+  if (isMissingEmailEventsTable(error)) return [];
+  if (error) throw error;
+
+  return ((data ?? []) as EmailEventRow[]).map((row): AdminEmailEvent => ({
+    id: row.id,
+    type: row.type,
+    recipient: row.recipient,
+    subject: row.subject,
+    status: row.status,
+    errorCode: row.error_code,
+    resendEmailId: row.resend_email_id,
+    orderId: row.order_id,
+    createdAt: row.created_at,
+    sentAt: row.sent_at,
+    updatedAt: row.updated_at
+  }));
+}
+
 function getAllowedAdminEmails() {
   return (process.env.ADMIN_EMAILS ?? "")
     .split(",")
@@ -448,6 +504,11 @@ function getProductName(value: unknown) {
 function isMissingOptionalProductContentColumn(error: { code?: string; message?: string } | null) {
   if (!error) return false;
   return error.code === "42703" && (error.message?.includes("detail_sections") || error.message?.includes("video_url"));
+}
+
+function isMissingEmailEventsTable(error: { code?: string; message?: string } | null) {
+  if (!error) return false;
+  return error.code === "42P01" || error.message?.includes("email_events");
 }
 
 function toNullableNumber(value: string | number | null) {

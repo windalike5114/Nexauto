@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { Boxes, ClipboardList, FileText, PackageCheck, PackagePlus, ShieldAlert, Wrench } from "lucide-react";
+import { ClipboardList, FileText, Mail, PackagePlus, ShieldAlert, Wrench } from "lucide-react";
 import { formatMoney } from "@/lib/catalog";
-import { checkAdminAccess, loadAdminDashboardData, type AdminOrder } from "@/lib/queries/admin";
+import { checkAdminAccess, loadAdminDashboardData, type AdminEmailEvent, type AdminOrder } from "@/lib/queries/admin";
 import {
   updateFulfillmentAction,
   updateProductContentAction,
@@ -20,7 +20,8 @@ const tabs = [
   { id: "orders", label: "Orders" },
   { id: "fulfillment", label: "Wiper fulfillment" },
   { id: "products", label: "Products" },
-  { id: "content", label: "Content" }
+  { id: "content", label: "Content" },
+  { id: "emails", label: "Email history" }
 ];
 
 export default async function AdminPage({ searchParams }: { searchParams: Promise<AdminSearchParams> }) {
@@ -32,9 +33,10 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
     return <AdminGate reason={access.reason} email={access.email} />;
   }
 
-  const { orders, products, variants, wiperSets, rearAddons } = await loadAdminDashboardData();
+  const { orders, products, variants, wiperSets, rearAddons, emailEvents } = await loadAdminDashboardData();
   const pendingFulfillment = orders.filter((order) => order.fulfillment?.connectorStatus === "pending").length;
   const paidOrders = orders.filter((order) => order.status === "paid").length;
+  const failedEmails = emailEvents.filter((event) => ["failed", "bounced", "complained"].includes(event.status)).length;
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
@@ -63,7 +65,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
         <Metric icon={<ClipboardList className="h-5 w-5" />} label="Paid orders" value={String(paidOrders)} />
         <Metric icon={<Wrench className="h-5 w-5" />} label="Pending connectors" value={String(pendingFulfillment)} />
         <Metric icon={<PackagePlus className="h-5 w-5" />} label="Products" value={String(products.length)} />
-        <Metric icon={<Boxes className="h-5 w-5" />} label="Wiper pair SKUs" value={String(wiperSets.length)} />
+        <Metric icon={<Mail className="h-5 w-5" />} label="Email issues" value={String(failedEmails)} />
       </section>
 
       {activeTab === "orders" ? <OrdersPanel orders={orders} /> : null}
@@ -72,6 +74,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
         <ProductsPanel variants={variants} wiperSets={wiperSets} rearAddons={rearAddons} />
       ) : null}
       {activeTab === "content" ? <ContentPanel products={products} /> : null}
+      {activeTab === "emails" ? <EmailHistoryPanel emailEvents={emailEvents} /> : null}
     </main>
   );
 }
@@ -331,6 +334,51 @@ function ContentPanel({ products }: { products: Awaited<ReturnType<typeof loadAd
           <button type="submit" className="mt-4 h-11 rounded bg-ink px-5 text-sm font-black text-white">Save content</button>
         </form>
       ))}
+    </section>
+  );
+}
+
+function EmailHistoryPanel({ emailEvents }: { emailEvents: AdminEmailEvent[] }) {
+  return (
+    <section className="mt-8 rounded-lg border border-black/10 bg-white p-5 shadow-sm">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h2 className="text-xl font-black">Email history</h2>
+          <p className="mt-2 text-sm font-bold leading-6 text-steel">
+            Transactional email log for contact enquiries, order confirmations, and Resend delivery events.
+          </p>
+        </div>
+        <Badge>{emailEvents.length} recent</Badge>
+      </div>
+
+      <div className="mt-5 overflow-hidden rounded border border-black/10">
+        <div className="hidden grid-cols-[150px_1fr_170px_110px_130px] gap-3 border-b border-black/10 bg-zinc-50 px-4 py-3 text-xs font-black uppercase tracking-[0.14em] text-steel lg:grid">
+          <span>Type</span>
+          <span>Subject</span>
+          <span>Recipient</span>
+          <span>Status</span>
+          <span>Created</span>
+        </div>
+        <div className="divide-y divide-black/10">
+          {emailEvents.map((event) => (
+            <article key={event.id} className="grid gap-3 px-4 py-4 text-sm lg:grid-cols-[150px_1fr_170px_110px_130px] lg:items-start">
+              <div>
+                <p className="font-black">{event.type.replaceAll("_", " ")}</p>
+                {event.orderId ? <p className="mt-1 font-mono text-xs font-bold text-steel">{event.orderId.slice(0, 8)}</p> : null}
+              </div>
+              <div>
+                <p className="font-bold">{event.subject ?? "No subject"}</p>
+                {event.errorCode ? <p className="mt-1 text-xs font-bold text-signal">{event.errorCode}</p> : null}
+                {event.resendEmailId ? <p className="mt-1 font-mono text-xs text-steel">{event.resendEmailId}</p> : null}
+              </div>
+              <p className="break-all font-bold text-steel">{event.recipient}</p>
+              <Badge>{event.status}</Badge>
+              <p className="font-bold text-steel">{new Date(event.createdAt).toLocaleDateString("en-NZ")}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+      {emailEvents.length === 0 ? <EmptyState text="No email events yet. Run the email_events SQL migration before expecting live records." /> : null}
     </section>
   );
 }

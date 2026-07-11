@@ -299,6 +299,24 @@ create table if not exists order_wiper_fulfillment (
   )
 );
 
+create table if not exists email_events (
+  id uuid primary key default gen_random_uuid(),
+  type text not null,
+  recipient text not null,
+  subject text,
+  customer_id uuid references customer_profiles(id) on delete set null,
+  order_id uuid references orders(id) on delete set null,
+  resend_email_id text,
+  status text not null default 'queued',
+  error_code text,
+  created_at timestamptz not null default now(),
+  sent_at timestamptz,
+  updated_at timestamptz not null default now(),
+  constraint email_events_status_check check (
+    status in ('queued', 'sent', 'delivered', 'delayed', 'failed', 'bounced', 'complained')
+  )
+);
+
 create index if not exists fitment_import_rows_batch_status_idx
   on fitment_import_rows(batch_id, parse_status);
 create index if not exists vehicle_applications_lookup_idx
@@ -323,6 +341,14 @@ create index if not exists order_wiper_fulfillment_order_idx
   on order_wiper_fulfillment(order_id);
 create index if not exists order_wiper_fulfillment_status_idx
   on order_wiper_fulfillment(connector_status, created_at desc);
+create index if not exists email_events_recipient_idx
+  on email_events(recipient);
+create index if not exists email_events_order_idx
+  on email_events(order_id);
+create index if not exists email_events_status_idx
+  on email_events(status, created_at desc);
+create index if not exists email_events_resend_idx
+  on email_events(resend_email_id);
 
 alter table categories enable row level security;
 alter table products enable row level security;
@@ -346,6 +372,7 @@ alter table wiper_sets enable row level security;
 alter table wiper_rear_addons enable row level security;
 alter table order_vehicle_snapshots enable row level security;
 alter table order_wiper_fulfillment enable row level security;
+alter table email_events enable row level security;
 
 drop policy if exists "Public can read vehicle makes" on vehicle_makes;
 create policy "Public can read vehicle makes"
