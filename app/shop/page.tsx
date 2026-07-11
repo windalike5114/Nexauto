@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, SlidersHorizontal } from "lucide-react";
+import { CheckCircle2, SlidersHorizontal } from "lucide-react";
 import { WiperFitmentFinder } from "@/components/wiper-fitment-finder";
 import { formatMoney } from "@/lib/catalog";
 import { wiperPairPricing } from "@/lib/pricing";
@@ -129,6 +129,12 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
             </p>
           </div>
 
+          <div className="mb-5 grid gap-2 rounded-lg border border-black/10 bg-[#F8FAFC] p-3 text-sm font-black text-ink shadow-sm sm:grid-cols-3">
+            <ServicePill label="Free NZ Shipping" />
+            <ServicePill label="12-Month Warranty" />
+            <ServicePill label="Ships from Auckland" />
+          </div>
+
           <div className="mb-5 flex flex-col gap-3 rounded-lg border border-black/10 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
             <div className="flex flex-wrap gap-2">
               <ControlLink href={buildShopHref(params, { sort: "length-asc", page: undefined })} active={(params.sort ?? "length-asc") === "length-asc"} label="Size: Small to Large" />
@@ -140,7 +146,7 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
           </div>
 
           {visibleWiperSets.length > 0 ? (
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
               {visibleWiperSets.map((wiperSet) => (
                 <WiperSetCard key={wiperSet.id} wiperSet={wiperSet} />
               ))}
@@ -206,58 +212,58 @@ function WiperSetCard({ wiperSet }: { wiperSet: WiperSet }) {
   const image = getWiperSetPreviewImage(wiperSet);
 
   return (
-    <article className="overflow-hidden rounded-lg border border-black/10 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-panel">
-      <div className="relative aspect-[4/3] bg-zinc-50">
+    <article className="overflow-hidden rounded-[14px] border border-black/10 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-panel">
+      <div className="relative aspect-[1/0.82] bg-zinc-50">
+        <span className="absolute left-3 top-3 z-10 rounded bg-signal px-2 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-white">
+          Sale
+        </span>
         <Image
           src={image}
           alt={`${wiperSet.name} preview`}
           fill
-          className="object-contain p-5"
-          sizes="(min-width: 1280px) 25vw, (min-width: 768px) 50vw, 100vw"
+          className="object-contain p-4"
+          sizes="(min-width: 1280px) 20vw, (min-width: 768px) 33vw, 50vw"
         />
       </div>
-      <div className="p-5">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h2 className="text-xl font-black">Front Wiper Blade Pair</h2>
-            <p className="mt-2 text-sm font-bold leading-6 text-steel">Smooth and quiet everyday wiping performance.</p>
-          </div>
-          <div className="shrink-0 text-right">
-            <p className="text-xs font-black uppercase tracking-[0.14em] text-signal">Sale</p>
-            <p className="text-xs font-bold text-steel line-through">{formatMoney(wiperSet.compareAtPrice ?? wiperPairPricing.compareAtPrice)}</p>
-            <p className="text-lg font-black">{formatMoney(wiperSet.price)}</p>
-          </div>
+      <div className="space-y-3 p-3 sm:p-4">
+        <div>
+          <h2 className="text-sm font-black leading-snug text-ink sm:text-base">
+            <span className="hidden sm:inline">Front Wiper Blade Pair</span>
+            <span className="sm:hidden">Front Wiper Pair</span>
+          </h2>
+          <p className="mt-2 text-sm font-black leading-5 text-steel sm:text-[15px]">
+            <span className="hidden sm:inline">
+              Driver {wiperSet.driverLengthIn}" + Passenger {wiperSet.passengerLengthIn}"
+            </span>
+            <span className="sm:hidden">
+              {wiperSet.driverLengthIn}" + {wiperSet.passengerLengthIn}"
+            </span>
+          </p>
         </div>
 
-        <div className="mt-5 grid grid-cols-[1fr_auto_1fr] items-center gap-3 rounded-lg bg-[#F8FAFC] p-4 text-center">
-          <LengthDisplay label="Driver Side" value={wiperSet.driverLengthIn} />
-          <span className="text-2xl font-black text-signal">+</span>
-          <LengthDisplay label="Passenger Side" value={wiperSet.passengerLengthIn} />
+        <div className="flex flex-wrap items-baseline gap-2">
+          <span className="text-lg font-black text-ink">{formatMoney(wiperSet.price)}</span>
+          <span className="text-xs font-bold text-steel line-through">{formatMoney(wiperSet.compareAtPrice ?? wiperPairPricing.compareAtPrice)}</span>
         </div>
 
-        <div className="mt-4 grid gap-2 text-xs font-black text-steel">
-          <span><span className="line-through">NZ$8 Shipping</span> waived during promo</span>
-          <span>12-Month Warranty</span>
-          <span>Ships from Auckland</span>
-        </div>
+        <p className="hidden text-xs font-black text-steel sm:block">Free NZ Shipping</p>
+
         <Link
           href={`/wipers/${wiperSet.sku}` as never}
-          className="mt-5 inline-flex h-11 w-full items-center justify-center gap-2 rounded bg-ink px-4 text-sm font-black text-white hover:bg-black"
+          className="inline-flex h-[42px] w-full items-center justify-center rounded bg-ink px-3 text-sm font-black text-white hover:bg-black"
         >
           View Details
-          <ArrowRight className="h-4 w-4" />
         </Link>
-        <p className="mt-3 text-center font-mono text-xs font-bold text-steel/70">SKU: {wiperSet.sku}</p>
       </div>
     </article>
   );
 }
 
-function LengthDisplay({ label, value }: { label: string; value: number }) {
+function ServicePill({ label }: { label: string }) {
   return (
-    <div>
-      <p className="text-3xl font-black leading-none text-ink">{value}"</p>
-      <p className="mt-2 text-xs font-black uppercase tracking-[0.12em] text-steel">{label}</p>
+    <div className="flex items-center gap-2 rounded bg-white px-3 py-2">
+      <CheckCircle2 className="h-4 w-4 text-signal" />
+      <span>{label}</span>
     </div>
   );
 }
