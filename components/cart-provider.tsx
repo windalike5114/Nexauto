@@ -4,8 +4,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { CheckCircle2, Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react";
+import { WiperFitmentFinder } from "@/components/wiper-fitment-finder";
 import { formatAttributeName, formatMoney } from "@/lib/catalog";
-import { calculateCartPricing } from "@/lib/pricing";
+import { calculateCartPricing, calculateOrderTotals } from "@/lib/pricing";
 import type { CartItem } from "@/lib/types";
 
 type CartContextValue = {
@@ -14,6 +15,15 @@ type CartContextValue = {
   productsSubtotal: number;
   bundleDiscount: number;
   subtotal: number;
+  couponCode: string;
+  couponDiscount: number;
+  couponLabel: string;
+  couponError: string;
+  couponDraft: string;
+  validatingCoupon: boolean;
+  setCouponDraft: (value: string) => void;
+  applyCoupon: () => Promise<void>;
+  clearCoupon: () => void;
   isDrawerOpen: boolean;
   openDrawer: () => void;
   closeDrawer: () => void;
@@ -30,6 +40,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [recentlyAdded, setRecentlyAdded] = useState<CartItem | null>(null);
+  const [couponDraft, setCouponDraft] = useState("");
+  const [couponCode, setCouponCode] = useState("");
+  const [couponDiscount, setCouponDiscount] = useState(0);
+  const [couponLabel, setCouponLabel] = useState("");
+  const [couponError, setCouponError] = useState("");
+  const [validatingCoupon, setValidatingCoupon] = useState(false);
 
   useEffect(() => {
     const saved = window.localStorage.getItem(storageKey);
@@ -52,6 +68,57 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       productsSubtotal: pricing.productsSubtotal,
       bundleDiscount: pricing.bundleDiscount,
       subtotal: pricing.subtotal,
+      couponCode,
+      couponDiscount,
+      couponLabel,
+      couponError,
+      couponDraft,
+      validatingCoupon,
+      setCouponDraft,
+      applyCoupon: async () => {
+        const nextCoupon = couponDraft.trim();
+        setCouponError("");
+
+        if (!nextCoupon) {
+          setCouponCode("");
+          setCouponDiscount(0);
+          setCouponLabel("");
+          return;
+        }
+
+        setValidatingCoupon(true);
+
+        try {
+          const response = await fetch("/api/coupons/validate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ code: nextCoupon, amount: pricing.subtotal })
+          });
+          const data = (await response.json()) as { code?: string; discount?: number; label?: string; error?: string };
+
+          if (!response.ok) {
+            throw new Error(data.error ?? "Coupon code is not valid.");
+          }
+
+          setCouponCode(data.code ?? nextCoupon);
+          setCouponDiscount(Number(data.discount ?? 0));
+          setCouponLabel(data.label ?? "Coupon applied");
+        } catch (error) {
+          setCouponCode("");
+          setCouponDiscount(0);
+          setCouponLabel("");
+          setCouponError(error instanceof Error ? error.message : "Coupon code is not valid.");
+        } finally {
+          setValidatingCoupon(false);
+        }
+      },
+      clearCoupon: () => {
+        setCouponCode("");
+        setCouponDiscount(0);
+        setCouponLabel("");
+        setCouponError("");
+        setCouponDraft("");
+      },
       isDrawerOpen,
       openDrawer: () => setIsDrawerOpen(true),
       closeDrawer: () => setIsDrawerOpen(false),
@@ -79,7 +146,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       },
       clearCart: () => setItems([])
     };
-  }, [isDrawerOpen, items]);
+  }, [couponCode, couponDiscount, couponDraft, couponError, couponLabel, isDrawerOpen, items, validatingCoupon]);
 
   return (
     <CartContext.Provider value={value}>
@@ -98,13 +165,34 @@ export function useCart() {
 }
 
 function CartDrawer({ recentlyAdded }: { recentlyAdded: CartItem | null }) {
-  const { items, isDrawerOpen, closeDrawer, updateQty, removeItem, productsSubtotal, bundleDiscount, subtotal } = useCart();
+  const {
+    items,
+    isDrawerOpen,
+    closeDrawer,
+    updateQty,
+    removeItem,
+    couponCode,
+    couponDiscount,
+    couponLabel,
+    couponError,
+    couponDraft,
+    validatingCoupon,
+    setCouponDraft,
+    applyCoupon,
+    clearCoupon
+  } = useCart();
   const drawerRef = useRef<HTMLDivElement | null>(null);
   const [checkingOut, setCheckingOut] = useState(false);
   const pricing = calculateCartPricing(items);
+  const totals = calculateOrderTotals(pricing, couponDiscount);
 
   async function checkout() {
     if (!items.length || checkingOut) return;
+
+    if (couponDraft.trim() && !couponCode) {
+      await applyCoupon();
+      return;
+    }
 
     setCheckingOut(true);
 
@@ -112,7 +200,7 @@ function CartDrawer({ recentlyAdded }: { recentlyAdded: CartItem | null }) {
       const response = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items })
+        body: JSON.stringify({ items, couponCode: couponCode || undefined })
       });
       const data = (await response.json()) as { url?: string; error?: string };
 
@@ -248,14 +336,35 @@ function CartDrawer({ recentlyAdded }: { recentlyAdded: CartItem | null }) {
               <p className="mt-3 font-bold text-steel">Your cart is empty.</p>
             </div>
           )}
+
+          <section className="mt-4 rounded-lg border border-black/10 bg-[#F8FAFC] p-4">
+            <p className="text-xs font-black uppercase tracking-[0.14em] text-signal">Wiper fitment</p>
+            <h3 className="mt-1 text-lg font-black text-ink">Find wipers for another vehicle</h3>
+            <div className="mt-3">
+              <WiperFitmentFinder
+                compact
+                directToProduct
+                title="Find another front pair"
+                description="Select another vehicle and add its matched wipers without losing this cart."
+                directButtonLabel="Find Wipers"
+              />
+            </div>
+          </section>
         </div>
 
         <div className="border-t border-black/10 p-5">
-          <div className="space-y-2 text-sm font-bold text-steel">
-            <SummaryRow label="Products subtotal" value={formatMoney(productsSubtotal)} />
-            {bundleDiscount > 0 ? <SummaryRow label={pricing.bundleLabel || "Bundle discount"} value={`-${formatMoney(bundleDiscount)}`} highlight /> : null}
-            <SummaryRow label="Subtotal" value={formatMoney(subtotal)} strong />
-          </div>
+          <CouponBox
+            couponCode={couponCode}
+            couponDiscount={couponDiscount}
+            couponLabel={couponLabel}
+            couponError={couponError}
+            couponDraft={couponDraft}
+            validatingCoupon={validatingCoupon}
+            setCouponDraft={setCouponDraft}
+            applyCoupon={applyCoupon}
+            clearCoupon={clearCoupon}
+          />
+          <OrderSummaryRows totals={totals} />
           <div className="mt-4 grid gap-2">
             <button type="button" onClick={closeDrawer} className="h-11 rounded border border-black/10 text-sm font-black text-ink hover:border-ink">
               Continue Shopping
@@ -316,6 +425,77 @@ function SummaryRow({ label, value, highlight = false, strong = false }: { label
     <div className={`flex justify-between gap-3 ${highlight ? "text-signal" : ""} ${strong ? "pt-2 text-lg font-black text-ink" : ""}`}>
       <span>{label}</span>
       <span>{value}</span>
+    </div>
+  );
+}
+
+function CouponBox({
+  couponCode,
+  couponDiscount,
+  couponLabel,
+  couponError,
+  couponDraft,
+  validatingCoupon,
+  setCouponDraft,
+  applyCoupon,
+  clearCoupon
+}: {
+  couponCode: string;
+  couponDiscount: number;
+  couponLabel: string;
+  couponError: string;
+  couponDraft: string;
+  validatingCoupon: boolean;
+  setCouponDraft: (value: string) => void;
+  applyCoupon: () => Promise<void>;
+  clearCoupon: () => void;
+}) {
+  return (
+    <div className="mb-4 rounded-lg border border-black/10 bg-zinc-50 p-3">
+      <label htmlFor="drawer-coupon" className="text-xs font-black uppercase tracking-[0.14em] text-steel">
+        Coupon code
+      </label>
+      <div className="mt-2 flex gap-2">
+        <input
+          id="drawer-coupon"
+          value={couponDraft}
+          onChange={(event) => setCouponDraft(event.target.value)}
+          placeholder="Enter code"
+          className="h-10 min-w-0 flex-1 rounded border border-black/10 bg-white px-3 text-sm font-bold text-ink outline-none focus:border-ink"
+        />
+        <button
+          type="button"
+          onClick={applyCoupon}
+          disabled={validatingCoupon}
+          className="h-10 rounded bg-ink px-3 text-xs font-black text-white hover:bg-black disabled:bg-zinc-300"
+        >
+          {validatingCoupon ? "Checking" : "Apply"}
+        </button>
+      </div>
+      {couponCode ? (
+        <div className="mt-3 flex items-center justify-between gap-3 rounded border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-800">
+          <span>
+            Applied: {couponCode} ({couponLabel}, {formatMoney(couponDiscount)})
+          </span>
+          <button type="button" onClick={clearCoupon} className="font-black uppercase tracking-[0.12em] text-emerald-900 hover:text-ink">
+            Remove
+          </button>
+        </div>
+      ) : null}
+      {couponError ? <p className="mt-2 text-xs font-bold text-signal">{couponError}</p> : null}
+    </div>
+  );
+}
+
+function OrderSummaryRows({ totals }: { totals: ReturnType<typeof calculateOrderTotals> }) {
+  return (
+    <div className="space-y-2 text-sm font-bold text-steel">
+      <SummaryRow label="Subtotal" value={formatMoney(totals.subtotal)} />
+      <SummaryRow label="Shipping" value="FREE" highlight />
+      <SummaryRow label="GST inc." value={formatMoney(totals.gstIncluded)} />
+      <SummaryRow label="Order total" value={formatMoney(totals.orderTotal)} />
+      {totals.discount > 0 ? <SummaryRow label="Discount" value={`-${formatMoney(totals.discount)}`} highlight /> : null}
+      <SummaryRow label="Grand total" value={`NZD ${formatMoney(totals.grandTotal)}`} strong />
     </div>
   );
 }

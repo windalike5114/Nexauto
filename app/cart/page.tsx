@@ -1,24 +1,41 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
 import { Trash2 } from "lucide-react";
 import { useCart } from "@/components/cart-provider";
+import { WiperFitmentFinder } from "@/components/wiper-fitment-finder";
 import { formatAttributeName, formatMoney } from "@/lib/catalog";
-import { calculateCartPricing } from "@/lib/pricing";
+import { calculateCartPricing, calculateOrderTotals } from "@/lib/pricing";
 
 export default function CartPage() {
-  const { items, updateQty, removeItem } = useCart();
-  const [couponDraft, setCouponDraft] = useState("");
-  const [appliedCoupon, setAppliedCoupon] = useState("");
+  const {
+    items,
+    updateQty,
+    removeItem,
+    couponCode,
+    couponDiscount,
+    couponLabel,
+    couponError,
+    couponDraft,
+    validatingCoupon,
+    setCouponDraft,
+    applyCoupon,
+    clearCoupon
+  } = useCart();
   const selectedVehicle = getSelectedVehicle(items);
   const pricing = calculateCartPricing(items);
+  const totals = calculateOrderTotals(pricing, couponDiscount);
 
   async function checkout() {
+    if (couponDraft.trim() && !couponCode) {
+      await applyCoupon();
+      return;
+    }
+
     const response = await fetch("/api/checkout", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ items, couponCode: appliedCoupon || undefined })
+      body: JSON.stringify({ items, couponCode: couponCode || undefined })
     });
     const data = (await response.json()) as { url?: string; error?: string };
     if (data.url) {
@@ -26,16 +43,6 @@ export default function CartPage() {
       return;
     }
     alert(data.error ?? "Checkout is not configured yet.");
-  }
-
-  function applyCoupon() {
-    const nextCoupon = couponDraft.trim();
-    if (!nextCoupon) {
-      setAppliedCoupon("");
-      return;
-    }
-
-    setAppliedCoupon(nextCoupon);
   }
 
   return (
@@ -108,6 +115,22 @@ export default function CartPage() {
               </article>
               );
             })}
+            <section className="rounded-lg border border-black/10 bg-[#F8FAFC] p-5 shadow-sm">
+              <p className="text-xs font-black uppercase tracking-[0.14em] text-signal">Wiper fitment</p>
+              <h2 className="mt-2 text-2xl font-black text-ink">Find wipers for another vehicle</h2>
+              <p className="mt-2 text-sm font-bold leading-6 text-steel">
+                Add another vehicle's matched front pair without losing the current cart.
+              </p>
+              <div className="mt-4">
+                <WiperFitmentFinder
+                  compact
+                  directToProduct
+                  title="Find another front pair"
+                  description="Select make, model, and year to continue shopping for another vehicle."
+                  directButtonLabel="Find Wipers"
+                />
+              </div>
+            </section>
           </div>
           <aside className="h-fit rounded-lg border border-black/10 bg-white p-5 shadow-panel">
             {pricing.bundleProgressMessage ? (
@@ -115,20 +138,6 @@ export default function CartPage() {
                 {pricing.bundleProgressMessage}
               </div>
             ) : null}
-            <div className="flex justify-between text-sm font-bold text-steel">
-              <span>Products subtotal</span>
-              <span>{formatMoney(pricing.productsSubtotal)}</span>
-            </div>
-            {pricing.bundleDiscount > 0 ? (
-              <div className="mt-2 flex justify-between text-sm font-black text-signal">
-                <span>{pricing.bundleLabel || "Bundle discount"}</span>
-                <span>-{formatMoney(pricing.bundleDiscount)}</span>
-              </div>
-            ) : null}
-            <div className="mt-3 flex justify-between border-t border-black/10 pt-3 text-lg font-black">
-              <span>Subtotal</span>
-              <span>{formatMoney(pricing.subtotal)}</span>
-            </div>
             <div className="mt-5 rounded-lg border border-black/10 bg-zinc-50 p-4">
               <label htmlFor="coupon" className="text-xs font-black uppercase tracking-[0.14em] text-steel">
                 Coupon code
@@ -144,32 +153,38 @@ export default function CartPage() {
                 <button
                   type="button"
                   onClick={applyCoupon}
-                  className="h-11 rounded bg-ink px-4 text-sm font-black text-white transition hover:-translate-y-0.5 hover:bg-black"
+                  disabled={validatingCoupon}
+                  className="h-11 rounded bg-ink px-4 text-sm font-black text-white transition hover:-translate-y-0.5 hover:bg-black disabled:bg-zinc-300"
                 >
-                  Apply
+                  {validatingCoupon ? "Checking" : "Apply"}
                 </button>
               </div>
-              {appliedCoupon ? (
+              {couponCode ? (
                 <div className="mt-3 flex items-center justify-between gap-3 rounded border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-bold text-emerald-800">
-                  <span>Applied: {appliedCoupon}</span>
+                  <span>
+                    Applied: {couponCode} ({couponLabel}, {formatMoney(couponDiscount)})
+                  </span>
                   <button
                     type="button"
-                    onClick={() => {
-                      setAppliedCoupon("");
-                      setCouponDraft("");
-                    }}
+                    onClick={clearCoupon}
                     className="text-xs font-black uppercase tracking-[0.12em] text-emerald-900 hover:text-ink"
                   >
                     Remove
                   </button>
                 </div>
               ) : null}
+              {couponError ? <p className="mt-3 text-xs font-bold text-signal">{couponError}</p> : null}
               <p className="mt-3 text-xs font-bold leading-5 text-steel">
-                Discounts are validated and calculated securely in Stripe Checkout.
+                Coupon codes are checked before checkout and revalidated securely at payment.
               </p>
             </div>
-            <div className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm font-black text-emerald-800">
-              Promo shipping: <span className="line-through">NZ$8</span> waived today
+            <div className="mt-5 space-y-2 text-sm font-bold text-steel">
+              <SummaryRow label="Subtotal" value={formatMoney(totals.subtotal)} />
+              <SummaryRow label="Shipping" value="FREE" highlight />
+              <SummaryRow label="GST inc." value={formatMoney(totals.gstIncluded)} />
+              <SummaryRow label="Order total" value={formatMoney(totals.orderTotal)} />
+              {totals.discount > 0 ? <SummaryRow label="Discount" value={`-${formatMoney(totals.discount)}`} highlight /> : null}
+              <SummaryRow label="Grand total" value={`NZD ${formatMoney(totals.grandTotal)}`} strong />
             </div>
             <p className="mt-3 text-sm leading-6 text-steel">GST is included where applicable. Delivery address is confirmed in Stripe Checkout.</p>
             <button
@@ -201,6 +216,15 @@ function getSelectedVehicle(items: ReturnType<typeof useCart>["items"]) {
   const year = items.find((item) => typeof item.attributes.vehicle_year !== "undefined")?.attributes.vehicle_year;
   const vehicle = [make, model, year].filter(Boolean).join(" ");
   return vehicle || "";
+}
+
+function SummaryRow({ label, value, highlight = false, strong = false }: { label: string; value: string; highlight?: boolean; strong?: boolean }) {
+  return (
+    <div className={`flex justify-between gap-3 ${highlight ? "text-signal" : ""} ${strong ? "border-t border-black/10 pt-3 text-lg font-black text-ink" : ""}`}>
+      <span>{label}</span>
+      <span>{value}</span>
+    </div>
+  );
 }
 
 function isCustomerVisibleAttribute(key: string) {

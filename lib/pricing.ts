@@ -55,6 +55,15 @@ export type CartPricingSummary = {
   bundleApplied: boolean;
 };
 
+export type OrderTotals = {
+  subtotal: number;
+  shipping: number;
+  gstIncluded: number;
+  orderTotal: number;
+  discount: number;
+  grandTotal: number;
+};
+
 export type CartLinePricing = {
   item: CartItem;
   baseLineTotal: number;
@@ -116,6 +125,20 @@ export function calculateCartLinePricing(items: CartItem[]): CartLinePricing[] {
 
 export function isFrontWiperPairBundleEligible(item: Pick<CartItem, "productId" | "bundleEligible" | "bundleCategory">) {
   return item.bundleEligible === true && item.bundleCategory === frontWiperPairBundle.eligibleCategory;
+}
+
+export function calculateOrderTotals(pricing: CartPricingSummary, couponDiscount = 0): OrderTotals {
+  const discount = roundMoney(pricing.bundleDiscount + Math.max(0, couponDiscount));
+  const grandTotal = roundMoney(Math.max(0, pricing.productsSubtotal - discount));
+
+  return {
+    subtotal: pricing.productsSubtotal,
+    shipping: 0,
+    gstIncluded: roundMoney((grandTotal * 3) / 23),
+    orderTotal: pricing.productsSubtotal,
+    discount,
+    grandTotal
+  };
 }
 
 function getBundledFrontPairTotal(items: CartItem[]) {
