@@ -285,7 +285,11 @@ function prepareOrderItem(
   const variant = variantsById.get(item.variant_id);
   const wiperSet = wiperSetsById.get(item.variant_id);
   const rearAddon = rearAddonsById.get(item.variant_id);
-  const unitPrice = Number(variant?.price ?? wiperSet?.price ?? rearAddon?.price ?? item.price);
+  const metadataPrice = Number(item.price);
+  const unitPrice =
+    item.product_id === "wiper_set" && Number.isFinite(metadataPrice)
+      ? metadataPrice
+      : Number(variant?.price ?? wiperSet?.price ?? rearAddon?.price ?? item.price);
   const qty = Number(item.qty);
   const isStandardVariant = item.product_id !== "wiper_set" && item.product_id !== "wiper_rear_addon";
   const attributes = {

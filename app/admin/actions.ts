@@ -54,8 +54,10 @@ export async function updateWiperSetAction(formData: FormData) {
   const supabase = getAdminOrThrow();
   const id = requiredString(formData, "wiperSetId");
   const price = Number(requiredString(formData, "price"));
+  const compareAtPriceValue = optionalString(formData, "compareAtPrice");
+  const compareAtPrice = compareAtPriceValue ? Number(compareAtPriceValue) : null;
 
-  if (!Number.isFinite(price)) {
+  if (!Number.isFinite(price) || (compareAtPrice !== null && !Number.isFinite(compareAtPrice))) {
     throw new Error("Price must be a valid number.");
   }
 
@@ -63,6 +65,7 @@ export async function updateWiperSetAction(formData: FormData) {
     .from("wiper_sets")
     .update({
       price,
+      compare_at_price: compareAtPrice,
       active: formData.get("active") === "on",
       updated_at: new Date().toISOString()
     })

@@ -178,7 +178,7 @@ create policy "Public can read active wiper rear addons"
 -- through service-role APIs or future authenticated policies.
 
 -- Draft seed for front-pair sets generated from imported fitment data.
--- Front-pair MVP price is fixed at 59.99.
+-- Front-pair daily sale price is 59.99 against a 79.99 brand anchor price.
 insert into wiper_sets (
   sku,
   slug,
@@ -186,6 +186,7 @@ insert into wiper_sets (
   set_type,
   driver_length_in,
   passenger_length_in,
+  compare_at_price,
   price,
   active
 )
@@ -205,6 +206,7 @@ select distinct
   'front_pair',
   greatest(driver_length_in, passenger_length_in),
   least(driver_length_in, passenger_length_in),
+  79.99,
   59.99,
   true
 from wiper_length_fitments
@@ -216,6 +218,7 @@ on conflict (slug) do update set
   set_type = excluded.set_type,
   driver_length_in = excluded.driver_length_in,
   passenger_length_in = excluded.passenger_length_in,
+  compare_at_price = excluded.compare_at_price,
   price = excluded.price,
   active = excluded.active,
   updated_at = now();

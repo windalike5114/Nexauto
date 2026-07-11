@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowRight, SlidersHorizontal } from "lucide-react";
 import { WiperFitmentFinder } from "@/components/wiper-fitment-finder";
 import { formatMoney } from "@/lib/catalog";
+import { wiperPairPricing } from "@/lib/pricing";
 import { listWiperSets } from "@/lib/queries/wiper-commerce";
 import type { WiperSet } from "@/lib/types";
 import { getWiperSetPreviewImage } from "@/lib/wiper-product-images";
@@ -58,7 +59,7 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
             <div className="mt-5 space-y-5">
               <FilterGroup title="Price">
                 <div className="grid grid-cols-2 gap-2">
-                  <SidebarLink href={buildShopHref(params, { min: "0", max: "60", page: undefined })} active={params.min === "0" && params.max === "60"} label="Under $60" />
+                  <SidebarLink href={buildShopHref(params, { min: "0", max: "60", page: undefined })} active={params.min === "0" && params.max === "60"} label="$59.99 Sale" />
                   <SidebarLink href={buildShopHref(params, { min: "60", max: "", page: undefined })} active={params.min === "60" && !params.max} label="$60+" />
                   <SidebarLink href={buildShopHref(params, { min: undefined, max: undefined, page: undefined })} active={!params.min && !params.max} label="Any price" />
                 </div>
@@ -182,7 +183,16 @@ function WiperSetCard({ wiperSet }: { wiperSet: WiperSet }) {
             <p className="font-mono text-sm font-black text-signal">{wiperSet.sku}</p>
             <h2 className="mt-2 text-xl font-black">{wiperSet.name}</h2>
           </div>
-          <p className="shrink-0 text-lg font-black">{formatMoney(wiperSet.price)}</p>
+          <div className="shrink-0 text-right">
+            <p className="text-xs font-black uppercase tracking-[0.14em] text-signal">Sale</p>
+            <p className="text-xs font-bold text-steel line-through">{formatMoney(wiperSet.compareAtPrice ?? wiperPairPricing.compareAtPrice)}</p>
+            <p className="text-lg font-black">{formatMoney(wiperSet.price)}</p>
+          </div>
+        </div>
+        <div className="mt-4 grid gap-2 text-xs font-black text-steel">
+          <span><span className="line-through">NZ$8 Shipping</span> waived during promo</span>
+          <span>12-Month Warranty</span>
+          <span>Ships from Auckland</span>
         </div>
         <Link
           href={`/wipers/${wiperSet.sku}` as never}

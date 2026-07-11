@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Check, Minus, Plus, ShoppingBag } from "lucide-react";
 import { formatMoney } from "@/lib/catalog";
+import { getWiperBundleSavings, getWiperPairLineTotal, wiperPairPricing } from "@/lib/pricing";
 import type { WiperRearAddon, WiperSet } from "@/lib/types";
 import { useCart } from "./cart-provider";
 
@@ -80,7 +81,9 @@ export function WiperSetPurchase({
     window.setTimeout(() => setAdded(false), 1600);
   }
 
-  const total = wiperSet.price * qty + (rearAddon && includeRear ? rearAddon.price * qty : 0);
+  const frontPairTotal = getWiperPairLineTotal(qty, wiperSet.price);
+  const total = frontPairTotal + (rearAddon && includeRear ? rearAddon.price * qty : 0);
+  const savings = getWiperBundleSavings(qty, wiperSet.price);
 
   return (
     <div className="rounded-lg border border-black/10 bg-white p-5 shadow-panel">
@@ -89,7 +92,35 @@ export function WiperSetPurchase({
           <p className="text-xs font-black uppercase tracking-[0.14em] text-steel">Front pair kit</p>
           <p className="mt-1 font-mono text-sm font-black">{wiperSet.sku}</p>
         </div>
-        <p className="text-2xl font-black">{formatMoney(wiperSet.price)}</p>
+        <div className="text-right">
+          <p className="text-sm font-black text-steel line-through">{formatMoney(wiperSet.compareAtPrice ?? wiperPairPricing.compareAtPrice)}</p>
+          <p className="text-2xl font-black">{formatMoney(wiperSet.price)}</p>
+        </div>
+      </div>
+
+      <div className="mt-4 grid gap-2 text-sm font-black text-ink sm:grid-cols-3">
+        <span className="rounded bg-zinc-50 px-3 py-2">
+          <span className="text-steel line-through">$8 Shipping</span> Waived
+        </span>
+        <span className="rounded bg-zinc-50 px-3 py-2">12-Month Warranty</span>
+        <span className="rounded bg-zinc-50 px-3 py-2">Auckland Dispatch</span>
+      </div>
+
+      <div className="mt-4 rounded-lg border border-signal/20 bg-red-50 p-3">
+        <p className="text-sm font-black text-ink">Bundle pricing</p>
+        <div className="mt-2 grid gap-2 text-sm font-bold text-steel sm:grid-cols-3">
+          <button type="button" onClick={() => setQty(1)} className={`rounded border px-3 py-2 text-left ${qty === 1 ? "border-signal bg-white text-ink" : "border-black/10 bg-white"}`}>
+            1 Pair <span className="block font-black">{formatMoney(wiperSet.price)}</span>
+          </button>
+          <button type="button" onClick={() => setQty(2)} className={`rounded border px-3 py-2 text-left ${qty === 2 ? "border-signal bg-white text-ink" : "border-black/10 bg-white"}`}>
+            2 Pairs <span className="block font-black">{formatMoney(wiperPairPricing.bundleTotals[2])}</span>
+          </button>
+          <button type="button" onClick={() => setQty(3)} className={`rounded border px-3 py-2 text-left ${qty === 3 ? "border-signal bg-white text-ink" : "border-black/10 bg-white"}`}>
+            3 Pairs <span className="block font-black">{formatMoney(wiperPairPricing.bundleTotals[3])}</span>
+          </button>
+        </div>
+        {savings > 0 ? <p className="mt-2 text-sm font-black text-signal">You save {formatMoney(savings)}</p> : null}
+        <p className="mt-2 text-xs font-bold text-steel">Member price {formatMoney(wiperPairPricing.memberPrice)} is reserved for the next account pricing phase.</p>
       </div>
 
       <div className="mt-5 grid grid-cols-2 gap-3">

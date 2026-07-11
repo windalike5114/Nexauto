@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Trash2 } from "lucide-react";
 import { useCart } from "@/components/cart-provider";
 import { formatAttributeName, formatMoney } from "@/lib/catalog";
+import { getCartItemLineTotal, getWiperBundleSavings } from "@/lib/pricing";
 
 export default function CartPage() {
   const { items, subtotal, updateQty, removeItem } = useCart();
@@ -98,8 +99,13 @@ export default function CartPage() {
                 </div>
                 <div className="mt-4 flex justify-between border-t border-black/10 pt-4 font-black">
                   <span>{formatMoney(item.price)} each</span>
-                  <span>{formatMoney(item.price * item.qty)}</span>
+                  <span>{formatMoney(getCartItemLineTotal(item))}</span>
                 </div>
+                {item.productId === "wiper_set" && getWiperBundleSavings(item.qty, item.price) > 0 ? (
+                  <p className="mt-2 text-sm font-black text-signal">
+                    Bundle saving: {formatMoney(getWiperBundleSavings(item.qty, item.price))}
+                  </p>
+                ) : null}
               </article>
             ))}
           </div>
@@ -147,7 +153,10 @@ export default function CartPage() {
                 Discounts are validated and calculated securely in Stripe Checkout.
               </p>
             </div>
-            <p className="mt-3 text-sm leading-6 text-steel">Shipping and tax are collected in Stripe Checkout.</p>
+            <div className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm font-black text-emerald-800">
+              Promo shipping: <span className="line-through">NZ$8</span> waived today
+            </div>
+            <p className="mt-3 text-sm leading-6 text-steel">GST is included where applicable. Delivery address is confirmed in Stripe Checkout.</p>
             <button
               type="button"
               onClick={checkout}

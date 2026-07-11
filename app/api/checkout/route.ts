@@ -3,6 +3,7 @@ import Stripe from "stripe";
 import { getVariantsByIds } from "@/lib/queries/catalog";
 import { getWiperRearAddonsByIds, getWiperSetsByIds } from "@/lib/queries/wiper-commerce";
 import { createClient } from "@/utils/supabase/server";
+import { getWiperPairLineTotal } from "@/lib/pricing";
 import type { CartItem } from "@/lib/types";
 
 type ValidatedCheckoutItem = {
@@ -12,6 +13,8 @@ type ValidatedCheckoutItem = {
   sku: string;
   name: string;
   price: number;
+  checkoutQuantity?: number;
+  checkoutLineTotal?: number;
   attributes: Record<string, string | number>;
 };
 
@@ -88,6 +91,8 @@ export async function POST(request: Request) {
         sku: wiperSet.sku,
         name: wiperSet.name,
         price: wiperSet.price,
+        checkoutQuantity: 1,
+        checkoutLineTotal: getWiperPairLineTotal(cartItem.qty, wiperSet.price),
         attributes: {
           ...cartItem.attributes,
           driver_length: `${wiperSet.driverLengthIn}"`,
@@ -149,13 +154,29 @@ export async function POST(request: Request) {
     customer_creation: "if_required",
     billing_address_collection: "required",
     shipping_address_collection: {
-      allowed_countries: ["NZ", "AU", "US"]
+      allowed_countries: ["NZ"]
     },
+    shipping_options: [
+      {
+        shipping_rate_data: {
+          type: "fixed_amount",
+          fixed_amount: {
+            amount: 0,
+            currency: "nzd"
+          },
+          display_name: "Promo shipping - normally NZ$8",
+          delivery_estimate: {
+            minimum: { unit: "business_day", value: 1 },
+            maximum: { unit: "business_day", value: 4 }
+          }
+        }
+      }
+    ],
     line_items: validatedItems.map((item) => ({
-      quantity: item.cartItem.qty,
+      quantity: item.checkoutQuantity ?? item.cartItem.qty,
       price_data: {
         currency: "nzd",
-        unit_amount: Math.round(item.price * 100),
+        unit_amount: Math.round((item.checkoutLineTotal ?? item.price) * 100),
         product_data: {
           name: item.name,
           description: `${item.sku} | ${Object.entries(item.attributes)
@@ -176,7 +197,7 @@ export async function POST(request: Request) {
           v: item.id,
           s: item.sku,
           q: item.cartItem.qty,
-          pr: item.price
+          pr: item.checkoutLineTotal ? item.checkoutLineTotal / item.cartItem.qty : item.price
         }))
       ),
       vehicle: JSON.stringify(vehicleMetadata),

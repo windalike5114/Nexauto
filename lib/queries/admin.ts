@@ -82,6 +82,7 @@ export type AdminWiperSet = {
   driverLengthIn: number;
   passengerLengthIn: number;
   price: number;
+  compareAtPrice: number | null;
   active: boolean;
 };
 
@@ -220,6 +221,7 @@ type WiperSetRow = {
   driver_length_in: string | number;
   passenger_length_in: string | number;
   price: string | number;
+  compare_at_price: string | number | null;
   active: boolean;
 };
 
@@ -547,7 +549,7 @@ async function listAdminWiperSets() {
   const supabase = getAdminOrThrow();
   const { data, error } = await supabase
     .from("wiper_sets")
-    .select("id,sku,name,driver_length_in,passenger_length_in,price,active")
+    .select("id,sku,name,driver_length_in,passenger_length_in,price,compare_at_price,active")
     .order("driver_length_in")
     .order("passenger_length_in");
 
@@ -559,6 +561,7 @@ async function listAdminWiperSets() {
     driverLengthIn: Number(row.driver_length_in),
     passengerLengthIn: Number(row.passenger_length_in),
     price: Number(row.price),
+    compareAtPrice: row.compare_at_price === null ? null : Number(row.compare_at_price),
     active: row.active
   }));
 }

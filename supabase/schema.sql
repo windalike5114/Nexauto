@@ -574,6 +574,7 @@ insert into wiper_sets (
   set_type,
   driver_length_in,
   passenger_length_in,
+  compare_at_price,
   price,
   active
 )
@@ -593,6 +594,7 @@ select distinct
   'front_pair',
   greatest(driver_length_in, passenger_length_in),
   least(driver_length_in, passenger_length_in),
+  79.99,
   59.99,
   true
 from wiper_length_fitments
@@ -604,6 +606,7 @@ on conflict (slug) do update set
   set_type = excluded.set_type,
   driver_length_in = excluded.driver_length_in,
   passenger_length_in = excluded.passenger_length_in,
+  compare_at_price = excluded.compare_at_price,
   price = excluded.price,
   active = excluded.active,
   updated_at = now();

@@ -7,6 +7,7 @@ import { WiperProductGallery } from "@/components/wiper-product-gallery";
 import { ContactForm } from "@/components/forms/contact-form";
 import { formatMoney } from "@/lib/catalog";
 import { blobMediaAssets } from "@/lib/blob-media-assets";
+import { wiperPairPricing } from "@/lib/pricing";
 import { getWiperRearAddonById, getWiperSetBySku } from "@/lib/queries/wiper-commerce";
 
 export const dynamic = "force-dynamic";
@@ -72,7 +73,20 @@ export default async function WiperSkuPage({
             <p className="mt-4 text-lg font-semibold leading-8 text-steel">
               Smooth, quiet and reliable wiping performance designed for everyday New Zealand driving.
             </p>
-            <p className="mt-5 text-3xl font-black">{formatMoney(wiperSet.price)}</p>
+            <div className="mt-5 flex flex-wrap items-end gap-3">
+              <span className="text-xl font-black text-steel line-through">
+                {formatMoney(wiperSet.compareAtPrice ?? wiperPairPricing.compareAtPrice)}
+              </span>
+              <span className="rounded bg-signal px-3 py-1 text-xs font-black uppercase tracking-[0.14em] text-white">Sale</span>
+              <span className="text-4xl font-black">{formatMoney(wiperSet.price)}</span>
+            </div>
+            <div className="mt-4 grid gap-2 text-sm font-black text-ink sm:grid-cols-3">
+              <span className="rounded border border-black/10 bg-white px-3 py-2">
+                <span className="text-steel line-through">NZ$8 Shipping</span> Waived
+              </span>
+              <span className="rounded border border-black/10 bg-white px-3 py-2">12-Month Warranty</span>
+              <span className="rounded border border-black/10 bg-white px-3 py-2">Ships from Auckland</span>
+            </div>
           </div>
 
           {vehicle ? (
@@ -122,7 +136,7 @@ export default async function WiperSkuPage({
 
           <div className="grid gap-3 sm:grid-cols-3">
             <TrustPoint icon={<CarFront className="h-4 w-4" />} text="Vehicle-Matched Fitment" />
-            <TrustPoint icon={<Truck className="h-4 w-4" />} text="Fast NZ Dispatch" />
+            <TrustPoint icon={<Truck className="h-4 w-4" />} text="$8 Shipping Waived" />
             <TrustPoint icon={<CreditCard className="h-4 w-4" />} text="Secure Checkout" />
           </div>
         </section>
@@ -243,7 +257,7 @@ export default async function WiperSkuPage({
 
       <section className="border-t border-black/10 bg-white">
         <div className="mx-auto grid max-w-7xl gap-4 px-4 py-10 sm:px-6 md:grid-cols-3 lg:px-8">
-          <InfoTile title="Shipping" text="Fast nationwide dispatch from New Zealand. Shipping options are shown at checkout." />
+          <InfoTile title="Shipping" text="Standard NZ shipping is NZ$8, currently waived as a launch promotion. Fast dispatch from Auckland for New Zealand orders." />
           <InfoTile title="Returns" text="Contact us before installation if you believe the product is not suitable for your vehicle." />
           <InfoTile title="Related products" text="Browse all front wiper blade pair combinations in the parts catalog." href="/shop" />
         </div>

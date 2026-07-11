@@ -463,12 +463,13 @@ function ProductsPanel({
         <h2 className="text-xl font-black">Wiper pair SKU pricing</h2>
         <div className="mt-5 grid gap-3">
           {wiperSets.slice(0, 24).map((wiperSet) => (
-            <form key={wiperSet.id} action={updateWiperSetAction} className="grid gap-3 rounded border border-black/10 bg-zinc-50 p-3 md:grid-cols-[1fr_120px_100px_auto] md:items-end">
+            <form key={wiperSet.id} action={updateWiperSetAction} className="grid gap-3 rounded border border-black/10 bg-zinc-50 p-3 md:grid-cols-[1fr_120px_120px_100px_auto] md:items-end">
               <input type="hidden" name="wiperSetId" value={wiperSet.id} />
               <div>
                 <p className="font-black">{wiperSet.name}</p>
                 <p className="font-mono text-xs font-bold text-steel">{wiperSet.sku}</p>
               </div>
+              <Field label="Compare at" name="compareAtPrice" type="number" step="0.01" defaultValue={String(wiperSet.compareAtPrice ?? "")} />
               <Field label="Price" name="price" type="number" step="0.01" defaultValue={String(wiperSet.price)} />
               <Toggle label="Active" name="active" defaultChecked={wiperSet.active} />
               <button type="submit" className="h-11 rounded bg-ink px-4 text-sm font-black text-white">Save</button>

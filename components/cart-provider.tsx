@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { getCartItemLineTotal } from "@/lib/pricing";
 import type { CartItem } from "@/lib/types";
 
 type CartContextValue = {
@@ -32,7 +33,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const value = useMemo<CartContextValue>(() => {
     const count = items.reduce((sum, item) => sum + item.qty, 0);
-    const subtotal = items.reduce((sum, item) => sum + item.qty * item.price, 0);
+    const subtotal = items.reduce((sum, item) => sum + getCartItemLineTotal(item), 0);
 
     return {
       items,

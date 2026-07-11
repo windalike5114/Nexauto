@@ -27,7 +27,7 @@ export default function ShippingPage() {
         <p>Delivery estimates are a guide only and may vary due to courier operations, weather, or public holidays.</p>
       </InfoSection>
       <InfoSection title="Shipping Costs and Tracking">
-        <p>Shipping charges are calculated during checkout based on your delivery address and the items in your order.</p>
+        <p>Standard New Zealand shipping is NZ$8. During launch or promotional campaigns, this shipping charge may be waived and shown as a discount during checkout.</p>
         <p>Once your order has been dispatched, you will receive courier information, a tracking number, and a tracking link where available.</p>
       </InfoSection>
       <InfoSection title="Damaged Deliveries">
