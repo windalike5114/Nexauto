@@ -148,7 +148,11 @@ export function AccountAuth() {
         ? supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/account` })
         : mode === "sign-in"
           ? supabase.auth.signInWithPassword({ email, password })
-          : supabase.auth.signUp({ email, password });
+          : supabase.auth.signUp({
+              email,
+              password,
+              options: { emailRedirectTo: `${window.location.origin}/account` }
+            });
     const { error } = await action;
 
     setLoading(false);
