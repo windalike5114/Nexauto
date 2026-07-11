@@ -56,6 +56,12 @@ type AccountResponse = {
     products: string[];
     total: number;
   }>;
+  rewards: {
+    welcome: {
+      amount: number;
+      status: "available" | "used";
+    };
+  };
 };
 
 type Address = {
@@ -69,9 +75,9 @@ type Address = {
   isDefault: boolean;
 };
 
-export function AccountAuth() {
+export function AccountAuth({ initialMode = "sign-in" }: { initialMode?: Mode }) {
   const router = useRouter();
-  const [mode, setMode] = useState<Mode>("sign-in");
+  const [mode, setMode] = useState<Mode>(initialMode);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
@@ -169,6 +175,11 @@ export function AccountAuth() {
           ? "Signed in successfully."
           : "Account created. Check email if confirmation is enabled."
     );
+    if (mode === "sign-up") {
+      window.sessionStorage.setItem("nexauto-welcome-registration-success", "true");
+      window.dispatchEvent(new CustomEvent("nexauto:welcome-reward-ready"));
+      window.dispatchEvent(new CustomEvent("nexauto:analytics", { detail: { event: "registration_completed" } }));
+    }
     await loadAccount();
   }
 
@@ -364,6 +375,7 @@ export function AccountAuth() {
         />
       ) : null}
       {activeSection === "orders" ? <OrdersSection orders={account.orders} /> : null}
+      {activeSection === "rewards" ? <RewardsSection reward={account.rewards.welcome} /> : null}
       {activeSection === "vehicles" ? (
         <VehiclesSection
           vehicles={account.vehicles}
@@ -552,6 +564,31 @@ function OrdersSection({ orders }: { orders: AccountResponse["orders"] }) {
       ) : (
         <EmptyState text="No orders yet." />
       )}
+    </Panel>
+  );
+}
+
+function RewardsSection({ reward }: { reward: AccountResponse["rewards"]["welcome"] }) {
+  const available = reward.status === "available";
+
+  return (
+    <Panel title="Rewards" icon={<Star className="h-5 w-5" />} className="mt-6">
+      <article className={`rounded-lg border p-5 ${available ? "border-red-100 bg-red-50" : "border-black/10 bg-zinc-50"}`}>
+        <p className="text-sm font-black uppercase tracking-[0.14em] text-signal">NZ${reward.amount} Welcome Reward</p>
+        <h3 className="mt-2 text-2xl font-black text-ink">
+          {available ? "Ready to use in your cart" : "Reward used"}
+        </h3>
+        <p className="mt-2 text-sm font-bold leading-6 text-steel">
+          {available
+            ? "Apply your account welcome reward in the cart before checkout. The discount is validated securely before payment."
+            : "This first-order welcome reward has already been used or is no longer available."}
+        </p>
+        {available ? (
+          <Link href="/cart" className="mt-4 inline-flex h-11 items-center justify-center rounded bg-ink px-4 text-sm font-black text-white hover:bg-black">
+            View Cart
+          </Link>
+        ) : null}
+      </article>
     </Panel>
   );
 }
@@ -864,6 +901,7 @@ type FitmentResult = {
 const sections = [
   { id: "dashboard", label: "Dashboard" },
   { id: "orders", label: "Orders" },
+  { id: "rewards", label: "Rewards" },
   { id: "vehicles", label: "Saved Vehicles" },
   { id: "addresses", label: "Addresses" },
   { id: "settings", label: "Account Settings" }

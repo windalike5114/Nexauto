@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { getVariantsByIds } from "@/lib/queries/catalog";
+import { listCustomerOrders } from "@/lib/queries/account";
 import { getWiperRearAddonsByIds, getWiperSetsByIds } from "@/lib/queries/wiper-commerce";
 import { createClient } from "@/utils/supabase/server";
 import { calculateCartLinePricing, calculateCartPricing } from "@/lib/pricing";
@@ -20,7 +21,11 @@ type ValidatedCheckoutItem = {
 };
 
 export async function POST(request: Request) {
-  const { items, couponCode } = (await request.json()) as { items?: CartItem[]; couponCode?: string };
+  const { items, couponCode, welcomeRewardApplied } = (await request.json()) as {
+    items?: CartItem[];
+    couponCode?: string;
+    welcomeRewardApplied?: boolean;
+  };
   const normalizedCouponCode = couponCode?.trim();
 
   if (!items?.length) {
@@ -177,6 +182,8 @@ export async function POST(request: Request) {
   const {
     data: { user }
   } = await supabase.auth.getUser();
+  const welcomeRewardDiscount = welcomeRewardApplied ? await getValidatedWelcomeRewardDiscount(user?.email ?? null, validatedItems) : 0;
+  const checkoutItems = welcomeRewardDiscount > 0 ? applyCheckoutDiscount(validatedItems, welcomeRewardDiscount) : validatedItems;
 
   const sessionParams: Stripe.Checkout.SessionCreateParams = {
     mode: "payment",
@@ -209,7 +216,7 @@ export async function POST(request: Request) {
         }
       }
     ],
-    line_items: validatedItems.map((item) => ({
+    line_items: checkoutItems.map((item) => ({
       quantity: item.checkoutQuantity ?? item.cartItem.qty,
       price_data: {
         currency: "nzd",
@@ -229,7 +236,7 @@ export async function POST(request: Request) {
     })),
     metadata: {
       items: JSON.stringify(
-        validatedItems.map((item) => buildCompactMetadataItem(item))
+        checkoutItems.map((item) => buildCompactMetadataItem(item))
       ),
       vehicle: JSON.stringify(vehicleMetadata),
       vehicle_make: vehicleMetadata?.make ?? "",
@@ -240,7 +247,8 @@ export async function POST(request: Request) {
       coupon_code: normalizedCouponCode ?? "",
       products_subtotal: String(pricing.productsSubtotal),
       bundle_discount: String(pricing.bundleDiscount),
-      final_subtotal: String(pricing.subtotal),
+      welcome_reward_discount: String(welcomeRewardDiscount),
+      final_subtotal: String(Math.max(0, pricing.subtotal - welcomeRewardDiscount)),
       source: "nexauto"
     },
     success_url: `${siteUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
@@ -250,6 +258,38 @@ export async function POST(request: Request) {
   const session = await stripe.checkout.sessions.create(sessionParams);
 
   return NextResponse.json({ url: session.url });
+}
+
+async function getValidatedWelcomeRewardDiscount(email: string | null, items: ValidatedCheckoutItem[]) {
+  if (!email) return 0;
+
+  const existingOrders = await listCustomerOrders(email);
+  if (existingOrders.length > 0) return 0;
+
+  const currentTotal = items.reduce((sum, item) => sum + (item.checkoutLineTotal ?? item.price * item.cartItem.qty), 0);
+  return Math.min(10, Math.max(0, Math.round(currentTotal * 100) / 100));
+}
+
+function applyCheckoutDiscount(items: ValidatedCheckoutItem[], discount: number) {
+  const total = items.reduce((sum, item) => sum + (item.checkoutLineTotal ?? item.price * item.cartItem.qty), 0);
+  let remainingDiscount = discount;
+
+  return items.map((item, index) => {
+    const lineTotal = item.checkoutLineTotal ?? item.price * item.cartItem.qty;
+    const isLast = index === items.length - 1;
+    const lineDiscount = isLast ? remainingDiscount : roundMoney((discount * lineTotal) / total);
+    remainingDiscount = roundMoney(remainingDiscount - lineDiscount);
+
+    return {
+      ...item,
+      checkoutQuantity: 1,
+      checkoutLineTotal: roundMoney(Math.max(0, lineTotal - lineDiscount)),
+      attributes: {
+        ...item.attributes,
+        ...(lineDiscount > 0 ? { welcome_reward_discount: lineDiscount } : {})
+      }
+    };
+  });
 }
 
 function buildCompactMetadataItem(item: ValidatedCheckoutItem) {
@@ -306,4 +346,8 @@ function getProductName(value: unknown) {
     return String((value as { name: string }).name);
   }
   return null;
+}
+
+function roundMoney(value: number) {
+  return Math.round(value * 100) / 100;
 }

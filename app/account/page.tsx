@@ -1,6 +1,9 @@
 import { AccountAuth } from "@/components/account-auth";
 
-export default function AccountPage() {
+export default async function AccountPage({ searchParams }: { searchParams: Promise<{ mode?: string }> }) {
+  const params = await searchParams;
+  const initialMode = params.mode === "sign-up" ? "sign-up" : "sign-in";
+
   return (
     <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
       <div className="mx-auto mb-8 max-w-2xl text-center">
@@ -10,7 +13,7 @@ export default function AccountPage() {
           Manage orders, saved vehicles, shipping addresses, and account settings in one place.
         </p>
       </div>
-      <AccountAuth />
+      <AccountAuth initialMode={initialMode} />
     </main>
   );
 }

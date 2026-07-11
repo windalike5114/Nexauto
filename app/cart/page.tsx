@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Trash2 } from "lucide-react";
+import { Gift, Trash2 } from "lucide-react";
 import { useCart } from "@/components/cart-provider";
 import { WiperFitmentFinder } from "@/components/wiper-fitment-finder";
 import { formatAttributeName, formatMoney } from "@/lib/catalog";
@@ -18,13 +18,17 @@ export default function CartPage() {
     couponError,
     couponDraft,
     validatingCoupon,
+    welcomeRewardStatus,
+    welcomeRewardDiscount,
+    applyWelcomeReward,
+    removeWelcomeReward,
     setCouponDraft,
     applyCoupon,
     clearCoupon
   } = useCart();
   const selectedVehicle = getSelectedVehicle(items);
   const pricing = calculateCartPricing(items);
-  const totals = calculateOrderTotals(pricing, couponDiscount);
+  const totals = calculateOrderTotals(pricing, couponDiscount + welcomeRewardDiscount);
 
   async function checkout() {
     if (couponDraft.trim() && !couponCode) {
@@ -35,7 +39,11 @@ export default function CartPage() {
     const response = await fetch("/api/checkout", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ items, couponCode: couponCode || undefined })
+      body: JSON.stringify({
+        items,
+        couponCode: couponCode || undefined,
+        welcomeRewardApplied: welcomeRewardStatus === "applied"
+      })
     });
     const data = (await response.json()) as { url?: string; error?: string };
     if (data.url) {
@@ -178,8 +186,35 @@ export default function CartPage() {
                 Coupon codes are checked before checkout and revalidated securely at payment.
               </p>
             </div>
+            {welcomeRewardStatus === "available" || welcomeRewardStatus === "applied" ? (
+              <div className="mt-4 rounded-lg border border-red-100 bg-red-50 p-4">
+                <div className="flex items-start gap-3">
+                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded bg-signal text-white">
+                    <Gift className="h-4 w-4" />
+                  </span>
+                  <div>
+                    <p className="text-sm font-black text-ink">
+                      {welcomeRewardStatus === "applied" ? "Welcome Reward Applied" : "Welcome Reward"}
+                    </p>
+                    <p className="mt-1 text-xs font-bold leading-5 text-steel">
+                      {welcomeRewardStatus === "applied" ? `-${formatMoney(welcomeRewardDiscount)} applied to this cart.` : "NZ$10 registration reward available."}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={welcomeRewardStatus === "applied" ? removeWelcomeReward : applyWelcomeReward}
+                      className="mt-3 h-9 rounded bg-ink px-3 text-xs font-black text-white hover:bg-black"
+                    >
+                      {welcomeRewardStatus === "applied" ? "Remove" : "Apply"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : null}
             <div className="mt-5 space-y-2 text-sm font-bold text-steel">
               <SummaryRow label="Subtotal" value={formatMoney(totals.subtotal)} />
+              {pricing.bundleDiscount > 0 ? <SummaryRow label={pricing.bundleLabel || "Bundle discount"} value={`-${formatMoney(pricing.bundleDiscount)}`} highlight /> : null}
+              {welcomeRewardDiscount > 0 ? <SummaryRow label="Welcome Reward" value={`-${formatMoney(welcomeRewardDiscount)}`} highlight /> : null}
+              {couponDiscount > 0 ? <SummaryRow label="Coupon" value={`-${formatMoney(couponDiscount)}`} highlight /> : null}
               <SummaryRow label="Shipping" value="FREE" highlight />
               <SummaryRow label="GST inc." value={formatMoney(totals.gstIncluded)} />
               <SummaryRow label="Order total" value={formatMoney(totals.orderTotal)} />

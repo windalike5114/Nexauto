@@ -27,7 +27,13 @@ export async function GET() {
       },
       profile,
       vehicles,
-      orders
+      orders,
+      rewards: {
+        welcome: {
+          amount: 10,
+          status: orders.length > 0 ? "used" : "available"
+        }
+      }
     });
   } catch (nextError) {
     return NextResponse.json(

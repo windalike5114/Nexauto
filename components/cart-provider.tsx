@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { CheckCircle2, Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react";
+import { CheckCircle2, Gift, Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react";
 import { WiperFitmentFinder } from "@/components/wiper-fitment-finder";
 import { formatAttributeName, formatMoney } from "@/lib/catalog";
 import { calculateCartPricing, calculateOrderTotals } from "@/lib/pricing";
@@ -21,6 +21,11 @@ type CartContextValue = {
   couponError: string;
   couponDraft: string;
   validatingCoupon: boolean;
+  accountEmail: string;
+  welcomeRewardStatus: "guest" | "available" | "applied" | "used";
+  welcomeRewardDiscount: number;
+  applyWelcomeReward: () => void;
+  removeWelcomeReward: () => void;
   setCouponDraft: (value: string) => void;
   applyCoupon: () => Promise<void>;
   clearCoupon: () => void;
@@ -46,6 +51,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [couponLabel, setCouponLabel] = useState("");
   const [couponError, setCouponError] = useState("");
   const [validatingCoupon, setValidatingCoupon] = useState(false);
+  const [accountEmail, setAccountEmail] = useState("");
+  const [welcomeRewardStatus, setWelcomeRewardStatus] = useState<"guest" | "available" | "applied" | "used">("guest");
+  const welcomeRewardDiscount = welcomeRewardStatus === "applied" ? 10 : 0;
 
   useEffect(() => {
     const saved = window.localStorage.getItem(storageKey);
@@ -57,6 +65,36 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     window.localStorage.setItem(storageKey, JSON.stringify(items));
   }, [items]);
+
+  useEffect(() => {
+    let active = true;
+
+    fetch("/api/account")
+      .then(async (response) => {
+        if (!active) return;
+        if (!response.ok) {
+          setAccountEmail("");
+          setWelcomeRewardStatus("guest");
+          return;
+        }
+
+        const data = (await response.json()) as {
+          profile?: { email?: string };
+          rewards?: { welcome?: { status?: "available" | "used" } };
+        };
+        setAccountEmail(data.profile?.email ?? "");
+        setWelcomeRewardStatus(data.rewards?.welcome?.status === "available" ? "available" : "used");
+      })
+      .catch(() => {
+        if (!active) return;
+        setAccountEmail("");
+        setWelcomeRewardStatus("guest");
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const value = useMemo<CartContextValue>(() => {
     const count = items.reduce((sum, item) => sum + item.qty, 0);
@@ -74,6 +112,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       couponError,
       couponDraft,
       validatingCoupon,
+      accountEmail,
+      welcomeRewardStatus,
+      welcomeRewardDiscount,
+      applyWelcomeReward: () => {
+        if (welcomeRewardStatus === "available") {
+          window.dispatchEvent(new CustomEvent("nexauto:analytics", { detail: { event: "reward_applied" } }));
+          setWelcomeRewardStatus("applied");
+        }
+      },
+      removeWelcomeReward: () => {
+        if (welcomeRewardStatus === "applied") setWelcomeRewardStatus("available");
+      },
       setCouponDraft,
       applyCoupon: async () => {
         const nextCoupon = couponDraft.trim();
@@ -146,7 +196,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       },
       clearCart: () => setItems([])
     };
-  }, [couponCode, couponDiscount, couponDraft, couponError, couponLabel, isDrawerOpen, items, validatingCoupon]);
+  }, [accountEmail, couponCode, couponDiscount, couponDraft, couponError, couponLabel, isDrawerOpen, items, validatingCoupon, welcomeRewardDiscount, welcomeRewardStatus]);
 
   return (
     <CartContext.Provider value={value}>
@@ -177,6 +227,10 @@ function CartDrawer({ recentlyAdded }: { recentlyAdded: CartItem | null }) {
     couponError,
     couponDraft,
     validatingCoupon,
+    welcomeRewardStatus,
+    welcomeRewardDiscount,
+    applyWelcomeReward,
+    removeWelcomeReward,
     setCouponDraft,
     applyCoupon,
     clearCoupon
@@ -184,7 +238,7 @@ function CartDrawer({ recentlyAdded }: { recentlyAdded: CartItem | null }) {
   const drawerRef = useRef<HTMLDivElement | null>(null);
   const [checkingOut, setCheckingOut] = useState(false);
   const pricing = calculateCartPricing(items);
-  const totals = calculateOrderTotals(pricing, couponDiscount);
+  const totals = calculateOrderTotals(pricing, couponDiscount + welcomeRewardDiscount);
 
   async function checkout() {
     if (!items.length || checkingOut) return;
@@ -200,7 +254,11 @@ function CartDrawer({ recentlyAdded }: { recentlyAdded: CartItem | null }) {
       const response = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items, couponCode: couponCode || undefined })
+        body: JSON.stringify({
+          items,
+          couponCode: couponCode || undefined,
+          welcomeRewardApplied: welcomeRewardStatus === "applied"
+        })
       });
       const data = (await response.json()) as { url?: string; error?: string };
 
@@ -364,7 +422,13 @@ function CartDrawer({ recentlyAdded }: { recentlyAdded: CartItem | null }) {
             applyCoupon={applyCoupon}
             clearCoupon={clearCoupon}
           />
-          <OrderSummaryRows totals={totals} />
+          <WelcomeRewardBox
+            status={welcomeRewardStatus}
+            discount={welcomeRewardDiscount}
+            onApply={applyWelcomeReward}
+            onRemove={removeWelcomeReward}
+          />
+          <OrderSummaryRows totals={totals} pricing={pricing} welcomeRewardDiscount={welcomeRewardDiscount} couponDiscount={couponDiscount} />
           <div className="mt-4 grid gap-2">
             <button type="button" onClick={closeDrawer} className="h-11 rounded border border-black/10 text-sm font-black text-ink hover:border-ink">
               Continue Shopping
@@ -487,10 +551,62 @@ function CouponBox({
   );
 }
 
-function OrderSummaryRows({ totals }: { totals: ReturnType<typeof calculateOrderTotals> }) {
+function WelcomeRewardBox({
+  status,
+  discount,
+  onApply,
+  onRemove
+}: {
+  status: "guest" | "available" | "applied" | "used";
+  discount: number;
+  onApply: () => void;
+  onRemove: () => void;
+}) {
+  if (status === "guest" || status === "used") return null;
+
+  return (
+    <div className="mb-4 rounded-lg border border-red-100 bg-red-50 p-3">
+      <div className="flex items-start gap-3">
+        <span className="grid h-9 w-9 shrink-0 place-items-center rounded bg-signal text-white">
+          <Gift className="h-4 w-4" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-black text-ink">
+            {status === "applied" ? "Welcome Reward Applied" : "Welcome Reward"}
+          </p>
+          <p className="mt-1 text-xs font-bold leading-5 text-steel">
+            {status === "applied" ? `-${formatMoney(discount)} applied to this cart.` : "NZ$10 registration reward available."}
+          </p>
+          <button
+            type="button"
+            onClick={status === "applied" ? onRemove : onApply}
+            className="mt-2 h-9 rounded bg-ink px-3 text-xs font-black text-white hover:bg-black"
+          >
+            {status === "applied" ? "Remove" : "Apply"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function OrderSummaryRows({
+  totals,
+  pricing,
+  welcomeRewardDiscount,
+  couponDiscount
+}: {
+  totals: ReturnType<typeof calculateOrderTotals>;
+  pricing: ReturnType<typeof calculateCartPricing>;
+  welcomeRewardDiscount: number;
+  couponDiscount: number;
+}) {
   return (
     <div className="space-y-2 text-sm font-bold text-steel">
       <SummaryRow label="Subtotal" value={formatMoney(totals.subtotal)} />
+      {pricing.bundleDiscount > 0 ? <SummaryRow label={pricing.bundleLabel || "Bundle discount"} value={`-${formatMoney(pricing.bundleDiscount)}`} highlight /> : null}
+      {welcomeRewardDiscount > 0 ? <SummaryRow label="Welcome Reward" value={`-${formatMoney(welcomeRewardDiscount)}`} highlight /> : null}
+      {couponDiscount > 0 ? <SummaryRow label="Coupon" value={`-${formatMoney(couponDiscount)}`} highlight /> : null}
       <SummaryRow label="Shipping" value="FREE" highlight />
       <SummaryRow label="GST inc." value={formatMoney(totals.gstIncluded)} />
       <SummaryRow label="Order total" value={formatMoney(totals.orderTotal)} />

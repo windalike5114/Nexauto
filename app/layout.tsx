@@ -4,6 +4,7 @@ import Link from "next/link";
 import { CartProvider } from "@/components/cart-provider";
 import { CartLink } from "@/components/cart-link";
 import { SiteFooter } from "@/components/site-footer";
+import { WelcomeRewardWidget } from "@/components/welcome-reward-widget";
 import { blobMediaAssets } from "@/lib/blob-media-assets";
 import "./globals.css";
 
@@ -83,6 +84,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             </header>
             {children}
             <SiteFooter />
+            <WelcomeRewardWidget />
           </div>
         </CartProvider>
       </body>
