@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { ArrowRight, CheckCircle2, ShieldCheck, Truck, Wrench } from "lucide-react";
 import { WiperFitmentFinder } from "@/components/wiper-fitment-finder";
 import { formatMoney } from "@/lib/catalog";
+import { wiperPairPricing } from "@/lib/pricing";
 import { listWiperSets } from "@/lib/queries/wiper-commerce";
 import type { WiperSet } from "@/lib/types";
 import { getWiperSetPreviewImage } from "@/lib/wiper-product-images";
@@ -60,10 +61,13 @@ export default async function HomePage() {
           <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-sm font-black uppercase tracking-[0.18em] text-signal">Popular Products</p>
-              <h2 className="mt-2 text-3xl font-black">Bestselling front pair SKUs</h2>
+              <h2 className="mt-2 text-3xl font-black">Bestselling Front Wiper Blade Pairs</h2>
+              <p className="mt-2 max-w-2xl text-sm font-bold leading-6 text-steel">
+                On sale now with front pair pricing and free NZ shipping included.
+              </p>
             </div>
             <Link href="/shop" className="inline-flex h-11 items-center gap-2 rounded-lg border border-black/10 bg-white px-4 text-sm font-black text-ink shadow-sm transition hover:-translate-y-0.5 hover:border-ink hover:shadow-md">
-              View all SKUs
+              View all blade sizes
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
@@ -163,10 +167,14 @@ function TrustPill({ icon, text }: { icon: React.ReactNode; text: string }) {
 
 function PopularSkuCard({ wiperSet }: { wiperSet: WiperSet }) {
   const image = getWiperSetPreviewImage(wiperSet);
+  const compareAtPrice = wiperSet.compareAtPrice ?? wiperPairPricing.compareAtPrice;
 
   return (
     <article className="min-w-[240px] overflow-hidden rounded-lg border border-black/10 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-panel sm:min-w-[260px]">
       <div className="relative aspect-[4/3] bg-zinc-50">
+        <span className="absolute left-3 top-3 z-10 rounded bg-signal px-2 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-white">
+          Sale
+        </span>
         <Image
           src={image}
           alt={`${wiperSet.name} preview`}
@@ -176,12 +184,18 @@ function PopularSkuCard({ wiperSet }: { wiperSet: WiperSet }) {
         />
       </div>
       <div className="p-5">
-        <p className="font-mono text-sm font-black text-signal">{wiperSet.sku}</p>
-        <h3 className="mt-2 text-lg font-black">{wiperSet.name}</h3>
+        <h3 className="text-lg font-black">Front Wiper Blade Pair</h3>
+        <p className="mt-2 text-sm font-black text-steel">
+          Driver {wiperSet.driverLengthIn}" + Passenger {wiperSet.passengerLengthIn}"
+        </p>
+        <p className="mt-3 text-xs font-black text-steel">Free NZ Shipping</p>
         <div className="mt-4 flex items-center justify-between gap-3">
-          <p className="text-lg font-black">{formatMoney(wiperSet.price)}</p>
+          <p className="flex flex-wrap items-baseline gap-2">
+            <span className="text-lg font-black">{formatMoney(wiperSet.price)}</span>
+            <span className="text-xs font-bold text-steel line-through">{formatMoney(compareAtPrice)}</span>
+          </p>
           <Link href={`/wipers/${wiperSet.sku}`} className="inline-flex h-10 items-center rounded bg-ink px-3 text-sm font-black text-white transition hover:-translate-y-0.5 hover:bg-black">
-            View
+            View Details
           </Link>
         </div>
       </div>

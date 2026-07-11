@@ -327,6 +327,14 @@ export function WiperFitmentFinder({
 
       {footnote ? <p className="mt-3 text-xs font-bold leading-6 text-steel">{footnote}</p> : null}
 
+      <p className="mt-3 text-xs font-bold leading-6 text-steel">
+        Can't find your vehicle?{" "}
+        <Link href="/contact" className="font-black text-signal underline-offset-4 hover:underline">
+          Contact us for fitment help
+        </Link>
+        .
+      </p>
+
       {error ? <div className="mt-4 rounded border border-signal/30 bg-red-50 p-3 text-sm font-bold text-signal">{error}</div> : null}
 
       {!directToProduct && year && !busy && !error ? (
