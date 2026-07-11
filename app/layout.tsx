@@ -34,6 +34,14 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <CartProvider>
           <div className="min-h-screen">
             <header className="sticky top-0 z-30 border-b border-black/10 bg-white/90 backdrop-blur">
+              <div className="bg-ink text-white">
+                <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-2 text-center text-xs font-black sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:text-left lg:px-8">
+                  <p>Launch offer: $20 off all front wiper blade pairs + shipping waived NZ-wide for the first 3 months.</p>
+                  <Link href="/#vehicle-finder" className="inline-flex items-center justify-center rounded bg-signal px-3 py-1.5 text-[11px] uppercase tracking-[0.12em] text-white transition hover:-translate-y-0.5 hover:bg-red-700">
+                    Find My Wipers
+                  </Link>
+                </div>
+              </div>
               <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
                 <Link href="/" className="flex items-center gap-3" aria-label="NexAuto home">
                   <Image

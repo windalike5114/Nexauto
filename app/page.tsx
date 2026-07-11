@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { ArrowRight, CheckCircle2, ShieldCheck, Truck, Wrench } from "lucide-react";
+import { ArrowRight, CheckCircle2, ShieldCheck, ShoppingCart, Truck, Wrench } from "lucide-react";
 import { WiperFitmentFinder } from "@/components/wiper-fitment-finder";
 import { formatMoney } from "@/lib/catalog";
 import { wiperPairPricing } from "@/lib/pricing";
@@ -51,6 +51,11 @@ export default async function HomePage() {
           </div>
 
           <div id="vehicle-finder" className="scroll-mt-24 self-center">
+            <div className="mb-3 rounded-2xl border border-white/18 bg-white/14 p-4 text-white shadow-lg backdrop-blur">
+              <p className="text-xs font-black uppercase tracking-[0.16em] text-signal">Limited launch offer</p>
+              <p className="mt-1 text-lg font-black">Save $20 on every front wiper blade pair</p>
+              <p className="mt-1 text-sm font-semibold text-white/76">$8 shipping waived NZ-wide during the first 3 months.</p>
+            </div>
             <WiperFitmentFinder directToProduct />
           </div>
         </div>
@@ -63,7 +68,7 @@ export default async function HomePage() {
               <p className="text-sm font-black uppercase tracking-[0.18em] text-signal">Popular Products</p>
               <h2 className="mt-2 text-3xl font-black">Bestselling Front Wiper Blade Pairs</h2>
               <p className="mt-2 max-w-2xl text-sm font-bold leading-6 text-steel">
-                On sale now with front pair pricing and free NZ shipping included.
+                On sale now with $20 off front pair pricing and launch shipping waived NZ-wide.
               </p>
             </div>
             <Link href="/shop" className="inline-flex h-11 items-center gap-2 rounded-lg border border-black/10 bg-white px-4 text-sm font-black text-ink shadow-sm transition hover:-translate-y-0.5 hover:border-ink hover:shadow-md">
@@ -76,6 +81,31 @@ export default async function HomePage() {
             {popularWiperSets.map((wiperSet) => (
               <PopularSkuCard key={wiperSet.id} wiperSet={wiperSet} />
             ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="border-b border-black/10 bg-white">
+        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+          <div className="grid gap-5 rounded-2xl border border-black/10 bg-[#F8FAFC] p-5 shadow-panel lg:grid-cols-[0.85fr_1.15fr] lg:items-center lg:p-7">
+            <div>
+              <p className="text-sm font-black uppercase tracking-[0.18em] text-signal">Buy More, Save More</p>
+              <h2 className="mt-2 text-3xl font-black text-ink">Bundle savings for multiple vehicles</h2>
+              <p className="mt-3 text-sm font-bold leading-6 text-steel">
+                Buying for more than one car? Bundle savings are applied automatically in cart when eligible front wiper blade pairs are added.
+              </p>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-3">
+              <BundlePrice label="1 Pair" price="$59.99" note="Save $20" />
+              <BundlePrice label="2 Pairs" price="$109.99" note="Save up to $50" featured />
+              <BundlePrice label="3 Pairs" price="$149.99" note="Save up to $90" />
+            </div>
+            <div className="lg:col-span-2">
+              <Link href="/shop" className="inline-flex h-11 items-center gap-2 rounded-lg bg-ink px-4 text-sm font-black text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-black hover:shadow-md">
+                Shop Wiper Blade Pairs
+                <ShoppingCart className="h-4 w-4" />
+              </Link>
+            </div>
           </div>
         </div>
       </section>
@@ -188,7 +218,7 @@ function PopularSkuCard({ wiperSet }: { wiperSet: WiperSet }) {
         <p className="mt-2 text-sm font-black text-steel">
           Driver {wiperSet.driverLengthIn}" + Passenger {wiperSet.passengerLengthIn}"
         </p>
-        <p className="mt-3 text-xs font-black text-steel">Free NZ Shipping</p>
+        <p className="mt-3 text-xs font-black text-steel">Save $20 - launch shipping waived</p>
         <div className="mt-4 flex items-center justify-between gap-3">
           <p className="flex flex-wrap items-baseline gap-2">
             <span className="text-lg font-black">{formatMoney(wiperSet.price)}</span>
@@ -200,6 +230,16 @@ function PopularSkuCard({ wiperSet }: { wiperSet: WiperSet }) {
         </div>
       </div>
     </article>
+  );
+}
+
+function BundlePrice({ label, price, note, featured = false }: { label: string; price: string; note: string; featured?: boolean }) {
+  return (
+    <div className={`rounded-lg border p-4 ${featured ? "border-signal bg-white shadow-sm" : "border-black/10 bg-white"}`}>
+      <p className="text-sm font-black text-steel">{label}</p>
+      <p className="mt-2 text-2xl font-black text-ink">{price}</p>
+      <p className="mt-1 text-xs font-black uppercase tracking-[0.12em] text-signal">{note}</p>
+    </div>
   );
 }
 
