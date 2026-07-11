@@ -43,10 +43,18 @@ type WiperRearAddonResult = {
 export function WiperFitmentFinder({
   compact = false,
   directToProduct = false,
+  title = "Find wiper sizes by vehicle",
+  description = "Select make, model, and year to check blade lengths before choosing your wiper variant.",
+  directButtonLabel = "Find wipers for my car",
+  footnote,
   onVehicleSaved
 }: {
   compact?: boolean;
   directToProduct?: boolean;
+  title?: string;
+  description?: string;
+  directButtonLabel?: string;
+  footnote?: string;
   onVehicleSaved?: () => void;
 }) {
   const router = useRouter();
@@ -266,9 +274,9 @@ export function WiperFitmentFinder({
             <CarFront className="h-4 w-4" />
             Wiper fitment
           </div>
-          <h2 className={`${compact ? "mt-2 text-2xl" : "mt-3 text-3xl"} font-black`}>Find wiper sizes by vehicle</h2>
+          <h2 className={`${compact ? "mt-2 text-2xl" : "mt-3 text-3xl"} font-black`}>{title}</h2>
           <p className="mt-2 max-w-2xl text-sm font-bold leading-6 text-steel">
-            Select make, model, and year to check blade lengths before choosing your wiper variant.
+            {description}
           </p>
         </div>
         <div className="hidden h-12 w-12 shrink-0 place-items-center rounded-xl bg-ink text-white shadow-sm sm:grid">
@@ -313,9 +321,11 @@ export function WiperFitmentFinder({
           className="mt-6 inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-xl bg-signal px-5 py-4 text-sm font-black text-white shadow-lg shadow-red-900/15 transition hover:-translate-y-0.5 hover:bg-red-700 hover:shadow-xl disabled:translate-y-0 disabled:bg-zinc-300 disabled:shadow-none"
         >
           {searching ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
-          Find wipers for my car
+          {directButtonLabel}
         </button>
       ) : null}
+
+      {footnote ? <p className="mt-3 text-xs font-bold leading-6 text-steel">{footnote}</p> : null}
 
       {error ? <div className="mt-4 rounded border border-signal/30 bg-red-50 p-3 text-sm font-bold text-signal">{error}</div> : null}
 
