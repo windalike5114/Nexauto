@@ -39,6 +39,7 @@ export type Category = {
 };
 
 export type CartItem = {
+  lineId?: string;
   productId: string;
   variantId: string;
   sku: string;
@@ -46,6 +47,9 @@ export type CartItem = {
   category: CategorySlug;
   qty: number;
   price: number;
+  imageUrl?: string;
+  bundleEligible?: boolean;
+  bundleCategory?: "front-wiper-pair" | string;
   attributes: SelectedAttributes;
 };
 

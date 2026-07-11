@@ -3,7 +3,7 @@ import Stripe from "stripe";
 import { getVariantsByIds } from "@/lib/queries/catalog";
 import { getWiperRearAddonsByIds, getWiperSetsByIds } from "@/lib/queries/wiper-commerce";
 import { createClient } from "@/utils/supabase/server";
-import { getWiperPairLineTotal } from "@/lib/pricing";
+import { calculateCartLinePricing, calculateCartPricing } from "@/lib/pricing";
 import type { CartItem } from "@/lib/types";
 
 type ValidatedCheckoutItem = {
@@ -15,6 +15,7 @@ type ValidatedCheckoutItem = {
   price: number;
   checkoutQuantity?: number;
   checkoutLineTotal?: number;
+  bundleDiscount?: number;
   attributes: Record<string, string | number>;
 };
 
@@ -37,81 +38,78 @@ export async function POST(request: Request) {
   const wiperSetItems = items.filter((item) => item.productId === "wiper_set");
   const rearAddonItems = items.filter((item) => item.productId === "wiper_rear_addon");
 
-  const requestedByVariantId = new Map(standardItems.map((item) => [item.variantId, item]));
-  const requestedByWiperSetId = new Map(wiperSetItems.map((item) => [item.variantId, item]));
-  const requestedByRearAddonId = new Map(rearAddonItems.map((item) => [item.variantId, item]));
+  const requestedVariantIds = [...new Set(standardItems.map((item) => item.variantId))];
+  const requestedWiperSetIds = [...new Set(wiperSetItems.map((item) => item.variantId))];
+  const requestedRearAddonIds = [...new Set(rearAddonItems.map((item) => item.variantId))];
 
   const [dbVariants, dbWiperSets, dbRearAddons] = await Promise.all([
-    getVariantsByIds([...requestedByVariantId.keys()]),
-    getWiperSetsByIds([...requestedByWiperSetId.keys()]),
-    getWiperRearAddonsByIds([...requestedByRearAddonId.keys()])
+    getVariantsByIds(requestedVariantIds),
+    getWiperSetsByIds(requestedWiperSetIds),
+    getWiperRearAddonsByIds(requestedRearAddonIds)
   ]);
 
-  if (dbVariants.length !== requestedByVariantId.size) {
+  if (dbVariants.length !== requestedVariantIds.length) {
     return NextResponse.json({ error: "One or more cart items are no longer available." }, { status: 409 });
   }
 
-  if (dbWiperSets.length !== requestedByWiperSetId.size || dbRearAddons.length !== requestedByRearAddonId.size) {
+  if (dbWiperSets.length !== requestedWiperSetIds.length || dbRearAddons.length !== requestedRearAddonIds.length) {
     return NextResponse.json({ error: "One or more wiper kit items are no longer available." }, { status: 409 });
   }
 
   let validatedItems: ValidatedCheckoutItem[];
 
   try {
-    const variantItems = dbVariants.map((variant) => {
-      const cartItem = requestedByVariantId.get(variant.id);
+    const variantsById = new Map(dbVariants.map((variant) => [variant.id, variant]));
+    const wiperSetsById = new Map(dbWiperSets.map((wiperSet) => [wiperSet.id, wiperSet]));
+    const rearAddonsById = new Map(dbRearAddons.map((rearAddon) => [rearAddon.id, rearAddon]));
 
-      if (!cartItem) {
-        throw new Error(`Cart item missing for variant ${variant.id}`);
-      }
+    const cartItemsForPricing = items.map((cartItem) => {
+      const variant = variantsById.get(cartItem.variantId);
+      const wiperSet = wiperSetsById.get(cartItem.variantId);
+      const rearAddon = rearAddonsById.get(cartItem.variantId);
 
-      if (variant.stock < cartItem.qty) {
-        throw new Error(`Not enough stock for ${variant.sku}`);
-      }
-
-      return {
-        cartItem,
-        id: variant.id,
-        productId: variant.product_id,
-        sku: variant.sku,
-        name: getProductName(variant.products) ?? cartItem.name,
-        price: Number(variant.price),
-        attributes: variant.attributes
-      };
-    });
-
-    const wiperSetLineItems = dbWiperSets.map((wiperSet) => {
-      const cartItem = requestedByWiperSetId.get(wiperSet.id);
-      if (!cartItem) throw new Error(`Cart item missing for wiper set ${wiperSet.id}`);
-
-      return {
-        cartItem,
-        id: wiperSet.id,
-        productId: "wiper_set",
-        sku: wiperSet.sku,
-        name: wiperSet.name,
-        price: wiperSet.price,
-        checkoutQuantity: 1,
-        checkoutLineTotal: getWiperPairLineTotal(cartItem.qty, wiperSet.price),
-        attributes: {
-          ...cartItem.attributes,
-          driver_length: `${wiperSet.driverLengthIn}"`,
-          passenger_length: `${wiperSet.passengerLengthIn}"`
+      if (cartItem.productId !== "wiper_set" && cartItem.productId !== "wiper_rear_addon") {
+        if (!variant) throw new Error(`Cart item missing for variant ${cartItem.variantId}`);
+        if (variant.stock < cartItem.qty) {
+          throw new Error(`Not enough stock for ${variant.sku}`);
         }
-      };
-    });
 
-    const rearAddonLineItems = dbRearAddons.map((rearAddon) => {
-      const cartItem = requestedByRearAddonId.get(rearAddon.id);
-      if (!cartItem) throw new Error(`Cart item missing for rear add-on ${rearAddon.id}`);
+        return {
+          ...cartItem,
+          name: getProductName(variant.products) ?? cartItem.name,
+          sku: variant.sku,
+          price: Number(variant.price),
+          attributes: variant.attributes,
+          bundleEligible: false
+        };
+      }
+
+      if (cartItem.productId === "wiper_set") {
+        if (!wiperSet) throw new Error(`Cart item missing for wiper set ${cartItem.variantId}`);
+
+        return {
+          ...cartItem,
+          name: wiperSet.name,
+          sku: wiperSet.sku,
+          price: wiperSet.price,
+          bundleEligible: true,
+          bundleCategory: "front-wiper-pair",
+          attributes: {
+            ...cartItem.attributes,
+            driver_length: `${wiperSet.driverLengthIn}"`,
+            passenger_length: `${wiperSet.passengerLengthIn}"`
+          }
+        };
+      }
+
+      if (!rearAddon) throw new Error(`Cart item missing for rear add-on ${cartItem.variantId}`);
 
       return {
-        cartItem,
-        id: rearAddon.id,
-        productId: "wiper_rear_addon",
-        sku: `WPR${rearAddon.rearLengthIn}`,
+        ...cartItem,
         name: rearAddon.name,
+        sku: `WPR${rearAddon.rearLengthIn}`,
         price: rearAddon.price,
+        bundleEligible: false,
         attributes: {
           ...cartItem.attributes,
           rear_length: `${rearAddon.rearLengthIn}"`
@@ -119,7 +117,45 @@ export async function POST(request: Request) {
       };
     });
 
-    validatedItems = [...variantItems, ...wiperSetLineItems, ...rearAddonLineItems];
+    const linePricing = calculateCartLinePricing(cartItemsForPricing);
+
+    validatedItems = linePricing.map(({ item: cartItem, finalLineTotal, bundleDiscount }) => {
+      const variant = variantsById.get(cartItem.variantId);
+      const wiperSet = wiperSetsById.get(cartItem.variantId);
+      const rearAddon = rearAddonsById.get(cartItem.variantId);
+
+      if (cartItem.productId !== "wiper_set" && cartItem.productId !== "wiper_rear_addon" && variant) {
+        if (variant.stock < cartItem.qty) {
+          throw new Error(`Not enough stock for ${variant.sku}`);
+        }
+
+        return {
+          cartItem,
+          id: variant.id,
+          productId: variant.product_id,
+          sku: variant.sku,
+          name: getProductName(variant.products) ?? cartItem.name,
+          price: Number(variant.price),
+          checkoutQuantity: 1,
+          checkoutLineTotal: finalLineTotal,
+          bundleDiscount,
+          attributes: variant.attributes
+        };
+      }
+
+      return {
+        cartItem,
+        id: cartItem.variantId,
+        productId: cartItem.productId,
+        sku: String(wiperSet?.sku ?? (rearAddon ? `WPR${rearAddon.rearLengthIn}` : cartItem.sku)),
+        name: String(wiperSet?.name ?? rearAddon?.name ?? cartItem.name),
+        price: cartItem.price,
+        checkoutQuantity: 1,
+        checkoutLineTotal: finalLineTotal,
+        bundleDiscount,
+        attributes: cartItem.attributes
+      };
+    });
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Cart item validation failed." },
@@ -136,6 +172,7 @@ export async function POST(request: Request) {
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
   const vehicleMetadata = buildVehicleMetadata(validatedItems);
+  const pricing = calculateCartPricing(validatedItems.map((item) => item.cartItem));
   const supabase = await createClient();
   const {
     data: { user }
@@ -192,13 +229,7 @@ export async function POST(request: Request) {
     })),
     metadata: {
       items: JSON.stringify(
-        validatedItems.map((item) => ({
-          p: item.productId,
-          v: item.id,
-          s: item.sku,
-          q: item.cartItem.qty,
-          pr: item.checkoutLineTotal ? item.checkoutLineTotal / item.cartItem.qty : item.price
-        }))
+        validatedItems.map((item) => buildCompactMetadataItem(item))
       ),
       vehicle: JSON.stringify(vehicleMetadata),
       vehicle_make: vehicleMetadata?.make ?? "",
@@ -207,6 +238,9 @@ export async function POST(request: Request) {
       vehicle_series: "",
       vehicle_body: "",
       coupon_code: normalizedCouponCode ?? "",
+      products_subtotal: String(pricing.productsSubtotal),
+      bundle_discount: String(pricing.bundleDiscount),
+      final_subtotal: String(pricing.subtotal),
       source: "nexauto"
     },
     success_url: `${siteUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
@@ -216,6 +250,25 @@ export async function POST(request: Request) {
   const session = await stripe.checkout.sessions.create(sessionParams);
 
   return NextResponse.json({ url: session.url });
+}
+
+function buildCompactMetadataItem(item: ValidatedCheckoutItem) {
+  return {
+    p: item.productId,
+    v: item.id,
+    s: item.sku,
+    q: item.cartItem.qty,
+    pr: item.checkoutLineTotal ? item.checkoutLineTotal / item.cartItem.qty : item.price,
+    bd: item.bundleDiscount ?? 0,
+    veh: item.attributes.vehicle,
+    a: item.attributes.vehicle_application_id,
+    m: item.attributes.vehicle_make,
+    d: item.attributes.vehicle_model,
+    y: item.attributes.vehicle_year,
+    dl: item.attributes.driver_length,
+    pl: item.attributes.passenger_length,
+    rl: item.attributes.rear_length
+  };
 }
 
 async function findActivePromotionCode(stripe: Stripe, code: string) {

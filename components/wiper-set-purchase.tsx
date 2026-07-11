@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { Check, ShoppingBag } from "lucide-react";
 import { formatMoney } from "@/lib/catalog";
 import type { WiperRearAddon, WiperSet } from "@/lib/types";
+import { getWiperSetPreviewImage } from "@/lib/wiper-product-images";
 import { useCart } from "./cart-provider";
 
 export function WiperSetPurchase({
@@ -26,6 +26,7 @@ export function WiperSetPurchase({
   const [includeRear, setIncludeRear] = useState(Boolean(rearAddon));
   const [added, setAdded] = useState(false);
   const { addItem } = useCart();
+  const wiperImage = getWiperSetPreviewImage(wiperSet);
 
   function handleAdd() {
     addItem({
@@ -36,6 +37,9 @@ export function WiperSetPurchase({
       category: "wiper",
       qty: 1,
       price: wiperSet.price,
+      imageUrl: wiperImage,
+      bundleEligible: true,
+      bundleCategory: "front-wiper-pair",
       attributes: {
         driver_length: `${wiperSet.driverLengthIn}"`,
         passenger_length: `${wiperSet.passengerLengthIn}"`,
@@ -60,6 +64,8 @@ export function WiperSetPurchase({
         category: "wiper",
         qty: 1,
         price: rearAddon.price,
+        imageUrl: wiperImage,
+        bundleEligible: false,
         attributes: {
           rear_length: `${rearAddon.rearLengthIn}"`,
           ...(vehicle ? { vehicle } : {}),
@@ -115,9 +121,9 @@ export function WiperSetPurchase({
         </button>
       </div>
 
-      <Link href="/cart" className="mt-3 inline-flex h-11 w-full items-center justify-center rounded border border-black/10 text-sm font-black text-ink hover:border-ink">
-        View cart
-      </Link>
+      <p className="mt-3 text-center text-xs font-bold leading-5 text-steel">
+        Your cart will open here so you can keep shopping for another vehicle.
+      </p>
     </div>
   );
 }

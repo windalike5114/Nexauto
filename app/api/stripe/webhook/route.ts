@@ -10,6 +10,15 @@ type CheckoutMetadataItem = {
   s?: string;
   q?: number;
   pr?: number;
+  bd?: number;
+  veh?: string;
+  a?: string;
+  m?: string;
+  d?: string;
+  y?: number;
+  dl?: string;
+  pl?: string;
+  rl?: string;
   product_id: string;
   variant_id: string;
   sku: string;
@@ -308,7 +317,7 @@ function prepareOrderItem(
           rear_length: `${Number(rearAddon?.rear_length_in)}"`
         }
       : {}),
-    ...(vehicleContext
+    ...(vehicleContext && !item.attributes?.vehicle_application_id
       ? {
           vehicle_application_id: vehicleContext.applicationId,
           vehicle_make: vehicleContext.make,
@@ -339,22 +348,31 @@ function buildWiperFulfillmentRows(
   vehicleContext: VehicleContext | null,
   customerVehicleId: string | null
 ) {
-  const insertedBySku = new Map(insertedItems.map((item) => [item.sku, item]));
+  const insertedByLine = new Map(insertedItems.map((item) => [buildOrderItemLookupKey(item.sku, item.attributes), item]));
   const rearLength = orderItems.find((item) => item.logical_product_id === "wiper_rear_addon")?.attributes.rear_length;
 
   return orderItems
     .filter((item) => item.logical_product_id === "wiper_set")
-    .map((item) => ({
-      order_id: orderId,
-      order_item_id: insertedBySku.get(item.sku)?.id ?? null,
-      vehicle_application_id: vehicleContext?.applicationId ?? null,
-      customer_vehicle_id: customerVehicleId,
-      wiper_set_id: item.logical_variant_id,
-      driver_length_in: parseLength(item.attributes.driver_length),
-      passenger_length_in: parseLength(item.attributes.passenger_length),
-      rear_length_in: parseLength(rearLength),
-      connector_status: "pending"
-    }));
+    .map((item) => {
+      const itemVehicleApplicationId =
+        typeof item.attributes.vehicle_application_id === "string" ? item.attributes.vehicle_application_id : vehicleContext?.applicationId ?? null;
+
+      return {
+        order_id: orderId,
+        order_item_id: insertedByLine.get(buildOrderItemLookupKey(item.sku, item.attributes))?.id ?? null,
+        vehicle_application_id: itemVehicleApplicationId,
+        customer_vehicle_id: itemVehicleApplicationId === vehicleContext?.applicationId ? customerVehicleId : null,
+        wiper_set_id: item.logical_variant_id,
+        driver_length_in: parseLength(item.attributes.driver_length),
+        passenger_length_in: parseLength(item.attributes.passenger_length),
+        rear_length_in: parseLength(rearLength),
+        connector_status: "pending"
+      };
+    });
+}
+
+function buildOrderItemLookupKey(sku: string, attributes: Record<string, string | number>) {
+  return `${sku}|${String(attributes.vehicle_application_id ?? "")}|${String(attributes.vehicle ?? "")}`;
 }
 
 function extractVehicleContext(orderItems: PreparedOrderItem[]): VehicleContext | null {
@@ -395,6 +413,17 @@ function normalizeMetadataItem(item: Partial<CheckoutMetadataItem>): CheckoutMet
   const sku = item.sku ?? item.s;
   const qty = item.qty ?? item.q;
   const price = item.price ?? item.pr;
+  const attributes = {
+    ...(item.attributes ?? {}),
+    ...(item.veh ? { vehicle: item.veh } : {}),
+    ...(item.a ? { vehicle_application_id: item.a } : {}),
+    ...(item.m ? { vehicle_make: item.m } : {}),
+    ...(item.d ? { vehicle_model: item.d } : {}),
+    ...(item.y ? { vehicle_year: item.y } : {}),
+    ...(item.dl ? { driver_length: item.dl } : {}),
+    ...(item.pl ? { passenger_length: item.pl } : {}),
+    ...(item.rl ? { rear_length: item.rl } : {})
+  };
 
   if (!productId || !variantId || !sku || !qty || price === undefined) return null;
 
@@ -403,7 +432,7 @@ function normalizeMetadataItem(item: Partial<CheckoutMetadataItem>): CheckoutMet
     variant_id: variantId,
     sku,
     name: item.name,
-    attributes: item.attributes,
+    attributes,
     qty,
     price
   };

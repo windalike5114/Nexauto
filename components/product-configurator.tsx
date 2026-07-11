@@ -38,6 +38,8 @@ export function ProductConfigurator({
       category: product.category,
       qty,
       price: variant.price,
+      imageUrl: product.images[0],
+      bundleEligible: false,
       attributes: variant.attributes
     });
     setAdded(true);

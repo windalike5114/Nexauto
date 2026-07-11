@@ -5,13 +5,14 @@ import { useState } from "react";
 import { Trash2 } from "lucide-react";
 import { useCart } from "@/components/cart-provider";
 import { formatAttributeName, formatMoney } from "@/lib/catalog";
-import { getCartItemLineTotal, getWiperBundleSavings } from "@/lib/pricing";
+import { calculateCartPricing } from "@/lib/pricing";
 
 export default function CartPage() {
-  const { items, subtotal, updateQty, removeItem } = useCart();
+  const { items, updateQty, removeItem } = useCart();
   const [couponDraft, setCouponDraft] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState("");
   const selectedVehicle = getSelectedVehicle(items);
+  const pricing = calculateCartPricing(items);
 
   async function checkout() {
     const response = await fetch("/api/checkout", {
@@ -64,12 +65,15 @@ export default function CartPage() {
               </section>
             ) : null}
 
-            {items.map((item) => (
-              <article key={item.sku} className="rounded-lg border border-black/10 bg-white p-5">
+            {items.map((item) => {
+              const lineId = getCartLineId(item);
+              return (
+              <article key={lineId} className="rounded-lg border border-black/10 bg-white p-5">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                   <div>
                     <p className="text-lg font-black">{item.name}</p>
                     <p className="mt-1 font-mono text-sm font-bold text-steel">{item.sku}</p>
+                    {getVehicleLabel(item) ? <p className="mt-2 text-sm font-black text-ink">For: {getVehicleLabel(item)}</p> : null}
                     <div className="mt-3 flex flex-wrap gap-2">
                       {Object.entries(item.attributes).filter(([key]) => isCustomerVisibleAttribute(key)).map(([key, value]) => (
                         <span key={key} className="rounded bg-zinc-100 px-3 py-1 text-xs font-bold text-steel">
@@ -84,12 +88,12 @@ export default function CartPage() {
                       type="number"
                       min={1}
                       value={item.qty}
-                      onChange={(event) => updateQty(item.sku, Number(event.target.value))}
+                      onChange={(event) => updateQty(lineId, Number(event.target.value))}
                       className="h-11 w-20 rounded border border-black/10 px-3 font-bold"
                     />
                     <button
                       type="button"
-                      onClick={() => removeItem(item.sku)}
+                      onClick={() => removeItem(lineId)}
                       className="grid h-11 w-11 place-items-center rounded border border-black/10 text-steel hover:text-signal"
                       aria-label={`Remove ${item.sku}`}
                     >
@@ -99,20 +103,31 @@ export default function CartPage() {
                 </div>
                 <div className="mt-4 flex justify-between border-t border-black/10 pt-4 font-black">
                   <span>{formatMoney(item.price)} each</span>
-                  <span>{formatMoney(getCartItemLineTotal(item))}</span>
+                  <span>{formatMoney(item.price * item.qty)}</span>
                 </div>
-                {item.productId === "wiper_set" && getWiperBundleSavings(item.qty, item.price) > 0 ? (
-                  <p className="mt-2 text-sm font-black text-signal">
-                    Bundle saving: {formatMoney(getWiperBundleSavings(item.qty, item.price))}
-                  </p>
-                ) : null}
               </article>
-            ))}
+              );
+            })}
           </div>
           <aside className="h-fit rounded-lg border border-black/10 bg-white p-5 shadow-panel">
-            <div className="flex justify-between text-lg font-black">
+            {pricing.bundleProgressMessage ? (
+              <div className="mb-4 rounded-lg border border-signal/20 bg-red-50 p-3 text-sm font-black text-signal">
+                {pricing.bundleProgressMessage}
+              </div>
+            ) : null}
+            <div className="flex justify-between text-sm font-bold text-steel">
+              <span>Products subtotal</span>
+              <span>{formatMoney(pricing.productsSubtotal)}</span>
+            </div>
+            {pricing.bundleDiscount > 0 ? (
+              <div className="mt-2 flex justify-between text-sm font-black text-signal">
+                <span>{pricing.bundleLabel || "Bundle discount"}</span>
+                <span>-{formatMoney(pricing.bundleDiscount)}</span>
+              </div>
+            ) : null}
+            <div className="mt-3 flex justify-between border-t border-black/10 pt-3 text-lg font-black">
               <span>Subtotal</span>
-              <span>{formatMoney(subtotal)}</span>
+              <span>{formatMoney(pricing.subtotal)}</span>
             </div>
             <div className="mt-5 rounded-lg border border-black/10 bg-zinc-50 p-4">
               <label htmlFor="coupon" className="text-xs font-black uppercase tracking-[0.14em] text-steel">
@@ -171,6 +186,10 @@ export default function CartPage() {
   );
 }
 
+function getCartLineId(item: ReturnType<typeof useCart>["items"][number]) {
+  return item.lineId ?? [item.productId, item.variantId, item.sku, item.attributes.vehicle_application_id ?? "", item.attributes.vehicle ?? ""].join("|");
+}
+
 function getSelectedVehicle(items: ReturnType<typeof useCart>["items"]) {
   for (const item of items) {
     const vehicle = item.attributes.vehicle;
@@ -186,4 +205,11 @@ function getSelectedVehicle(items: ReturnType<typeof useCart>["items"]) {
 
 function isCustomerVisibleAttribute(key: string) {
   return !["vehicle", "vehicle_application_id", "vehicle_make", "vehicle_model", "vehicle_year"].includes(key);
+}
+
+function getVehicleLabel(item: ReturnType<typeof useCart>["items"][number]) {
+  const vehicle = item.attributes.vehicle;
+  if (typeof vehicle === "string" && vehicle.trim()) return vehicle;
+
+  return [item.attributes.vehicle_year, item.attributes.vehicle_make, item.attributes.vehicle_model].filter(Boolean).join(" ");
 }
