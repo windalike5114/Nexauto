@@ -17,16 +17,13 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://nexautoparts.co.nz"),
   icons: {
     icon: [
-      { url: blobMediaAssets.brand.favicons.icon16, sizes: "16x16", type: "image/png" },
-      { url: blobMediaAssets.brand.favicons.icon32, sizes: "32x32", type: "image/png" },
-      { url: blobMediaAssets.brand.favicons.icon48, sizes: "48x48", type: "image/png" },
-      { url: blobMediaAssets.brand.favicons.icon64, sizes: "64x64", type: "image/png" }
+      { url: "/favicon-48.png", sizes: "48x48", type: "image/png" },
+      { url: "/favicon-64.png", sizes: "64x64", type: "image/png" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" }
     ],
-    apple: [{ url: blobMediaAssets.brand.favicons.apple180, sizes: "180x180", type: "image/png" }],
-    other: [
-      { rel: "icon", url: blobMediaAssets.brand.favicons.android192, sizes: "192x192", type: "image/png" },
-      { rel: "icon", url: blobMediaAssets.brand.favicons.android512, sizes: "512x512", type: "image/png" }
-    ]
+    shortcut: "/favicon-48.png",
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }]
   }
 };
 

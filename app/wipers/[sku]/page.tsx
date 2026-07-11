@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -23,6 +24,25 @@ type WiperSkuSearchParams = {
 
 const productGalleryImages = ["nexautowiper1", "nexautowiper2", "nexautowiper3", "nexautowiper4", "nexautowiper5"];
 const adapterImageNames = ["nexautoclip1", "nexautoclip11", "nexautoclip13", "nexautoclip2", "nexautoclip4", "nexautoclip7", "nexautoclip8"];
+
+export async function generateMetadata({ params }: { params: Promise<{ sku: string }> }): Promise<Metadata> {
+  const { sku } = await params;
+  const wiperSet = await getWiperSetBySku(decodeURIComponent(sku));
+
+  if (!wiperSet) {
+    return {
+      title: "Premium Windscreen Wiper Blades",
+      description: "Find premium windscreen wiper blades for New Zealand vehicles with NexAutoParts."
+    };
+  }
+
+  const title = getWiperSetTitle(wiperSet);
+
+  return {
+    title,
+    description: `${title} for New Zealand vehicles. Smooth, quiet wiping performance, vehicle-matched fitment, 12-month warranty and Auckland dispatch.`
+  };
+}
 
 export default async function WiperSkuPage({
   params,
@@ -53,7 +73,7 @@ export default async function WiperSkuPage({
     : query.vehicle
       ? decodeURIComponent(query.vehicle)
       : "";
-  const title = `Front Windscreen Wiper Blade Pair - ${wiperSet.driverLengthIn}" + ${wiperSet.passengerLengthIn}"`;
+  const title = getWiperSetTitle(wiperSet);
   const galleryImages = productGalleryImages.map((name) => ({
     src: getImageUrl(name),
     alt: `${title} product image`
@@ -281,6 +301,10 @@ function getImageUrl(name: string) {
   const image = blobMediaAssets.images.find((asset) => asset.name === name);
   if (!image) throw new Error(`Missing Blob image asset: ${name}`);
   return image.url;
+}
+
+function getWiperSetTitle(wiperSet: { driverLengthIn: number; passengerLengthIn: number }) {
+  return `Premium Front Windscreen Wiper Blade Pair - ${wiperSet.driverLengthIn}" + ${wiperSet.passengerLengthIn}"`;
 }
 
 function FitmentTile({ label, lengthIn }: { label: string; lengthIn: number }) {

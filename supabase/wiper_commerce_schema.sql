@@ -198,7 +198,7 @@ select distinct
     trim(to_char(greatest(driver_length_in, passenger_length_in), 'FM999D9'), '.') ||
     '-' ||
     trim(to_char(least(driver_length_in, passenger_length_in), 'FM999D9'), '.') as slug,
-  'Front Wiper Pair - ' ||
+  'Premium Front Windscreen Wiper Blade Pair - ' ||
     trim(to_char(greatest(driver_length_in, passenger_length_in), 'FM999D9'), '.') ||
     '" + ' ||
     trim(to_char(least(driver_length_in, passenger_length_in), 'FM999D9'), '.') ||
