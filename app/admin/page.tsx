@@ -1,7 +1,29 @@
 import Link from "next/link";
-import { ClipboardList, FileText, Mail, PackagePlus, ShieldAlert, Wrench } from "lucide-react";
+import {
+  BarChart3,
+  CarFront,
+  ClipboardList,
+  FileText,
+  Inbox,
+  Mail,
+  PackagePlus,
+  Search,
+  Settings,
+  ShieldAlert,
+  ShoppingCart,
+  Store,
+  Users,
+  Wrench
+} from "lucide-react";
 import { formatMoney } from "@/lib/catalog";
-import { checkAdminAccess, loadAdminDashboardData, type AdminEmailEvent, type AdminOrder } from "@/lib/queries/admin";
+import {
+  checkAdminAccess,
+  loadAdminDashboardData,
+  type AdminCustomer,
+  type AdminEmailEvent,
+  type AdminEnquiry,
+  type AdminOrder
+} from "@/lib/queries/admin";
 import {
   updateFulfillmentAction,
   updateProductContentAction,
@@ -17,65 +39,220 @@ type AdminSearchParams = {
 };
 
 const tabs = [
-  { id: "orders", label: "Orders" },
-  { id: "fulfillment", label: "Wiper fulfillment" },
-  { id: "products", label: "Products" },
-  { id: "content", label: "Content" },
-  { id: "emails", label: "Email history" }
+  {
+    group: "Admin",
+    items: [{ id: "overview", label: "Overview", icon: BarChart3 }]
+  },
+  {
+    group: "Orders",
+    items: [
+      { id: "orders", label: "Orders", icon: ShoppingCart },
+      { id: "fulfillment", label: "Wiper fulfillment", icon: Wrench }
+    ]
+  },
+  {
+    group: "Catalog",
+    items: [
+      { id: "products", label: "Products", icon: PackagePlus },
+      { id: "fitment", label: "Vehicle fitment", icon: CarFront }
+    ]
+  },
+  {
+    group: "Customers",
+    items: [
+      { id: "customers", label: "Customers", icon: Users },
+      { id: "enquiries", label: "Enquiries", icon: Inbox }
+    ]
+  },
+  {
+    group: "System",
+    items: [
+      { id: "emails", label: "Emails", icon: Mail },
+      { id: "content", label: "Content", icon: FileText },
+      { id: "settings", label: "Settings", icon: Settings }
+    ]
+  }
 ];
+
+const flatTabs = tabs.flatMap((group) => group.items);
 
 export default async function AdminPage({ searchParams }: { searchParams: Promise<AdminSearchParams> }) {
   const params = await searchParams;
-  const activeTab = tabs.some((tab) => tab.id === params.tab) ? params.tab! : "orders";
+  const activeTab = flatTabs.some((tab) => tab.id === params.tab) ? params.tab! : "overview";
   const access = await checkAdminAccess();
 
   if (!access.ok) {
     return <AdminGate reason={access.reason} email={access.email} />;
   }
 
-  const { orders, products, variants, wiperSets, rearAddons, emailEvents } = await loadAdminDashboardData();
-  const pendingFulfillment = orders.filter((order) => order.fulfillment?.connectorStatus === "pending").length;
-  const paidOrders = orders.filter((order) => order.status === "paid").length;
-  const failedEmails = emailEvents.filter((event) => ["failed", "bounced", "complained"].includes(event.status)).length;
+  const { orders, products, variants, wiperSets, rearAddons, emailEvents, customers, enquiries } = await loadAdminDashboardData();
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-      <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <p className="text-sm font-black uppercase tracking-[0.18em] text-signal">Admin</p>
-          <h1 className="mt-2 text-4xl font-black">Operations workbench</h1>
-          <p className="mt-3 text-sm font-bold text-steel">Signed in as {access.email}</p>
+    <main className="min-h-screen bg-[#F6F7F9] text-ink">
+      <div className="mx-auto grid max-w-[1600px] gap-0 lg:grid-cols-[260px_1fr]">
+        <AdminSidebar activeTab={activeTab} />
+        <section className="min-w-0 px-4 py-6 sm:px-6 lg:px-8">
+          <AdminTopBar email={access.email} activeTab={activeTab} />
+
+          {activeTab === "overview" ? (
+            <OverviewPanel
+              orders={orders}
+              variants={variants}
+              emailEvents={emailEvents}
+              customers={customers}
+              enquiries={enquiries}
+            />
+          ) : null}
+          {activeTab === "orders" ? <OrdersPanel orders={orders} /> : null}
+          {activeTab === "fulfillment" ? <FulfillmentPanel orders={orders} /> : null}
+          {activeTab === "products" ? (
+            <ProductsPanel variants={variants} wiperSets={wiperSets} rearAddons={rearAddons} />
+          ) : null}
+          {activeTab === "fitment" ? <PlaceholderPanel title="Vehicle fitment" text="Fitment review tools are reserved for the next admin phase. Current fitment lookup remains database-driven on the storefront." /> : null}
+          {activeTab === "customers" ? <CustomersPanel customers={customers} /> : null}
+          {activeTab === "enquiries" ? <EnquiriesPanel enquiries={enquiries} /> : null}
+          {activeTab === "content" ? <ContentPanel products={products} /> : null}
+          {activeTab === "emails" ? <EmailHistoryPanel emailEvents={emailEvents} /> : null}
+          {activeTab === "settings" ? <SettingsPanel /> : null}
+        </section>
+      </div>
+    </main>
+  );
+}
+
+function AdminSidebar({ activeTab }: { activeTab: string }) {
+  return (
+    <aside className="border-b border-black/10 bg-white px-4 py-5 lg:sticky lg:top-0 lg:min-h-screen lg:border-b-0 lg:border-r">
+      <div className="mb-6">
+        <p className="text-lg font-black">NexAutoParts</p>
+        <p className="text-xs font-black uppercase tracking-[0.2em] text-signal">Admin</p>
+      </div>
+      <nav className="grid gap-5">
+        {tabs.map((group) => (
+          <div key={group.group}>
+            <p className="mb-2 px-2 text-[11px] font-black uppercase tracking-[0.16em] text-steel">{group.group}</p>
+            <div className="grid gap-1">
+              {group.items.map((item) => {
+                const Icon = item.icon;
+                const active = activeTab === item.id;
+                return (
+                  <Link
+                    key={item.id}
+                    href={`/admin?tab=${item.id}` as never}
+                    className={`flex h-10 items-center gap-3 rounded-lg border-l-4 px-3 text-sm font-black transition ${
+                      active
+                        ? "border-signal bg-red-50 text-ink"
+                        : "border-transparent text-steel hover:bg-zinc-50 hover:text-ink"
+                    }`}
+                  >
+                    <Icon className="h-4 w-4" />
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </nav>
+    </aside>
+  );
+}
+
+function AdminTopBar({ email, activeTab }: { email: string; activeTab: string }) {
+  const activeLabel = flatTabs.find((tab) => tab.id === activeTab)?.label ?? "Overview";
+
+  return (
+    <header className="mb-6 flex flex-col gap-4 rounded-xl border border-black/10 bg-white p-4 shadow-sm lg:flex-row lg:items-center lg:justify-between">
+      <div>
+        <p className="text-xs font-black uppercase tracking-[0.18em] text-steel">{new Date().toLocaleDateString("en-NZ", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</p>
+        <h1 className="mt-1 text-2xl font-black">{activeLabel}</h1>
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
+        <Link href="/" className="inline-flex h-10 items-center gap-2 rounded-lg border border-black/10 bg-white px-3 text-sm font-black text-steel hover:border-ink">
+          <Store className="h-4 w-4" />
+          View Store
+        </Link>
+        <div className="hidden h-10 items-center gap-2 rounded-lg border border-black/10 bg-zinc-50 px-3 text-sm font-bold text-steel md:flex">
+          <Search className="h-4 w-4" />
+          Search
         </div>
-        <div className="flex flex-wrap gap-2">
-          {tabs.map((tab) => (
-            <Link
-              key={tab.id}
-              href={`/admin?tab=${tab.id}` as never}
-              className={`rounded px-4 py-2 text-sm font-black ${
-                activeTab === tab.id ? "bg-ink text-white" : "border border-black/10 bg-white text-steel hover:border-ink"
-              }`}
-            >
-              {tab.label}
-            </Link>
-          ))}
-        </div>
+        <div className="rounded-lg bg-ink px-3 py-2 text-sm font-black text-white">{email}</div>
+      </div>
+    </header>
+  );
+}
+
+function OverviewPanel({
+  orders,
+  variants,
+  emailEvents,
+  customers,
+  enquiries
+}: {
+  orders: AdminOrder[];
+  variants: Awaited<ReturnType<typeof loadAdminDashboardData>>["variants"];
+  emailEvents: AdminEmailEvent[];
+  customers: AdminCustomer[];
+  enquiries: AdminEnquiry[];
+}) {
+  const today = new Date().toDateString();
+  const todaysOrders = orders.filter((order) => new Date(order.createdAt).toDateString() === today);
+  const todaysSales = todaysOrders.reduce((total, order) => total + order.subtotal, 0);
+  const paidOrders = orders.filter((order) => order.status === "paid");
+  const averageOrderValue = paidOrders.length ? paidOrders.reduce((total, order) => total + order.subtotal, 0) / paidOrders.length : 0;
+  const pendingFulfillment = orders.filter((order) => order.fulfillment?.connectorStatus === "pending");
+  const failedPayments = orders.filter((order) => ["failed", "payment_failed"].includes(order.status));
+  const lowStock = variants.filter((variant) => variant.stock <= 5);
+  const failedEmails = emailEvents.filter((event) => ["failed", "bounced", "complained"].includes(event.status));
+  const newEnquiries = enquiries.filter((enquiry) => enquiry.status === "new");
+
+  return (
+    <section className="grid gap-6">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <Metric icon={<BarChart3 className="h-5 w-5" />} label="Today's Sales" value={formatMoney(todaysSales)} detail={`${todaysOrders.length} orders today`} />
+        <Metric icon={<ClipboardList className="h-5 w-5" />} label="Orders" value={String(orders.length)} detail={`${pendingFulfillment.length} awaiting fulfilment`} />
+        <Metric icon={<ShoppingCart className="h-5 w-5" />} label="Average Order Value" value={formatMoney(averageOrderValue)} detail="Paid orders only" />
+        <Metric icon={<Users className="h-5 w-5" />} label="Customers" value={String(customers.length)} detail={`${newEnquiries.length} new enquiries`} />
       </div>
 
-      <section className="grid gap-4 md:grid-cols-4">
-        <Metric icon={<ClipboardList className="h-5 w-5" />} label="Paid orders" value={String(paidOrders)} />
-        <Metric icon={<Wrench className="h-5 w-5" />} label="Pending connectors" value={String(pendingFulfillment)} />
-        <Metric icon={<PackagePlus className="h-5 w-5" />} label="Products" value={String(products.length)} />
-        <Metric icon={<Mail className="h-5 w-5" />} label="Email issues" value={String(failedEmails)} />
-      </section>
+      <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
+        <Panel title="Needs Attention">
+          <AttentionRow label="Orders awaiting fulfilment" value={pendingFulfillment.length} href="/admin?tab=fulfillment" />
+          <AttentionRow label="Failed payments" value={failedPayments.length} href="/admin?tab=orders" />
+          <AttentionRow label="Low-stock products" value={lowStock.length} href="/admin?tab=products" />
+          <AttentionRow label="New enquiries" value={newEnquiries.length} href="/admin?tab=enquiries" />
+          <AttentionRow label="Failed emails" value={failedEmails.length} href="/admin?tab=emails" />
+        </Panel>
 
-      {activeTab === "orders" ? <OrdersPanel orders={orders} /> : null}
-      {activeTab === "fulfillment" ? <FulfillmentPanel orders={orders} /> : null}
-      {activeTab === "products" ? (
-        <ProductsPanel variants={variants} wiperSets={wiperSets} rearAddons={rearAddons} />
-      ) : null}
-      {activeTab === "content" ? <ContentPanel products={products} /> : null}
-      {activeTab === "emails" ? <EmailHistoryPanel emailEvents={emailEvents} /> : null}
-    </main>
+        <Panel title="Order Status">
+          <StatusCount label="Paid" count={orders.filter((order) => order.status === "paid").length} />
+          <StatusCount label="Pending" count={orders.filter((order) => order.status === "pending").length} />
+          <StatusCount label="Processing" count={orders.filter((order) => order.fulfillment?.connectorStatus === "selected").length} />
+          <StatusCount label="Shipped / fulfilled" count={orders.filter((order) => ["packed", "fulfilled"].includes(order.fulfillment?.connectorStatus ?? "")).length} />
+          <StatusCount label="Cancelled" count={orders.filter((order) => order.status === "cancelled").length} />
+        </Panel>
+      </div>
+
+      <div className="grid gap-6 xl:grid-cols-[1.35fr_0.65fr]">
+        <Panel title="Recent Orders">
+          <CompactOrders orders={orders.slice(0, 6)} />
+        </Panel>
+        <Panel title="Low Stock">
+          <div className="grid gap-3">
+            {lowStock.slice(0, 8).map((variant) => (
+              <div key={variant.id} className="flex items-center justify-between rounded-lg border border-black/10 bg-zinc-50 p-3">
+                <div>
+                  <p className="font-black">{variant.sku}</p>
+                  <p className="text-xs font-bold text-steel">{variant.productName}</p>
+                </div>
+                <Badge>{variant.stock} left</Badge>
+              </div>
+            ))}
+            {lowStock.length === 0 ? <EmptyState text="No low-stock items." /> : null}
+          </div>
+        </Panel>
+      </div>
+    </section>
   );
 }
 
@@ -383,14 +560,176 @@ function EmailHistoryPanel({ emailEvents }: { emailEvents: AdminEmailEvent[] }) 
   );
 }
 
-function Metric({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+function CustomersPanel({ customers }: { customers: AdminCustomer[] }) {
   return (
-    <div className="rounded-lg border border-black/10 bg-white p-5 shadow-sm">
+    <Panel title="Customers" className="mt-0">
+      <div className="overflow-hidden rounded-lg border border-black/10">
+        <div className="hidden grid-cols-[1fr_220px_90px_130px_120px] gap-3 border-b border-black/10 bg-zinc-50 px-4 py-3 text-xs font-black uppercase tracking-[0.14em] text-steel lg:grid">
+          <span>Customer</span>
+          <span>Email</span>
+          <span>Orders</span>
+          <span>Total Spent</span>
+          <span>Joined</span>
+        </div>
+        <div className="divide-y divide-black/10">
+          {customers.map((customer) => (
+            <article key={customer.id} className="grid gap-3 px-4 py-4 text-sm lg:grid-cols-[1fr_220px_90px_130px_120px] lg:items-center">
+              <div>
+                <p className="font-black">{customer.name ?? "Customer"}</p>
+                <p className="font-mono text-xs font-bold text-steel">{customer.id.slice(0, 8)}</p>
+              </div>
+              <p className="break-all font-bold text-steel">{customer.email}</p>
+              <p className="font-black">{customer.orderCount}</p>
+              <p className="font-black">{formatMoney(customer.totalSpent)}</p>
+              <p className="font-bold text-steel">{new Date(customer.joinedAt).toLocaleDateString("en-NZ")}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+      {customers.length === 0 ? <EmptyState text="No customers yet." /> : null}
+    </Panel>
+  );
+}
+
+function EnquiriesPanel({ enquiries }: { enquiries: AdminEnquiry[] }) {
+  return (
+    <Panel title="Enquiries" className="mt-0">
+      <div className="grid gap-4">
+        {enquiries.map((enquiry) => (
+          <article key={enquiry.id} className="rounded-lg border border-black/10 bg-zinc-50 p-4">
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+              <div>
+                <p className="font-black">{enquiry.name}</p>
+                <p className="mt-1 break-all text-sm font-bold text-steel">{enquiry.email}</p>
+                {enquiry.partOrSku ? <p className="mt-2 font-mono text-xs font-black text-signal">{enquiry.partOrSku}</p> : null}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Badge>{enquiry.status.replaceAll("_", " ")}</Badge>
+                <Badge>{new Date(enquiry.createdAt).toLocaleDateString("en-NZ")}</Badge>
+              </div>
+            </div>
+            <p className="mt-4 rounded-lg bg-white p-3 text-sm font-bold leading-6 text-ink">{enquiry.message}</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <a href={`mailto:${enquiry.email}`} className="rounded bg-ink px-3 py-2 text-xs font-black text-white">
+                Reply by Email
+              </a>
+              {enquiry.sourceUrl ? (
+                <a href={enquiry.sourceUrl} className="rounded border border-black/10 bg-white px-3 py-2 text-xs font-black text-steel">
+                  Source Page
+                </a>
+              ) : null}
+            </div>
+          </article>
+        ))}
+        {enquiries.length === 0 ? <EmptyState text="No enquiries yet. Run the contact_enquiries SQL migration before expecting live records." /> : null}
+      </div>
+    </Panel>
+  );
+}
+
+function SettingsPanel() {
+  return (
+    <section className="grid gap-6 xl:grid-cols-2">
+      <Panel title="Store Settings" className="mt-0">
+        <ReadOnlySetting label="Business Name" value="NexAutoParts" />
+        <ReadOnlySetting label="Website URL" value="https://nexautoparts.co.nz" />
+        <ReadOnlySetting label="Support Email" value="support@nexautoparts.co.nz" />
+        <ReadOnlySetting label="Order Email" value="orders@nexautoparts.co.nz" />
+      </Panel>
+      <Panel title="Integrations" className="mt-0">
+        <ReadOnlySetting label="Supabase" value="Connected via server environment" />
+        <ReadOnlySetting label="Stripe" value="Connected via webhook" />
+        <ReadOnlySetting label="Resend" value="Connected when RESEND_API_KEY is set" />
+        <p className="mt-4 rounded-lg bg-zinc-50 p-3 text-sm font-bold leading-6 text-steel">
+          Secret keys are intentionally not shown in admin. Manage them in Vercel environment variables.
+        </p>
+      </Panel>
+    </section>
+  );
+}
+
+function PlaceholderPanel({ title, text }: { title: string; text: string }) {
+  return (
+    <Panel title={title} className="mt-0">
+      <p className="text-sm font-bold leading-6 text-steel">{text}</p>
+    </Panel>
+  );
+}
+
+function Panel({ title, children, className = "" }: { title: string; children: React.ReactNode; className?: string }) {
+  return (
+    <section className={`rounded-xl border border-black/10 bg-white p-5 shadow-sm ${className}`}>
+      <h2 className="text-xl font-black">{title}</h2>
+      <div className="mt-5">{children}</div>
+    </section>
+  );
+}
+
+function AttentionRow({ label, value, href }: { label: string; value: number; href: string }) {
+  return (
+    <Link href={href as never} className="flex items-center justify-between rounded-lg border border-black/10 bg-zinc-50 p-3 transition hover:-translate-y-0.5 hover:bg-white hover:shadow-sm">
+      <div>
+        <p className="font-black">{value}</p>
+        <p className="text-sm font-bold text-steel">{label}</p>
+      </div>
+      <span className="text-sm font-black text-signal">View</span>
+    </Link>
+  );
+}
+
+function StatusCount({ label, count }: { label: string; count: number }) {
+  return (
+    <div className="flex items-center justify-between border-b border-black/10 py-3 last:border-b-0">
+      <span className="font-bold text-steel">{label}</span>
+      <span className="font-black">{count}</span>
+    </div>
+  );
+}
+
+function CompactOrders({ orders }: { orders: AdminOrder[] }) {
+  return (
+    <div className="overflow-hidden rounded-lg border border-black/10">
+      <div className="hidden grid-cols-[120px_1fr_120px_110px_130px] gap-3 border-b border-black/10 bg-zinc-50 px-4 py-3 text-xs font-black uppercase tracking-[0.14em] text-steel lg:grid">
+        <span>Order</span>
+        <span>Customer</span>
+        <span>Total</span>
+        <span>Payment</span>
+        <span>Fulfilment</span>
+      </div>
+      <div className="divide-y divide-black/10">
+        {orders.map((order) => (
+          <article key={order.id} className="grid gap-3 px-4 py-4 text-sm lg:grid-cols-[120px_1fr_120px_110px_130px] lg:items-center">
+            <p className="font-mono font-black">{formatOrderNumber(order.id)}</p>
+            <p className="break-all font-bold text-steel">{order.customerName ?? order.email ?? "Guest"}</p>
+            <p className="font-black">{formatMoney(order.subtotal)}</p>
+            <Badge>{order.status}</Badge>
+            <Badge>{order.fulfillment?.connectorStatus ?? "unfulfilled"}</Badge>
+          </article>
+        ))}
+      </div>
+      {orders.length === 0 ? <EmptyState text="No orders yet." /> : null}
+    </div>
+  );
+}
+
+function ReadOnlySetting({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between border-b border-black/10 py-3 last:border-b-0">
+      <span className="text-sm font-black uppercase tracking-[0.12em] text-steel">{label}</span>
+      <span className="text-right text-sm font-black">{value}</span>
+    </div>
+  );
+}
+
+function Metric({ icon, label, value, detail }: { icon: React.ReactNode; label: string; value: string; detail?: string }) {
+  return (
+    <div className="rounded-xl border border-black/10 bg-white p-5 shadow-sm">
       <div className="flex items-center gap-3 text-steel">
         {icon}
         <span className="text-sm font-black uppercase tracking-[0.16em]">{label}</span>
       </div>
       <p className="mt-4 text-3xl font-black">{value}</p>
+      {detail ? <p className="mt-2 text-sm font-bold text-steel">{detail}</p> : null}
     </div>
   );
 }
@@ -450,4 +789,8 @@ function EmptyState({ text }: { text: string }) {
 
 function formatLength(value: number | null) {
   return value ? `${value}"` : "N/A";
+}
+
+function formatOrderNumber(orderId: string) {
+  return `#NXA${orderId.replaceAll("-", "").slice(0, 8).toUpperCase()}`;
 }

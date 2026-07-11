@@ -317,6 +317,25 @@ create table if not exists email_events (
   )
 );
 
+create table if not exists contact_enquiries (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  email text not null,
+  part_or_sku text,
+  message text not null,
+  source_page text,
+  source_url text,
+  product_name text,
+  product_sku text,
+  status text not null default 'new',
+  admin_note text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  constraint contact_enquiries_status_check check (
+    status in ('new', 'in_progress', 'replied', 'closed')
+  )
+);
+
 create index if not exists fitment_import_rows_batch_status_idx
   on fitment_import_rows(batch_id, parse_status);
 create index if not exists vehicle_applications_lookup_idx
@@ -349,6 +368,10 @@ create index if not exists email_events_status_idx
   on email_events(status, created_at desc);
 create index if not exists email_events_resend_idx
   on email_events(resend_email_id);
+create index if not exists contact_enquiries_email_idx
+  on contact_enquiries(email);
+create index if not exists contact_enquiries_status_idx
+  on contact_enquiries(status, created_at desc);
 
 alter table categories enable row level security;
 alter table products enable row level security;
@@ -373,6 +396,7 @@ alter table wiper_rear_addons enable row level security;
 alter table order_vehicle_snapshots enable row level security;
 alter table order_wiper_fulfillment enable row level security;
 alter table email_events enable row level security;
+alter table contact_enquiries enable row level security;
 
 drop policy if exists "Public can read vehicle makes" on vehicle_makes;
 create policy "Public can read vehicle makes"

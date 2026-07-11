@@ -107,6 +107,31 @@ export type AdminEmailEvent = {
   updatedAt: string;
 };
 
+export type AdminCustomer = {
+  id: string;
+  email: string;
+  name: string | null;
+  orderCount: number;
+  totalSpent: number;
+  joinedAt: string;
+};
+
+export type AdminEnquiry = {
+  id: string;
+  name: string;
+  email: string;
+  partOrSku: string | null;
+  message: string;
+  sourcePage: string | null;
+  sourceUrl: string | null;
+  productName: string | null;
+  productSku: string | null;
+  status: string;
+  adminNote: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
 type OrderRow = {
   id: string;
   email: string | null;
@@ -206,6 +231,29 @@ type EmailEventRow = {
   updated_at: string;
 };
 
+type CustomerRow = {
+  id: string;
+  email: string;
+  name: string | null;
+  created_at: string;
+};
+
+type EnquiryRow = {
+  id: string;
+  name: string;
+  email: string;
+  part_or_sku: string | null;
+  message: string;
+  source_page: string | null;
+  source_url: string | null;
+  product_name: string | null;
+  product_sku: string | null;
+  status: string;
+  admin_note: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 export async function checkAdminAccess(): Promise<AdminCheck> {
   const allowedEmails = getAllowedAdminEmails();
 
@@ -250,7 +298,7 @@ export async function loadAdminDashboardData() {
 
   const orders = (ordersData ?? []) as OrderRow[];
   const orderIds = orders.map((order) => order.id);
-  const [items, vehicles, fulfillments, products, variants, wiperSets, rearAddons, emailEvents] = await Promise.all([
+  const [items, vehicles, fulfillments, products, variants, wiperSets, rearAddons, emailEvents, customers, enquiries] = await Promise.all([
     listOrderItems(orderIds),
     listOrderVehicles(orderIds),
     listFulfillments(orderIds),
@@ -258,7 +306,9 @@ export async function loadAdminDashboardData() {
     listAdminVariants(),
     listAdminWiperSets(),
     listAdminRearAddons(),
-    listAdminEmailEvents()
+    listAdminEmailEvents(),
+    listAdminCustomers(orders),
+    listAdminEnquiries()
   ]);
 
   const itemsByOrder = groupBy(items, (item) => item.orderId);
@@ -284,7 +334,9 @@ export async function loadAdminDashboardData() {
     variants,
     wiperSets,
     rearAddons,
-    emailEvents
+    emailEvents,
+    customers,
+    enquiries
   };
 }
 
@@ -470,6 +522,68 @@ async function listAdminEmailEvents() {
   }));
 }
 
+async function listAdminCustomers(orders: OrderRow[]) {
+  const supabase = getAdminOrThrow();
+  const { data, error } = await supabase
+    .from("customer_profiles")
+    .select("id,email,name,created_at")
+    .order("created_at", { ascending: false })
+    .limit(100);
+
+  if (isMissingTable(error, "customer_profiles")) return [];
+  if (error) throw error;
+
+  const totalsByEmail = new Map<string, { orderCount: number; totalSpent: number }>();
+  for (const order of orders) {
+    const email = order.email?.toLowerCase();
+    if (!email) continue;
+    const current = totalsByEmail.get(email) ?? { orderCount: 0, totalSpent: 0 };
+    current.orderCount += 1;
+    current.totalSpent += Number(order.subtotal);
+    totalsByEmail.set(email, current);
+  }
+
+  return ((data ?? []) as CustomerRow[]).map((row): AdminCustomer => {
+    const totals = totalsByEmail.get(row.email.toLowerCase()) ?? { orderCount: 0, totalSpent: 0 };
+    return {
+      id: row.id,
+      email: row.email,
+      name: row.name,
+      orderCount: totals.orderCount,
+      totalSpent: totals.totalSpent,
+      joinedAt: row.created_at
+    };
+  });
+}
+
+async function listAdminEnquiries() {
+  const supabase = getAdminOrThrow();
+  const { data, error } = await supabase
+    .from("contact_enquiries")
+    .select("id,name,email,part_or_sku,message,source_page,source_url,product_name,product_sku,status,admin_note,created_at,updated_at")
+    .order("created_at", { ascending: false })
+    .limit(100);
+
+  if (isMissingTable(error, "contact_enquiries")) return [];
+  if (error) throw error;
+
+  return ((data ?? []) as EnquiryRow[]).map((row): AdminEnquiry => ({
+    id: row.id,
+    name: row.name,
+    email: row.email,
+    partOrSku: row.part_or_sku,
+    message: row.message,
+    sourcePage: row.source_page,
+    sourceUrl: row.source_url,
+    productName: row.product_name,
+    productSku: row.product_sku,
+    status: row.status,
+    adminNote: row.admin_note,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at
+  }));
+}
+
 function getAllowedAdminEmails() {
   return (process.env.ADMIN_EMAILS ?? "")
     .split(",")
@@ -509,6 +623,11 @@ function isMissingOptionalProductContentColumn(error: { code?: string; message?:
 function isMissingEmailEventsTable(error: { code?: string; message?: string } | null) {
   if (!error) return false;
   return error.code === "42P01" || error.message?.includes("email_events");
+}
+
+function isMissingTable(error: { code?: string; message?: string } | null, table: string) {
+  if (!error) return false;
+  return error.code === "42P01" || Boolean(error.message?.includes(table));
 }
 
 function toNullableNumber(value: string | number | null) {

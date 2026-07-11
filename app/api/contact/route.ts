@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { sendContactEmails } from "@/lib/email/templates/contact";
+import { createSupabaseAdminClient } from "@/lib/supabase";
 
 type ContactRequest = {
   name?: string;
@@ -49,6 +50,17 @@ export async function POST(request: Request) {
   }
 
   try {
+    await saveContactEnquiry({
+      name,
+      email,
+      partOrSku,
+      message,
+      sourcePage,
+      sourceUrl,
+      productName,
+      productSku
+    });
+
     await sendContactEmails({
       name,
       email,
@@ -66,6 +78,36 @@ export async function POST(request: Request) {
       { error: "We couldn't send your enquiry. Please try again or email support@nexautoparts.co.nz." },
       { status: 500 }
     );
+  }
+}
+
+async function saveContactEnquiry(input: {
+  name: string;
+  email: string;
+  partOrSku: string;
+  message: string;
+  sourcePage: string;
+  sourceUrl: string;
+  productName: string;
+  productSku: string;
+}) {
+  const supabase = createSupabaseAdminClient();
+  if (!supabase) return;
+
+  try {
+    await supabase.from("contact_enquiries").insert({
+      name: input.name,
+      email: input.email,
+      part_or_sku: input.partOrSku || null,
+      message: input.message,
+      source_page: input.sourcePage,
+      source_url: input.sourceUrl,
+      product_name: input.productName || null,
+      product_sku: input.productSku || null,
+      status: "new"
+    });
+  } catch {
+    // The contact email path should keep working even before the enquiry table is migrated.
   }
 }
 
