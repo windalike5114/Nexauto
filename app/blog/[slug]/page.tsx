@@ -177,9 +177,21 @@ export default async function BlogArticlePage({ params }: BlogArticlePageProps) 
 }
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat("en-NZ", {
-    day: "numeric",
-    month: "long",
-    year: "numeric"
-  }).format(new Date(`${value}T00:00:00+12:00`));
+  const [year, month, day] = value.split("-").map(Number);
+  const monthNames = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December"
+  ];
+
+  return `${day} ${monthNames[month - 1]} ${year}`;
 }
