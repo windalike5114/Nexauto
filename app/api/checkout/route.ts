@@ -3,6 +3,7 @@ import Stripe from "stripe";
 import { getVariantsByIds } from "@/lib/queries/catalog";
 import { listCustomerOrders } from "@/lib/queries/account";
 import { getWiperRearAddonsByIds, getWiperSetsByIds } from "@/lib/queries/wiper-commerce";
+import { createSupabaseAdminClient } from "@/lib/supabase";
 import { createClient } from "@/utils/supabase/server";
 import { calculateCartLinePricing, calculateCartPricing } from "@/lib/pricing";
 import type { CartItem } from "@/lib/types";
@@ -184,6 +185,19 @@ export async function POST(request: Request) {
   } = await supabase.auth.getUser();
   const welcomeRewardDiscount = welcomeRewardApplied ? await getValidatedWelcomeRewardDiscount(user?.email ?? null, validatedItems) : 0;
   const checkoutItems = welcomeRewardDiscount > 0 ? applyCheckoutDiscount(validatedItems, welcomeRewardDiscount) : validatedItems;
+  const pendingOrder = await createPendingCheckoutOrder({
+    items: checkoutItems,
+    email: user?.email ?? null,
+    vehicle: vehicleMetadata,
+    currency: "nzd",
+    pricing: {
+      productsSubtotal: pricing.productsSubtotal,
+      bundleDiscount: pricing.bundleDiscount,
+      welcomeRewardDiscount,
+      finalSubtotal: Math.max(0, pricing.subtotal - welcomeRewardDiscount),
+      couponCode: normalizedCouponCode ?? null
+    }
+  });
 
   const sessionParams: Stripe.Checkout.SessionCreateParams = {
     mode: "payment",
@@ -235,7 +249,11 @@ export async function POST(request: Request) {
       }
     })),
     metadata: {
-      items: JSON.stringify(
+      order_id: pendingOrder?.id ?? "",
+      order_number: pendingOrder?.orderNumber ?? "",
+      items: pendingOrder
+        ? ""
+        : JSON.stringify(
         checkoutItems.map((item) => buildCompactMetadataItem(item))
       ),
       vehicle: JSON.stringify(vehicleMetadata),
@@ -256,8 +274,120 @@ export async function POST(request: Request) {
   };
 
   const session = await stripe.checkout.sessions.create(sessionParams);
+  await attachStripeSessionToPendingOrder(pendingOrder?.id ?? null, session.id);
 
   return NextResponse.json({ url: session.url });
+}
+
+async function createPendingCheckoutOrder({
+  items,
+  email,
+  vehicle,
+  currency,
+  pricing
+}: {
+  items: ValidatedCheckoutItem[];
+  email: string | null;
+  vehicle: ReturnType<typeof buildVehicleMetadata>;
+  currency: string;
+  pricing: {
+    productsSubtotal: number;
+    bundleDiscount: number;
+    welcomeRewardDiscount: number;
+    finalSubtotal: number;
+    couponCode: string | null;
+  };
+}) {
+  const supabase = createSupabaseAdminClient();
+  if (!supabase) return null;
+
+  const itemsSnapshot = items.map((item) => ({
+    product_id: item.productId,
+    variant_id: item.id,
+    sku: item.sku,
+    product_name: item.name,
+    attributes: item.attributes,
+    qty: item.cartItem.qty,
+    unit_price: item.checkoutLineTotal ? roundMoney(item.checkoutLineTotal / item.cartItem.qty) : item.price,
+    line_total: item.checkoutLineTotal ?? item.price * item.cartItem.qty,
+    bundle_discount: item.bundleDiscount ?? 0
+  }));
+
+  const { data: order, error } = await supabase
+    .from("orders")
+    .insert({
+      email,
+      items_snapshot: {
+        items: itemsSnapshot,
+        vehicle,
+        pricing,
+        checkout_state: "pending_stripe_payment"
+      },
+      subtotal: pricing.finalSubtotal,
+      currency,
+      status: "pending"
+    })
+    .select("id")
+    .single();
+
+  if (error || !order?.id) {
+    console.error("Could not create pending order", error);
+    return null;
+  }
+
+  const orderId = order.id as string;
+
+  await supabase.from("order_items").insert(
+    items.map((item) => ({
+      order_id: orderId,
+      product_id: isUuid(item.productId) ? item.productId : null,
+      variant_id: item.productId !== "wiper_set" && item.productId !== "wiper_rear_addon" && isUuid(item.id) ? item.id : null,
+      sku: item.sku,
+      product_name: item.name,
+      attributes: {
+        ...item.attributes,
+        logical_product_id: item.productId,
+        logical_variant_id: item.id,
+        bundle_discount: item.bundleDiscount ?? 0
+      },
+      qty: item.cartItem.qty,
+      unit_price: item.checkoutLineTotal ? roundMoney(item.checkoutLineTotal / item.cartItem.qty) : item.price,
+      line_total: item.checkoutLineTotal ?? item.price * item.cartItem.qty
+    }))
+  );
+
+  if (vehicle?.a && vehicle.make && vehicle.model && vehicle.year) {
+    await supabase.from("order_vehicle_snapshots").insert({
+      order_id: orderId,
+      vehicle_application_id: isUuid(String(vehicle.a)) ? vehicle.a : null,
+      make_snapshot: String(vehicle.make),
+      model_snapshot: String(vehicle.model),
+      year: Number(vehicle.year)
+    });
+  }
+
+  return {
+    id: orderId,
+    orderNumber: formatOrderNumber(orderId)
+  };
+}
+
+async function attachStripeSessionToPendingOrder(orderId: string | null, stripeSessionId: string) {
+  if (!orderId) return;
+  const supabase = createSupabaseAdminClient();
+  if (!supabase) return;
+
+  const { error } = await supabase
+    .from("orders")
+    .update({
+      stripe_session_id: stripeSessionId,
+      updated_at: new Date().toISOString()
+    })
+    .eq("id", orderId);
+
+  if (error) {
+    console.error("Could not attach Stripe session to pending order", error);
+  }
 }
 
 async function getValidatedWelcomeRewardDiscount(email: string | null, items: ValidatedCheckoutItem[]) {
@@ -350,4 +480,12 @@ function getProductName(value: unknown) {
 
 function roundMoney(value: number) {
   return Math.round(value * 100) / 100;
+}
+
+function formatOrderNumber(orderId: string) {
+  return `NXA${orderId.replace(/-/g, "").slice(0, 8).toUpperCase()}`;
+}
+
+function isUuid(value: string) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{12}$/i.test(value);
 }

@@ -90,54 +90,78 @@ export async function POST(request: Request) {
 
   const metadataItems = parseMetadataItems(session.metadata?.items);
   const metadataVehicle = parseMetadataVehicle(session.metadata?.vehicle);
-  const standardVariantIds = metadataItems
-    .filter((item) => item.product_id !== "wiper_set" && item.product_id !== "wiper_rear_addon")
-    .map((item) => item.variant_id);
-  const wiperSetIds = metadataItems.filter((item) => item.product_id === "wiper_set").map((item) => item.variant_id);
-  const rearAddonIds = metadataItems.filter((item) => item.product_id === "wiper_rear_addon").map((item) => item.variant_id);
-  const [variants, wiperSets, rearAddons] = await Promise.all([
-    loadVariantsByIds(supabase, standardVariantIds),
-    loadWiperSetsByIds(supabase, wiperSetIds),
-    loadRearAddonsByIds(supabase, rearAddonIds)
-  ]);
-  const variantsById = new Map(variants.map((variant) => [variant.id as string, variant]));
-  const wiperSetsById = new Map(wiperSets.map((wiperSet) => [wiperSet.id as string, wiperSet]));
-  const rearAddonsById = new Map(rearAddons.map((rearAddon) => [rearAddon.id as string, rearAddon]));
-  const orderItems = metadataItems.map((item) => prepareOrderItem(item, variantsById, wiperSetsById, rearAddonsById, metadataVehicle));
-  const subtotal = orderItems.reduce((sum, item) => sum + item.line_total, 0);
   const email = session.customer_details?.email ?? session.customer_email ?? null;
   const customerName = session.customer_details?.name ?? null;
+  const existingOrder = await findExistingOrder(supabase, session.metadata?.order_id ?? null, session.id);
+
+  if (existingOrder?.status === "paid") {
+    return NextResponse.json({ received: true });
+  }
+
+  const orderItems = metadataItems.length
+    ? await prepareMetadataOrderItems(supabase, metadataItems, metadataVehicle)
+    : existingOrder
+      ? await loadPreparedExistingOrderItems(supabase, existingOrder.id)
+      : [];
+  const subtotal = orderItems.reduce((sum, item) => sum + item.line_total, 0);
 
   if (email) {
     await getOrCreateCustomerProfileByEmail(email, customerName);
   }
 
-  const { data: order, error: orderError } = await supabase
-    .from("orders")
-    .insert({
+  const orderPayload = {
       email,
       customer_name: customerName,
       shipping_address: session.shipping_details?.address ?? {},
       billing_address: session.customer_details?.address ?? {},
-      items_snapshot: orderItems.map((item) => ({
-        product_id: item.logical_product_id,
-        variant_id: item.logical_variant_id,
-        sku: item.sku,
-        product_name: item.product_name,
-        attributes: item.attributes,
-        qty: item.qty,
-        unit_price: item.unit_price,
-        line_total: item.line_total
-      })),
+      items_snapshot: {
+        items: orderItems.map((item) => ({
+          product_id: item.logical_product_id,
+          variant_id: item.logical_variant_id,
+          sku: item.sku,
+          product_name: item.product_name,
+          attributes: item.attributes,
+          qty: item.qty,
+          unit_price: item.unit_price,
+          line_total: item.line_total
+        })),
+        vehicle: metadataVehicle,
+        stripe: {
+          session_id: session.id,
+          payment_intent_id: typeof session.payment_intent === "string" ? session.payment_intent : session.payment_intent?.id ?? null,
+          amount_subtotal: session.amount_subtotal ? session.amount_subtotal / 100 : null,
+          amount_total: session.amount_total ? session.amount_total / 100 : null,
+          payment_status: session.payment_status
+        },
+        discounts: {
+          coupon_code: session.metadata?.coupon_code ?? "",
+          bundle_discount: Number(session.metadata?.bundle_discount ?? 0),
+          welcome_reward_discount: Number(session.metadata?.welcome_reward_discount ?? 0)
+        }
+      },
       subtotal,
       currency: session.currency ?? "nzd",
       status: "paid",
       stripe_session_id: session.id,
       stripe_payment_intent_id:
         typeof session.payment_intent === "string" ? session.payment_intent : session.payment_intent?.id
-    })
-    .select("id")
-    .single();
+    };
+
+  const { data: order, error: orderError } = existingOrder
+    ? await supabase
+        .from("orders")
+        .update({
+          ...orderPayload,
+          updated_at: new Date().toISOString()
+        })
+        .eq("id", existingOrder.id)
+        .select("id")
+        .single()
+    : await supabase
+        .from("orders")
+        .insert(orderPayload)
+        .select("id")
+        .single();
 
   if (orderError) {
     if (orderError.code === "23505") {
@@ -147,29 +171,36 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: orderError.message }, { status: 500 });
   }
 
-  const { data: insertedItems, error: itemsError } = await supabase
-    .from("order_items")
-    .insert(
-      orderItems.map((item) => ({
-        product_id: item.product_id,
-        variant_id: item.variant_id,
-        sku: item.sku,
-        product_name: item.product_name,
-        attributes: {
-          ...item.attributes,
-          logical_product_id: item.logical_product_id,
-          logical_variant_id: item.logical_variant_id
-        },
-        qty: item.qty,
-        unit_price: item.unit_price,
-        line_total: item.line_total,
-        order_id: order.id
-      }))
-    )
-    .select("id,sku,attributes");
+  const existingItems = await loadExistingOrderItems(supabase, order.id as string);
+  let insertedItems = existingItems;
 
-  if (itemsError) {
-    return NextResponse.json({ error: itemsError.message }, { status: 500 });
+  if (!existingItems.length) {
+    const { data, error: itemsError } = await supabase
+      .from("order_items")
+      .insert(
+        orderItems.map((item) => ({
+          product_id: item.product_id,
+          variant_id: item.variant_id,
+          sku: item.sku,
+          product_name: item.product_name,
+          attributes: {
+            ...item.attributes,
+            logical_product_id: item.logical_product_id,
+            logical_variant_id: item.logical_variant_id
+          },
+          qty: item.qty,
+          unit_price: item.unit_price,
+          line_total: item.line_total,
+          order_id: order.id
+        }))
+      )
+      .select("id,sku,attributes");
+
+    if (itemsError) {
+      return NextResponse.json({ error: itemsError.message }, { status: 500 });
+    }
+
+    insertedItems = data ?? [];
   }
 
   const vehicleContext = metadataVehicle ?? extractVehicleContext(orderItems);
@@ -188,22 +219,33 @@ export async function POST(request: Request) {
     );
     customerVehicleId = saved.vehicle.id;
 
-    const { error: vehicleSnapshotError } = await supabase.from("order_vehicle_snapshots").insert({
-      order_id: order.id,
-      vehicle_application_id: vehicleContext.applicationId,
-      customer_vehicle_id: customerVehicleId,
-      make_snapshot: vehicleContext.make,
-      model_snapshot: vehicleContext.model,
-      year: vehicleContext.year
-    });
+    const hasVehicleSnapshot = await orderHasVehicleSnapshot(supabase, order.id as string);
+    const vehicleSnapshotWrite = hasVehicleSnapshot
+      ? supabase
+          .from("order_vehicle_snapshots")
+          .update({
+            customer_vehicle_id: customerVehicleId
+          })
+          .eq("order_id", order.id)
+      : supabase.from("order_vehicle_snapshots").insert({
+          order_id: order.id,
+          vehicle_application_id: vehicleContext.applicationId,
+          customer_vehicle_id: customerVehicleId,
+          make_snapshot: vehicleContext.make,
+          model_snapshot: vehicleContext.model,
+          year: vehicleContext.year
+        });
+
+    const { error: vehicleSnapshotError } = await vehicleSnapshotWrite;
 
     if (vehicleSnapshotError) {
       return NextResponse.json({ error: vehicleSnapshotError.message }, { status: 500 });
     }
   }
 
-  const fulfillmentRows = buildWiperFulfillmentRows(order.id as string, orderItems, insertedItems ?? [], vehicleContext, customerVehicleId);
-  if (fulfillmentRows.length) {
+  const fulfillmentRows = buildWiperFulfillmentRows(order.id as string, orderItems, insertedItems, vehicleContext, customerVehicleId);
+  const fulfillmentExists = await orderHasFulfillment(supabase, order.id as string);
+  if (fulfillmentRows.length && !fulfillmentExists) {
     const { error: fulfillmentError } = await supabase.from("order_wiper_fulfillment").insert(fulfillmentRows);
 
     if (fulfillmentError) {
@@ -246,6 +288,94 @@ export async function POST(request: Request) {
   }
 
   return NextResponse.json({ received: true });
+}
+
+async function findExistingOrder(
+  supabase: NonNullable<ReturnType<typeof createSupabaseAdminClient>>,
+  orderId: string | null,
+  stripeSessionId: string
+) {
+  if (orderId && isUuid(orderId)) {
+    const { data, error } = await supabase.from("orders").select("id,status").eq("id", orderId).maybeSingle();
+    if (error) throw error;
+    if (data) return data as { id: string; status: string };
+  }
+
+  const { data, error } = await supabase.from("orders").select("id,status").eq("stripe_session_id", stripeSessionId).maybeSingle();
+  if (error) throw error;
+  return data as { id: string; status: string } | null;
+}
+
+async function loadExistingOrderItems(supabase: NonNullable<ReturnType<typeof createSupabaseAdminClient>>, orderId: string) {
+  const { data, error } = await supabase.from("order_items").select("id,sku,attributes").eq("order_id", orderId);
+  if (error) throw error;
+  return (data ?? []) as Array<{ id: string; sku: string; attributes: Record<string, string | number> }>;
+}
+
+async function orderHasVehicleSnapshot(supabase: NonNullable<ReturnType<typeof createSupabaseAdminClient>>, orderId: string) {
+  const { data, error } = await supabase.from("order_vehicle_snapshots").select("id").eq("order_id", orderId).limit(1);
+  if (error) throw error;
+  return Boolean(data?.length);
+}
+
+async function orderHasFulfillment(supabase: NonNullable<ReturnType<typeof createSupabaseAdminClient>>, orderId: string) {
+  const { data, error } = await supabase.from("order_wiper_fulfillment").select("id").eq("order_id", orderId).limit(1);
+  if (error) throw error;
+  return Boolean(data?.length);
+}
+
+async function prepareMetadataOrderItems(
+  supabase: NonNullable<ReturnType<typeof createSupabaseAdminClient>>,
+  metadataItems: CheckoutMetadataItem[],
+  metadataVehicle: VehicleContext | null
+) {
+  const standardVariantIds = metadataItems
+    .filter((item) => item.product_id !== "wiper_set" && item.product_id !== "wiper_rear_addon")
+    .map((item) => item.variant_id);
+  const wiperSetIds = metadataItems.filter((item) => item.product_id === "wiper_set").map((item) => item.variant_id);
+  const rearAddonIds = metadataItems.filter((item) => item.product_id === "wiper_rear_addon").map((item) => item.variant_id);
+  const [variants, wiperSets, rearAddons] = await Promise.all([
+    loadVariantsByIds(supabase, standardVariantIds),
+    loadWiperSetsByIds(supabase, wiperSetIds),
+    loadRearAddonsByIds(supabase, rearAddonIds)
+  ]);
+  const variantsById = new Map(variants.map((variant) => [variant.id as string, variant]));
+  const wiperSetsById = new Map(wiperSets.map((wiperSet) => [wiperSet.id as string, wiperSet]));
+  const rearAddonsById = new Map(rearAddons.map((rearAddon) => [rearAddon.id as string, rearAddon]));
+
+  return metadataItems.map((item) => prepareOrderItem(item, variantsById, wiperSetsById, rearAddonsById, metadataVehicle));
+}
+
+async function loadPreparedExistingOrderItems(supabase: NonNullable<ReturnType<typeof createSupabaseAdminClient>>, orderId: string) {
+  const { data, error } = await supabase
+    .from("order_items")
+    .select("product_id,variant_id,sku,product_name,attributes,qty,unit_price,line_total")
+    .eq("order_id", orderId)
+    .order("created_at", { ascending: true });
+
+  if (error) throw error;
+
+  return ((data ?? []) as Array<{
+    product_id: string | null;
+    variant_id: string | null;
+    sku: string;
+    product_name: string;
+    attributes: Record<string, string | number>;
+    qty: number;
+    unit_price: string | number;
+    line_total: string | number;
+  }>).map((item): PreparedOrderItem => ({
+    logical_product_id: String(item.attributes.logical_product_id ?? item.product_id ?? ""),
+    logical_variant_id: String(item.attributes.logical_variant_id ?? item.variant_id ?? ""),
+    product_id: item.product_id,
+    variant_id: item.variant_id,
+    sku: item.sku,
+    product_name: item.product_name,
+    attributes: item.attributes ?? {},
+    qty: item.qty,
+    unit_price: Number(item.unit_price),
+    line_total: Number(item.line_total)
+  }));
 }
 
 async function loadVariantsByIds(supabase: NonNullable<ReturnType<typeof createSupabaseAdminClient>>, variantIds: string[]) {

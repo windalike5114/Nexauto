@@ -373,6 +373,9 @@ function OrdersPanel({ orders }: { orders: AdminOrder[] }) {
                 </div>
               ))}
             </div>
+            <Link href={`/admin/orders/${order.id}`} className="mt-4 inline-flex h-10 items-center justify-center rounded bg-ink px-4 text-sm font-black text-white hover:bg-black">
+              View details
+            </Link>
           </article>
         ))}
         {orders.length === 0 ? <EmptyState text="No orders yet." /> : null}

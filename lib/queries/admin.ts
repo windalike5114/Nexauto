@@ -14,6 +14,10 @@ export type AdminOrder = {
   status: string;
   createdAt: string;
   stripeSessionId: string | null;
+  stripePaymentIntentId: string | null;
+  shippingAddress: Record<string, unknown>;
+  billingAddress: Record<string, unknown>;
+  itemsSnapshot: unknown;
   items: AdminOrderItem[];
   vehicle: AdminVehicleSnapshot | null;
   fulfillment: AdminWiperFulfillment | null;
@@ -156,6 +160,10 @@ type OrderRow = {
   status: string;
   created_at: string;
   stripe_session_id: string | null;
+  stripe_payment_intent_id: string | null;
+  shipping_address: Record<string, unknown>;
+  billing_address: Record<string, unknown>;
+  items_snapshot: unknown;
 };
 
 type OrderItemRow = {
@@ -341,6 +349,26 @@ export async function loadAdminOrdersData() {
   return loadAdminOrdersDataInternal();
 }
 
+export async function loadAdminOrderDetailData(orderId: string) {
+  await requireAdminAccess();
+  const supabase = getAdminOrThrow();
+  const { data, error } = await supabase
+    .from("orders")
+    .select("id,email,customer_name,subtotal,currency,status,created_at,stripe_session_id,stripe_payment_intent_id,shipping_address,billing_address,items_snapshot")
+    .eq("id", orderId)
+    .single();
+
+  if (error) throw error;
+
+  const [items, vehicles, fulfillments] = await Promise.all([
+    listOrderItems([orderId]),
+    listOrderVehicles([orderId]),
+    listFulfillments([orderId])
+  ]);
+
+  return mapAdminOrders([data as OrderRow], items, vehicles, fulfillments)[0];
+}
+
 export async function loadAdminProductsData(): Promise<AdminProductsData> {
   await requireAdminAccess();
   return loadAdminProductsDataInternal();
@@ -393,7 +421,7 @@ async function listAdminOrderRows() {
   const supabase = getAdminOrThrow();
   const { data: ordersData, error: ordersError } = await supabase
     .from("orders")
-    .select("id,email,customer_name,subtotal,currency,status,created_at,stripe_session_id")
+    .select("id,email,customer_name,subtotal,currency,status,created_at,stripe_session_id,stripe_payment_intent_id,shipping_address,billing_address,items_snapshot")
     .order("created_at", { ascending: false })
     .limit(50);
 
@@ -420,6 +448,10 @@ function mapAdminOrders(
     status: order.status,
     createdAt: order.created_at,
     stripeSessionId: order.stripe_session_id,
+    stripePaymentIntentId: order.stripe_payment_intent_id,
+    shippingAddress: order.shipping_address ?? {},
+    billingAddress: order.billing_address ?? {},
+    itemsSnapshot: order.items_snapshot,
     items: itemsByOrder.get(order.id) ?? [],
     vehicle: vehicleByOrder.get(order.id) ?? null,
     fulfillment: fulfillmentByOrder.get(order.id) ?? null

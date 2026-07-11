@@ -148,6 +148,7 @@ export async function listCustomerOrders(emailInput: string) {
     .from("orders")
     .select("id,subtotal,status,created_at")
     .eq("email", email)
+    .neq("status", "pending")
     .order("created_at", { ascending: false })
     .limit(50);
 
@@ -183,7 +184,7 @@ export async function listCustomerOrders(emailInput: string) {
 
   return orders.map((order): CustomerOrder => ({
     id: order.id,
-    orderNumber: order.id.slice(0, 8).toUpperCase(),
+    orderNumber: `NXA${order.id.replace(/-/g, "").slice(0, 8).toUpperCase()}`,
     orderDate: order.created_at,
     status: order.status,
     vehicle: vehicleByOrder.get(order.id) ?? null,
