@@ -1,5 +1,6 @@
 import { createSupabaseAdminClient } from "@/lib/supabase";
 import { createClient } from "@/utils/supabase/server";
+import { getOrderNumberFromSnapshot } from "@/lib/order-number";
 
 export type AdminCheck =
   | { ok: true; email: string }
@@ -7,6 +8,7 @@ export type AdminCheck =
 
 export type AdminOrder = {
   id: string;
+  orderNumber: string;
   email: string | null;
   customerName: string | null;
   subtotal: number;
@@ -441,6 +443,7 @@ function mapAdminOrders(
   const fulfillmentByOrder = new Map(fulfillments.map((fulfillment) => [fulfillment.orderId, fulfillment]));
   return orders.map((order): AdminOrder => ({
     id: order.id,
+    orderNumber: getOrderNumberFromSnapshot(order.id, order.items_snapshot),
     email: order.email,
     customerName: order.customer_name,
     subtotal: Number(order.subtotal),

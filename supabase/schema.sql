@@ -60,6 +60,7 @@ create table if not exists orders (
   subtotal numeric(10, 2) not null default 0,
   currency text not null default 'nzd',
   status text not null default 'pending',
+  order_number text unique,
   stripe_session_id text unique,
   stripe_payment_intent_id text,
   created_at timestamptz not null default now(),

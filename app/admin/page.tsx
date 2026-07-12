@@ -395,7 +395,7 @@ function FulfillmentPanel({ orders }: { orders: AdminOrder[] }) {
           <article key={fulfillment.id} className="rounded-lg border border-black/10 bg-white p-5 shadow-sm">
             <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
               <div>
-                <p className="text-xs font-black uppercase tracking-[0.14em] text-steel">Order {order.id.slice(0, 8)}</p>
+                <p className="text-xs font-black uppercase tracking-[0.14em] text-steel">Order {order.orderNumber}</p>
                 <h2 className="mt-1 text-xl font-black">{order.email ?? "No email"}</h2>
                 {order.vehicle ? (
                   <p className="mt-2 text-sm font-bold text-steel">
@@ -756,7 +756,7 @@ function CompactOrders({ orders }: { orders: AdminOrder[] }) {
       <div className="divide-y divide-black/10">
         {orders.map((order) => (
           <article key={order.id} className="grid gap-3 px-4 py-4 text-sm lg:grid-cols-[120px_1fr_120px_110px_130px] lg:items-center">
-            <p className="font-mono font-black">{formatOrderNumber(order.id)}</p>
+            <p className="font-mono font-black">{order.orderNumber}</p>
             <p className="break-all font-bold text-steel">{order.customerName ?? order.email ?? "Guest"}</p>
             <p className="font-black">{formatMoney(order.subtotal)}</p>
             <Badge>{order.status}</Badge>
@@ -846,8 +846,4 @@ function EmptyState({ text }: { text: string }) {
 
 function formatLength(value: number | null) {
   return value ? `${value}"` : "N/A";
-}
-
-function formatOrderNumber(orderId: string) {
-  return `#NXA${orderId.replaceAll("-", "").slice(0, 8).toUpperCase()}`;
 }

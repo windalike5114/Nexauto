@@ -2,6 +2,7 @@ import Link from "next/link";
 import Stripe from "stripe";
 import { CheckoutSuccessActions } from "@/components/checkout-success-actions";
 import { formatMoney } from "@/lib/catalog";
+import { getOrderNumberFromSnapshot } from "@/lib/order-number";
 import { createSupabaseAdminClient } from "@/lib/supabase";
 import { createClient } from "@/utils/supabase/server";
 
@@ -26,7 +27,7 @@ export default async function CheckoutSuccessPage({ searchParams }: { searchPara
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-xs font-black uppercase tracking-[0.14em] text-steel">Order number</p>
-                <p className="mt-1 text-lg font-black">{formatOrderNumber(order.id)}</p>
+                <p className="mt-1 text-lg font-black">{order.orderNumber}</p>
               </div>
               <span className="rounded bg-white px-3 py-1 text-xs font-black uppercase tracking-[0.12em] text-steel">{order.status}</span>
             </div>
@@ -34,6 +35,11 @@ export default async function CheckoutSuccessPage({ searchParams }: { searchPara
               <p>Total: <span className="font-black text-ink">{formatMoney(order.subtotal)}</span></p>
               <p>Email: <span className="font-black text-ink">{order.email ?? checkoutSession?.customerEmail ?? ""}</span></p>
             </div>
+            {checkoutSession?.invoiceUrl ? (
+              <a href={checkoutSession.invoiceUrl} className="mt-4 inline-flex rounded bg-white px-4 py-2 text-sm font-black text-ink ring-1 ring-black/10 hover:ring-ink">
+                View Stripe invoice
+              </a>
+            ) : null}
           </div>
         ) : (
           <p className="mt-5 rounded border border-amber-200 bg-amber-50 p-3 text-sm font-bold text-amber-900">
@@ -61,7 +67,7 @@ async function loadOrderByStripeSession(sessionId: string | undefined) {
 
   const { data, error } = await supabase
     .from("orders")
-    .select("id,email,customer_name,subtotal,status")
+    .select("id,email,customer_name,subtotal,status,items_snapshot")
     .eq("stripe_session_id", sessionId)
     .maybeSingle();
 
@@ -69,6 +75,7 @@ async function loadOrderByStripeSession(sessionId: string | undefined) {
 
   return {
     id: data.id as string,
+    orderNumber: getOrderNumberFromSnapshot(data.id as string, data.items_snapshot),
     email: data.email as string | null,
     customerName: data.customer_name as string | null,
     subtotal: Number(data.subtotal),
@@ -92,17 +99,17 @@ async function loadCheckoutSession(sessionId: string | undefined) {
 
   try {
     const stripe = new Stripe(secretKey);
-    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    const session = await stripe.checkout.sessions.retrieve(sessionId, {
+      expand: ["invoice"]
+    });
+    const invoice = typeof session.invoice === "object" && session.invoice ? session.invoice : null;
 
     return {
       customerEmail: session.customer_details?.email ?? session.customer_email ?? "",
-      customerName: session.customer_details?.name ?? ""
+      customerName: session.customer_details?.name ?? "",
+      invoiceUrl: "hosted_invoice_url" in (invoice ?? {}) ? invoice?.hosted_invoice_url ?? "" : ""
     };
   } catch {
     return null;
   }
-}
-
-function formatOrderNumber(orderId: string) {
-  return `NXA${orderId.replace(/-/g, "").slice(0, 8).toUpperCase()}`;
 }

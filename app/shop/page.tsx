@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { CheckCircle2, SlidersHorizontal } from "lucide-react";
+import { TestCheckoutCard } from "@/components/test-checkout-card";
 import { WiperFitmentFinder } from "@/components/wiper-fitment-finder";
 import { formatMoney } from "@/lib/catalog";
 import { wiperPairPricing } from "@/lib/pricing";
@@ -150,6 +151,7 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
               {visibleWiperSets.map((wiperSet) => (
                 <WiperSetCard key={wiperSet.id} wiperSet={wiperSet} />
               ))}
+              {currentPage === totalPages ? <TestCheckoutCard /> : null}
             </div>
           ) : (
             <div className="rounded-lg border border-black/10 bg-white p-8 text-center font-bold text-steel">

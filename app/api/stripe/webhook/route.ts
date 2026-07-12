@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createSupabaseAdminClient } from "@/lib/supabase";
 import { getOrCreateCustomerProfileByEmail, saveCustomerVehicleByEmail } from "@/lib/queries/account";
+import { getOrderNumberFromSnapshot } from "@/lib/order-number";
 import { sendOrderConfirmationEmail } from "@/lib/email/templates/order-confirmation";
 
 type CheckoutMetadataItem = {
@@ -93,6 +94,10 @@ export async function POST(request: Request) {
   const email = session.customer_details?.email ?? session.customer_email ?? null;
   const customerName = session.customer_details?.name ?? null;
   const existingOrder = await findExistingOrder(supabase, session.metadata?.order_id ?? null, session.id);
+  const orderNumber = existingOrder
+    ? getOrderNumberFromSnapshot(existingOrder.id, existingOrder.items_snapshot)
+    : session.metadata?.order_number || "";
+  const invoice = await loadStripeInvoice(stripe, session.invoice);
 
   if (existingOrder?.status === "paid") {
     return NextResponse.json({ received: true });
@@ -115,6 +120,7 @@ export async function POST(request: Request) {
       shipping_address: session.shipping_details?.address ?? {},
       billing_address: session.customer_details?.address ?? {},
       items_snapshot: {
+        order_number: orderNumber,
         items: orderItems.map((item) => ({
           product_id: item.logical_product_id,
           variant_id: item.logical_variant_id,
@@ -129,6 +135,8 @@ export async function POST(request: Request) {
         stripe: {
           session_id: session.id,
           payment_intent_id: typeof session.payment_intent === "string" ? session.payment_intent : session.payment_intent?.id ?? null,
+          invoice_id: invoice?.id ?? (typeof session.invoice === "string" ? session.invoice : session.invoice?.id ?? null),
+          invoice_url: invoice?.hosted_invoice_url ?? null,
           amount_subtotal: session.amount_subtotal ? session.amount_subtotal / 100 : null,
           amount_total: session.amount_total ? session.amount_total / 100 : null,
           payment_status: session.payment_status
@@ -257,6 +265,7 @@ export async function POST(request: Request) {
     try {
       await sendOrderConfirmationEmail({
         orderId: order.id as string,
+        orderNumber: getOrderNumberFromSnapshot(order.id as string, (orderPayload.items_snapshot as unknown)),
         email,
         customerName,
         createdAt: new Date().toISOString(),
@@ -296,14 +305,25 @@ async function findExistingOrder(
   stripeSessionId: string
 ) {
   if (orderId && isUuid(orderId)) {
-    const { data, error } = await supabase.from("orders").select("id,status").eq("id", orderId).maybeSingle();
+    const { data, error } = await supabase.from("orders").select("id,status,items_snapshot").eq("id", orderId).maybeSingle();
     if (error) throw error;
-    if (data) return data as { id: string; status: string };
+    if (data) return data as { id: string; status: string; items_snapshot: unknown };
   }
 
-  const { data, error } = await supabase.from("orders").select("id,status").eq("stripe_session_id", stripeSessionId).maybeSingle();
+  const { data, error } = await supabase.from("orders").select("id,status,items_snapshot").eq("stripe_session_id", stripeSessionId).maybeSingle();
   if (error) throw error;
-  return data as { id: string; status: string } | null;
+  return data as { id: string; status: string; items_snapshot: unknown } | null;
+}
+
+async function loadStripeInvoice(stripe: Stripe, invoice: Stripe.Checkout.Session["invoice"]) {
+  const invoiceId = typeof invoice === "string" ? invoice : invoice?.id;
+  if (!invoiceId) return null;
+
+  try {
+    return await stripe.invoices.retrieve(invoiceId);
+  } catch {
+    return null;
+  }
 }
 
 async function loadExistingOrderItems(supabase: NonNullable<ReturnType<typeof createSupabaseAdminClient>>, orderId: string) {

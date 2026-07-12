@@ -3,6 +3,7 @@ import Stripe from "stripe";
 import { getVariantsByIds } from "@/lib/queries/catalog";
 import { listCustomerOrders } from "@/lib/queries/account";
 import { getWiperRearAddonsByIds, getWiperSetsByIds } from "@/lib/queries/wiper-commerce";
+import { allocateOrderNumber } from "@/lib/order-number";
 import { createSupabaseAdminClient } from "@/lib/supabase";
 import { createClient } from "@/utils/supabase/server";
 import { calculateCartLinePricing, calculateCartPricing } from "@/lib/pricing";
@@ -40,7 +41,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const standardItems = items.filter((item) => item.productId !== "wiper_set" && item.productId !== "wiper_rear_addon");
+  const standardItems = items.filter((item) => item.productId !== "wiper_set" && item.productId !== "wiper_rear_addon" && item.productId !== "test_product");
   const wiperSetItems = items.filter((item) => item.productId === "wiper_set");
   const rearAddonItems = items.filter((item) => item.productId === "wiper_rear_addon");
 
@@ -73,6 +74,20 @@ export async function POST(request: Request) {
       const variant = variantsById.get(cartItem.variantId);
       const wiperSet = wiperSetsById.get(cartItem.variantId);
       const rearAddon = rearAddonsById.get(cartItem.variantId);
+
+      if (cartItem.productId === "test_product") {
+        return {
+          ...cartItem,
+          name: "NexAutoParts Checkout Test Product",
+          sku: "TEST-001",
+          price: 1,
+          bundleEligible: false,
+          attributes: {
+            ...cartItem.attributes,
+            test_product: "true"
+          }
+        };
+      }
 
       if (cartItem.productId !== "wiper_set" && cartItem.productId !== "wiper_rear_addon") {
         if (!variant) throw new Error(`Cart item missing for variant ${cartItem.variantId}`);
@@ -129,6 +144,24 @@ export async function POST(request: Request) {
       const variant = variantsById.get(cartItem.variantId);
       const wiperSet = wiperSetsById.get(cartItem.variantId);
       const rearAddon = rearAddonsById.get(cartItem.variantId);
+
+      if (cartItem.productId === "test_product") {
+        return {
+          cartItem,
+          id: "test-001",
+          productId: "test_product",
+          sku: "TEST-001",
+          name: "NexAutoParts Checkout Test Product",
+          price: 1,
+          checkoutQuantity: 1,
+          checkoutLineTotal: finalLineTotal,
+          bundleDiscount,
+          attributes: {
+            ...cartItem.attributes,
+            test_product: "true"
+          }
+        };
+      }
 
       if (cartItem.productId !== "wiper_set" && cartItem.productId !== "wiper_rear_addon" && variant) {
         if (variant.stock < cartItem.qty) {
@@ -205,6 +238,16 @@ export async function POST(request: Request) {
     payment_method_types: ["card", "afterpay_clearpay"],
     adaptive_pricing: {
       enabled: false
+    },
+    invoice_creation: {
+      enabled: true,
+      invoice_data: {
+        metadata: {
+          order_id: pendingOrder?.id ?? "",
+          order_number: pendingOrder?.orderNumber ?? ""
+        },
+        description: pendingOrder?.orderNumber ? `NexAutoParts order ${pendingOrder.orderNumber}` : "NexAutoParts order"
+      }
     },
     allow_promotion_codes: promotionCode ? undefined : true,
     discounts: promotionCode ? [{ promotion_code: promotionCode.id }] : undefined,
@@ -336,6 +379,22 @@ async function createPendingCheckoutOrder({
   }
 
   const orderId = order.id as string;
+  const orderNumber = await allocateOrderNumber(supabase, orderId);
+  const snapshot = {
+    order_number: orderNumber,
+    items: itemsSnapshot,
+    vehicle,
+    pricing,
+    checkout_state: "pending_stripe_payment"
+  };
+
+  await supabase
+    .from("orders")
+    .update({
+      items_snapshot: snapshot,
+      updated_at: new Date().toISOString()
+    })
+    .eq("id", orderId);
 
   await supabase.from("order_items").insert(
     items.map((item) => ({
@@ -368,7 +427,7 @@ async function createPendingCheckoutOrder({
 
   return {
     id: orderId,
-    orderNumber: formatOrderNumber(orderId)
+    orderNumber
   };
 }
 
@@ -480,10 +539,6 @@ function getProductName(value: unknown) {
 
 function roundMoney(value: number) {
   return Math.round(value * 100) / 100;
-}
-
-function formatOrderNumber(orderId: string) {
-  return `NXA${orderId.replace(/-/g, "").slice(0, 8).toUpperCase()}`;
 }
 
 function isUuid(value: string) {

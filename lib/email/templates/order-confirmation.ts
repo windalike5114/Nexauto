@@ -14,6 +14,7 @@ type OrderEmailItem = {
 
 export type OrderConfirmationEmailInput = {
   orderId: string;
+  orderNumber?: string;
   email: string;
   customerName: string | null;
   createdAt: string;
@@ -32,7 +33,7 @@ export type OrderConfirmationEmailInput = {
 };
 
 export async function sendOrderConfirmationEmail(input: OrderConfirmationEmailInput) {
-  const orderNumber = formatOrderNumber(input.orderId);
+  const orderNumber = input.orderNumber ?? formatOrderNumber(input.orderId);
   const siteUrl = getSiteUrl();
   const itemRows = input.items
     .map((item) => {
@@ -129,7 +130,8 @@ export async function sendOrderConfirmationEmail(input: OrderConfirmationEmailIn
 }
 
 export function formatOrderNumber(orderId: string) {
-  return `NXA${orderId.replace(/-/g, "").slice(0, 8).toUpperCase()}`;
+  const digits = orderId.replace(/\D/g, "").slice(-5).padStart(5, "0");
+  return `NEX${digits}`;
 }
 
 function getSizeSummary(attributes: Record<string, unknown>) {

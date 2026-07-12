@@ -1,4 +1,5 @@
 import type { User } from "@supabase/supabase-js";
+import { getOrderNumberFromSnapshot } from "@/lib/order-number";
 import { createSupabaseAdminClient } from "@/lib/supabase";
 
 export type CustomerVehicleInput = {
@@ -57,6 +58,7 @@ type CustomerOrderRow = {
   subtotal: string | number;
   status: string;
   created_at: string;
+  items_snapshot: unknown;
 };
 
 type CustomerOrderItemRow = {
@@ -146,7 +148,7 @@ export async function listCustomerOrders(emailInput: string) {
   const supabase = getAdminOrThrow();
   const { data, error } = await supabase
     .from("orders")
-    .select("id,subtotal,status,created_at")
+    .select("id,subtotal,status,created_at,items_snapshot")
     .eq("email", email)
     .neq("status", "pending")
     .order("created_at", { ascending: false })
@@ -184,7 +186,7 @@ export async function listCustomerOrders(emailInput: string) {
 
   return orders.map((order): CustomerOrder => ({
     id: order.id,
-    orderNumber: `NXA${order.id.replace(/-/g, "").slice(0, 8).toUpperCase()}`,
+    orderNumber: getOrderNumberFromSnapshot(order.id, order.items_snapshot),
     orderDate: order.created_at,
     status: order.status,
     vehicle: vehicleByOrder.get(order.id) ?? null,

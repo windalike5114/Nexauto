@@ -22,7 +22,7 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div>
               <p className="font-mono text-xs font-bold uppercase tracking-[0.14em] text-steel">{order.id}</p>
-              <h1 className="mt-2 text-3xl font-black">Order {formatOrderNumber(order.id)}</h1>
+              <h1 className="mt-2 text-3xl font-black">Order {order.orderNumber}</h1>
               <p className="mt-2 text-sm font-bold text-steel">{new Date(order.createdAt).toLocaleString("en-NZ")}</p>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -151,10 +151,6 @@ function Field({ label, name, defaultValue }: { label: string; name: string; def
 
 function Badge({ children }: { children: ReactNode }) {
   return <span className="rounded bg-zinc-100 px-3 py-1 text-xs font-black uppercase tracking-[0.12em] text-steel">{children}</span>;
-}
-
-function formatOrderNumber(orderId: string) {
-  return `NXA${orderId.replace(/-/g, "").slice(0, 8).toUpperCase()}`;
 }
 
 function formatAddress(address: Record<string, unknown>) {
