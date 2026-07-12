@@ -62,6 +62,24 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
+    function onCheckoutComplete() {
+      setItems([]);
+      setCouponCode("");
+      setCouponDiscount(0);
+      setCouponLabel("");
+      setCouponError("");
+      setCouponDraft("");
+      setRecentlyAdded(null);
+      if (welcomeRewardStatus === "applied") setWelcomeRewardStatus("available");
+    }
+
+    window.addEventListener("nexauto:checkout-complete", onCheckoutComplete);
+    return () => {
+      window.removeEventListener("nexauto:checkout-complete", onCheckoutComplete);
+    };
+  }, [welcomeRewardStatus]);
+
+  useEffect(() => {
     window.localStorage.setItem(storageKey, JSON.stringify(items));
   }, [items]);
 

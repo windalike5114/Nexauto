@@ -31,6 +31,9 @@ export type CustomerOrder = {
   orderNumber: string;
   orderDate: string;
   status: string;
+  paymentStatus: string;
+  fulfillmentStatus: string | null;
+  statusDescription: string;
   vehicle: string | null;
   products: string[];
   total: number;
@@ -73,6 +76,11 @@ type CustomerOrderVehicleRow = {
   make_snapshot: string;
   model_snapshot: string;
   year: number;
+};
+
+type CustomerOrderFulfillmentRow = {
+  order_id: string;
+  connector_status: string;
 };
 
 function getAdminOrThrow() {
@@ -161,7 +169,7 @@ export async function listCustomerOrders(emailInput: string) {
 
   if (!orderIds.length) return [];
 
-  const [itemsResult, vehiclesResult] = await Promise.all([
+  const [itemsResult, vehiclesResult, fulfillmentsResult] = await Promise.all([
     supabase
       .from("order_items")
       .select("order_id,product_name,sku,qty")
@@ -170,11 +178,16 @@ export async function listCustomerOrders(emailInput: string) {
     supabase
       .from("order_vehicle_snapshots")
       .select("order_id,make_snapshot,model_snapshot,year")
+      .in("order_id", orderIds),
+    supabase
+      .from("order_wiper_fulfillment")
+      .select("order_id,connector_status")
       .in("order_id", orderIds)
   ]);
 
   if (itemsResult.error) throw itemsResult.error;
   if (vehiclesResult.error) throw vehiclesResult.error;
+  if (fulfillmentsResult.error) throw fulfillmentsResult.error;
 
   const itemsByOrder = groupBy((itemsResult.data ?? []) as CustomerOrderItemRow[], (item) => item.order_id);
   const vehicleByOrder = new Map(
@@ -183,16 +196,86 @@ export async function listCustomerOrders(emailInput: string) {
       `${vehicle.make_snapshot} ${vehicle.model_snapshot} ${vehicle.year}`
     ])
   );
+  const fulfillmentByOrder = new Map(
+    ((fulfillmentsResult.data ?? []) as CustomerOrderFulfillmentRow[]).map((fulfillment) => [
+      fulfillment.order_id,
+      fulfillment.connector_status
+    ])
+  );
 
-  return orders.map((order): CustomerOrder => ({
-    id: order.id,
-    orderNumber: getOrderNumberFromSnapshot(order.id, order.items_snapshot),
-    orderDate: order.created_at,
-    status: order.status,
-    vehicle: vehicleByOrder.get(order.id) ?? null,
-    products: (itemsByOrder.get(order.id) ?? []).map((item) => `${item.product_name} x${item.qty}`),
-    total: Number(order.subtotal)
-  }));
+  return orders.map((order): CustomerOrder => {
+    const fulfillmentStatus = fulfillmentByOrder.get(order.id) ?? null;
+    const customerStatus = getCustomerOrderStatus(order.status, fulfillmentStatus);
+
+    return {
+      id: order.id,
+      orderNumber: getOrderNumberFromSnapshot(order.id, order.items_snapshot),
+      orderDate: order.created_at,
+      status: customerStatus.label,
+      paymentStatus: order.status,
+      fulfillmentStatus,
+      statusDescription: customerStatus.description,
+      vehicle: vehicleByOrder.get(order.id) ?? null,
+      products: (itemsByOrder.get(order.id) ?? []).map((item) => `${item.product_name} x${item.qty}`),
+      total: Number(order.subtotal)
+    };
+  });
+}
+
+function getCustomerOrderStatus(paymentStatus: string, fulfillmentStatus: string | null) {
+  if (paymentStatus === "cancelled") {
+    return {
+      label: "Cancelled",
+      description: "This order has been cancelled."
+    };
+  }
+
+  if (paymentStatus === "refunded") {
+    return {
+      label: "Refunded",
+      description: "This order has been refunded."
+    };
+  }
+
+  if (paymentStatus === "failed") {
+    return {
+      label: "Payment failed",
+      description: "Payment was not completed for this order."
+    };
+  }
+
+  if (paymentStatus === "pending") {
+    return {
+      label: "Order placed",
+      description: "We are waiting for payment confirmation."
+    };
+  }
+
+  if (fulfillmentStatus === "fulfilled") {
+    return {
+      label: "Delivered",
+      description: "This order has been marked as completed."
+    };
+  }
+
+  if (fulfillmentStatus === "packed") {
+    return {
+      label: "Shipped",
+      description: "Your order has been packed and is ready for delivery or dispatch."
+    };
+  }
+
+  if (fulfillmentStatus === "selected") {
+    return {
+      label: "Preparing order",
+      description: "The correct adapter has been selected and your order is being prepared."
+    };
+  }
+
+  return {
+    label: "Order placed",
+    description: "Payment has been received and your order is waiting to be prepared."
+  };
 }
 
 export async function saveCustomerVehicle(user: User, vehicle: CustomerVehicleInput) {

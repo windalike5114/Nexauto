@@ -30,6 +30,8 @@ export function CheckoutSuccessActions({
   useEffect(() => {
     if (clearedRef.current) return;
     clearedRef.current = true;
+    window.localStorage.setItem("nexauto-cart", "[]");
+    window.dispatchEvent(new Event("nexauto:checkout-complete"));
     clearCart();
   }, [clearCart]);
 

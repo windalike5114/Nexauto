@@ -52,6 +52,9 @@ type AccountResponse = {
     orderNumber: string;
     orderDate: string;
     status: string;
+    paymentStatus: string;
+    fulfillmentStatus: string | null;
+    statusDescription: string;
     vehicle: string | null;
     products: string[];
     total: number;
@@ -545,11 +548,17 @@ function OrdersSection({ orders }: { orders: AccountResponse["orders"] }) {
                   <h3 className="mt-1 text-xl font-black">{formatMoney(order.total)}</h3>
                   <p className="mt-1 text-sm font-bold text-steel">Order Date {new Date(order.orderDate).toLocaleDateString("en-NZ")}</p>
                 </div>
-                <span className="inline-flex h-8 items-center rounded bg-white px-3 text-xs font-black uppercase tracking-[0.12em] text-steel">{order.status}</span>
+                <span className="inline-flex h-8 items-center rounded bg-white px-3 text-xs font-black uppercase tracking-[0.12em] text-signal">{order.status}</span>
               </div>
-              <div className="mt-4 grid gap-3 md:grid-cols-3">
+              <div className="mt-4 rounded border border-red-100 bg-white p-4">
+                <p className="text-xs font-black uppercase tracking-[0.14em] text-steel">Order status</p>
+                <p className="mt-1 text-2xl font-black text-ink">{order.status}</p>
+                <p className="mt-2 text-sm font-bold leading-6 text-steel">{order.statusDescription}</p>
+              </div>
+              <div className="mt-4 grid gap-3 md:grid-cols-4">
                 <InfoTile label="Vehicle" value={order.vehicle ?? "Not attached"} />
-                <InfoTile label="Order status" value={formatOrderStatus(order.status)} />
+                <InfoTile label="Payment" value={formatOrderStatus(order.paymentStatus)} />
+                <InfoTile label="Fulfilment" value={formatOrderStatus(order.fulfillmentStatus ?? "pending")} />
                 <InfoTile label="Total" value={formatMoney(order.total)} />
               </div>
               <div className="mt-3">
@@ -792,7 +801,7 @@ function OrderSummary({ order }: { order: AccountResponse["orders"][number] }) {
         <div>
           <p className="font-mono text-xs font-black text-steel">{order.orderNumber}</p>
           <p className="mt-1 font-black">{order.vehicle ?? "Vehicle not attached"}</p>
-          <p className="mt-1 text-xs font-black uppercase tracking-[0.12em] text-signal">Status: {formatOrderStatus(order.status)}</p>
+          <p className="mt-1 text-xs font-black uppercase tracking-[0.12em] text-signal">Status: {order.status}</p>
         </div>
         <p className="font-black">{formatMoney(order.total)}</p>
       </div>
