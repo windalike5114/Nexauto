@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { CheckCircle2, Gift, Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react";
-import { WiperFitmentFinder } from "@/components/wiper-fitment-finder";
 import { formatAttributeName, formatMoney } from "@/lib/catalog";
 import { calculateCartPricing, calculateOrderTotals } from "@/lib/pricing";
 import type { CartItem } from "@/lib/types";
@@ -194,7 +193,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       removeItem: (lineId) => {
         setItems((current) => current.filter((item) => getLineId(item) !== lineId));
       },
-      clearCart: () => setItems([])
+      clearCart: () => {
+        setItems([]);
+        setCouponCode("");
+        setCouponDiscount(0);
+        setCouponLabel("");
+        setCouponError("");
+        setCouponDraft("");
+        if (welcomeRewardStatus === "applied") setWelcomeRewardStatus("available");
+      }
     };
   }, [accountEmail, couponCode, couponDiscount, couponDraft, couponError, couponLabel, isDrawerOpen, items, validatingCoupon, welcomeRewardDiscount, welcomeRewardStatus]);
 
@@ -398,15 +405,12 @@ function CartDrawer({ recentlyAdded }: { recentlyAdded: CartItem | null }) {
           <section className="mt-4 rounded-lg border border-black/10 bg-[#F8FAFC] p-4">
             <p className="text-xs font-black uppercase tracking-[0.14em] text-signal">Wiper fitment</p>
             <h3 className="mt-1 text-lg font-black text-ink">Find wipers for another vehicle</h3>
-            <div className="mt-3">
-              <WiperFitmentFinder
-                compact
-                directToProduct
-                title="Find another front pair"
-                description="Select another vehicle and add its matched wipers without losing this cart."
-                directButtonLabel="Find Wipers"
-              />
-            </div>
+            <p className="mt-2 text-sm font-bold leading-6 text-steel">
+              Open the vehicle finder to search another car while keeping this cart.
+            </p>
+            <Link href="/shop#vehicle-finder" onClick={closeDrawer} className="mt-3 inline-flex h-10 items-center justify-center rounded bg-ink px-4 text-sm font-black text-white hover:bg-black">
+              Go to Wiper fitment
+            </Link>
           </section>
         </div>
 

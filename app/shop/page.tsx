@@ -214,7 +214,11 @@ function WiperSetCard({ wiperSet }: { wiperSet: WiperSet }) {
   const image = getWiperSetPreviewImage(wiperSet);
 
   return (
-    <article className="overflow-hidden rounded-[14px] border border-black/10 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-panel">
+    <Link
+      href={`/wipers/${wiperSet.sku}` as never}
+      className="block overflow-hidden rounded-[14px] border border-black/10 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-panel focus:outline-none focus:ring-2 focus:ring-signal focus:ring-offset-2"
+      aria-label={`View ${wiperSet.driverLengthIn} inch driver and ${wiperSet.passengerLengthIn} inch passenger front wiper blade pair`}
+    >
       <div className="relative aspect-[1/0.82] bg-zinc-50">
         <span className="absolute left-3 top-3 z-10 rounded bg-signal px-2 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-white">
           Sale
@@ -250,14 +254,11 @@ function WiperSetCard({ wiperSet }: { wiperSet: WiperSet }) {
 
         <p className="hidden text-xs font-black text-steel sm:block">Free NZ Shipping</p>
 
-        <Link
-          href={`/wipers/${wiperSet.sku}` as never}
-          className="inline-flex h-[42px] w-full items-center justify-center rounded bg-ink px-3 text-sm font-black text-white hover:bg-black"
-        >
+        <span className="inline-flex h-[42px] w-full items-center justify-center rounded bg-ink px-3 text-sm font-black text-white">
           View Details
-        </Link>
+        </span>
       </div>
-    </article>
+    </Link>
   );
 }
 

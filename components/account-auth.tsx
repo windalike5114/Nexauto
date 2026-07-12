@@ -549,8 +549,11 @@ function OrdersSection({ orders }: { orders: AccountResponse["orders"] }) {
               </div>
               <div className="mt-4 grid gap-3 md:grid-cols-3">
                 <InfoTile label="Vehicle" value={order.vehicle ?? "Not attached"} />
-                <InfoTile label="Products" value={order.products.join(", ") || "No products"} />
+                <InfoTile label="Order status" value={formatOrderStatus(order.status)} />
                 <InfoTile label="Total" value={formatMoney(order.total)} />
+              </div>
+              <div className="mt-3">
+                <InfoTile label="Products" value={order.products.join(", ") || "No products"} />
               </div>
               <div className="mt-4 flex flex-wrap gap-2">
                 <OrderButton icon={<PackageCheck className="h-4 w-4" />} label="View Details" />
@@ -789,6 +792,7 @@ function OrderSummary({ order }: { order: AccountResponse["orders"][number] }) {
         <div>
           <p className="font-mono text-xs font-black text-steel">{order.orderNumber}</p>
           <p className="mt-1 font-black">{order.vehicle ?? "Vehicle not attached"}</p>
+          <p className="mt-1 text-xs font-black uppercase tracking-[0.12em] text-signal">Status: {formatOrderStatus(order.status)}</p>
         </div>
         <p className="font-black">{formatMoney(order.total)}</p>
       </div>
@@ -812,6 +816,13 @@ function OrderButton({ icon, label }: { icon: React.ReactNode; label: string }) 
       {label}
     </button>
   );
+}
+
+function formatOrderStatus(status: string) {
+  return status
+    .split("_")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
 }
 
 function AuthModeButton({ active, icon, label, onClick }: { active: boolean; icon: React.ReactNode; label: string; onClick: () => void }) {

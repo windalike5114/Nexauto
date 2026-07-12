@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { Gift, Trash2 } from "lucide-react";
 import { useCart } from "@/components/cart-provider";
-import { WiperFitmentFinder } from "@/components/wiper-fitment-finder";
 import { formatAttributeName, formatMoney } from "@/lib/catalog";
 import { calculateCartPricing, calculateOrderTotals } from "@/lib/pricing";
 
@@ -127,17 +126,11 @@ export default function CartPage() {
               <p className="text-xs font-black uppercase tracking-[0.14em] text-signal">Wiper fitment</p>
               <h2 className="mt-2 text-2xl font-black text-ink">Find wipers for another vehicle</h2>
               <p className="mt-2 text-sm font-bold leading-6 text-steel">
-                Add another vehicle's matched front pair without losing the current cart.
+                Use the vehicle finder to add another matched front pair without losing the current cart.
               </p>
-              <div className="mt-4">
-                <WiperFitmentFinder
-                  compact
-                  directToProduct
-                  title="Find another front pair"
-                  description="Select make, model, and year to continue shopping for another vehicle."
-                  directButtonLabel="Find Wipers"
-                />
-              </div>
+              <Link href="/shop#vehicle-finder" className="mt-4 inline-flex h-11 items-center justify-center rounded bg-ink px-4 text-sm font-black text-white hover:bg-black">
+                Go to Wiper fitment
+              </Link>
             </section>
           </div>
           <aside className="h-fit rounded-lg border border-black/10 bg-white p-5 shadow-panel">
