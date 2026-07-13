@@ -167,49 +167,53 @@ export default async function HomePage() {
         />
       </div>
 
-      <section className="relative overflow-hidden bg-ink text-white">
-        <Image
-          src="/home/local-service.png"
-          alt="NexAutoParts local service and dispatch support"
-          fill
-          className="object-cover opacity-48"
-          sizes="100vw"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/86 via-black/62 to-black/28" />
-        <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
-          <div className="max-w-2xl">
+      <section className="border-t border-black/10 bg-[#F8FAFC]">
+        <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 lg:grid-cols-[1fr_0.82fr] lg:items-center lg:px-8">
+          <div>
             <p className="inline-flex items-center gap-2 text-sm font-black uppercase tracking-[0.18em] text-signal">
               <ImagePlus className="h-4 w-4" />
-              Need something else?
+              Need help finding the right part?
             </p>
-            <h2 className="mt-4 text-4xl font-black leading-tight sm:text-5xl">Looking for another part, image, or fitment detail?</h2>
-            <p className="mt-4 text-base font-semibold leading-8 text-white/78">
-              If you need any other product images, vehicle fitment support, or help finding the right part, contact our NZ-based team and we will help you confirm the details.
+            <h2 className="mt-4 text-3xl font-black leading-tight text-ink sm:text-4xl">Need Help Finding the Right Part?</h2>
+            <p className="mt-4 text-base font-bold leading-8 text-steel">
+              Can't find the product, image or fitment information you need?
             </p>
-            <Link href="/contact" className="mt-7 inline-flex h-12 items-center gap-2 rounded bg-signal px-5 font-black text-white shadow-lg shadow-red-950/20 transition hover:-translate-y-0.5 hover:bg-red-700">
-              Contact us
+            <p className="mt-3 max-w-2xl text-base font-semibold leading-8 text-steel">
+              Send us your vehicle details or part requirements and our New Zealand-based team will help confirm the right option.
+            </p>
+            <Link href="/contact" className="mt-7 inline-flex h-12 items-center gap-2 rounded bg-ink px-5 font-black text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-black">
+              Contact Us
               <ArrowRight className="h-4 w-4" />
             </Link>
+          </div>
+          <div className="relative aspect-[16/10] overflow-hidden rounded-2xl bg-zinc-100 shadow-panel">
+            <Image
+              src="/home/local-service.png"
+              alt="NexAutoParts local service and dispatch support"
+              fill
+              className="object-cover"
+              sizes="(min-width: 1024px) 40vw, 100vw"
+            />
           </div>
         </div>
       </section>
 
-      <section className="border-t border-black/10 bg-[#F8FAFC]">
+      <section className="bg-ink text-white">
         <div className="mx-auto grid max-w-7xl gap-6 px-4 py-10 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:px-8">
           <div>
             <p className="inline-flex items-center gap-2 text-sm font-black uppercase tracking-[0.18em] text-signal">
               <Mail className="h-4 w-4" />
-              Keep in the loop
+              Keep in the Loop
             </p>
-            <h2 className="mt-3 text-3xl font-black text-ink">Subscribe to our newsletter</h2>
-            <p className="mt-3 max-w-xl text-sm font-bold leading-6 text-steel">
-              Get launch offers, new product updates, fitment tips, and practical maintenance guides for New Zealand drivers.
+            <h2 className="mt-3 text-3xl font-black text-white">Useful updates for New Zealand drivers.</h2>
+            <p className="mt-3 max-w-xl text-sm font-bold leading-6 text-white/70">
+              Get exclusive offers, new product updates, fitment tips and practical vehicle maintenance guides delivered to your inbox.
             </p>
           </div>
-          <div className="rounded-2xl border border-black/10 bg-white p-5 shadow-panel">
+          <div className="rounded-2xl border border-white/10 bg-white/8 p-5 shadow-panel">
             <HomeNewsletterSignup />
-            <p className="mt-3 text-xs font-bold leading-5 text-steel">
-              No spam. Just useful updates from NexAutoParts.
+            <p className="mt-3 text-xs font-bold leading-5 text-white/60">
+              No spam. Unsubscribe anytime.
             </p>
           </div>
         </div>

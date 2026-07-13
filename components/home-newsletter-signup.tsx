@@ -51,11 +51,11 @@ export function HomeNewsletterSignup() {
   }
 
   return (
-    <form onSubmit={submit} className="mt-5">
-      <div className="flex flex-col gap-3 sm:flex-row">
-        <label htmlFor="home-newsletter-email" className="sr-only">
-          Email address
-        </label>
+    <form onSubmit={submit}>
+      <label htmlFor="home-newsletter-email" className="text-xs font-black uppercase tracking-[0.14em] text-white/78">
+        Email address
+      </label>
+      <div className="mt-2 flex flex-col gap-3 sm:flex-row">
         <input
           id="home-newsletter-email"
           type="email"
@@ -64,7 +64,7 @@ export function HomeNewsletterSignup() {
           required
           maxLength={254}
           placeholder="Enter your email"
-          className="h-12 min-w-0 flex-1 rounded border border-black/10 bg-white px-4 text-sm font-bold text-ink outline-none focus:border-ink"
+          className="h-12 min-w-0 flex-1 rounded border border-white/15 bg-white px-4 text-sm font-bold text-ink outline-none focus:border-signal"
         />
         <button
           type="submit"
@@ -75,7 +75,7 @@ export function HomeNewsletterSignup() {
         </button>
       </div>
       {message ? (
-        <p className={`mt-3 text-sm font-bold ${message.type === "success" ? "text-emerald-700" : "text-signal"}`}>
+        <p className={`mt-3 text-sm font-bold ${message.type === "success" ? "text-emerald-300" : "text-red-200"}`}>
           {message.text}
         </p>
       ) : null}
