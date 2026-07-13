@@ -199,11 +199,10 @@ export default async function HomePage() {
       <section className="bg-ink text-white">
         <div className="mx-auto grid max-w-7xl gap-6 px-4 py-10 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:px-8">
           <div>
-            <p className="inline-flex items-center gap-2 text-sm font-black uppercase tracking-[0.18em] text-signal">
+            <h2 className="inline-flex items-center gap-2 text-3xl font-black text-white sm:text-4xl">
               <Mail className="h-4 w-4" />
               Keep in the Loop
-            </p>
-            <h2 className="mt-3 text-3xl font-black text-white">Useful updates for New Zealand drivers.</h2>
+            </h2>
             <p className="mt-3 max-w-xl text-sm font-bold leading-6 text-white/70">
               Get exclusive offers, new product updates, fitment tips and practical vehicle maintenance guides delivered to your inbox.
             </p>
