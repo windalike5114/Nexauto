@@ -36,6 +36,8 @@ const footerGroups = [
   }
 ];
 
+const paymentMethods = ["Visa", "Mastercard", "Apple Pay", "Google Pay", "Afterpay"];
+
 export function SiteFooter() {
   return (
     <footer className="border-t border-black/10 bg-ink text-white">
@@ -85,9 +87,33 @@ export function SiteFooter() {
         ))}
       </div>
       <div className="border-t border-white/10">
-        <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-4 text-xs font-bold text-white/55 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
-          <span>(c) 2026 NexAutoParts. All rights reserved.</span>
-          <span>Secure checkout powered by Stripe.</span>
+        <div className="mx-auto grid max-w-7xl gap-5 px-4 py-5 text-xs font-bold text-white/60 sm:px-6 lg:grid-cols-[1fr_auto] lg:items-center lg:px-8">
+          <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center">
+            <div>
+              <p className="text-[11px] font-black uppercase tracking-[0.16em] text-white">We Accept</p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {paymentMethods.map((method) => (
+                  <span key={method} className="rounded border border-white/15 bg-white/10 px-2.5 py-1 text-[11px] font-black text-white/85">
+                    {method}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div>
+              <p className="text-[11px] font-black uppercase tracking-[0.16em] text-white">Follow us</p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {["Facebook", "Instagram"].map((channel) => (
+                  <span key={channel} className="rounded border border-white/15 px-2.5 py-1 text-[11px] font-black text-white/70">
+                    {channel}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-col gap-1 lg:text-right">
+            <span>(c) 2026 NexAutoParts. All rights reserved. NZBN 9429053285928.</span>
+            <span>Secure checkout powered by Stripe.</span>
+          </div>
         </div>
       </div>
     </footer>
