@@ -168,7 +168,7 @@ export default async function HomePage() {
       </div>
 
       <section className="border-t border-black/10 bg-[#F8FAFC]">
-        <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-24">
           <div className="max-w-3xl">
             <h2 className="text-3xl font-black leading-tight text-ink sm:text-4xl">Need Help Finding the Right Part?</h2>
             <p className="mt-4 text-base font-bold leading-8 text-steel">
@@ -178,20 +178,20 @@ export default async function HomePage() {
               Send us your vehicle details or part requirements and our team will help confirm the right option.
             </p>
           </div>
-          <div className="relative mt-7 aspect-[16/7] overflow-hidden rounded-2xl bg-zinc-100 shadow-panel">
-            <Image
-              src="/home/local-service.png"
-              alt="NexAutoParts local service and dispatch support"
-              fill
-              className="object-cover"
-              sizes="(min-width: 1024px) 960px, 100vw"
-            />
-          </div>
           <div>
             <Link href="/contact" className="mt-7 inline-flex h-12 items-center gap-2 rounded bg-ink px-5 font-black text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-black">
               Contact Us
               <ArrowRight className="h-4 w-4" />
             </Link>
+          </div>
+          <div className="relative mt-12 aspect-[4/3] overflow-hidden rounded-[20px] bg-zinc-100 shadow-panel sm:mt-14 sm:aspect-[16/7] lg:mt-16 lg:aspect-[1920/650]">
+            <Image
+              src="/home/parts-support-hero.png"
+              alt="Modern vehicle with windscreen wipers and automotive parts support"
+              fill
+              className="object-cover"
+              sizes="(min-width: 1280px) 1216px, 100vw"
+            />
           </div>
         </div>
       </section>
