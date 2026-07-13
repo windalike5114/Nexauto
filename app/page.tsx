@@ -1,7 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { ArrowRight, CheckCircle2, ShieldCheck, ShoppingCart, Truck, Wrench } from "lucide-react";
+import { ArrowRight, CheckCircle2, ImagePlus, Mail, ShieldCheck, ShoppingCart, Truck, Wrench } from "lucide-react";
+import { HomeNewsletterSignup } from "@/components/home-newsletter-signup";
 import { WiperFitmentFinder } from "@/components/wiper-fitment-finder";
 import { formatMoney } from "@/lib/catalog";
 import { wiperPairPricing } from "@/lib/pricing";
@@ -165,6 +166,54 @@ export default async function HomePage() {
           background="soft"
         />
       </div>
+
+      <section className="relative overflow-hidden bg-ink text-white">
+        <Image
+          src="/home/local-service.png"
+          alt="NexAutoParts local service and dispatch support"
+          fill
+          className="object-cover opacity-48"
+          sizes="100vw"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/86 via-black/62 to-black/28" />
+        <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
+          <div className="max-w-2xl">
+            <p className="inline-flex items-center gap-2 text-sm font-black uppercase tracking-[0.18em] text-signal">
+              <ImagePlus className="h-4 w-4" />
+              Need something else?
+            </p>
+            <h2 className="mt-4 text-4xl font-black leading-tight sm:text-5xl">Looking for another part, image, or fitment detail?</h2>
+            <p className="mt-4 text-base font-semibold leading-8 text-white/78">
+              If you need any other product images, vehicle fitment support, or help finding the right part, contact our NZ-based team and we will help you confirm the details.
+            </p>
+            <Link href="/contact" className="mt-7 inline-flex h-12 items-center gap-2 rounded bg-signal px-5 font-black text-white shadow-lg shadow-red-950/20 transition hover:-translate-y-0.5 hover:bg-red-700">
+              Contact us
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="border-t border-black/10 bg-[#F8FAFC]">
+        <div className="mx-auto grid max-w-7xl gap-6 px-4 py-10 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:px-8">
+          <div>
+            <p className="inline-flex items-center gap-2 text-sm font-black uppercase tracking-[0.18em] text-signal">
+              <Mail className="h-4 w-4" />
+              Keep in the loop
+            </p>
+            <h2 className="mt-3 text-3xl font-black text-ink">Subscribe to our newsletter</h2>
+            <p className="mt-3 max-w-xl text-sm font-bold leading-6 text-steel">
+              Get launch offers, new product updates, fitment tips, and practical maintenance guides for New Zealand drivers.
+            </p>
+          </div>
+          <div className="rounded-2xl border border-black/10 bg-white p-5 shadow-panel">
+            <HomeNewsletterSignup />
+            <p className="mt-3 text-xs font-bold leading-5 text-steel">
+              No spam. Just useful updates from NexAutoParts.
+            </p>
+          </div>
+        </div>
+      </section>
     </main>
   );
 }
