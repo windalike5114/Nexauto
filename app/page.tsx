@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { ArrowRight, CheckCircle2, ImagePlus, Mail, ShieldCheck, ShoppingCart, Truck, Wrench } from "lucide-react";
+import { ArrowRight, CheckCircle2, Mail, ShieldCheck, ShoppingCart, Truck, Wrench } from "lucide-react";
 import { HomeNewsletterSignup } from "@/components/home-newsletter-signup";
 import { WiperFitmentFinder } from "@/components/wiper-fitment-finder";
 import { formatMoney } from "@/lib/catalog";
@@ -168,18 +168,14 @@ export default async function HomePage() {
       </div>
 
       <section className="border-t border-black/10 bg-[#F8FAFC]">
-        <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 lg:grid-cols-[1fr_0.82fr] lg:items-center lg:px-8">
+        <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 lg:grid-cols-[0.86fr_1.14fr] lg:items-center lg:px-8">
           <div>
-            <p className="inline-flex items-center gap-2 text-sm font-black uppercase tracking-[0.18em] text-signal">
-              <ImagePlus className="h-4 w-4" />
-              Need help finding the right part?
-            </p>
-            <h2 className="mt-4 text-3xl font-black leading-tight text-ink sm:text-4xl">Need Help Finding the Right Part?</h2>
+            <h2 className="text-3xl font-black leading-tight text-ink sm:text-4xl">Need Help Finding the Right Part?</h2>
             <p className="mt-4 text-base font-bold leading-8 text-steel">
               Can't find the product, image or fitment information you need?
             </p>
             <p className="mt-3 max-w-2xl text-base font-semibold leading-8 text-steel">
-              Send us your vehicle details or part requirements and our New Zealand-based team will help confirm the right option.
+              Send us your vehicle details or part requirements and our team will help confirm the right option.
             </p>
             <Link href="/contact" className="mt-7 inline-flex h-12 items-center gap-2 rounded bg-ink px-5 font-black text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-black">
               Contact Us
