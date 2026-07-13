@@ -92,7 +92,7 @@ export function WiperSetPurchase({
       : `Add Front Pair - ${formatMoney(total)}`;
 
   return (
-    <div className="rounded-lg border border-black/10 bg-white p-5 shadow-panel">
+    <div className="rounded-lg border border-black/10 bg-white p-4 shadow-panel sm:p-5">
       {rearAddon ? (
         <label className="flex cursor-pointer items-start gap-3 rounded border border-black/10 bg-zinc-50 p-3">
           <input
@@ -103,7 +103,7 @@ export function WiperSetPurchase({
           />
           <span className="flex-1">
             <span className="block text-sm font-black">Add rear blade</span>
-            <span className="mt-1 block text-sm font-bold text-steel">
+            <span className="mt-1 block text-sm font-bold leading-6 text-steel">
               {rearAddon.rearLengthIn}" / {toMillimetres(rearAddon.rearLengthIn)} mm - {formatMoney(rearAddon.price)}
             </span>
           </span>
@@ -114,7 +114,7 @@ export function WiperSetPurchase({
         <button
           type="button"
           onClick={handleAdd}
-          className="inline-flex h-12 w-full items-center justify-center gap-2 rounded bg-signal px-5 font-black text-white hover:bg-red-700"
+          className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded bg-signal px-4 py-3 text-sm font-black text-white hover:bg-red-700 sm:px-5 sm:text-base"
         >
           {added ? <Check className="h-5 w-5" /> : <ShoppingBag className="h-5 w-5" />}
           {added ? "Added" : addLabel}

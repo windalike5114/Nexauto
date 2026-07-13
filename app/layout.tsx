@@ -36,14 +36,14 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           <div className="min-h-screen">
             <header className="sticky top-0 z-30 border-b border-black/10 bg-white/90 backdrop-blur">
               <div className="bg-ink text-white">
-                <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-2 text-center text-xs font-black sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:text-left lg:px-8">
-                  <p>Launch offer: $20 off all front wiper blade pairs + shipping waived NZ-wide for the first 3 months.</p>
-                  <Link href="/#vehicle-finder" className="inline-flex items-center justify-center rounded bg-signal px-3 py-1.5 text-[11px] uppercase tracking-[0.12em] text-white transition hover:-translate-y-0.5 hover:bg-red-700">
+                <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-3 py-2 text-xs font-black sm:px-6 lg:px-8">
+                  <p className="min-w-0 flex-1 leading-5 sm:text-left">Launch offer: $20 off wiper pairs + shipping waived NZ-wide.</p>
+                  <Link href="/#vehicle-finder" className="inline-flex shrink-0 items-center justify-center rounded bg-signal px-2.5 py-1.5 text-[10px] uppercase tracking-[0.1em] text-white transition hover:-translate-y-0.5 hover:bg-red-700 sm:px-3 sm:text-[11px]">
                     Find My Wipers
                   </Link>
                 </div>
               </div>
-              <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+              <nav className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-3 py-3 sm:px-6 sm:py-4 lg:px-8">
                 <Link href="/" className="flex items-center gap-3" aria-label="NexAuto home">
                   <Image
                     src={blobMediaAssets.brand.circleIcon}
@@ -62,11 +62,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                     priority
                   />
                 </Link>
-                <div className="flex items-center gap-2 text-sm font-semibold text-steel">
-                  <Link className="rounded px-3 py-2 hover:bg-black/5" href="/">
+                <div className="flex min-w-0 items-center gap-1 text-xs font-bold text-steel sm:gap-2 sm:text-sm sm:font-semibold">
+                  <Link className="rounded px-2 py-2 hover:bg-black/5 sm:px-3" href="/">
                     Finder
                   </Link>
-                  <Link className="rounded px-3 py-2 hover:bg-black/5" href="/shop">
+                  <Link className="rounded px-2 py-2 hover:bg-black/5 sm:px-3" href="/shop">
                     Shop
                   </Link>
                   <Link className="hidden rounded px-3 py-2 hover:bg-black/5 lg:inline-flex" href="/about">
@@ -75,7 +75,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                   <Link className="hidden rounded px-3 py-2 hover:bg-black/5 lg:inline-flex" href="/contact">
                     Contact
                   </Link>
-                  <Link className="rounded px-3 py-2 hover:bg-black/5" href="/account">
+                  <Link className="rounded px-2 py-2 hover:bg-black/5 sm:px-3" href="/account">
                     Account
                   </Link>
                   <CartLink />

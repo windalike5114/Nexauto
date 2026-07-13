@@ -80,29 +80,29 @@ export default async function WiperSkuPage({
 
   return (
     <main>
-      <section className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[1.15fr_0.85fr] lg:px-8">
+      <section className="mx-auto grid max-w-7xl gap-6 px-4 py-7 sm:px-6 sm:py-10 lg:grid-cols-[1.15fr_0.85fr] lg:gap-8 lg:px-8">
         <div className="space-y-4 lg:sticky lg:top-28 lg:self-start">
           <WiperProductGallery images={galleryImages} />
         </div>
 
         <section className="space-y-6">
           <div>
-            <p className="text-sm font-black uppercase tracking-[0.18em] text-signal">Wipers</p>
-            <h1 className="mt-3 text-4xl font-black leading-tight sm:text-5xl">Premium Front Windscreen Wiper Blade Pair</h1>
-            <p className="mt-2 text-2xl font-black text-ink">
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-signal sm:text-sm sm:tracking-[0.18em]">Wipers</p>
+            <h1 className="mt-2 text-3xl font-black leading-tight sm:mt-3 sm:text-5xl">Premium Front Windscreen Wiper Blade Pair</h1>
+            <p className="mt-2 text-xl font-black text-ink sm:text-2xl">
               {wiperSet.driverLengthIn}" + {wiperSet.passengerLengthIn}"
             </p>
-            <p className="mt-4 text-lg font-semibold leading-8 text-steel">
+            <p className="mt-3 text-base font-semibold leading-7 text-steel sm:mt-4 sm:text-lg sm:leading-8">
               Smooth, quiet and reliable wiping performance designed for everyday New Zealand driving.
             </p>
             <div className="mt-5 flex flex-wrap items-end gap-3">
-              <span className="text-xl font-black text-steel line-through">
+              <span className="text-lg font-black text-steel line-through sm:text-xl">
                 {formatMoney(wiperSet.compareAtPrice ?? wiperPairPricing.compareAtPrice)}
               </span>
               <span className="rounded bg-signal px-3 py-1 text-xs font-black uppercase tracking-[0.14em] text-white">Sale</span>
-              <span className="text-4xl font-black">{formatMoney(wiperSet.price)}</span>
+              <span className="text-3xl font-black sm:text-4xl">{formatMoney(wiperSet.price)}</span>
             </div>
-            <div className="mt-4 grid gap-2 text-sm font-black text-ink sm:grid-cols-2">
+            <div className="mt-4 grid grid-cols-2 gap-2 text-xs font-black text-ink sm:text-sm">
               <span className="rounded border border-black/10 bg-white px-3 py-2">Fits your selected vehicle</span>
               <span className="rounded border border-black/10 bg-white px-3 py-2">Front pair included</span>
               <span className="rounded border border-black/10 bg-white px-3 py-2">Free NZ shipping</span>
@@ -112,19 +112,19 @@ export default async function WiperSkuPage({
           </div>
 
           {vehicle ? (
-            <section className="rounded-lg border border-black/10 bg-zinc-50 p-5">
+            <section className="rounded-lg border border-black/10 bg-zinc-50 p-4 sm:p-5">
               <div className="flex items-start gap-3">
                 <div className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-signal text-white">
                   <CarFront className="h-5 w-5" />
                 </div>
                 <div>
                   <p className="text-xs font-black uppercase tracking-[0.14em] text-signal">Selected vehicle</p>
-                  <h2 className="mt-1 text-2xl font-black">{vehicle}</h2>
+                  <h2 className="mt-1 text-xl font-black leading-tight sm:text-2xl">{vehicle}</h2>
                 </div>
               </div>
             </section>
           ) : (
-            <section className="rounded-lg border border-black/10 bg-zinc-50 p-5">
+            <section className="rounded-lg border border-black/10 bg-zinc-50 p-4 sm:p-5">
               <div className="flex items-start gap-3">
                 <CircleHelp className="mt-0.5 h-5 w-5 shrink-0 text-signal" />
                 <div>
@@ -137,7 +137,7 @@ export default async function WiperSkuPage({
             </section>
           )}
 
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-2 gap-3">
             <FitmentTile label="Driver side" lengthIn={wiperSet.driverLengthIn} />
             <FitmentTile label="Passenger side" lengthIn={wiperSet.passengerLengthIn} />
           </div>
@@ -146,7 +146,7 @@ export default async function WiperSkuPage({
             <p className="text-sm font-bold leading-6 text-steel">
               Not sure whether these sizes fit your vehicle? Use our Vehicle Finder before ordering to confirm compatibility.
             </p>
-            <Link href="/#vehicle-finder" className="inline-flex h-11 shrink-0 items-center justify-center rounded bg-ink px-4 text-sm font-black text-white transition hover:-translate-y-0.5 hover:bg-black">
+            <Link href="/#vehicle-finder" className="inline-flex h-11 w-full shrink-0 items-center justify-center rounded bg-ink px-4 text-sm font-black text-white transition hover:-translate-y-0.5 hover:bg-black sm:w-auto">
               Check My Vehicle
             </Link>
           </div>
@@ -156,7 +156,7 @@ export default async function WiperSkuPage({
       </section>
 
       <section className="border-t border-black/10 bg-[#F8FAFC]">
-        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-12 lg:px-8">
           <div className="grid gap-4 md:grid-cols-3">
             <FeatureCard title="Smooth & Quiet" text="Designed for consistent wiping with reduced noise, skipping and vibration." />
             <FeatureCard title="Even Windscreen Contact" text="The flexible internal structure helps distribute pressure across the blade for consistent contact with the windscreen." />
@@ -176,7 +176,7 @@ export default async function WiperSkuPage({
           </div>
           <div className="flex gap-4 overflow-x-auto pb-2">
             {adapterImageNames.map((name, index) => (
-              <article key={name} className="relative aspect-[4/3] min-w-[42%] overflow-hidden rounded-lg border border-black/10 bg-white shadow-sm sm:min-w-[220px] lg:min-w-0 lg:flex-1">
+            <article key={name} className="relative aspect-[4/3] min-w-[58%] overflow-hidden rounded-lg border border-black/10 bg-white shadow-sm min-[430px]:min-w-[42%] sm:min-w-[220px] lg:min-w-0 lg:flex-1">
                 <Image
                   src={getImageUrl(name)}
                   alt={`Common wiper arm adapter style ${index + 1}`}
@@ -194,16 +194,16 @@ export default async function WiperSkuPage({
       </section>
 
       <section className="border-t border-black/10 bg-[#F8FAFC]">
-        <div className="mx-auto grid max-w-7xl gap-6 px-4 py-12 sm:px-6 lg:grid-cols-[1fr_360px] lg:items-center lg:px-8">
+        <div className="mx-auto grid max-w-7xl gap-6 px-4 py-10 sm:px-6 sm:py-12 lg:grid-cols-[1fr_360px] lg:items-center lg:px-8">
           <div>
             <p className="text-sm font-black uppercase tracking-[0.18em] text-signal">Installation support</p>
-            <h2 className="mt-3 text-3xl font-black">Need Help Installing Your Wipers?</h2>
+            <h2 className="mt-3 text-2xl font-black sm:text-3xl">Need Help Installing Your Wipers?</h2>
             <p className="mt-4 max-w-3xl text-base font-semibold leading-8 text-steel">
               View step-by-step installation guides for different adapter types.
             </p>
           </div>
           <div>
-            <Link href="/wiper-installation-guides" className="inline-flex h-12 items-center justify-center rounded bg-signal px-5 font-black text-white transition hover:-translate-y-0.5 hover:bg-red-700">
+            <Link href="/wiper-installation-guides" className="inline-flex h-12 w-full items-center justify-center rounded bg-signal px-5 font-black text-white transition hover:-translate-y-0.5 hover:bg-red-700 sm:w-auto">
               View Installation Guides
             </Link>
           </div>

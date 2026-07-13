@@ -267,14 +267,14 @@ export function WiperFitmentFinder({
   }
 
   return (
-    <section className={`rounded-2xl border border-black/10 bg-white shadow-panel ${compact ? "p-5" : "p-7 sm:p-8"}`}>
-      <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+    <section className={`rounded-2xl border border-black/10 bg-white shadow-panel ${compact ? "p-5" : "p-5 sm:p-8"}`}>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-5">
         <div>
-          <div className="flex items-center gap-2 text-sm font-black uppercase tracking-[0.16em] text-signal">
+          <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.14em] text-signal sm:text-sm sm:tracking-[0.16em]">
             <CarFront className="h-4 w-4" />
             Wiper fitment
           </div>
-          <h2 className={`${compact ? "mt-2 text-2xl" : "mt-3 text-3xl"} font-black`}>{title}</h2>
+          <h2 className={`${compact ? "mt-2 text-2xl" : "mt-3 text-2xl sm:text-3xl"} font-black leading-tight`}>{title}</h2>
           <p className="mt-2 max-w-2xl text-sm font-bold leading-6 text-steel">
             {description}
           </p>
@@ -284,7 +284,7 @@ export function WiperFitmentFinder({
         </div>
       </div>
 
-      <div className={`mt-6 grid gap-4 ${compact ? "grid-cols-1" : "md:grid-cols-3"}`}>
+      <div className={`mt-5 grid gap-3 sm:mt-6 sm:gap-4 ${compact ? "grid-cols-1" : "md:grid-cols-3"}`}>
         <SelectControl label="Make" value={makeId} disabled={busy && loading === "makes"} onChange={setMakeId}>
           <option value="">Select make</option>
           {makes.map((entry) => (
@@ -318,7 +318,7 @@ export function WiperFitmentFinder({
           type="button"
           disabled={!makeId || !modelId || !year || searching}
           onClick={findAndGoToProduct}
-          className="mt-6 inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-xl bg-signal px-5 py-4 text-sm font-black text-white shadow-lg shadow-red-900/15 transition hover:-translate-y-0.5 hover:bg-red-700 hover:shadow-xl disabled:translate-y-0 disabled:bg-zinc-300 disabled:shadow-none"
+          className="mt-5 inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-xl bg-signal px-5 py-4 text-sm font-black text-white shadow-lg shadow-red-900/15 transition hover:-translate-y-0.5 hover:bg-red-700 hover:shadow-xl disabled:translate-y-0 disabled:bg-zinc-300 disabled:shadow-none sm:mt-6"
         >
           {searching ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
           {directButtonLabel}
@@ -329,7 +329,7 @@ export function WiperFitmentFinder({
 
       <p className="mt-3 text-xs font-bold leading-6 text-steel">
         Can't find your vehicle?{" "}
-        <Link href="/contact" className="font-black text-signal underline-offset-4 hover:underline">
+        <Link href="/contact" className="font-black text-signal underline underline-offset-4 hover:no-underline">
           Contact us for fitment help
         </Link>
         .
@@ -433,12 +433,12 @@ function SelectControl({
 }) {
   return (
     <label className="block">
-      <span className="text-xs font-black uppercase tracking-[0.14em] text-steel">{label}</span>
+      <span className="text-xs font-black uppercase tracking-[0.12em] text-steel sm:tracking-[0.14em]">{label}</span>
       <select
         value={value}
         disabled={disabled}
         onChange={(event) => onChange(event.target.value)}
-        className="mt-2 h-12 w-full rounded border border-black/10 bg-white px-3 text-sm font-bold text-ink outline-none disabled:bg-zinc-100 disabled:text-steel"
+        className="mt-2 h-12 w-full rounded-lg border border-black/10 bg-white px-3 text-base font-bold text-ink outline-none disabled:bg-zinc-100 disabled:text-steel sm:text-sm"
       >
         {children}
       </select>

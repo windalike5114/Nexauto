@@ -34,17 +34,17 @@ export default async function HomePage() {
         />
         <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/48 to-black/18" />
 
-        <div className="relative mx-auto grid min-h-[calc(100vh-73px)] max-w-7xl content-center gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[0.84fr_1.16fr] lg:px-8">
+        <div className="relative mx-auto grid min-h-[calc(100svh-105px)] max-w-7xl content-center gap-7 px-4 py-8 sm:px-6 sm:py-12 lg:min-h-[calc(100vh-73px)] lg:grid-cols-[0.84fr_1.16fr] lg:gap-10 lg:px-8">
           <div className="flex flex-col justify-center text-white">
-            <p className="text-sm font-black uppercase tracking-[0.18em] text-white/80">NZ auto parts and wiper fitment</p>
-            <h1 className="mt-4 max-w-3xl text-4xl font-black leading-tight sm:text-6xl">
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-white/80 sm:text-sm sm:tracking-[0.18em]">NZ auto parts and wiper fitment</p>
+            <h1 className="mt-3 max-w-3xl text-3xl font-black leading-tight sm:mt-4 sm:text-6xl">
               Quality Auto Parts for New Zealand Drivers
             </h1>
-            <p className="mt-5 max-w-2xl text-lg font-semibold leading-8 text-white/78">
+            <p className="mt-4 max-w-2xl text-base font-semibold leading-7 text-white/78 sm:mt-5 sm:text-lg sm:leading-8">
               Find the right replacement parts with confidence. From premium wiper blades to essential maintenance components, NexAutoParts makes it easy to keep your vehicle performing at its best.
             </p>
 
-            <div className="mt-8 grid gap-3 sm:grid-cols-3">
+            <div className="mt-6 grid gap-2 sm:mt-8 sm:grid-cols-3 sm:gap-3">
               <TrustPill icon={<Wrench className="h-4 w-4" />} text="Premium Quality" />
               <TrustPill icon={<Truck className="h-4 w-4" />} text="Fast NZ Shipping" />
               <TrustPill icon={<ShieldCheck className="h-4 w-4" />} text="Vehicle Fitment Support" />
@@ -52,10 +52,10 @@ export default async function HomePage() {
           </div>
 
           <div id="vehicle-finder" className="scroll-mt-24 self-center">
-            <div className="mb-3 rounded-2xl border border-white/18 bg-white/14 p-4 text-white shadow-lg backdrop-blur">
+            <div className="mb-3 rounded-2xl border border-white/18 bg-white/14 p-3 text-white shadow-lg backdrop-blur sm:p-4">
               <p className="text-xs font-black uppercase tracking-[0.16em] text-signal">Limited launch offer</p>
-              <p className="mt-1 text-lg font-black">Save $20 on every front wiper blade pair</p>
-              <p className="mt-1 text-sm font-semibold text-white/76">$8 shipping waived NZ-wide during the first 3 months.</p>
+              <p className="mt-1 text-base font-black sm:text-lg">Save $20 on every front wiper blade pair</p>
+              <p className="mt-1 text-xs font-semibold text-white/76 sm:text-sm">$8 shipping waived NZ-wide during the first 3 months.</p>
             </div>
             <WiperFitmentFinder directToProduct />
           </div>
@@ -67,7 +67,7 @@ export default async function HomePage() {
           <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-sm font-black uppercase tracking-[0.18em] text-signal">Popular Products</p>
-              <h2 className="mt-2 text-3xl font-black">Bestselling Front Wiper Blade Pairs</h2>
+              <h2 className="mt-2 text-2xl font-black sm:text-3xl">Bestselling Front Wiper Blade Pairs</h2>
               <p className="mt-2 max-w-2xl text-sm font-bold leading-6 text-steel">
                 On sale now with $20 off front pair pricing and launch shipping waived NZ-wide.
               </p>
@@ -78,7 +78,7 @@ export default async function HomePage() {
             </Link>
           </div>
 
-          <div className="flex gap-4 overflow-x-auto pb-2">
+          <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-2 sm:mx-0 sm:gap-4 sm:px-0">
             {popularWiperSets.map((wiperSet) => (
               <PopularSkuCard key={wiperSet.id} wiperSet={wiperSet} />
             ))}
@@ -88,21 +88,21 @@ export default async function HomePage() {
 
       <section className="border-b border-black/10 bg-white">
         <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-          <div className="grid gap-5 rounded-2xl border border-black/10 bg-[#F8FAFC] p-5 shadow-panel lg:grid-cols-[0.85fr_1.15fr] lg:items-center lg:p-7">
+          <div className="grid gap-5 rounded-2xl border border-black/10 bg-[#F8FAFC] p-4 shadow-panel sm:p-5 lg:grid-cols-[0.85fr_1.15fr] lg:items-center lg:p-7">
             <div>
               <p className="text-sm font-black uppercase tracking-[0.18em] text-signal">Buy More, Save More</p>
-              <h2 className="mt-2 text-3xl font-black text-ink">Bundle savings for multiple vehicles</h2>
+              <h2 className="mt-2 text-2xl font-black text-ink sm:text-3xl">Bundle savings for multiple vehicles</h2>
               <p className="mt-3 text-sm font-bold leading-6 text-steel">
                 Buying for more than one car? Bundle savings are applied automatically in cart when eligible front wiper blade pairs are added.
               </p>
             </div>
-            <div className="grid gap-3 sm:grid-cols-3">
+            <div className="grid grid-cols-3 gap-2 sm:gap-3">
               <BundlePrice label="1 Pair" price="$59.99" note="Save $20" />
               <BundlePrice label="2 Pairs" price="$109.99" note="Save up to $50" featured />
               <BundlePrice label="3 Pairs" price="$149.99" note="Save up to $90" />
             </div>
             <div className="lg:col-span-2">
-              <Link href="/shop" className="inline-flex h-11 items-center gap-2 rounded-lg bg-ink px-4 text-sm font-black text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-black hover:shadow-md">
+              <Link href="/shop" className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-ink px-4 text-sm font-black text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-black hover:shadow-md sm:w-auto">
                 Shop Wiper Blade Pairs
                 <ShoppingCart className="h-4 w-4" />
               </Link>
@@ -112,12 +112,12 @@ export default async function HomePage() {
       </section>
 
       <section className="bg-ink text-white">
-        <div className="mx-auto grid max-w-7xl gap-8 px-4 py-16 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-start lg:px-8 lg:py-20">
+        <div className="mx-auto grid max-w-7xl gap-6 px-4 py-12 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-start lg:px-8 lg:py-20">
           <div>
             <p className="text-sm font-black uppercase tracking-[0.18em] text-signal">Keeping New Zealand Moving</p>
-            <h2 className="mt-4 text-4xl font-black leading-tight sm:text-5xl">Maintaining your vehicle should not be complicated.</h2>
+            <h2 className="mt-4 text-3xl font-black leading-tight sm:text-5xl">Maintaining your vehicle should not be complicated.</h2>
           </div>
-          <div className="space-y-5 text-lg font-semibold leading-9 text-white/76">
+          <div className="space-y-4 text-base font-semibold leading-8 text-white/76 sm:text-lg sm:leading-9">
             <p>
               At NexAutoParts, we believe maintaining your vehicle should not be complicated or expensive. Whether you are replacing worn wiper blades, servicing your family car, or sourcing reliable replacement parts, we are here to make the process simple.
             </p>
@@ -168,8 +168,8 @@ export default async function HomePage() {
       </div>
 
       <section className="border-t border-black/10 bg-[#F8FAFC]">
-        <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-24">
-          <div className="relative min-h-[520px] overflow-hidden rounded-[20px] bg-ink shadow-panel sm:min-h-[460px] lg:min-h-[430px]">
+        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
+          <div className="relative min-h-[500px] overflow-hidden rounded-[20px] bg-ink shadow-panel sm:min-h-[460px] lg:min-h-[430px]">
             <Image
               src="/home/parts-support-hero.png"
               alt="Modern vehicle with windscreen wipers and automotive parts support"
@@ -178,16 +178,16 @@ export default async function HomePage() {
               sizes="(min-width: 1280px) 1216px, 100vw"
             />
             <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/45 to-black/20 sm:bg-gradient-to-r sm:from-black/82 sm:via-black/55 sm:to-black/10" />
-            <div className="relative flex min-h-[520px] items-center px-6 py-12 sm:min-h-[460px] sm:px-10 lg:min-h-[430px] lg:px-14">
+            <div className="relative flex min-h-[500px] items-end px-5 py-8 sm:min-h-[460px] sm:items-center sm:px-10 lg:min-h-[430px] lg:px-14">
               <div className="max-w-2xl text-white">
                 <h2 className="text-3xl font-black leading-tight sm:text-4xl lg:text-5xl">Need Help Finding the Right Part?</h2>
-                <p className="mt-5 text-base font-bold leading-8 text-white/90 sm:text-lg">
+                <p className="mt-4 text-base font-bold leading-7 text-white/90 sm:mt-5 sm:text-lg sm:leading-8">
                   Can't find the product, image or fitment information you need?
                 </p>
-                <p className="mt-3 max-w-xl text-base font-semibold leading-8 text-white/80">
+                <p className="mt-3 max-w-xl text-sm font-semibold leading-7 text-white/80 sm:text-base sm:leading-8">
                   Send us your vehicle details or part requirements and our team will help confirm the right option.
                 </p>
-                <Link href="/contact" className="mt-8 inline-flex h-12 items-center gap-2 rounded bg-signal px-5 font-black text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-red-700">
+                <Link href="/contact" className="mt-6 inline-flex h-12 w-full items-center justify-center gap-2 rounded bg-signal px-5 font-black text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-red-700 sm:mt-8 sm:w-auto">
                   Contact Us
                   <ArrowRight className="h-4 w-4" />
                 </Link>
@@ -239,7 +239,7 @@ function pickPopularWiperSets(wiperSets: WiperSet[]) {
 
 function TrustPill({ icon, text }: { icon: React.ReactNode; text: string }) {
   return (
-    <div className="flex min-h-12 items-center gap-2 rounded-lg border border-white/18 bg-white/12 px-4 text-sm font-black text-white shadow-sm backdrop-blur">
+    <div className="flex min-h-11 items-center gap-2 rounded-lg border border-white/18 bg-white/12 px-3 text-xs font-black text-white shadow-sm backdrop-blur sm:min-h-12 sm:px-4 sm:text-sm">
       <span className="text-signal">{icon}</span>
       <span>{text}</span>
     </div>
@@ -251,7 +251,7 @@ function PopularSkuCard({ wiperSet }: { wiperSet: WiperSet }) {
   const compareAtPrice = wiperSet.compareAtPrice ?? wiperPairPricing.compareAtPrice;
 
   return (
-    <article className="min-w-[240px] overflow-hidden rounded-lg border border-black/10 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-panel sm:min-w-[260px]">
+    <article className="min-w-[218px] overflow-hidden rounded-lg border border-black/10 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-panel sm:min-w-[260px]">
       <div className="relative aspect-[4/3] bg-zinc-50">
         <span className="absolute left-3 top-3 z-10 rounded bg-signal px-2 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-white">
           Sale
@@ -264,18 +264,18 @@ function PopularSkuCard({ wiperSet }: { wiperSet: WiperSet }) {
           sizes="260px"
         />
       </div>
-      <div className="p-5">
-        <h3 className="text-lg font-black">Front Wiper Blade Pair</h3>
+      <div className="p-4 sm:p-5">
+        <h3 className="text-base font-black sm:text-lg">Front Wiper Blade Pair</h3>
         <p className="mt-2 text-sm font-black text-steel">
           Driver {wiperSet.driverLengthIn}" + Passenger {wiperSet.passengerLengthIn}"
         </p>
         <p className="mt-3 text-xs font-black text-steel">Save $20 - launch shipping waived</p>
-        <div className="mt-4 flex items-center justify-between gap-3">
+        <div className="mt-4 grid gap-3 sm:flex sm:items-center sm:justify-between">
           <p className="flex flex-wrap items-baseline gap-2">
             <span className="text-lg font-black">{formatMoney(wiperSet.price)}</span>
             <span className="text-xs font-bold text-steel line-through">{formatMoney(compareAtPrice)}</span>
           </p>
-          <Link href={`/wipers/${wiperSet.sku}`} className="inline-flex h-10 items-center rounded bg-ink px-3 text-sm font-black text-white transition hover:-translate-y-0.5 hover:bg-black">
+          <Link href={`/wipers/${wiperSet.sku}`} className="inline-flex h-10 items-center justify-center rounded bg-ink px-3 text-sm font-black text-white transition hover:-translate-y-0.5 hover:bg-black">
             View Details
           </Link>
         </div>
@@ -286,10 +286,10 @@ function PopularSkuCard({ wiperSet }: { wiperSet: WiperSet }) {
 
 function BundlePrice({ label, price, note, featured = false }: { label: string; price: string; note: string; featured?: boolean }) {
   return (
-    <div className={`rounded-lg border p-4 ${featured ? "border-signal bg-white shadow-sm" : "border-black/10 bg-white"}`}>
-      <p className="text-sm font-black text-steel">{label}</p>
-      <p className="mt-2 text-2xl font-black text-ink">{price}</p>
-      <p className="mt-1 text-xs font-black uppercase tracking-[0.12em] text-signal">{note}</p>
+    <div className={`rounded-lg border p-3 sm:p-4 ${featured ? "border-signal bg-white shadow-sm" : "border-black/10 bg-white"}`}>
+      <p className="text-xs font-black text-steel sm:text-sm">{label}</p>
+      <p className="mt-2 text-lg font-black text-ink sm:text-2xl">{price}</p>
+      <p className="mt-1 text-[10px] font-black uppercase tracking-[0.08em] text-signal sm:text-xs sm:tracking-[0.12em]">{note}</p>
     </div>
   );
 }
@@ -315,8 +315,8 @@ function FeatureSection({
 }) {
   return (
     <section className={`border-b border-black/10 ${background === "soft" ? "bg-[#F8FAFC]" : "bg-white"}`}>
-      <div className={`mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 lg:grid-cols-2 lg:items-center lg:px-8 lg:py-16 ${reverse ? "lg:[&>*:first-child]:order-2" : ""}`}>
-        <div className="relative aspect-[16/10] overflow-hidden rounded-lg bg-zinc-100 shadow-panel transition hover:-translate-y-1">
+      <div className={`mx-auto grid max-w-7xl gap-6 px-4 py-10 sm:px-6 lg:grid-cols-2 lg:items-center lg:gap-8 lg:px-8 lg:py-16 ${reverse ? "lg:[&>*:first-child]:order-2" : ""}`}>
+        <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-zinc-100 shadow-panel transition hover:-translate-y-1 sm:aspect-[16/10]">
           <Image
             src={image}
             alt={imageAlt}
@@ -328,9 +328,9 @@ function FeatureSection({
 
         <div>
           <p className="text-sm font-black uppercase tracking-[0.18em] text-signal">{eyebrow}</p>
-          <h2 className="mt-3 text-3xl font-black leading-tight text-ink sm:text-4xl">{title}</h2>
-          <p className="mt-4 text-base font-semibold leading-8 text-steel">{text}</p>
-          <div className="mt-6 grid gap-3">
+          <h2 className="mt-3 text-2xl font-black leading-tight text-ink sm:text-4xl">{title}</h2>
+          <p className="mt-3 text-base font-semibold leading-7 text-steel sm:mt-4 sm:leading-8">{text}</p>
+          <div className="mt-5 grid gap-3 sm:mt-6">
             {points.map((point) => (
               <div key={point} className="flex items-center gap-3 text-sm font-black text-ink">
                 <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-signal text-white">

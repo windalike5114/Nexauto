@@ -71,7 +71,7 @@ export function ContactForm({ sourcePage, productName, productSku, defaultPartOr
   }
 
   return (
-    <section className="rounded-lg border border-black/10 bg-white p-6 shadow-panel">
+    <section className="rounded-lg border border-black/10 bg-white p-4 shadow-panel sm:p-6">
       <h2 className="text-xl font-black">Message us</h2>
       <form onSubmit={submit} className="mt-5 space-y-4">
         <div className="hidden">
@@ -86,7 +86,7 @@ export function ContactForm({ sourcePage, productName, productSku, defaultPartOr
             name="name"
             required
             maxLength={120}
-            className="mt-2 h-12 w-full rounded border border-black/10 px-3 outline-none focus:border-ink"
+            className="mt-2 h-12 w-full rounded border border-black/10 px-3 text-base outline-none focus:border-ink"
             placeholder="Your name"
           />
         </FormField>
@@ -97,7 +97,7 @@ export function ContactForm({ sourcePage, productName, productSku, defaultPartOr
             type="email"
             required
             maxLength={254}
-            className="mt-2 h-12 w-full rounded border border-black/10 px-3 outline-none focus:border-ink"
+            className="mt-2 h-12 w-full rounded border border-black/10 px-3 text-base outline-none focus:border-ink"
             placeholder="you@example.com"
           />
         </FormField>
@@ -108,7 +108,7 @@ export function ContactForm({ sourcePage, productName, productSku, defaultPartOr
             value={partOrSku}
             onChange={(event) => setPartOrSku(event.target.value)}
             maxLength={160}
-            className="mt-2 h-12 w-full rounded border border-black/10 px-3 outline-none focus:border-ink"
+            className="mt-2 h-12 w-full rounded border border-black/10 px-3 text-base outline-none focus:border-ink"
             placeholder="Enter a part name or SKU, if applicable"
           />
         </FormField>
@@ -118,7 +118,7 @@ export function ContactForm({ sourcePage, productName, productSku, defaultPartOr
             name="message"
             required
             maxLength={2000}
-            className="mt-2 min-h-[140px] w-full rounded border border-black/10 p-3 outline-none focus:border-ink"
+            className="mt-2 min-h-[140px] w-full rounded border border-black/10 p-3 text-base outline-none focus:border-ink"
             placeholder="Tell us how we can help"
           />
         </FormField>

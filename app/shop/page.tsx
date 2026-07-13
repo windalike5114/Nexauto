@@ -37,23 +37,23 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
   const visibleWiperSets = filteredWiperSets.slice(firstItemIndex, firstItemIndex + pageSize);
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-      <div className="mb-8 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+    <main className="mx-auto max-w-7xl px-4 py-7 sm:px-6 sm:py-10 lg:px-8">
+      <div className="mb-6 flex flex-col gap-4 md:mb-8 md:flex-row md:items-end md:justify-between md:gap-5">
         <div>
-          <p className="text-sm font-black uppercase tracking-[0.18em] text-signal">Wiper Blades</p>
-          <h1 className="mt-2 max-w-3xl text-4xl font-black leading-tight">Find the Right Wiper Blades for Your Vehicle</h1>
+          <p className="text-xs font-black uppercase tracking-[0.16em] text-signal sm:text-sm sm:tracking-[0.18em]">Wiper Blades</p>
+          <h1 className="mt-2 max-w-3xl text-3xl font-black leading-tight sm:text-4xl">Find the Right Wiper Blades for Your Vehicle</h1>
           <p className="mt-3 max-w-3xl text-sm font-bold leading-6 text-steel">
             Search by vehicle for the easiest way to find compatible front wiper blades, or browse available blade size combinations below.
           </p>
         </div>
-        <Link href="#vehicle-finder" className="inline-flex h-12 items-center justify-center rounded-lg bg-signal px-5 text-sm font-black text-white shadow-lg shadow-red-900/15 transition hover:-translate-y-0.5 hover:bg-red-700">
+        <Link href="#vehicle-finder" className="inline-flex h-12 w-full items-center justify-center rounded-lg bg-signal px-5 text-sm font-black text-white shadow-lg shadow-red-900/15 transition hover:-translate-y-0.5 hover:bg-red-700 sm:w-auto">
           Find My Wipers
         </Link>
       </div>
 
       {error ? <div className="mb-6 rounded-lg border border-signal/30 bg-white p-5 text-sm font-bold text-signal">{error}</div> : null}
 
-      <div id="vehicle-finder" className="mb-10 rounded-2xl bg-[#EEF5FB] p-3 shadow-panel ring-1 ring-black/5 sm:p-4">
+      <div id="vehicle-finder" className="mb-7 scroll-mt-28 rounded-2xl bg-[#EEF5FB] p-2.5 shadow-panel ring-1 ring-black/5 sm:mb-10 sm:p-4">
         <WiperFitmentFinder
           directToProduct
           title="Find Wipers for Your Vehicle"
@@ -63,14 +63,14 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
         />
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-[280px_1fr]">
+      <div className="grid gap-6 lg:grid-cols-[280px_1fr] lg:gap-8">
         <aside className="space-y-5">
-          <section className="rounded-lg border border-black/10 bg-white p-5 shadow-sm">
+          <section className="rounded-lg border border-black/10 bg-white p-4 shadow-sm sm:p-5">
             <div className="flex items-center gap-2">
               <SlidersHorizontal className="h-5 w-5 text-signal" />
               <h2 className="font-black">Filter by Size</h2>
             </div>
-            <form action="/shop" className="mt-5 space-y-5">
+            <form action="/shop" className="mt-4 space-y-4 sm:mt-5 sm:space-y-5">
               <input type="hidden" name="sort" value={params.sort ?? "length-asc"} />
               <input type="hidden" name="show" value={String(pageSize)} />
 
@@ -122,32 +122,32 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
         </aside>
 
         <section>
-          <div className="mb-5">
-            <p className="text-sm font-black uppercase tracking-[0.18em] text-signal">Browse Wiper Blade Sizes</p>
-            <h2 className="mt-2 text-2xl font-black">Available Front Wiper Blade Pairs</h2>
+          <div className="mb-4 sm:mb-5">
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-signal sm:text-sm sm:tracking-[0.18em]">Browse Wiper Blade Sizes</p>
+            <h2 className="mt-2 text-xl font-black sm:text-2xl">Available Front Wiper Blade Pairs</h2>
             <p className="mt-2 max-w-2xl text-sm font-bold leading-6 text-steel">
               Already know the blade sizes you need? Browse available front wiper blade pairs below.
             </p>
           </div>
 
-          <div className="mb-5 grid gap-2 rounded-lg border border-black/10 bg-[#F8FAFC] p-3 text-sm font-black text-ink shadow-sm sm:grid-cols-3">
+          <div className="mb-4 grid gap-2 rounded-lg border border-black/10 bg-[#F8FAFC] p-3 text-xs font-black text-ink shadow-sm min-[390px]:grid-cols-3 sm:mb-5 sm:text-sm">
             <ServicePill label="Free NZ Shipping" />
             <ServicePill label="12-Month Warranty" />
             <ServicePill label="Ships from Auckland" />
           </div>
 
-          <div className="mb-5 flex flex-col gap-3 rounded-lg border border-black/10 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+          <div className="mb-4 flex flex-col gap-3 rounded-lg border border-black/10 bg-white p-3 shadow-sm sm:mb-5 sm:flex-row sm:items-center sm:justify-between sm:p-4">
             <div className="flex flex-wrap gap-2">
               <ControlLink href={buildShopHref(params, { sort: "length-asc", page: undefined })} active={(params.sort ?? "length-asc") === "length-asc"} label="Size: Small to Large" />
               <ControlLink href={buildShopHref(params, { sort: "length-desc", page: undefined })} active={params.sort === "length-desc"} label="Size: Large to Small" />
             </div>
-            <p className="text-sm font-black text-steel">
+            <p className="text-xs font-black text-steel sm:text-sm">
               Showing {visibleWiperSets.length ? firstItemIndex + 1 : 0}-{firstItemIndex + visibleWiperSets.length} of {filteredWiperSets.length} pairs
             </p>
           </div>
 
           {visibleWiperSets.length > 0 ? (
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
+            <div className="grid grid-cols-1 gap-3 min-[390px]:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
               {visibleWiperSets.map((wiperSet) => (
                 <WiperSetCard key={wiperSet.id} wiperSet={wiperSet} />
               ))}
@@ -160,7 +160,7 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
           )}
 
           {totalPages > 1 ? (
-            <div className="mt-6 flex flex-col gap-3 rounded-lg border border-black/10 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+            <div className="mt-6 flex flex-col gap-3 rounded-lg border border-black/10 bg-white p-3 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-4">
               <p className="text-sm font-black text-steel">
                 Page {currentPage} of {totalPages}
               </p>
@@ -219,25 +219,25 @@ function WiperSetCard({ wiperSet }: { wiperSet: WiperSet }) {
       className="block overflow-hidden rounded-[14px] border border-black/10 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-panel focus:outline-none focus:ring-2 focus:ring-signal focus:ring-offset-2"
       aria-label={`View ${wiperSet.driverLengthIn} inch driver and ${wiperSet.passengerLengthIn} inch passenger front wiper blade pair`}
     >
-      <div className="relative aspect-[1/0.82] bg-zinc-50">
-        <span className="absolute left-3 top-3 z-10 rounded bg-signal px-2 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-white">
+      <div className="relative aspect-[1/0.72] bg-zinc-50 sm:aspect-[1/0.82]">
+        <span className="absolute left-2 top-2 z-10 rounded bg-signal px-2 py-1 text-[10px] font-black uppercase tracking-[0.1em] text-white sm:left-3 sm:top-3 sm:tracking-[0.12em]">
           Sale
         </span>
         <Image
           src={image}
           alt={`${wiperSet.name} preview`}
           fill
-          className="object-contain p-4"
+          className="object-contain p-3 sm:p-4"
           sizes="(min-width: 1280px) 20vw, (min-width: 768px) 33vw, 50vw"
         />
       </div>
-      <div className="space-y-3 p-3 sm:p-4">
+      <div className="space-y-2.5 p-3 sm:space-y-3 sm:p-4">
         <div>
           <h2 className="text-sm font-black leading-snug text-ink sm:text-base">
             <span className="hidden sm:inline">Front Wiper Blade Pair</span>
             <span className="sm:hidden">Front Wiper Pair</span>
           </h2>
-          <p className="mt-2 text-sm font-black leading-5 text-steel sm:text-[15px]">
+          <p className="mt-1.5 text-sm font-black leading-5 text-steel sm:mt-2 sm:text-[15px]">
             <span className="hidden sm:inline">
               Driver {wiperSet.driverLengthIn}" + Passenger {wiperSet.passengerLengthIn}"
             </span>
@@ -254,7 +254,7 @@ function WiperSetCard({ wiperSet }: { wiperSet: WiperSet }) {
 
         <p className="hidden text-xs font-black text-steel sm:block">Free NZ Shipping</p>
 
-        <span className="inline-flex h-[42px] w-full items-center justify-center rounded bg-ink px-3 text-sm font-black text-white">
+        <span className="inline-flex h-10 w-full items-center justify-center rounded bg-ink px-3 text-sm font-black text-white sm:h-[42px]">
           View Details
         </span>
       </div>
@@ -264,7 +264,7 @@ function WiperSetCard({ wiperSet }: { wiperSet: WiperSet }) {
 
 function ServicePill({ label }: { label: string }) {
   return (
-    <div className="flex items-center gap-2 rounded bg-white px-3 py-2">
+    <div className="flex items-center gap-1.5 rounded bg-white px-2.5 py-2 sm:gap-2 sm:px-3">
       <CheckCircle2 className="h-4 w-4 text-signal" />
       <span>{label}</span>
     </div>
@@ -287,7 +287,7 @@ function SidebarLink({ href, active, label }: { href: string; active: boolean; l
   return (
     <Link
       href={href as never}
-      className={`rounded border px-3 py-2 text-sm font-bold ${active ? "border-ink bg-ink text-white" : "border-black/10 text-steel hover:border-ink"}`}
+      className={`rounded border px-3 py-2 text-center text-sm font-bold ${active ? "border-ink bg-ink text-white" : "border-black/10 text-steel hover:border-ink"}`}
     >
       {label}
     </Link>

@@ -64,7 +64,7 @@ export function HomeNewsletterSignup() {
           required
           maxLength={254}
           placeholder="Enter your email"
-          className="h-12 min-w-0 flex-1 rounded border border-white/15 bg-white px-4 text-sm font-bold text-ink outline-none focus:border-signal"
+          className="h-12 min-w-0 flex-1 rounded border border-white/15 bg-white px-4 text-base font-bold text-ink outline-none focus:border-signal sm:text-sm"
         />
         <button
           type="submit"
