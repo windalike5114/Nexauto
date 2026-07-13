@@ -168,8 +168,8 @@ export default async function HomePage() {
       </div>
 
       <section className="border-t border-black/10 bg-[#F8FAFC]">
-        <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 lg:grid-cols-[0.86fr_1.14fr] lg:items-center lg:px-8">
-          <div>
+        <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
+          <div className="max-w-3xl">
             <h2 className="text-3xl font-black leading-tight text-ink sm:text-4xl">Need Help Finding the Right Part?</h2>
             <p className="mt-4 text-base font-bold leading-8 text-steel">
               Can't find the product, image or fitment information you need?
@@ -177,19 +177,21 @@ export default async function HomePage() {
             <p className="mt-3 max-w-2xl text-base font-semibold leading-8 text-steel">
               Send us your vehicle details or part requirements and our team will help confirm the right option.
             </p>
-            <Link href="/contact" className="mt-7 inline-flex h-12 items-center gap-2 rounded bg-ink px-5 font-black text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-black">
-              Contact Us
-              <ArrowRight className="h-4 w-4" />
-            </Link>
           </div>
-          <div className="relative aspect-[16/10] overflow-hidden rounded-2xl bg-zinc-100 shadow-panel">
+          <div className="relative mt-7 aspect-[16/7] overflow-hidden rounded-2xl bg-zinc-100 shadow-panel">
             <Image
               src="/home/local-service.png"
               alt="NexAutoParts local service and dispatch support"
               fill
               className="object-cover"
-              sizes="(min-width: 1024px) 40vw, 100vw"
+              sizes="(min-width: 1024px) 960px, 100vw"
             />
+          </div>
+          <div>
+            <Link href="/contact" className="mt-7 inline-flex h-12 items-center gap-2 rounded bg-ink px-5 font-black text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-black">
+              Contact Us
+              <ArrowRight className="h-4 w-4" />
+            </Link>
           </div>
         </div>
       </section>
