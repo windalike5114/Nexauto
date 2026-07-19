@@ -26,6 +26,7 @@ import {
 import { formatMoney } from "@/lib/catalog";
 import { WiperFitmentFinder } from "@/components/wiper-fitment-finder";
 import { createClient } from "@/utils/supabase/client";
+import { AccountAddressesSection } from "@/components/account/addresses-section";
 
 type Mode = "sign-in" | "sign-up" | "reset-password";
 
@@ -90,8 +91,6 @@ export function AccountAuth({ initialMode = "sign-in" }: { initialMode?: Mode })
   const [activeSection, setActiveSection] = useState("dashboard");
   const [defaultVehicleId, setDefaultVehicleId] = useState("");
   const [vehicleActionId, setVehicleActionId] = useState("");
-  const [addresses, setAddresses] = useState<Address[]>([]);
-  const [showAddressForm, setShowAddressForm] = useState(false);
   const [settingsName, setSettingsName] = useState("");
   const [settingsPassword, setSettingsPassword] = useState("");
   const [newsletter, setNewsletter] = useState(true);
@@ -113,14 +112,11 @@ export function AccountAuth({ initialMode = "sign-in" }: { initialMode?: Mode })
     if (!account) return;
 
     const defaultKey = `nexauto-default-vehicle-${account.profile.email}`;
-    const addressKey = `nexauto-addresses-${account.profile.email}`;
     const newsletterKey = `nexauto-newsletter-${account.profile.email}`;
     const storedDefault = window.localStorage.getItem(defaultKey);
-    const storedAddresses = window.localStorage.getItem(addressKey);
     const storedNewsletter = window.localStorage.getItem(newsletterKey);
 
     setDefaultVehicleId(storedDefault && account.vehicles.some((vehicle) => vehicle.id === storedDefault) ? storedDefault : account.vehicles[0]?.id ?? "");
-    setAddresses(storedAddresses ? (JSON.parse(storedAddresses) as Address[]) : []);
     setNewsletter(storedNewsletter ? storedNewsletter === "true" : true);
     setSettingsName(account.profile.name ?? "");
   }, [account]);
@@ -253,35 +249,6 @@ export function AccountAuth({ initialMode = "sign-in" }: { initialMode?: Mode })
     }
   }
 
-  function saveAddress(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (!account) return;
-
-    const formData = new FormData(event.currentTarget);
-    const nextAddress: Address = {
-      id: crypto.randomUUID(),
-      label: String(formData.get("label") ?? "Shipping"),
-      name: String(formData.get("name") ?? ""),
-      line1: String(formData.get("line1") ?? ""),
-      suburb: String(formData.get("suburb") ?? ""),
-      city: String(formData.get("city") ?? ""),
-      postcode: String(formData.get("postcode") ?? ""),
-      isDefault: addresses.length === 0
-    };
-    const nextAddresses = [...addresses, nextAddress];
-
-    setAddresses(nextAddresses);
-    window.localStorage.setItem(`nexauto-addresses-${account.profile.email}`, JSON.stringify(nextAddresses));
-    setShowAddressForm(false);
-  }
-
-  function removeAddress(addressId: string) {
-    if (!account) return;
-    const nextAddresses = addresses.filter((address) => address.id !== addressId);
-    setAddresses(nextAddresses);
-    window.localStorage.setItem(`nexauto-addresses-${account.profile.email}`, JSON.stringify(nextAddresses));
-  }
-
   async function saveSettings(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!account) return;
@@ -391,13 +358,7 @@ export function AccountAuth({ initialMode = "sign-in" }: { initialMode?: Mode })
         />
       ) : null}
       {activeSection === "addresses" ? (
-        <AddressesSection
-          addresses={addresses}
-          showForm={showAddressForm}
-          setShowForm={setShowAddressForm}
-          saveAddress={saveAddress}
-          removeAddress={removeAddress}
-        />
+        <AccountAddressesSection email={account.profile.email} />
       ) : null}
       {activeSection === "settings" ? (
         <SettingsSection
