@@ -131,9 +131,10 @@ export function AccountAddressesSection({ email }: { email: string }) {
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error ?? "Address could not be saved.");
+      const savedAddress = data.address as AccountAddress;
+      setAddresses((current) => mergeAddress(current, savedAddress));
       setShowForm(false);
       setEditing(null);
-      await loadAddresses();
       setMessage(editing ? "Address updated." : "Address saved.");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Address could not be saved.");
@@ -149,7 +150,14 @@ export function AccountAddressesSection({ email }: { email: string }) {
       const response = await fetch(`/api/account/addresses/${addressId}`, { method: "DELETE" });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error ?? "Address could not be deleted.");
-      await loadAddresses();
+      setAddresses((current) =>
+        current
+          .filter((address) => address.id !== addressId)
+          .map((address) => ({
+            ...address,
+            isDefaultShipping: data.replacementDefaultAddressId ? address.id === data.replacementDefaultAddressId : address.isDefaultShipping
+          }))
+      );
       setMessage("Address deleted.");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Address could not be deleted.");
@@ -165,7 +173,13 @@ export function AccountAddressesSection({ email }: { email: string }) {
       const response = await fetch(`/api/account/addresses/${addressId}/default`, { method: "POST" });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error ?? "Default address could not be updated.");
-      await loadAddresses();
+      const defaultAddress = data.address as AccountAddress;
+      setAddresses((current) =>
+        current.map((address) => ({
+          ...address,
+          isDefaultShipping: address.id === defaultAddress.id
+        }))
+      );
       setMessage("Default shipping address updated.");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Default address could not be updated.");
@@ -254,6 +268,17 @@ export function AccountAddressesSection({ email }: { email: string }) {
       )}
     </section>
   );
+}
+
+function mergeAddress(addresses: AccountAddress[], nextAddress: AccountAddress) {
+  const exists = addresses.some((address) => address.id === nextAddress.id);
+  const nextAddresses = exists ? addresses.map((address) => (address.id === nextAddress.id ? nextAddress : address)) : [...addresses, nextAddress];
+  return nextAddress.isDefaultShipping
+    ? nextAddresses.map((address) => ({
+        ...address,
+        isDefaultShipping: address.id === nextAddress.id
+      }))
+    : nextAddresses;
 }
 
 function AddressForm({
