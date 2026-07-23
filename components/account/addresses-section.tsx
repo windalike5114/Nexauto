@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Edit3, Loader2, MapPin, Plus, Star, Trash2 } from "lucide-react";
 
 export type AccountAddress = {
@@ -103,11 +103,10 @@ export function AccountAddressesSection({ email }: { email: string }) {
     return { ok: true as const, addresses: (data.addresses ?? []) as AccountAddress[], imported: Number(data.imported ?? 0) };
   }
 
-  async function saveAddress(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function saveAddress(form: HTMLFormElement) {
     setSaving(true);
     setMessage("");
-    const formData = new FormData(event.currentTarget);
+    const formData = new FormData(form);
     const payload = {
       label: stringValue(formData, "label"),
       recipientName: stringValue(formData, "recipientName"),
@@ -207,7 +206,7 @@ export function AccountAddressesSection({ email }: { email: string }) {
       {message ? <p className="mb-4 rounded bg-zinc-50 p-3 text-sm font-bold text-steel">{message}</p> : null}
 
       {showForm ? (
-        <AddressForm address={editing} saving={saving} onSubmit={saveAddress} onCancel={() => { setShowForm(false); setEditing(null); }} />
+        <AddressForm address={editing} saving={saving} onSave={(form) => void saveAddress(form)} onCancel={() => { setShowForm(false); setEditing(null); }} />
       ) : null}
 
       {loading ? (
@@ -260,16 +259,16 @@ export function AccountAddressesSection({ email }: { email: string }) {
 function AddressForm({
   address,
   saving,
-  onSubmit,
+  onSave,
   onCancel
 }: {
   address: AccountAddress | null;
   saving: boolean;
-  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  onSave: (form: HTMLFormElement) => void;
   onCancel: () => void;
 }) {
   return (
-    <form onSubmit={onSubmit} className="mb-5 grid gap-3 rounded-lg border border-black/10 bg-zinc-50 p-4 md:grid-cols-2">
+    <form onSubmit={(event) => { event.preventDefault(); onSave(event.currentTarget); }} className="mb-5 grid gap-3 rounded-lg border border-black/10 bg-zinc-50 p-4 md:grid-cols-2">
       <Field name="label" label="Address label" defaultValue={address?.label ?? "Home" } />
       <Field name="recipientName" label="Recipient name" defaultValue={address?.recipientName ?? ""} required />
       <Field name="company" label="Company" defaultValue={address?.company ?? ""} />
@@ -288,7 +287,7 @@ function AddressForm({
         <button type="button" onClick={onCancel} className="h-11 rounded border border-black/10 bg-white px-4 text-sm font-black text-ink">
           Cancel
         </button>
-        <button type="submit" disabled={saving} className="h-11 rounded bg-signal px-4 text-sm font-black text-white disabled:bg-zinc-300">
+        <button type="button" onClick={(event) => { const form = event.currentTarget.form; if (form?.reportValidity()) onSave(form); }} disabled={saving} className="h-11 rounded bg-signal px-4 text-sm font-black text-white disabled:bg-zinc-300">
           {saving ? "Saving..." : address ? "Update Address" : "Save Address"}
         </button>
       </div>
