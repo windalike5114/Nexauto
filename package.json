@@ -9,6 +9,7 @@
     "lint": "next lint",
     "test:addresses": "node --import tsx --test tests/customer-addresses.test.ts",
     "test:vehicles": "node --import tsx --test tests/customer-vehicles.test.ts",
+    "test:order-claiming": "node --import tsx --test tests/customer-order-claiming.test.ts",
     "test:checkout": "node --import tsx --test tests/domain-contracts.test.ts tests/pricing-engine.test.ts tests/checkout-service.test.ts tests/stripe-webhook.test.ts tests/operational-recovery.test.ts",
     "fitment:report": "node scripts/fitment/import-wiper-fitments.mjs --report-only",
     "fitment:import": "node scripts/fitment/import-wiper-fitments.mjs --apply",

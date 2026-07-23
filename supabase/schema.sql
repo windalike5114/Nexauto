@@ -65,6 +65,7 @@ create table if not exists orders (
   currency text not null default 'nzd',
   status text not null default 'pending',
   order_number text unique,
+  customer_profile_id uuid,
   stripe_session_id text unique,
   stripe_payment_intent_id text,
   created_at timestamptz not null default now(),
@@ -97,6 +98,12 @@ create index if not exists order_items_vehicle_application_idx on order_items(ve
 create index if not exists order_items_wiper_set_idx on order_items(wiper_set_id);
 create index if not exists orders_status_created_at_idx on orders(status, created_at desc);
 create index if not exists orders_checkout_version_idx on orders(checkout_version);
+create index if not exists orders_customer_profile_id_idx on orders(customer_profile_id);
+create index if not exists orders_normalized_email_status_unowned_idx
+  on orders(lower(btrim(email)), status, created_at desc)
+  where customer_profile_id is null
+    and email is not null
+    and btrim(email) <> '';
 
 -- Reserved for later vehicle fitment search. No frontend route uses these tables in the MVP.
 create table if not exists fitment_vehicles (
@@ -351,6 +358,14 @@ begin
       add constraint order_items_wiper_set_id_fkey
       foreign key (wiper_set_id) references wiper_sets(id) on delete set null;
   end if;
+
+  if not exists (
+    select 1 from pg_constraint where conname = 'orders_customer_profile_id_fkey'
+  ) then
+    alter table orders
+      add constraint orders_customer_profile_id_fkey
+      foreign key (customer_profile_id) references customer_profiles(id) on delete set null;
+  end if;
 end $$;
 
 create table if not exists email_events (
@@ -389,6 +404,37 @@ create table if not exists system_audit_events (
   created_at timestamptz not null default now(),
   constraint system_audit_events_actor_type_check check (
     actor_type in ('system', 'admin', 'cron')
+  )
+);
+
+create table if not exists order_claim_events (
+  id uuid primary key default gen_random_uuid(),
+  order_id uuid not null references orders(id) on delete restrict,
+  customer_profile_id uuid references customer_profiles(id) on delete set null,
+  auth_user_id uuid,
+  normalized_email text not null,
+  claim_method text not null,
+  status text not null,
+  reason text,
+  source text not null default 'account_initialization',
+  metadata jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now(),
+  constraint order_claim_events_method_check check (
+    claim_method in (
+      'authenticated_checkout',
+      'verified_email_claim',
+      'admin_manual_claim',
+      'migration_backfill'
+    )
+  ),
+  constraint order_claim_events_status_check check (
+    status in (
+      'claimed',
+      'already_owned',
+      'skipped_ineligible',
+      'conflict',
+      'failed'
+    )
   )
 );
 
@@ -463,6 +509,24 @@ create index if not exists system_audit_events_entity_idx
   on system_audit_events(entity_type, entity_id, created_at desc);
 create index if not exists system_audit_events_type_idx
   on system_audit_events(event_type, created_at desc);
+create index if not exists order_claim_events_order_idx
+  on order_claim_events(order_id, created_at desc);
+create index if not exists order_claim_events_profile_idx
+  on order_claim_events(customer_profile_id, created_at desc);
+create unique index if not exists order_claim_events_result_uidx
+  on order_claim_events (
+    order_id,
+    customer_profile_id,
+    claim_method,
+    status,
+    reason
+  )
+  where status in (
+    'claimed',
+    'already_owned',
+    'conflict',
+    'skipped_ineligible'
+  );
 create index if not exists contact_enquiries_email_idx
   on contact_enquiries(email);
 create index if not exists contact_enquiries_status_idx
@@ -840,6 +904,236 @@ create policy "Customers can delete own addresses"
   using (
     public.customer_profile_belongs_to_auth_user(customer_profile_id, auth.uid())
   );
+
+create or replace function public.claim_customer_orders_for_verified_user(
+  p_auth_user_id uuid,
+  p_verified_email text
+)
+returns table (
+  claimed_count integer,
+  already_owned_count integer,
+  conflict_count integer,
+  skipped_count integer,
+  claimed_order_ids uuid[]
+)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_profile public.customer_profiles%rowtype;
+  v_profile_count integer;
+  v_profile_email text;
+  v_verified_email text;
+  v_claimed_ids uuid[] := '{}';
+  v_claimed_count integer := 0;
+  v_already_owned_count integer := 0;
+  v_conflict_count integer := 0;
+  v_skipped_count integer := 0;
+begin
+  if p_auth_user_id is null then
+    raise exception 'auth_user_required';
+  end if;
+
+  v_verified_email := lower(btrim(coalesce(p_verified_email, '')));
+
+  if v_verified_email = '' then
+    raise exception 'verified_email_required';
+  end if;
+
+  select count(*)
+  into v_profile_count
+  from public.customer_profiles
+  where auth_user_id = p_auth_user_id;
+
+  if v_profile_count = 0 then
+    raise exception 'customer_profile_not_found';
+  end if;
+
+  if v_profile_count > 1 then
+    raise exception 'duplicate_customer_profile';
+  end if;
+
+  select *
+  into v_profile
+  from public.customer_profiles
+  where auth_user_id = p_auth_user_id
+  limit 1;
+
+  v_profile_email := lower(btrim(coalesce(v_profile.email, '')));
+
+  if v_profile_email = '' then
+    raise exception 'customer_profile_email_missing';
+  end if;
+
+  if v_verified_email <> v_profile_email then
+    raise exception 'customer_profile_email_mismatch';
+  end if;
+
+  perform pg_advisory_xact_lock(
+    hashtextextended('order_claim:' || v_profile.id::text, 0)
+  );
+
+  select count(*)
+  into v_already_owned_count
+  from public.orders o
+  where lower(btrim(o.email)) = v_verified_email
+    and o.status in ('paid', 'refunded')
+    and o.customer_profile_id = v_profile.id;
+
+  select count(*)
+  into v_conflict_count
+  from public.orders o
+  where lower(btrim(o.email)) = v_verified_email
+    and o.status in ('paid', 'refunded')
+    and o.customer_profile_id is not null
+    and o.customer_profile_id <> v_profile.id;
+
+  select count(*)
+  into v_skipped_count
+  from public.orders o
+  where lower(btrim(o.email)) = v_verified_email
+    and o.status in ('pending', 'failed', 'cancelled')
+    and o.customer_profile_id is null;
+
+  with matching_unowned as (
+    select o.id
+    from public.orders o
+    where lower(btrim(o.email)) = v_verified_email
+      and o.status in ('paid', 'refunded')
+      and o.customer_profile_id is null
+    for update
+  ),
+  updated as (
+    update public.orders o
+    set
+      customer_profile_id = v_profile.id,
+      updated_at = now()
+    from matching_unowned m
+    where o.id = m.id
+    returning o.id
+  ),
+  inserted_claims as (
+    insert into public.order_claim_events (
+      order_id,
+      customer_profile_id,
+      auth_user_id,
+      normalized_email,
+      claim_method,
+      status,
+      reason,
+      source
+    )
+    select
+      u.id,
+      v_profile.id,
+      p_auth_user_id,
+      v_verified_email,
+      'verified_email_claim',
+      'claimed',
+      'matched_verified_email',
+      'account_initialization'
+    from updated u
+    on conflict do nothing
+    returning order_id
+  )
+  select
+    coalesce(array_agg(order_id), '{}'),
+    count(*)::integer
+  into v_claimed_ids, v_claimed_count
+  from inserted_claims;
+
+  insert into public.order_claim_events (
+    order_id,
+    customer_profile_id,
+    auth_user_id,
+    normalized_email,
+    claim_method,
+    status,
+    reason,
+    source
+  )
+  select
+    o.id,
+    v_profile.id,
+    p_auth_user_id,
+    v_verified_email,
+    'verified_email_claim',
+    'already_owned',
+    'order_already_owned_by_profile',
+    'account_initialization'
+  from public.orders o
+  where lower(btrim(o.email)) = v_verified_email
+    and o.status in ('paid', 'refunded')
+    and o.customer_profile_id = v_profile.id
+    and not (o.id = any(v_claimed_ids))
+  on conflict do nothing;
+
+  insert into public.order_claim_events (
+    order_id,
+    customer_profile_id,
+    auth_user_id,
+    normalized_email,
+    claim_method,
+    status,
+    reason,
+    source
+  )
+  select
+    o.id,
+    v_profile.id,
+    p_auth_user_id,
+    v_verified_email,
+    'verified_email_claim',
+    'conflict',
+    'order_owned_by_another_profile',
+    'account_initialization'
+  from public.orders o
+  where lower(btrim(o.email)) = v_verified_email
+    and o.status in ('paid', 'refunded')
+    and o.customer_profile_id is not null
+    and o.customer_profile_id <> v_profile.id
+  on conflict do nothing;
+
+  insert into public.order_claim_events (
+    order_id,
+    customer_profile_id,
+    auth_user_id,
+    normalized_email,
+    claim_method,
+    status,
+    reason,
+    source
+  )
+  select
+    o.id,
+    v_profile.id,
+    p_auth_user_id,
+    v_verified_email,
+    'verified_email_claim',
+    'skipped_ineligible',
+    'order_status_not_eligible',
+    'account_initialization'
+  from public.orders o
+  where lower(btrim(o.email)) = v_verified_email
+    and o.status in ('pending', 'failed', 'cancelled')
+    and o.customer_profile_id is null
+  on conflict do nothing;
+
+  return query select
+    v_claimed_count,
+    v_already_owned_count,
+    v_conflict_count,
+    v_skipped_count,
+    v_claimed_ids;
+end;
+$$;
+
+revoke execute on function public.claim_customer_orders_for_verified_user(uuid, text)
+  from public, anon, authenticated;
+
+grant execute on function public.claim_customer_orders_for_verified_user(uuid, text)
+  to service_role;
 
 insert into categories (slug, name, description, sort_order) values
   ('wiper', 'Wipers', 'Universal blades selected by length and connector.', 10),

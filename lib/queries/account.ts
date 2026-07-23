@@ -1,5 +1,7 @@
 import type { User } from "@supabase/supabase-js";
 import { getOrderNumberFromSnapshot } from "@/lib/order-number";
+import { normalizeClaimEmail } from "@/lib/domain/account/order-claim.schema";
+import type { OrderOwnershipSource } from "@/lib/domain/account/order-claim.types";
 import { createSupabaseAdminClient } from "@/lib/supabase";
 
 export type CustomerVehicleInput = {
@@ -39,6 +41,7 @@ export type CustomerOrder = {
   vehicle: string | null;
   products: string[];
   total: number;
+  ownershipSource?: OrderOwnershipSource;
 };
 
 type CustomerProfileRow = {
@@ -66,6 +69,8 @@ type CustomerOrderRow = {
   status: string;
   created_at: string;
   items_snapshot: unknown;
+  customer_profile_id?: string | null;
+  ownership_source?: OrderOwnershipSource;
 };
 
 type CustomerOrderItemRow = {
@@ -157,7 +162,7 @@ export async function listCustomerVehicles(profileId: string) {
 }
 
 export async function listCustomerOrders(emailInput: string) {
-  const email = emailInput.toLowerCase();
+  const email = normalizeClaimEmail(emailInput);
   const supabase = getAdminOrThrow();
   const { data, error } = await supabase
     .from("orders")
@@ -222,7 +227,105 @@ export async function listCustomerOrders(emailInput: string) {
       statusDescription: customerStatus.description,
       vehicle: vehicleByOrder.get(order.id) ?? null,
       products: (itemsByOrder.get(order.id) ?? []).map((item) => `${item.product_name} x${item.qty}`),
-      total: Number(order.subtotal)
+      total: Number(order.subtotal),
+      ownershipSource: order.ownership_source
+    };
+  });
+}
+
+export async function listCustomerOrdersForProfile(profileId: string, emailInput: string) {
+  const email = normalizeClaimEmail(emailInput);
+  const supabase = getAdminOrThrow();
+  const [ownedResult, legacyResult] = await Promise.all([
+    supabase
+      .from("orders")
+      .select("id,subtotal,status,created_at,items_snapshot,customer_profile_id")
+      .eq("customer_profile_id", profileId)
+      .neq("status", "pending")
+      .order("created_at", { ascending: false })
+      .limit(50),
+    supabase
+      .from("orders")
+      .select("id,subtotal,status,created_at,items_snapshot,customer_profile_id")
+      .is("customer_profile_id", null)
+      .eq("email", email)
+      .in("status", ["paid", "refunded"])
+      .order("created_at", { ascending: false })
+      .limit(50)
+  ]);
+
+  if (ownedResult.error) throw ownedResult.error;
+  if (legacyResult.error) throw legacyResult.error;
+
+  const rowsById = new Map<string, CustomerOrderRow>();
+  for (const row of (ownedResult.data ?? []) as CustomerOrderRow[]) {
+    rowsById.set(row.id, { ...row, ownership_source: "profile" });
+  }
+  for (const row of (legacyResult.data ?? []) as CustomerOrderRow[]) {
+    if (!rowsById.has(row.id)) rowsById.set(row.id, { ...row, ownership_source: "legacy_email" });
+  }
+
+  const orders = [...rowsById.values()].sort(
+    (left, right) => new Date(right.created_at).getTime() - new Date(left.created_at).getTime()
+  );
+  return hydrateCustomerOrders(supabase, orders);
+}
+
+async function hydrateCustomerOrders(supabase: ReturnType<typeof getAdminOrThrow>, orders: CustomerOrderRow[]) {
+  const orderIds = orders.map((order) => order.id);
+
+  if (!orderIds.length) return [];
+
+  const [itemsResult, vehiclesResult, fulfillmentsResult] = await Promise.all([
+    supabase
+      .from("order_items")
+      .select("order_id,product_name,sku,qty")
+      .in("order_id", orderIds)
+      .order("created_at", { ascending: true }),
+    supabase
+      .from("order_vehicle_snapshots")
+      .select("order_id,make_snapshot,model_snapshot,year")
+      .in("order_id", orderIds),
+    supabase
+      .from("order_wiper_fulfillment")
+      .select("order_id,connector_status")
+      .in("order_id", orderIds)
+  ]);
+
+  if (itemsResult.error) throw itemsResult.error;
+  if (vehiclesResult.error) throw vehiclesResult.error;
+  if (fulfillmentsResult.error) throw fulfillmentsResult.error;
+
+  const itemsByOrder = groupBy((itemsResult.data ?? []) as CustomerOrderItemRow[], (item) => item.order_id);
+  const vehicleByOrder = new Map(
+    ((vehiclesResult.data ?? []) as CustomerOrderVehicleRow[]).map((vehicle) => [
+      vehicle.order_id,
+      `${vehicle.make_snapshot} ${vehicle.model_snapshot} ${vehicle.year}`
+    ])
+  );
+  const fulfillmentByOrder = new Map(
+    ((fulfillmentsResult.data ?? []) as CustomerOrderFulfillmentRow[]).map((fulfillment) => [
+      fulfillment.order_id,
+      fulfillment.connector_status
+    ])
+  );
+
+  return orders.map((order): CustomerOrder => {
+    const fulfillmentStatus = fulfillmentByOrder.get(order.id) ?? null;
+    const customerStatus = getCustomerOrderStatus(order.status, fulfillmentStatus);
+
+    return {
+      id: order.id,
+      orderNumber: getOrderNumberFromSnapshot(order.id, order.items_snapshot),
+      orderDate: order.created_at,
+      status: customerStatus.label,
+      paymentStatus: order.status,
+      fulfillmentStatus,
+      statusDescription: customerStatus.description,
+      vehicle: vehicleByOrder.get(order.id) ?? null,
+      products: (itemsByOrder.get(order.id) ?? []).map((item) => `${item.product_name} x${item.qty}`),
+      total: Number(order.subtotal),
+      ownershipSource: order.ownership_source
     };
   });
 }

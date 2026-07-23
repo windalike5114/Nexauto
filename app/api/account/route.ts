@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
-import { getOrCreateCustomerProfile, listCustomerOrders, listCustomerVehicles } from "@/lib/queries/account";
+import { claimCustomerOrdersForAccount } from "@/lib/application/account/claim-customer-orders";
+import { isOrderClaimError } from "@/lib/domain/account/order-claim.errors";
+import { createSupabaseAccountOrderRepository } from "@/lib/infrastructure/supabase/account-order.repository";
+import { getOrCreateCustomerProfile, listCustomerOrdersForProfile, listCustomerVehicles } from "@/lib/queries/account";
+import type { User } from "@supabase/supabase-js";
 
 export async function GET() {
   const supabase = await createClient();
@@ -15,9 +19,10 @@ export async function GET() {
 
   try {
     const profile = await getOrCreateCustomerProfile(user);
+    const claimResult = await claimOrdersSafely(user);
     const [vehicles, orders] = await Promise.all([
       listCustomerVehicles(profile.id),
-      listCustomerOrders(profile.email)
+      listCustomerOrdersForProfile(profile.id, profile.email)
     ]);
 
     return NextResponse.json({
@@ -28,6 +33,8 @@ export async function GET() {
       profile,
       vehicles,
       orders,
+      claimResult,
+      legacyFallbackUsed: orders.some((order) => order.ownershipSource === "legacy_email"),
       rewards: {
         welcome: {
           amount: 10,
@@ -41,4 +48,42 @@ export async function GET() {
       { status: 500 }
     );
   }
+}
+
+async function claimOrdersSafely(user: User) {
+  try {
+    return await claimCustomerOrdersForAccount(
+      {
+        authUserId: user.id,
+        verifiedEmail: user.email ?? null,
+        emailVerified: Boolean(user.email_confirmed_at ?? user.confirmed_at)
+      },
+      createSupabaseAccountOrderRepository()
+    );
+  } catch (error) {
+    if (isOrderClaimError(error)) {
+      console.error("account.order_claim_skipped", {
+        code: error.code,
+        authUserId: user.id
+      });
+      return emptyClaimResult(error.safeMessage);
+    }
+
+    console.error("account.order_claim_failed", {
+      authUserId: user.id,
+      message: error instanceof Error ? error.message : "Unknown order claim error"
+    });
+    return emptyClaimResult("Order history could not be linked right now.");
+  }
+}
+
+function emptyClaimResult(warning: string) {
+  return {
+    claimedCount: 0,
+    alreadyOwnedCount: 0,
+    conflictCount: 0,
+    skippedCount: 0,
+    claimedOrderIds: [],
+    warning
+  };
 }
