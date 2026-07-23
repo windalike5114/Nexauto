@@ -28,6 +28,7 @@ type CartContextValue = {
   setCouponDraft: (value: string) => void;
   applyCoupon: () => Promise<void>;
   clearCoupon: () => void;
+  getStableCheckoutRequestId: () => string;
   isDrawerOpen: boolean;
   openDrawer: () => void;
   closeDrawer: () => void;
@@ -39,6 +40,8 @@ type CartContextValue = {
 
 const CartContext = createContext<CartContextValue | null>(null);
 const storageKey = "nexauto-cart";
+const couponStorageKey = "nexauto-coupon";
+const checkoutRequestStorageKey = "nexauto-checkout-request-id";
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
@@ -52,6 +55,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [validatingCoupon, setValidatingCoupon] = useState(false);
   const [accountEmail, setAccountEmail] = useState("");
   const [welcomeRewardStatus, setWelcomeRewardStatus] = useState<"guest" | "available" | "applied" | "used">("guest");
+  const [checkoutRequestId, setCheckoutRequestId] = useState("");
+  const couponRestoredRef = useRef(false);
   const welcomeRewardDiscount = welcomeRewardStatus === "applied" ? 10 : 0;
 
   useEffect(() => {
@@ -59,6 +64,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     if (saved) {
       setItems((JSON.parse(saved) as CartItem[]).map(normalizeCartItem));
     }
+    const savedCoupon = readSavedCoupon();
+    if (savedCoupon) {
+      couponRestoredRef.current = true;
+      setCouponDraft(savedCoupon);
+    }
+    setCheckoutRequestId(window.sessionStorage.getItem(checkoutRequestStorageKey) ?? "");
   }, []);
 
   useEffect(() => {
@@ -70,6 +81,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       setCouponError("");
       setCouponDraft("");
       setRecentlyAdded(null);
+      clearCheckoutRequestId();
+      window.localStorage.removeItem(couponStorageKey);
       if (welcomeRewardStatus === "applied") setWelcomeRewardStatus("available");
     }
 
@@ -82,6 +95,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     window.localStorage.setItem(storageKey, JSON.stringify(items));
   }, [items]);
+
+  useEffect(() => {
+    if (!couponRestoredRef.current || !couponDraft.trim() || !items.length || couponCode) return;
+    couponRestoredRef.current = false;
+    void applyRestoredCoupon(couponDraft.trim());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [couponDraft, items.length, couponCode]);
 
   useEffect(() => {
     let active = true;
@@ -135,21 +155,30 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       applyWelcomeReward: () => {
         if (welcomeRewardStatus === "available") {
           window.dispatchEvent(new CustomEvent("nexauto:analytics", { detail: { event: "reward_applied" } }));
+          invalidateCheckoutRequestId(setCheckoutRequestId);
           setWelcomeRewardStatus("applied");
         }
       },
       removeWelcomeReward: () => {
-        if (welcomeRewardStatus === "applied") setWelcomeRewardStatus("available");
+        if (welcomeRewardStatus === "applied") {
+          invalidateCheckoutRequestId(setCheckoutRequestId);
+          setWelcomeRewardStatus("available");
+        }
       },
-      setCouponDraft,
+      setCouponDraft: (value) => {
+        invalidateCheckoutRequestId(setCheckoutRequestId);
+        setCouponDraft(value);
+      },
       applyCoupon: async () => {
         const nextCoupon = couponDraft.trim();
         setCouponError("");
+        invalidateCheckoutRequestId(setCheckoutRequestId);
 
         if (!nextCoupon) {
           setCouponCode("");
           setCouponDiscount(0);
           setCouponLabel("");
+          window.localStorage.removeItem(couponStorageKey);
           return;
         }
 
@@ -170,10 +199,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           setCouponCode(data.code ?? nextCoupon);
           setCouponDiscount(Number(data.discount ?? 0));
           setCouponLabel(data.label ?? "Coupon applied");
+          saveCouponCode(data.code ?? nextCoupon);
         } catch (error) {
           setCouponCode("");
           setCouponDiscount(0);
           setCouponLabel("");
+          window.localStorage.removeItem(couponStorageKey);
           setCouponError(error instanceof Error ? error.message : "Coupon code is not valid.");
         } finally {
           setValidatingCoupon(false);
@@ -185,7 +216,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         setCouponLabel("");
         setCouponError("");
         setCouponDraft("");
+        window.localStorage.removeItem(couponStorageKey);
+        invalidateCheckoutRequestId(setCheckoutRequestId);
       },
+      getStableCheckoutRequestId: () => getOrCreateCheckoutRequestId(checkoutRequestId, setCheckoutRequestId),
       isDrawerOpen,
       openDrawer: () => setIsDrawerOpen(true),
       closeDrawer: () => setIsDrawerOpen(false),
@@ -193,6 +227,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         const normalizedItem = normalizeCartItem(item);
         setRecentlyAdded(normalizedItem);
         setIsDrawerOpen(true);
+        invalidateCheckoutRequestId(setCheckoutRequestId);
         setItems((current) => {
           const existing = current.find((entry) => getLineId(entry) === normalizedItem.lineId);
           if (!existing) return [...current, normalizedItem];
@@ -202,6 +237,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         });
       },
       updateQty: (lineId, qty) => {
+        invalidateCheckoutRequestId(setCheckoutRequestId);
         setItems((current) =>
           current
             .map((item) => (getLineId(item) === lineId ? { ...item, qty: Math.max(1, qty) } : item))
@@ -209,6 +245,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         );
       },
       removeItem: (lineId) => {
+        invalidateCheckoutRequestId(setCheckoutRequestId);
         setItems((current) => current.filter((item) => getLineId(item) !== lineId));
       },
       clearCart: () => {
@@ -218,10 +255,46 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         setCouponLabel("");
         setCouponError("");
         setCouponDraft("");
+        window.localStorage.removeItem(couponStorageKey);
+        clearCheckoutRequestId();
+        setCheckoutRequestId("");
         if (welcomeRewardStatus === "applied") setWelcomeRewardStatus("available");
       }
     };
-  }, [accountEmail, couponCode, couponDiscount, couponDraft, couponError, couponLabel, isDrawerOpen, items, validatingCoupon, welcomeRewardDiscount, welcomeRewardStatus]);
+  }, [accountEmail, checkoutRequestId, couponCode, couponDiscount, couponDraft, couponError, couponLabel, isDrawerOpen, items, validatingCoupon, welcomeRewardDiscount, welcomeRewardStatus]);
+
+  async function applyRestoredCoupon(nextCoupon: string) {
+    setCouponError("");
+    setValidatingCoupon(true);
+
+    try {
+      const pricing = calculateCartPricing(items);
+      const response = await fetch("/api/coupons/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: nextCoupon, amount: pricing.subtotal })
+      });
+      const data = (await response.json()) as { code?: string; discount?: number; label?: string; error?: string };
+
+      if (!response.ok) {
+        throw new Error(data.error ?? "Coupon code is not valid.");
+      }
+
+      setCouponCode(data.code ?? nextCoupon);
+      setCouponDiscount(Number(data.discount ?? 0));
+      setCouponLabel(data.label ?? "Coupon applied");
+      saveCouponCode(data.code ?? nextCoupon);
+    } catch {
+      setCouponCode("");
+      setCouponDiscount(0);
+      setCouponLabel("");
+      setCouponDraft("");
+      window.localStorage.removeItem(couponStorageKey);
+      setCouponError("Saved coupon code is no longer valid.");
+    } finally {
+      setValidatingCoupon(false);
+    }
+  }
 
   return (
     <CartContext.Provider value={value}>
@@ -258,7 +331,8 @@ function CartDrawer({ recentlyAdded }: { recentlyAdded: CartItem | null }) {
     removeWelcomeReward,
     setCouponDraft,
     applyCoupon,
-    clearCoupon
+    clearCoupon,
+    getStableCheckoutRequestId
   } = useCart();
   const drawerRef = useRef<HTMLDivElement | null>(null);
   const [checkingOut, setCheckingOut] = useState(false);
@@ -276,9 +350,10 @@ function CartDrawer({ recentlyAdded }: { recentlyAdded: CartItem | null }) {
     setCheckingOut(true);
 
     try {
+      const requestId = getStableCheckoutRequestId();
       const response = await fetch("/api/checkout", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "x-checkout-request-id": requestId },
         body: JSON.stringify({
           items,
           couponCode: couponCode || undefined,
@@ -471,6 +546,44 @@ function CartDrawer({ recentlyAdded }: { recentlyAdded: CartItem | null }) {
       </aside>
     </div>
   );
+}
+
+function readSavedCoupon() {
+  try {
+    const saved = window.localStorage.getItem(couponStorageKey);
+    if (!saved) return "";
+    const parsed = JSON.parse(saved) as { couponCode?: string; savedAt?: string };
+    return typeof parsed.couponCode === "string" ? parsed.couponCode : "";
+  } catch {
+    window.localStorage.removeItem(couponStorageKey);
+    return "";
+  }
+}
+
+function saveCouponCode(couponCode: string) {
+  window.localStorage.setItem(couponStorageKey, JSON.stringify({ couponCode, savedAt: new Date().toISOString() }));
+}
+
+function getOrCreateCheckoutRequestId(current: string, setValue: (value: string) => void) {
+  if (current) return current;
+  const stored = window.sessionStorage.getItem(checkoutRequestStorageKey);
+  if (stored) {
+    setValue(stored);
+    return stored;
+  }
+  const next = crypto.randomUUID();
+  window.sessionStorage.setItem(checkoutRequestStorageKey, next);
+  setValue(next);
+  return next;
+}
+
+function invalidateCheckoutRequestId(setValue: (value: string) => void) {
+  clearCheckoutRequestId();
+  setValue("");
+}
+
+function clearCheckoutRequestId() {
+  window.sessionStorage.removeItem(checkoutRequestStorageKey);
 }
 
 function QuantityControl({ qty, onDecrease, onIncrease, onChange }: { qty: number; onDecrease: () => void; onIncrease: () => void; onChange: (qty: number) => void }) {

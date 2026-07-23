@@ -25,6 +25,7 @@ export type OrderConfirmationEmailInput = {
   shippingAddress: Record<string, unknown>;
   billingAddress: Record<string, unknown>;
   items: OrderEmailItem[];
+  emailEventId?: string | null;
   vehicle?: {
     make: string;
     model: string;
@@ -65,6 +66,7 @@ export async function sendOrderConfirmationEmail(input: OrderConfirmationEmailIn
     replyTo: emailAddresses.support,
     subject: `Order confirmed - #${orderNumber}`,
     orderId: input.orderId,
+    emailEventId: input.emailEventId,
     html: renderEmailLayout({
       title: `Order confirmed - #${orderNumber}`,
       intro: "Thanks for your order. Your payment has been received and your order is now being prepared.",

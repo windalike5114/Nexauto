@@ -57,6 +57,10 @@ create table if not exists orders (
   shipping_address jsonb not null default '{}'::jsonb,
   billing_address jsonb not null default '{}'::jsonb,
   items_snapshot jsonb not null default '[]'::jsonb,
+  checkout_version text,
+  pricing_version text,
+  pricing_snapshot jsonb,
+  reward_state jsonb,
   subtotal numeric(10, 2) not null default 0,
   currency text not null default 'nzd',
   status text not null default 'pending',
@@ -78,12 +82,21 @@ create table if not exists order_items (
   attributes jsonb not null default '{}'::jsonb,
   qty integer not null check (qty > 0),
   unit_price numeric(10, 2) not null check (unit_price >= 0),
+  line_subtotal numeric(10, 2),
+  line_discount numeric(10, 2),
   line_total numeric(10, 2) not null check (line_total >= 0),
+  vehicle_application_id uuid,
+  wiper_set_id uuid,
+  vehicle_snapshot jsonb,
+  product_snapshot jsonb,
   created_at timestamptz not null default now()
 );
 
 create index if not exists order_items_order_id_idx on order_items(order_id);
+create index if not exists order_items_vehicle_application_idx on order_items(vehicle_application_id);
+create index if not exists order_items_wiper_set_idx on order_items(wiper_set_id);
 create index if not exists orders_status_created_at_idx on orders(status, created_at desc);
+create index if not exists orders_checkout_version_idx on orders(checkout_version);
 
 -- Reserved for later vehicle fitment search. No frontend route uses these tables in the MVP.
 create table if not exists fitment_vehicles (
@@ -238,6 +251,27 @@ create table if not exists customer_vehicles (
   unique (email, vehicle_application_id, year)
 );
 
+create table if not exists customer_addresses (
+  id uuid primary key default gen_random_uuid(),
+  customer_profile_id uuid not null references customer_profiles(id) on delete cascade,
+  label text,
+  recipient_name text not null,
+  company text,
+  phone text,
+  line1 text not null,
+  line2 text,
+  suburb text,
+  city text not null,
+  region text,
+  postcode text,
+  country text not null default 'NZ',
+  is_default_shipping boolean not null default false,
+  legacy_import_fingerprint text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  constraint customer_addresses_country_check check (country = 'NZ')
+);
+
 create table if not exists wiper_sets (
   id uuid primary key default gen_random_uuid(),
   sku text not null unique,
@@ -300,6 +334,25 @@ create table if not exists order_wiper_fulfillment (
   )
 );
 
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint where conname = 'order_items_vehicle_application_id_fkey'
+  ) then
+    alter table order_items
+      add constraint order_items_vehicle_application_id_fkey
+      foreign key (vehicle_application_id) references vehicle_applications(id) on delete set null;
+  end if;
+
+  if not exists (
+    select 1 from pg_constraint where conname = 'order_items_wiper_set_id_fkey'
+  ) then
+    alter table order_items
+      add constraint order_items_wiper_set_id_fkey
+      foreign key (wiper_set_id) references wiper_sets(id) on delete set null;
+  end if;
+end $$;
+
 create table if not exists email_events (
   id uuid primary key default gen_random_uuid(),
   type text not null,
@@ -308,13 +361,34 @@ create table if not exists email_events (
   customer_id uuid references customer_profiles(id) on delete set null,
   order_id uuid references orders(id) on delete set null,
   resend_email_id text,
+  dedupe_key text,
   status text not null default 'queued',
   error_code text,
+  attempt_count integer not null default 0,
+  next_retry_at timestamptz,
+  last_error_summary text,
+  claimed_at timestamptz,
+  last_attempted_at timestamptz,
   created_at timestamptz not null default now(),
   sent_at timestamptz,
   updated_at timestamptz not null default now(),
   constraint email_events_status_check check (
-    status in ('queued', 'sent', 'delivered', 'delayed', 'failed', 'bounced', 'complained')
+    status in ('queued', 'pending', 'sending', 'sent', 'delivered', 'delayed', 'failed', 'failed_retryable', 'bounced', 'complained')
+  )
+);
+
+create table if not exists system_audit_events (
+  id uuid primary key default gen_random_uuid(),
+  event_type text not null,
+  entity_type text not null,
+  entity_id text,
+  actor_type text not null,
+  actor_id text,
+  summary text not null,
+  metadata jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now(),
+  constraint system_audit_events_actor_type_check check (
+    actor_type in ('system', 'admin', 'cron')
   )
 );
 
@@ -351,6 +425,16 @@ create index if not exists customer_vehicles_email_idx
   on customer_vehicles(email);
 create index if not exists customer_vehicles_profile_idx
   on customer_vehicles(customer_profile_id);
+create index if not exists customer_addresses_profile_idx
+  on customer_addresses(customer_profile_id);
+create index if not exists customer_addresses_profile_default_idx
+  on customer_addresses(customer_profile_id, is_default_shipping);
+create unique index if not exists customer_addresses_one_default_uidx
+  on customer_addresses(customer_profile_id)
+  where is_default_shipping = true;
+create unique index if not exists customer_addresses_legacy_import_uidx
+  on customer_addresses(customer_profile_id, legacy_import_fingerprint)
+  where legacy_import_fingerprint is not null;
 create index if not exists wiper_sets_lengths_idx
   on wiper_sets(driver_length_in, passenger_length_in, rear_length_in);
 create index if not exists wiper_rear_addons_length_idx
@@ -369,6 +453,16 @@ create index if not exists email_events_status_idx
   on email_events(status, created_at desc);
 create index if not exists email_events_resend_idx
   on email_events(resend_email_id);
+create unique index if not exists email_events_dedupe_key_uidx
+  on email_events(dedupe_key)
+  where dedupe_key is not null;
+create index if not exists email_events_retry_idx
+  on email_events(status, next_retry_at, updated_at)
+  where status in ('failed', 'failed_retryable');
+create index if not exists system_audit_events_entity_idx
+  on system_audit_events(entity_type, entity_id, created_at desc);
+create index if not exists system_audit_events_type_idx
+  on system_audit_events(event_type, created_at desc);
 create index if not exists contact_enquiries_email_idx
   on contact_enquiries(email);
 create index if not exists contact_enquiries_status_idx
@@ -392,11 +486,13 @@ alter table wiper_length_fitments enable row level security;
 alter table wiper_connector_fitments enable row level security;
 alter table customer_profiles enable row level security;
 alter table customer_vehicles enable row level security;
+alter table customer_addresses enable row level security;
 alter table wiper_sets enable row level security;
 alter table wiper_rear_addons enable row level security;
 alter table order_vehicle_snapshots enable row level security;
 alter table order_wiper_fulfillment enable row level security;
 alter table email_events enable row level security;
+alter table system_audit_events enable row level security;
 alter table contact_enquiries enable row level security;
 
 drop policy if exists "Public can read vehicle makes" on vehicle_makes;
@@ -477,6 +573,272 @@ create policy "Public can read active variants"
       where products.id = product_variants.product_id
       and products.active = true
     )
+  );
+
+create or replace function public.set_updated_at()
+returns trigger
+language plpgsql
+set search_path = public
+as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$;
+
+drop trigger if exists customer_addresses_set_updated_at on public.customer_addresses;
+create trigger customer_addresses_set_updated_at
+before update on public.customer_addresses
+for each row
+execute function public.set_updated_at();
+
+create or replace function public.create_customer_address(
+  p_auth_user_id uuid,
+  p_label text,
+  p_recipient_name text,
+  p_company text,
+  p_phone text,
+  p_line1 text,
+  p_line2 text,
+  p_suburb text,
+  p_city text,
+  p_region text,
+  p_postcode text,
+  p_country text,
+  p_is_default_shipping boolean default false,
+  p_legacy_import_fingerprint text default null
+)
+returns public.customer_addresses
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_profile_id uuid;
+  v_should_default boolean;
+  v_address public.customer_addresses%rowtype;
+begin
+  select id into v_profile_id
+  from public.customer_profiles
+  where auth_user_id = p_auth_user_id;
+
+  if v_profile_id is null then
+    raise exception 'customer_profile_not_found';
+  end if;
+
+  perform pg_advisory_xact_lock(hashtext(v_profile_id::text));
+
+  select (p_is_default_shipping or not exists (
+    select 1 from public.customer_addresses
+    where customer_profile_id = v_profile_id
+  )) into v_should_default;
+
+  if v_should_default then
+    update public.customer_addresses
+    set is_default_shipping = false
+    where customer_profile_id = v_profile_id
+      and is_default_shipping = true;
+  end if;
+
+  insert into public.customer_addresses (
+    customer_profile_id,
+    label,
+    recipient_name,
+    company,
+    phone,
+    line1,
+    line2,
+    suburb,
+    city,
+    region,
+    postcode,
+    country,
+    is_default_shipping,
+    legacy_import_fingerprint
+  )
+  values (
+    v_profile_id,
+    p_label,
+    p_recipient_name,
+    p_company,
+    p_phone,
+    p_line1,
+    p_line2,
+    p_suburb,
+    p_city,
+    p_region,
+    p_postcode,
+    coalesce(p_country, 'NZ'),
+    v_should_default,
+    p_legacy_import_fingerprint
+  )
+  returning * into v_address;
+
+  return v_address;
+end;
+$$;
+
+create or replace function public.set_default_customer_address(
+  p_auth_user_id uuid,
+  p_address_id uuid
+)
+returns public.customer_addresses
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_profile_id uuid;
+  v_address public.customer_addresses%rowtype;
+begin
+  select id into v_profile_id
+  from public.customer_profiles
+  where auth_user_id = p_auth_user_id;
+
+  if v_profile_id is null then
+    raise exception 'customer_profile_not_found';
+  end if;
+
+  perform pg_advisory_xact_lock(hashtext(v_profile_id::text));
+
+  select * into v_address
+  from public.customer_addresses
+  where id = p_address_id
+    and customer_profile_id = v_profile_id;
+
+  if v_address.id is null then
+    raise exception 'address_not_found';
+  end if;
+
+  update public.customer_addresses
+  set is_default_shipping = false
+  where customer_profile_id = v_profile_id
+    and is_default_shipping = true
+    and id <> p_address_id;
+
+  update public.customer_addresses
+  set is_default_shipping = true
+  where id = p_address_id
+  returning * into v_address;
+
+  return v_address;
+end;
+$$;
+
+create or replace function public.delete_customer_address(
+  p_auth_user_id uuid,
+  p_address_id uuid
+)
+returns table (
+  deleted_address_id uuid,
+  replacement_default_address_id uuid
+)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_profile_id uuid;
+  v_was_default boolean;
+  v_replacement_id uuid;
+begin
+  select id into v_profile_id
+  from public.customer_profiles
+  where auth_user_id = p_auth_user_id;
+
+  if v_profile_id is null then
+    raise exception 'customer_profile_not_found';
+  end if;
+
+  perform pg_advisory_xact_lock(hashtext(v_profile_id::text));
+
+  select is_default_shipping into v_was_default
+  from public.customer_addresses
+  where id = p_address_id
+    and customer_profile_id = v_profile_id;
+
+  if v_was_default is null then
+    raise exception 'address_not_found';
+  end if;
+
+  delete from public.customer_addresses
+  where id = p_address_id
+    and customer_profile_id = v_profile_id;
+
+  if v_was_default then
+    select id into v_replacement_id
+    from public.customer_addresses
+    where customer_profile_id = v_profile_id
+    order by updated_at desc, created_at desc, id desc
+    limit 1;
+
+    if v_replacement_id is not null then
+      update public.customer_addresses
+      set is_default_shipping = true
+      where id = v_replacement_id;
+    end if;
+  end if;
+
+  return query select p_address_id, v_replacement_id;
+end;
+$$;
+
+create or replace function public.customer_profile_belongs_to_auth_user(
+  p_customer_profile_id uuid,
+  p_auth_user_id uuid
+)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.customer_profiles
+    where id = p_customer_profile_id
+      and auth_user_id = p_auth_user_id
+  );
+$$;
+
+revoke all on function public.customer_profile_belongs_to_auth_user(uuid, uuid) from public;
+revoke all on function public.customer_profile_belongs_to_auth_user(uuid, uuid) from anon;
+grant execute on function public.customer_profile_belongs_to_auth_user(uuid, uuid) to authenticated;
+grant execute on function public.customer_profile_belongs_to_auth_user(uuid, uuid) to service_role;
+
+drop policy if exists "Customers can read own addresses" on public.customer_addresses;
+create policy "Customers can read own addresses"
+  on public.customer_addresses for select
+  to authenticated
+  using (
+    public.customer_profile_belongs_to_auth_user(customer_profile_id, auth.uid())
+  );
+
+drop policy if exists "Customers can insert own addresses" on public.customer_addresses;
+create policy "Customers can insert own addresses"
+  on public.customer_addresses for insert
+  to authenticated
+  with check (
+    public.customer_profile_belongs_to_auth_user(customer_profile_id, auth.uid())
+  );
+
+drop policy if exists "Customers can update own addresses" on public.customer_addresses;
+create policy "Customers can update own addresses"
+  on public.customer_addresses for update
+  to authenticated
+  using (
+    public.customer_profile_belongs_to_auth_user(customer_profile_id, auth.uid())
+  )
+  with check (
+    public.customer_profile_belongs_to_auth_user(customer_profile_id, auth.uid())
+  );
+
+drop policy if exists "Customers can delete own addresses" on public.customer_addresses;
+create policy "Customers can delete own addresses"
+  on public.customer_addresses for delete
+  to authenticated
+  using (
+    public.customer_profile_belongs_to_auth_user(customer_profile_id, auth.uid())
   );
 
 insert into categories (slug, name, description, sort_order) values

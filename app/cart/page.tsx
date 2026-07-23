@@ -23,7 +23,8 @@ export default function CartPage() {
     removeWelcomeReward,
     setCouponDraft,
     applyCoupon,
-    clearCoupon
+    clearCoupon,
+    getStableCheckoutRequestId
   } = useCart();
   const selectedVehicle = getSelectedVehicle(items);
   const pricing = calculateCartPricing(items);
@@ -37,7 +38,7 @@ export default function CartPage() {
 
     const response = await fetch("/api/checkout", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "x-checkout-request-id": getStableCheckoutRequestId() },
       body: JSON.stringify({
         items,
         couponCode: couponCode || undefined,

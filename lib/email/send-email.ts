@@ -29,13 +29,14 @@ export type SendEmailInput = {
   replyTo?: string;
   orderId?: string;
   customerId?: string;
+  emailEventId?: string | null;
 };
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
 export async function sendEmail(input: SendEmailInput) {
   const recipients = Array.isArray(input.to) ? input.to : [input.to];
-  const eventId = await logEmailEvent({
+  const eventId = input.emailEventId ?? await logEmailEvent({
     type: input.type,
     recipient: recipients.join(","),
     subject: input.subject,
