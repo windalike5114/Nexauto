@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { PlayCircle, ShieldCheck, Truck, Wrench } from "lucide-react";
+import { ShieldCheck, Truck, Wrench } from "lucide-react";
 import { notFound } from "next/navigation";
 import { ProductConfigurator } from "@/components/product-configurator";
 import { WiperFitmentFinder } from "@/components/wiper-fitment-finder";
@@ -83,27 +83,6 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
                 <p className="mt-3 leading-7 text-steel">{section.body}</p>
               </article>
             ))}
-            <article className="rounded-lg border border-black/10 bg-ink p-5 text-white">
-              <div className="flex items-center gap-3">
-                <PlayCircle className="h-6 w-6 text-signal" />
-                <h3 className="text-lg font-black">Installation overview</h3>
-              </div>
-              <p className="mt-3 leading-7 text-white/75">
-                {product.videoUrl
-                  ? "Video link is available for installation notes, connector checks, and buyer confidence."
-                  : "A short product walkthrough can sit here for installation notes, connector checks, and buyer confidence."}
-              </p>
-              {product.videoUrl ? (
-                <a
-                  href={product.videoUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-4 inline-flex h-10 items-center rounded bg-white px-4 text-sm font-black text-ink"
-                >
-                  Open video
-                </a>
-              ) : null}
-            </article>
           </div>
         </div>
       </section>

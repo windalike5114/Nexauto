@@ -1,17 +1,20 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Gift, X } from "lucide-react";
 import { useCart } from "@/components/cart-provider";
 
 const dismissedKey = "nexauto-welcome-reward-dismissed";
 const shownKey = "nexauto-welcome-reward-shown";
+const autoMinimizeMs = 12000;
 
 type WidgetState = "hidden" | "card" | "tab";
 
 export function WelcomeRewardWidget() {
-  const { welcomeRewardStatus, welcomeRewardDiscount, openDrawer, count } = useCart();
+  const { welcomeRewardStatus, welcomeRewardDiscount, openDrawer, count, isDrawerOpen } = useCart();
+  const pathname = usePathname();
   const [state, setState] = useState<WidgetState>("hidden");
   const [confirmation, setConfirmation] = useState(false);
 
@@ -59,6 +62,16 @@ export function WelcomeRewardWidget() {
   }, [welcomeRewardStatus]);
 
   useEffect(() => {
+    if (state !== "card") return;
+
+    const timer = window.setTimeout(() => {
+      setState("tab");
+    }, autoMinimizeMs);
+
+    return () => window.clearTimeout(timer);
+  }, [state]);
+
+  useEffect(() => {
     function onReady() {
       setConfirmation(true);
       window.setTimeout(() => setConfirmation(false), 6500);
@@ -68,7 +81,14 @@ export function WelcomeRewardWidget() {
     return () => window.removeEventListener("nexauto:welcome-reward-ready", onReady);
   }, []);
 
-  if (confirmation) {
+  const shouldHideOnPage =
+    pathname === "/account" ||
+    pathname.startsWith("/account/") ||
+    pathname === "/cart" ||
+    pathname.startsWith("/checkout") ||
+    pathname.startsWith("/admin");
+
+  if (confirmation && !isDrawerOpen && !shouldHideOnPage) {
     return (
       <div className="fixed bottom-5 left-5 z-40 w-[min(340px,calc(100vw-32px))] rounded-2xl border border-black/10 bg-white p-4 shadow-2xl">
         <p className="text-sm font-black text-ink">Your NZ$10 Welcome Reward is ready.</p>
@@ -79,7 +99,7 @@ export function WelcomeRewardWidget() {
     );
   }
 
-  if (state === "hidden" || welcomeRewardStatus === "used" || welcomeRewardStatus === "applied") return null;
+  if (state === "hidden" || isDrawerOpen || shouldHideOnPage || welcomeRewardStatus === "used" || welcomeRewardStatus === "applied") return null;
 
   if (state === "tab") {
     return (

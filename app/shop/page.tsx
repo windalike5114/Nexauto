@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { CheckCircle2, SlidersHorizontal } from "lucide-react";
-import { ProductCard } from "@/components/product-card";
 import { TestCheckoutCard } from "@/components/test-checkout-card";
 import { WiperFitmentFinder } from "@/components/wiper-fitment-finder";
 import { formatMoney } from "@/lib/catalog";
+import { productImage } from "@/lib/product-content";
 import { wiperPairPricing } from "@/lib/pricing";
 import { listProducts } from "@/lib/queries/catalog";
 import { listWiperSets } from "@/lib/queries/wiper-commerce";
@@ -187,7 +187,7 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
               </div>
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
                 {lightingProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} categoryName="Lighting" />
+                  <ShopProductCard key={product.id} product={product} />
                 ))}
               </div>
             </section>
@@ -282,6 +282,55 @@ function WiperSetCard({ wiperSet }: { wiperSet: WiperSet }) {
         </div>
 
         <p className="hidden text-xs font-black text-steel sm:block">Free NZ Shipping</p>
+
+        <span className="inline-flex h-10 w-full items-center justify-center rounded bg-ink px-3 text-sm font-black text-white sm:h-[42px]">
+          View Details
+        </span>
+      </div>
+    </Link>
+  );
+}
+
+function ShopProductCard({ product }: { product: Product }) {
+  const image = productImage(product);
+
+  return (
+    <Link
+      href={`/products/${product.slug}` as never}
+      className="block overflow-hidden rounded-[14px] border border-black/10 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-panel focus:outline-none focus:ring-2 focus:ring-signal focus:ring-offset-2"
+      aria-label={`View ${product.name}`}
+    >
+      <div className="relative aspect-[1/0.72] bg-zinc-50 sm:aspect-[1/0.82]">
+        <span className="absolute left-2 top-2 z-10 rounded bg-signal px-2 py-1 text-[10px] font-black uppercase tracking-[0.1em] text-white sm:left-3 sm:top-3 sm:tracking-[0.12em]">
+          Bundle
+        </span>
+        {image ? (
+          <Image
+            src={image}
+            alt={`${product.name} preview`}
+            fill
+            className="object-contain p-3 sm:p-4"
+            sizes="(min-width: 1280px) 24vw, (min-width: 768px) 33vw, 100vw"
+          />
+        ) : (
+          <div className="grid h-full place-items-center bg-zinc-100 text-sm font-black uppercase tracking-[0.18em] text-steel">
+            No image
+          </div>
+        )}
+      </div>
+      <div className="space-y-2.5 p-3 sm:space-y-3 sm:p-4">
+        <div>
+          <h2 className="text-sm font-black leading-snug text-ink sm:text-base">{product.name}</h2>
+          <p className="mt-1.5 text-sm font-black leading-5 text-steel sm:mt-2 sm:text-[15px]">
+            4 x H11 bulbs + licence plate lights
+          </p>
+        </div>
+
+        <div className="flex flex-wrap items-baseline gap-2">
+          <span className="text-lg font-black text-ink">{formatMoney(product.price)}</span>
+        </div>
+
+        <p className="hidden text-xs font-black text-steel sm:block">Ships from Auckland</p>
 
         <span className="inline-flex h-10 w-full items-center justify-center rounded bg-ink px-3 text-sm font-black text-white sm:h-[42px]">
           View Details
