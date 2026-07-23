@@ -15,7 +15,7 @@ type WidgetState = "hidden" | "card" | "tab";
 export function WelcomeRewardWidget() {
   const { welcomeRewardStatus, welcomeRewardDiscount, openDrawer, count, isDrawerOpen } = useCart();
   const pathname = usePathname();
-  const [state, setState] = useState<WidgetState>("hidden");
+  const [state, setState] = useState<WidgetState>("tab");
   const [confirmation, setConfirmation] = useState(false);
 
   useEffect(() => {
@@ -36,6 +36,8 @@ export function WelcomeRewardWidget() {
       setState("tab");
       return;
     }
+
+    setState("tab");
 
     const show = () => {
       window.sessionStorage.setItem(shownKey, "true");
@@ -81,14 +83,9 @@ export function WelcomeRewardWidget() {
     return () => window.removeEventListener("nexauto:welcome-reward-ready", onReady);
   }, []);
 
-  const shouldHideOnPage =
-    pathname === "/account" ||
-    pathname.startsWith("/account/") ||
-    pathname === "/cart" ||
-    pathname.startsWith("/checkout") ||
-    pathname.startsWith("/admin");
+  const shouldHideOnPage = pathname.startsWith("/checkout") || pathname.startsWith("/admin");
 
-  if (confirmation && !isDrawerOpen && !shouldHideOnPage) {
+  if (confirmation && !shouldHideOnPage) {
     return (
       <div className="fixed bottom-5 left-5 z-40 w-[min(340px,calc(100vw-32px))] rounded-2xl border border-black/10 bg-white p-4 shadow-2xl">
         <p className="text-sm font-black text-ink">Your NZ$10 Welcome Reward is ready.</p>
@@ -99,7 +96,7 @@ export function WelcomeRewardWidget() {
     );
   }
 
-  if (state === "hidden" || isDrawerOpen || shouldHideOnPage || welcomeRewardStatus === "used" || welcomeRewardStatus === "applied") return null;
+  if (state === "hidden" || shouldHideOnPage || welcomeRewardStatus === "used" || welcomeRewardStatus === "applied") return null;
 
   if (state === "tab") {
     return (
@@ -109,7 +106,7 @@ export function WelcomeRewardWidget() {
           trackRewardEvent("welcome_reward_reopened");
           setState("card");
         }}
-        className="fixed bottom-5 left-5 z-40 inline-flex h-11 items-center gap-2 rounded-full bg-ink px-4 text-sm font-black text-white shadow-xl transition hover:-translate-y-0.5 motion-reduce:transition-none max-sm:bottom-4 max-sm:left-4"
+        className={`fixed bottom-5 left-5 inline-flex h-11 items-center gap-2 rounded-full bg-ink px-4 text-sm font-black text-white shadow-xl transition hover:-translate-y-0.5 motion-reduce:transition-none max-sm:bottom-4 max-sm:left-4 ${isDrawerOpen ? "z-[60]" : "z-40"}`}
         aria-label="Open NZ$10 Welcome Reward"
       >
         <Gift className="h-4 w-4 text-signal" />
@@ -122,7 +119,7 @@ export function WelcomeRewardWidget() {
 
   return (
     <aside
-      className="fixed bottom-5 left-5 z-40 w-[min(340px,calc(100vw-32px))] rounded-2xl border border-black/10 bg-white p-4 text-ink shadow-2xl max-sm:bottom-4 max-sm:left-4"
+      className={`fixed bottom-5 left-5 w-[min(340px,calc(100vw-32px))] rounded-2xl border border-black/10 bg-white p-4 text-ink shadow-2xl max-sm:bottom-4 max-sm:left-4 ${isDrawerOpen ? "z-[60]" : "z-40"}`}
       aria-label="NZ$10 Welcome Reward"
     >
       <button
