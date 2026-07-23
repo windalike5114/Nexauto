@@ -34,6 +34,27 @@ export function productDetailContent(product: Product) {
   }
 
   if (product.category === "bulb") {
+    if (product.slug === "h11-headlight-license-plate-bulb-bundle") {
+      return {
+        kicker: "Lighting refresh bundle",
+        intro:
+          "A value-focused exterior lighting bundle for drivers who already know they need H11 replacement bulbs. It pairs four H11 12V halogen bulbs with licence plate light bulbs so common lighting maintenance can be handled in one order.",
+        highlights: ["4 x H11 halogen bulbs", "Licence plate bulbs included", "12V exterior lighting refresh"],
+        sections: databaseSections.length
+          ? databaseSections
+          : [
+              {
+                title: "Bundle Contents",
+                body: "Includes four H11 12V halogen replacement bulbs for vehicles that use H11 fitment, plus licence plate light bulbs for a clean exterior lighting refresh."
+              },
+              {
+                title: "Fitment Reminder",
+                body: "H11 bulbs are commonly used in low beam, fog light, and daytime running light applications depending on the vehicle. Please confirm your existing bulb type before ordering."
+              }
+            ]
+      };
+    }
+
     return {
       kicker: "Clear replacement lighting",
       intro:

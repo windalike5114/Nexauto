@@ -30,7 +30,7 @@ export function ProductCard({ product, categoryName }: { product: Product; categ
             src={image}
             alt={product.name}
             fill
-            className={product.category === "wiper" ? "object-contain p-5" : "object-cover"}
+            className={product.category === "wiper" || product.category === "bulb" ? "object-contain p-5" : "object-cover"}
             sizes="(min-width: 1024px) 33vw, 100vw"
           />
         ) : (

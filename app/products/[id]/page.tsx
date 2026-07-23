@@ -35,7 +35,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
                 alt={product.name}
                 fill
                 priority
-                className="object-cover"
+                className={product.category === "wiper" || product.category === "bulb" ? "object-contain p-6" : "object-cover"}
                 sizes="(min-width: 1024px) 50vw, 100vw"
               />
             ) : (

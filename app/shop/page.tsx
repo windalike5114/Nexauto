@@ -2,12 +2,14 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { CheckCircle2, SlidersHorizontal } from "lucide-react";
+import { ProductCard } from "@/components/product-card";
 import { TestCheckoutCard } from "@/components/test-checkout-card";
 import { WiperFitmentFinder } from "@/components/wiper-fitment-finder";
 import { formatMoney } from "@/lib/catalog";
 import { wiperPairPricing } from "@/lib/pricing";
+import { listProducts } from "@/lib/queries/catalog";
 import { listWiperSets } from "@/lib/queries/wiper-commerce";
-import type { WiperSet } from "@/lib/types";
+import type { Product, WiperSet } from "@/lib/types";
 import { getWiperSetPreviewImage } from "@/lib/wiper-product-images";
 
 export const dynamic = "force-dynamic";
@@ -28,7 +30,7 @@ type ShopSearchParams = {
 
 export default async function ShopPage({ searchParams }: { searchParams: Promise<ShopSearchParams> }) {
   const params = await searchParams;
-  const { wiperSets, error } = await loadShopData();
+  const { wiperSets, lightingProducts, error } = await loadShopData();
   const filteredWiperSets = applyShopFilters(wiperSets, params);
   const pageSize = getPageSize(params.show);
   const totalPages = Math.max(1, Math.ceil(filteredWiperSets.length / pageSize));
@@ -173,6 +175,23 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
               </div>
             </div>
           ) : null}
+
+          {lightingProducts.length > 0 ? (
+            <section className="mt-10 border-t border-black/10 pt-8 sm:mt-12 sm:pt-10">
+              <div className="mb-4 sm:mb-5">
+                <p className="text-xs font-black uppercase tracking-[0.16em] text-signal sm:text-sm sm:tracking-[0.18em]">Lighting Bundles</p>
+                <h2 className="mt-2 text-xl font-black sm:text-2xl">Headlight & Licence Plate Bulb Packs</h2>
+                <p className="mt-2 max-w-2xl text-sm font-bold leading-6 text-steel">
+                  Practical lighting refresh bundles for customers who already know their bulb type.
+                </p>
+              </div>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                {lightingProducts.map((product) => (
+                  <ProductCard key={product.id} product={product} categoryName="Lighting" />
+                ))}
+              </div>
+            </section>
+          ) : null}
         </section>
       </div>
     </main>
@@ -181,14 +200,24 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
 
 async function loadShopData() {
   try {
-    const wiperSets = await listWiperSets();
-    return { wiperSets, error: "" };
+    const [wiperSets, bulbProducts] = await Promise.all([listWiperSets(), listProducts("bulb")]);
+    const lightingProducts = pickShopLightingProducts(bulbProducts);
+    return { wiperSets, lightingProducts, error: "" };
   } catch (error) {
     return {
       wiperSets: [],
+      lightingProducts: [],
       error: error instanceof Error ? error.message : "Could not load Supabase wiper SKU data."
     };
   }
+}
+
+function pickShopLightingProducts(products: Product[]) {
+  const preferredSlugs = ["h11-headlight-license-plate-bulb-bundle"];
+  const bySlug = new Map(products.map((product) => [product.slug, product]));
+  const preferred = preferredSlugs.map((slug) => bySlug.get(slug)).filter((product): product is Product => Boolean(product));
+  const fallback = products.filter((product) => !preferredSlugs.includes(product.slug)).slice(0, 3 - preferred.length);
+  return [...preferred, ...fallback];
 }
 
 function applyShopFilters(wiperSets: WiperSet[], params: ShopSearchParams) {
