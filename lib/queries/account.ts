@@ -19,10 +19,12 @@ export type CustomerProfile = {
 export type CustomerVehicle = {
   id: string;
   applicationId: string | null;
+  label: string | null;
   make: string;
   model: string;
   year: number;
   source: string;
+  isDefault: boolean;
   lastUsedAt: string;
 };
 
@@ -49,10 +51,12 @@ type CustomerProfileRow = {
 type CustomerVehicleRow = {
   id: string;
   vehicle_application_id: string | null;
+  label?: string | null;
   make_snapshot: string;
   model_snapshot: string;
   year: number;
   source: string;
+  is_default?: boolean;
   last_used_at: string;
 };
 
@@ -143,8 +147,9 @@ export async function listCustomerVehicles(profileId: string) {
   const supabase = getAdminOrThrow();
   const { data, error } = await supabase
     .from("customer_vehicles")
-    .select("id,vehicle_application_id,make_snapshot,model_snapshot,year,source,last_used_at")
+    .select("id,vehicle_application_id,label,make_snapshot,model_snapshot,year,source,is_default,last_used_at")
     .eq("customer_profile_id", profileId)
+    .order("is_default", { ascending: false })
     .order("last_used_at", { ascending: false });
 
   if (error) throw error;
@@ -369,10 +374,12 @@ function mapVehicle(row: CustomerVehicleRow): CustomerVehicle {
   return {
     id: row.id,
     applicationId: row.vehicle_application_id,
+    label: row.label ?? null,
     make: row.make_snapshot,
     model: row.model_snapshot,
     year: row.year,
     source: row.source,
+    isDefault: row.is_default ?? false,
     lastUsedAt: row.last_used_at
   };
 }

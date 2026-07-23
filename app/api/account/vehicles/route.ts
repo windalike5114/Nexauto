@@ -1,59 +1,53 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
-import { removeCustomerVehicle, saveCustomerVehicle } from "@/lib/queries/account";
-
-type SaveVehicleBody = {
-  applicationId?: string;
-  make?: string;
-  model?: string;
-  year?: number | string;
-};
+import { getCustomerAddressContext } from "@/lib/application/account/account-context";
+import { deleteCustomerVehicleForAccount } from "@/lib/application/account/delete-customer-vehicle";
+import { saveCustomerVehicleForAccount } from "@/lib/application/account/save-customer-vehicle";
+import { setDefaultCustomerVehicleForAccount } from "@/lib/application/account/set-default-customer-vehicle";
+import { updateCustomerVehicleForAccount } from "@/lib/application/account/update-customer-vehicle";
+import { CustomerVehicleError } from "@/lib/domain/account/customer-vehicle.errors";
+import { createSupabaseAccountVehicleRepository } from "@/lib/infrastructure/supabase/account-vehicle.repository";
 
 export async function POST(request: Request) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-    error
-  } = await supabase.auth.getUser();
+  const context = await resolveContext("Sign in to save vehicles.");
+  if (!context.ok) return context.response;
 
-  if (error || !user) {
-    return NextResponse.json({ error: "Sign in to save vehicles." }, { status: 401 });
+  const body = await readJson(request);
+  if (!body.ok) return body.response;
+  try {
+    const vehicle = await saveCustomerVehicleForAccount(context.context, body.data, createSupabaseAccountVehicleRepository());
+    return NextResponse.json({ vehicle });
+  } catch (nextError) {
+    return handleVehicleError(nextError);
   }
+}
 
-  const body = (await request.json()) as SaveVehicleBody;
-  const year = Number(body.year);
+export async function PATCH(request: Request) {
+  const context = await resolveContext("Sign in to manage vehicles.");
+  if (!context.ok) return context.response;
 
-  if (!body.applicationId || !body.make || !body.model || !Number.isFinite(year)) {
-    return NextResponse.json({ error: "applicationId, make, model, and year are required." }, { status: 400 });
-  }
+  const body = await readJson(request);
+  if (!body.ok) return body.response;
+
+  const vehicleId = typeof body.data.id === "string" ? body.data.id : "";
+  if (!vehicleId) return NextResponse.json({ error: "Vehicle id is required." }, { status: 400 });
 
   try {
-    const result = await saveCustomerVehicle(user, {
-      applicationId: body.applicationId,
-      make: body.make,
-      model: body.model,
-      year
-    });
+    if (body.data.isDefault === true) {
+      const vehicle = await setDefaultCustomerVehicleForAccount(context.context, vehicleId, createSupabaseAccountVehicleRepository());
+      return NextResponse.json({ vehicle });
+    }
 
-    return NextResponse.json(result);
+    const vehicle = await updateCustomerVehicleForAccount(context.context, vehicleId, body.data, createSupabaseAccountVehicleRepository());
+    return NextResponse.json({ vehicle });
   } catch (nextError) {
-    return NextResponse.json(
-      { error: nextError instanceof Error ? nextError.message : "Could not save vehicle." },
-      { status: 500 }
-    );
+    return handleVehicleError(nextError);
   }
 }
 
 export async function DELETE(request: Request) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-    error
-  } = await supabase.auth.getUser();
-
-  if (error || !user) {
-    return NextResponse.json({ error: "Sign in to manage vehicles." }, { status: 401 });
-  }
+  const context = await resolveContext("Sign in to manage vehicles.");
+  if (!context.ok) return context.response;
 
   const vehicleId = new URL(request.url).searchParams.get("id");
 
@@ -62,12 +56,53 @@ export async function DELETE(request: Request) {
   }
 
   try {
-    const result = await removeCustomerVehicle(user, vehicleId);
+    const result = await deleteCustomerVehicleForAccount(context.context, vehicleId, createSupabaseAccountVehicleRepository());
     return NextResponse.json(result);
   } catch (nextError) {
-    return NextResponse.json(
-      { error: nextError instanceof Error ? nextError.message : "Could not remove vehicle." },
-      { status: 500 }
-    );
+    return handleVehicleError(nextError);
   }
+}
+
+async function resolveContext(unauthorizedMessage: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error
+  } = await supabase.auth.getUser();
+
+  if (error || !user) {
+    return { ok: false as const, response: NextResponse.json({ error: unauthorizedMessage }, { status: 401 }) };
+  }
+
+  try {
+    return { ok: true as const, context: await getCustomerAddressContext(user) };
+  } catch {
+    return { ok: false as const, response: NextResponse.json({ error: "Could not load account profile." }, { status: 500 }) };
+  }
+}
+
+async function readJson(request: Request) {
+  try {
+    const data = await request.json();
+    return { ok: true as const, data: isRecord(data) ? data : {} };
+  } catch {
+    return { ok: false as const, response: NextResponse.json({ error: "Vehicle details are invalid." }, { status: 400 }) };
+  }
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function handleVehicleError(error: unknown) {
+  if (error instanceof CustomerVehicleError) {
+    const status =
+      error.code === "CUSTOMER_VEHICLE_VALIDATION_FAILED"
+        ? 400
+        : error.code === "CUSTOMER_VEHICLE_NOT_FOUND" || error.code === "CUSTOMER_VEHICLE_OWNERSHIP_FAILED"
+          ? 404
+          : 500;
+    return NextResponse.json({ error: error.message }, { status });
+  }
+  return NextResponse.json({ error: "Vehicle request could not be completed." }, { status: 500 });
 }

@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "test:addresses": "node --import tsx --test tests/customer-addresses.test.ts",
+    "test:vehicles": "node --import tsx --test tests/customer-vehicles.test.ts",
     "fitment:report": "node scripts/fitment/import-wiper-fitments.mjs --report-only",
     "fitment:import": "node scripts/fitment/import-wiper-fitments.mjs --apply",
     "fitment:check": "node scripts/fitment/check-fitment-counts.mjs",

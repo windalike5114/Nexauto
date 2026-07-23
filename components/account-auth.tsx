@@ -43,9 +43,11 @@ type AccountResponse = {
   vehicles: Array<{
     id: string;
     applicationId: string | null;
+    label: string | null;
     make: string;
     model: string;
     year: number;
+    isDefault: boolean;
     lastUsedAt: string;
   }>;
   orders: Array<{
@@ -89,7 +91,6 @@ export function AccountAuth({ initialMode = "sign-in" }: { initialMode?: Mode })
   const [account, setAccount] = useState<AccountResponse | null>(null);
   const [checkingSession, setCheckingSession] = useState(true);
   const [activeSection, setActiveSection] = useState("dashboard");
-  const [defaultVehicleId, setDefaultVehicleId] = useState("");
   const [vehicleActionId, setVehicleActionId] = useState("");
   const [settingsName, setSettingsName] = useState("");
   const [settingsPassword, setSettingsPassword] = useState("");
@@ -111,19 +112,16 @@ export function AccountAuth({ initialMode = "sign-in" }: { initialMode?: Mode })
   useEffect(() => {
     if (!account) return;
 
-    const defaultKey = `nexauto-default-vehicle-${account.profile.email}`;
     const newsletterKey = `nexauto-newsletter-${account.profile.email}`;
-    const storedDefault = window.localStorage.getItem(defaultKey);
     const storedNewsletter = window.localStorage.getItem(newsletterKey);
 
-    setDefaultVehicleId(storedDefault && account.vehicles.some((vehicle) => vehicle.id === storedDefault) ? storedDefault : account.vehicles[0]?.id ?? "");
     setNewsletter(storedNewsletter ? storedNewsletter === "true" : true);
     setSettingsName(account.profile.name ?? "");
   }, [account]);
 
   const defaultVehicle = useMemo(
-    () => account?.vehicles.find((vehicle) => vehicle.id === defaultVehicleId) ?? account?.vehicles[0] ?? null,
-    [account, defaultVehicleId]
+    () => account?.vehicles.find((vehicle) => vehicle.isDefault) ?? account?.vehicles[0] ?? null,
+    [account]
   );
   const recentOrders = account?.orders.slice(0, 3) ?? [];
 
@@ -190,10 +188,25 @@ export function AccountAuth({ initialMode = "sign-in" }: { initialMode?: Mode })
     setLoading(false);
   }
 
-  function saveDefaultVehicle(vehicleId: string) {
-    if (!account) return;
-    setDefaultVehicleId(vehicleId);
-    window.localStorage.setItem(`nexauto-default-vehicle-${account.profile.email}`, vehicleId);
+  async function saveDefaultVehicle(vehicleId: string) {
+    setVehicleActionId(vehicleId);
+    setMessage("");
+
+    try {
+      const response = await fetch("/api/account/vehicles", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: vehicleId, isDefault: true })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error ?? "Could not update default vehicle.");
+      await loadAccount();
+      setMessage("Default vehicle updated.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Could not update default vehicle.");
+    } finally {
+      setVehicleActionId("");
+    }
   }
 
   async function removeVehicle(vehicleId: string) {
@@ -349,7 +362,6 @@ export function AccountAuth({ initialMode = "sign-in" }: { initialMode?: Mode })
       {activeSection === "vehicles" ? (
         <VehiclesSection
           vehicles={account.vehicles}
-          defaultVehicleId={defaultVehicleId}
           busyVehicleId={vehicleActionId}
           setDefaultVehicle={saveDefaultVehicle}
           removeVehicle={removeVehicle}
@@ -568,7 +580,6 @@ function RewardsSection({ reward }: { reward: AccountResponse["rewards"]["welcom
 
 function VehiclesSection({
   vehicles,
-  defaultVehicleId,
   busyVehicleId,
   setDefaultVehicle,
   removeVehicle,
@@ -576,7 +587,6 @@ function VehiclesSection({
   refresh
 }: {
   vehicles: AccountResponse["vehicles"];
-  defaultVehicleId: string;
   busyVehicleId: string;
   setDefaultVehicle: (vehicleId: string) => void;
   removeVehicle: (vehicleId: string) => void;
@@ -593,16 +603,19 @@ function VehiclesSection({
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                   <div>
                     <h3 className="text-xl font-black">{vehicleLabel(vehicle)}</h3>
-                    {vehicle.id === defaultVehicleId ? <p className="mt-1 text-sm font-black text-signal">Default Vehicle</p> : null}
+                    {vehicle.label ? <p className="mt-1 text-sm font-bold text-steel">{vehicle.label}</p> : null}
+                    {vehicle.isDefault ? <p className="mt-1 text-sm font-black text-signal">Default Vehicle</p> : null}
                     <p className="mt-1 text-xs font-bold text-steel">Last used {new Date(vehicle.lastUsedAt).toLocaleDateString("en-NZ")}</p>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     <button type="button" onClick={() => findWipers(vehicle)} disabled={busyVehicleId === vehicle.id} className="h-10 rounded bg-signal px-3 text-sm font-black text-white hover:bg-red-700 disabled:bg-zinc-300">
                       {busyVehicleId === vehicle.id ? "Finding..." : "Find Wipers"}
                     </button>
-                    <button type="button" onClick={() => setDefaultVehicle(vehicle.id)} className="h-10 rounded border border-black/10 bg-white px-3 text-sm font-black text-ink hover:border-ink">
-                      Set as Default
-                    </button>
+                    {!vehicle.isDefault ? (
+                      <button type="button" onClick={() => setDefaultVehicle(vehicle.id)} disabled={busyVehicleId === vehicle.id} className="h-10 rounded border border-black/10 bg-white px-3 text-sm font-black text-ink hover:border-ink disabled:text-steel">
+                        Set as Default
+                      </button>
+                    ) : null}
                     <button type="button" className="h-10 rounded border border-black/10 bg-white px-3 text-sm font-black text-ink hover:border-ink">
                       Edit
                     </button>
