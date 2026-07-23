@@ -287,7 +287,7 @@ function AddressForm({
         <button type="button" onClick={onCancel} className="h-11 rounded border border-black/10 bg-white px-4 text-sm font-black text-ink">
           Cancel
         </button>
-        <button type="button" onClick={(event) => { const form = event.currentTarget.form; if (form?.reportValidity()) onSave(form); }} disabled={saving} className="h-11 rounded bg-signal px-4 text-sm font-black text-white disabled:bg-zinc-300">
+        <button type="button" onClick={(event) => { const form = event.currentTarget.form; if (form) onSave(form); }} disabled={saving} className="h-11 rounded bg-signal px-4 text-sm font-black text-white disabled:bg-zinc-300">
           {saving ? "Saving..." : address ? "Update Address" : "Save Address"}
         </button>
       </div>
