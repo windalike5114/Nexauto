@@ -215,9 +215,7 @@ async function loadShopData() {
 function pickShopLightingProducts(products: Product[]) {
   const preferredSlugs = ["h11-headlight-license-plate-bulb-bundle"];
   const bySlug = new Map(products.map((product) => [product.slug, product]));
-  const preferred = preferredSlugs.map((slug) => bySlug.get(slug)).filter((product): product is Product => Boolean(product));
-  const fallback = products.filter((product) => !preferredSlugs.includes(product.slug)).slice(0, 3 - preferred.length);
-  return [...preferred, ...fallback];
+  return preferredSlugs.map((slug) => bySlug.get(slug)).filter((product): product is Product => Boolean(product));
 }
 
 function applyShopFilters(wiperSets: WiperSet[], params: ShopSearchParams) {
