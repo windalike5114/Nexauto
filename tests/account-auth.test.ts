@@ -13,6 +13,7 @@ import {
 const accountAuthComponent = readFileSync("components/account-auth.tsx", "utf8");
 const checkoutSuccessComponent = readFileSync("components/checkout-success-actions.tsx", "utf8");
 const callbackRoute = readFileSync("app/auth/callback/route.ts", "utf8");
+const middlewareClient = readFileSync("utils/supabase/middleware.ts", "utf8");
 
 test("sign-up input normalizes email and trims name", () => {
   const input = parseSignUpInput({
@@ -95,6 +96,11 @@ test("account registration entry uses auth callback and safe errors", () => {
   assert.match(accountAuthComponent, /parsePasswordResetInput/);
   assert.match(accountAuthComponent, /getSafeAuthErrorMessage/);
   assert.doesNotMatch(accountAuthComponent, /setMessage\(error\.message\)/);
+});
+
+test("middleware treats stale Supabase refresh cookies as signed out", () => {
+  assert.match(middlewareClient, /try\s*{\s*await supabase\.auth\.getUser\(\);/s);
+  assert.match(middlewareClient, /catch\s*{/);
 });
 
 test("checkout success registration uses the same account auth validation and callback", () => {

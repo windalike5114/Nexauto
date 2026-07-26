@@ -26,7 +26,12 @@ export async function updateSession(request: NextRequest) {
     }
   });
 
-  await supabase.auth.getUser();
+  try {
+    await supabase.auth.getUser();
+  } catch {
+    // Stale browser cookies can make Supabase throw during session refresh.
+    // Treat that request as signed out instead of logging a production error.
+  }
 
   return supabaseResponse;
 }
