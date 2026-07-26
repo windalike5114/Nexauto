@@ -27,6 +27,14 @@ import { formatMoney } from "@/lib/catalog";
 import { WiperFitmentFinder } from "@/components/wiper-fitment-finder";
 import { createClient } from "@/utils/supabase/client";
 import { AccountAddressesSection } from "@/components/account/addresses-section";
+import { getSafeAuthErrorMessage } from "@/lib/domain/account/auth-errors";
+import {
+  getAuthCallbackUrl,
+  getFirstValidationMessage,
+  parsePasswordResetInput,
+  parseSignInInput,
+  parseSignUpInput
+} from "@/lib/domain/account/auth.schema";
 
 type Mode = "sign-in" | "sign-up" | "reset-password";
 
@@ -84,8 +92,10 @@ type Address = {
 export function AccountAuth({ initialMode = "sign-in" }: { initialMode?: Mode }) {
   const router = useRouter();
   const [mode, setMode] = useState<Mode>(initialMode);
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [account, setAccount] = useState<AccountResponse | null>(null);
@@ -128,56 +138,81 @@ export function AccountAuth({ initialMode = "sign-in" }: { initialMode?: Mode })
   async function loadAccount() {
     setCheckingSession(true);
 
-    const response = await fetch("/api/account");
-    if (!response.ok) {
+    try {
+      const response = await fetch("/api/account");
+      if (!response.ok) {
+        setAccount(null);
+        setCheckingSession(false);
+        return;
+      }
+
+      const data = (await response.json()) as AccountResponse;
+      setAccount(data);
+      setCheckingSession(false);
+    } catch {
       setAccount(null);
       setCheckingSession(false);
-      return;
     }
-
-    const data = (await response.json()) as AccountResponse;
-    setAccount(data);
-    setCheckingSession(false);
   }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (loading) return;
+
     setLoading(true);
     setMessage("");
 
-    const supabase = createClient();
-    const action =
-      mode === "reset-password"
-        ? supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/account` })
-        : mode === "sign-in"
-          ? supabase.auth.signInWithPassword({ email, password })
-          : supabase.auth.signUp({
-              email,
-              password,
-              options: { emailRedirectTo: `${window.location.origin}/account` }
-            });
-    const { error } = await action;
+    try {
+      const supabase = createClient();
+      const callbackUrl = getAuthCallbackUrl(window.location.origin, "/account");
 
-    setLoading(false);
+      if (mode === "reset-password") {
+        const input = parsePasswordResetInput({ email });
+        const { error } = await supabase.auth.resetPasswordForEmail(input.email, { redirectTo: callbackUrl });
+        if (error) throw error;
+        setMessage("If an account exists for this email, password reset instructions will be sent.");
+        return;
+      }
 
-    if (error) {
-      setMessage(error.message);
-      return;
-    }
+      if (mode === "sign-in") {
+        const input = parseSignInInput({ email, password });
+        const { error } = await supabase.auth.signInWithPassword(input);
+        if (error) throw error;
+        setMessage("Signed in successfully.");
+        await loadAccount();
+        return;
+      }
 
-    setMessage(
-      mode === "reset-password"
-        ? "Password reset email sent. Check your inbox for the secure link."
-        : mode === "sign-in"
-          ? "Signed in successfully."
-          : "Account created. Check email if confirmation is enabled."
-    );
-    if (mode === "sign-up") {
+      const input = parseSignUpInput({ name, email, password, confirmPassword });
+      const { data, error } = await supabase.auth.signUp({
+        email: input.email,
+        password: input.password,
+        options: {
+          emailRedirectTo: callbackUrl,
+          data: input.name ? { name: input.name } : undefined
+        }
+      });
+
+      if (error) throw error;
+
       window.sessionStorage.setItem("nexauto-welcome-registration-success", "true");
-      window.dispatchEvent(new CustomEvent("nexauto:welcome-reward-ready"));
       window.dispatchEvent(new CustomEvent("nexauto:analytics", { detail: { event: "registration_completed" } }));
+
+      if (data.session) {
+        window.dispatchEvent(new CustomEvent("nexauto:welcome-reward-ready"));
+        setMessage("Account created and signed in.");
+        await loadAccount();
+        return;
+      }
+
+      setMessage("Account created. Please check your email to confirm your account before signing in.");
+      setMode("sign-in");
+    } catch (error) {
+      const message = getFirstValidationMessage(error);
+      setMessage(message === "Please check the form and try again." ? getSafeAuthErrorMessage(error) : message);
+    } finally {
+      setLoading(false);
     }
-    await loadAccount();
   }
 
   async function signOut() {
@@ -278,7 +313,7 @@ export function AccountAuth({ initialMode = "sign-in" }: { initialMode?: Mode })
     setLoading(false);
 
     if (error) {
-      setMessage(error.message);
+      setMessage(getSafeAuthErrorMessage(error, "Could not update account settings. Please try again."));
       return;
     }
 
@@ -297,7 +332,23 @@ export function AccountAuth({ initialMode = "sign-in" }: { initialMode?: Mode })
   }
 
   if (!account) {
-    return <AuthCard mode={mode} setMode={setMode} email={email} setEmail={setEmail} password={password} setPassword={setPassword} loading={loading} message={message} submit={submit} />;
+    return (
+      <AuthCard
+        mode={mode}
+        setMode={setMode}
+        name={name}
+        setName={setName}
+        email={email}
+        setEmail={setEmail}
+        password={password}
+        setPassword={setPassword}
+        confirmPassword={confirmPassword}
+        setConfirmPassword={setConfirmPassword}
+        loading={loading}
+        message={message}
+        submit={submit}
+      />
+    );
   }
 
   return (
@@ -392,20 +443,28 @@ export function AccountAuth({ initialMode = "sign-in" }: { initialMode?: Mode })
 function AuthCard({
   mode,
   setMode,
+  name,
+  setName,
   email,
   setEmail,
   password,
   setPassword,
+  confirmPassword,
+  setConfirmPassword,
   loading,
   message,
   submit
 }: {
   mode: Mode;
   setMode: (mode: Mode) => void;
+  name: string;
+  setName: (name: string) => void;
   email: string;
   setEmail: (email: string) => void;
   password: string;
   setPassword: (password: string) => void;
+  confirmPassword: string;
+  setConfirmPassword: (password: string) => void;
   loading: boolean;
   message: string;
   submit: (event: FormEvent<HTMLFormElement>) => void;
@@ -418,9 +477,17 @@ function AuthCard({
       </div>
 
       <form onSubmit={submit} className="mt-6 space-y-4">
+        {mode === "sign-up" ? (
+          <TextInput id="name" label="Name" value={name} onChange={setName} autoComplete="name" />
+        ) : null}
         <TextInput id="email" label="Email" type="email" value={email} onChange={setEmail} required />
         {mode !== "reset-password" ? (
-          <TextInput id="password" label="Password" type="password" value={password} onChange={setPassword} required minLength={6} />
+          <>
+            <TextInput id="password" label="Password" type="password" value={password} onChange={setPassword} required minLength={6} autoComplete={mode === "sign-in" ? "current-password" : "new-password"} />
+            {mode === "sign-up" ? (
+              <TextInput id="confirm-password" label="Confirm password" type="password" value={confirmPassword} onChange={setConfirmPassword} required minLength={6} autoComplete="new-password" />
+            ) : null}
+          </>
         ) : null}
         <button type="submit" disabled={loading} className="h-12 w-full rounded bg-signal px-5 font-black text-white hover:bg-red-700 disabled:bg-zinc-300">
           {loading ? "Working..." : mode === "reset-password" ? "Send reset link" : mode === "sign-in" ? "Sign in" : "Create account"}
@@ -826,7 +893,8 @@ function TextInput({
   required = false,
   disabled = false,
   minLength,
-  placeholder
+  placeholder,
+  autoComplete
 }: {
   id: string;
   label: string;
@@ -837,6 +905,7 @@ function TextInput({
   disabled?: boolean;
   minLength?: number;
   placeholder?: string;
+  autoComplete?: string;
 }) {
   return (
     <div>
@@ -851,6 +920,7 @@ function TextInput({
         minLength={minLength}
         value={value}
         placeholder={placeholder}
+        autoComplete={autoComplete}
         onChange={(event) => onChange(event.target.value)}
         className="mt-2 h-12 w-full rounded border border-black/10 px-3 outline-none focus:border-ink disabled:bg-zinc-100 disabled:text-steel"
       />

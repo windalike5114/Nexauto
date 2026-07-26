@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CheckCircle, Loader2, UserPlus } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
+import { getSafeAuthErrorMessage } from "@/lib/domain/account/auth-errors";
+import { getAuthCallbackUrl, getFirstValidationMessage, parseSignUpInput } from "@/lib/domain/account/auth.schema";
 import { useCart } from "./cart-provider";
 
 export function CheckoutSuccessActions({
@@ -24,6 +26,7 @@ export function CheckoutSuccessActions({
   const [name, setName] = useState(customerName);
   const [email, setEmail] = useState(customerEmail);
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -40,31 +43,33 @@ export function CheckoutSuccessActions({
     setLoading(true);
     setMessage("");
 
-    const supabase = createClient();
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          name
+    try {
+      const input = parseSignUpInput({ name, email, password, confirmPassword });
+      const supabase = createClient();
+      const { data, error } = await supabase.auth.signUp({
+        email: input.email,
+        password: input.password,
+        options: {
+          emailRedirectTo: getAuthCallbackUrl(window.location.origin, "/account"),
+          data: input.name ? { name: input.name } : undefined
         }
+      });
+
+      if (error) throw error;
+
+      if (data.session) {
+        await fetch("/api/account");
+        router.push("/account" as never);
+        return;
       }
-    });
 
-    setLoading(false);
-
-    if (error) {
-      setMessage(error.message);
-      return;
+      setMessage("Account created. Check your email to confirm your login, then your previous orders will appear automatically.");
+    } catch (error) {
+      const validationMessage = getFirstValidationMessage(error);
+      setMessage(validationMessage === "Please check the form and try again." ? getSafeAuthErrorMessage(error) : validationMessage);
+    } finally {
+      setLoading(false);
     }
-
-    if (data.session) {
-      await fetch("/api/account");
-      router.push("/account" as never);
-      return;
-    }
-
-    setMessage("Account created. Check your email to confirm your login, then your previous orders will appear automatically.");
   }
 
   return (
@@ -131,6 +136,17 @@ export function CheckoutSuccessActions({
                 minLength={6}
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
+                className="mt-2 h-11 w-full rounded border border-black/10 px-3 text-sm font-bold outline-none focus:border-ink"
+              />
+            </label>
+            <label className="block sm:col-span-2">
+              <span className="text-xs font-black uppercase tracking-[0.14em] text-steel">Confirm password</span>
+              <input
+                type="password"
+                required
+                minLength={6}
+                value={confirmPassword}
+                onChange={(event) => setConfirmPassword(event.target.value)}
                 className="mt-2 h-11 w-full rounded border border-black/10 px-3 text-sm font-bold outline-none focus:border-ink"
               />
             </label>
