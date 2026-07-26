@@ -35,7 +35,10 @@ export async function checkAdminAccess(): Promise<AdminAccessResult> {
       error
     } = await supabase.auth.getUser();
 
-    if (error) throw new AdminInfrastructureError();
+    if (error) {
+      if (isSignedOutSupabaseAuthError(error)) throw new AdminUnauthenticatedError();
+      throw new AdminInfrastructureError();
+    }
 
     return {
       ok: true,
@@ -52,4 +55,23 @@ export async function checkAdminAccess(): Promise<AdminAccessResult> {
     });
     return { ok: false, reason: "infrastructure" };
   }
+}
+
+export function isSignedOutSupabaseAuthError(error: unknown) {
+  if (!error || typeof error !== "object") return false;
+  const candidate = error as { name?: unknown; message?: unknown; code?: unknown; status?: unknown };
+  const name = typeof candidate.name === "string" ? candidate.name.toLowerCase() : "";
+  const message = typeof candidate.message === "string" ? candidate.message.toLowerCase() : "";
+  const code = typeof candidate.code === "string" ? candidate.code.toLowerCase() : "";
+
+  return (
+    name.includes("authsessionmissing") ||
+    message.includes("auth session missing") ||
+    message.includes("session missing") ||
+    message.includes("jwt expired") ||
+    message.includes("invalid jwt") ||
+    message.includes("refresh token") ||
+    code === "session_not_found" ||
+    candidate.status === 401
+  );
 }

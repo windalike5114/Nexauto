@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
-import { createAdminAccessContext, normalizeAdminEmail, parseAdminEmailAllowlist } from "../lib/application/admin/check-admin-access";
+import { createAdminAccessContext, isSignedOutSupabaseAuthError, normalizeAdminEmail, parseAdminEmailAllowlist } from "../lib/application/admin/check-admin-access";
 import { AdminConfigurationError, AdminForbiddenError, AdminUnauthenticatedError } from "../lib/domain/admin/admin-access.errors";
 
 test("admin email normalization trims and lowercases", () => {
@@ -33,6 +33,13 @@ test("allowlisted admin receives normalized access context", () => {
     email: "owner@nexautoparts.co.nz",
     role: "admin"
   });
+});
+
+test("Supabase missing or stale auth sessions are treated as signed out", () => {
+  assert.equal(isSignedOutSupabaseAuthError({ name: "AuthSessionMissingError", message: "Auth session missing!" }), true);
+  assert.equal(isSignedOutSupabaseAuthError({ message: "JWT expired" }), true);
+  assert.equal(isSignedOutSupabaseAuthError({ status: 401 }), true);
+  assert.equal(isSignedOutSupabaseAuthError({ message: "fetch failed" }), false);
 });
 
 test("admin pages, details, and actions use central guard boundary", () => {
