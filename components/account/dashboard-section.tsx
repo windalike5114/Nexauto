@@ -86,7 +86,8 @@ function OrderSummary({ order }: { order: AccountOrder }) {
     <article className="rounded border border-black/10 bg-zinc-50 p-4">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="font-mono text-xs font-black text-steel">{order.orderNumber}</p>
+          <p className="text-xs font-black uppercase tracking-[0.14em] text-steel">Order</p>
+          <p className="mt-1 font-mono text-lg font-black leading-none text-ink">{order.orderNumber}</p>
           <p className="mt-1 font-black">{order.vehicle ?? "Vehicle not attached"}</p>
           <p className="mt-1 text-xs font-black uppercase tracking-[0.12em] text-signal">Status: {order.status}</p>
         </div>

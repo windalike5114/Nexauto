@@ -16,12 +16,14 @@ import {
   Wrench
 } from "lucide-react";
 import { formatMoney } from "@/lib/catalog";
+import { AdminOrderList } from "@/components/admin/order-list/admin-order-list";
 import {
   checkAdminAccess,
   loadAdminContentData,
   loadAdminCustomersData,
   loadAdminEmailEventsData,
   loadAdminEnquiriesData,
+  loadAdminOrderListData,
   loadAdminOrdersData,
   loadAdminOverviewData,
   loadAdminProductsData,
@@ -29,6 +31,7 @@ import {
   type AdminEmailEvent,
   type AdminEnquiry,
   type AdminOrder,
+  type AdminOrderListResult,
   type AdminProduct,
   type AdminRearAddon,
   type AdminVariant,
@@ -46,6 +49,16 @@ export const dynamic = "force-dynamic";
 
 type AdminSearchParams = {
   tab?: string;
+  search?: string;
+  orderStatus?: string;
+  fulfilmentStatus?: string;
+  emailStatus?: string;
+  needsAttention?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  page?: string;
+  pageSize?: string;
+  sort?: string;
 };
 
 const tabs = [
@@ -95,7 +108,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
     return <AdminGate reason={access.reason} email={access.email} />;
   }
 
-  const tabData = await loadAdminTabData(activeTab);
+  const tabData = await loadAdminTabData(activeTab, params);
 
   return (
     <main className="min-h-screen bg-[#F6F7F9] text-ink">
@@ -113,7 +126,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
               enquiries={tabData.enquiries}
             />
           ) : null}
-          {activeTab === "orders" ? <OrdersPanel orders={tabData.orders} /> : null}
+          {activeTab === "orders" && tabData.orderList ? <AdminOrderList result={tabData.orderList} /> : null}
           {activeTab === "fulfillment" ? <FulfillmentPanel orders={tabData.orders} /> : null}
           {activeTab === "products" ? (
             <ProductsPanel variants={tabData.variants} wiperSets={tabData.wiperSets} rearAddons={tabData.rearAddons} />
@@ -130,9 +143,10 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
   );
 }
 
-async function loadAdminTabData(activeTab: string) {
+async function loadAdminTabData(activeTab: string, params: AdminSearchParams) {
   const empty = {
     orders: [] as AdminOrder[],
+    orderList: null as AdminOrderListResult | null,
     products: [] as AdminProduct[],
     variants: [] as AdminVariant[],
     wiperSets: [] as AdminWiperSet[],
@@ -146,7 +160,11 @@ async function loadAdminTabData(activeTab: string) {
     return { ...empty, ...(await loadAdminOverviewData()) };
   }
 
-  if (activeTab === "orders" || activeTab === "fulfillment") {
+  if (activeTab === "orders") {
+    return { ...empty, orderList: await loadAdminOrderListData(params) };
+  }
+
+  if (activeTab === "fulfillment") {
     return { ...empty, orders: await loadAdminOrdersData() };
   }
 
@@ -262,9 +280,9 @@ function OverviewPanel({
   return (
     <section className="grid gap-6">
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <Metric icon={<BarChart3 className="h-5 w-5" />} label="Today's Sales" value={formatMoney(todaysSales)} detail={`${todaysOrders.length} orders today`} />
-        <Metric icon={<ClipboardList className="h-5 w-5" />} label="Orders" value={String(orders.length)} detail={`${pendingFulfillment.length} awaiting fulfilment`} />
-        <Metric icon={<ShoppingCart className="h-5 w-5" />} label="Average Order Value" value={formatMoney(averageOrderValue)} detail="Paid orders only" />
+        <Metric icon={<BarChart3 className="h-5 w-5" />} label="Recent Sales Sample" value={formatMoney(todaysSales)} detail={`Latest 50 orders only · ${todaysOrders.length} today`} />
+        <Metric icon={<ClipboardList className="h-5 w-5" />} label="Recent Orders" value={String(orders.length)} detail={`Latest 50 only · ${pendingFulfillment.length} awaiting fulfilment`} />
+        <Metric icon={<ShoppingCart className="h-5 w-5" />} label="Recent Average Value" value={formatMoney(averageOrderValue)} detail="Latest 50 paid orders only" />
         <Metric icon={<Users className="h-5 w-5" />} label="Customers" value={String(customers.length)} detail={`${newEnquiries.length} new enquiries`} />
       </div>
 
@@ -277,7 +295,7 @@ function OverviewPanel({
           <AttentionRow label="Failed emails" value={failedEmails.length} href="/admin?tab=emails" />
         </Panel>
 
-        <Panel title="Order Status">
+        <Panel title="Recent Order Status (latest 50)">
           <StatusCount label="Paid" count={orders.filter((order) => order.status === "paid").length} />
           <StatusCount label="Pending" count={orders.filter((order) => order.status === "pending").length} />
           <StatusCount label="Processing" count={orders.filter((order) => order.fulfillment?.connectorStatus === "selected").length} />
@@ -287,7 +305,7 @@ function OverviewPanel({
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[1.35fr_0.65fr]">
-        <Panel title="Recent Orders">
+        <Panel title="Recent Orders (latest 50)">
           <CompactOrders orders={orders.slice(0, 6)} />
         </Panel>
         <Panel title="Low Stock">
@@ -309,15 +327,23 @@ function OverviewPanel({
   );
 }
 
-function AdminGate({ reason, email }: { reason: "signed_out" | "forbidden" | "not_configured"; email?: string }) {
+function AdminGate({ reason, email }: { reason: "signed_out" | "forbidden" | "not_configured" | "infrastructure"; email?: string }) {
   const title =
-    reason === "not_configured" ? "Admin is not configured" : reason === "forbidden" ? "Admin access denied" : "Sign in required";
+    reason === "not_configured"
+      ? "Admin is not configured"
+      : reason === "forbidden"
+        ? "Admin access denied"
+        : reason === "infrastructure"
+          ? "Admin access could not be verified"
+          : "Sign in required";
   const body =
     reason === "not_configured"
-      ? "Set ADMIN_EMAILS in Vercel and .env.local, for example sales@nexauto.co.nz."
+      ? "Set ADMIN_EMAILS in Vercel and .env.local, for example sales@nexautoparts.co.nz."
       : reason === "forbidden"
-        ? `${email ?? "This account"} is not included in ADMIN_EMAILS.`
-        : "Sign in with an admin email before opening this hidden admin route.";
+        ? `${email ?? "This account"} is not authorized for admin access.`
+        : reason === "infrastructure"
+          ? "Please try again shortly. The admin session could not be checked safely."
+          : "Sign in with an admin email before opening this hidden admin route.";
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:px-8">

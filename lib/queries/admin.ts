@@ -1,10 +1,15 @@
 import { createSupabaseAdminClient } from "@/lib/supabase";
-import { createClient } from "@/utils/supabase/server";
 import { getOrderNumberFromSnapshot } from "@/lib/order-number";
+import { checkAdminAccess as checkCentralAdminAccess } from "@/lib/application/admin/check-admin-access";
+import { requireAdminAccess as requireCentralAdminAccess } from "@/lib/application/admin/require-admin-access";
+import { parseAdminOrderListQuery } from "@/lib/application/admin/admin-order-list-query.schema";
+import { listAdminOrders } from "@/lib/application/admin/list-admin-orders";
+import type { AdminOrderListResult } from "@/lib/application/admin/admin-order-list.types";
+import { createAdminOrderRepository } from "@/lib/infrastructure/supabase/admin-order.repository";
 
 export type AdminCheck =
   | { ok: true; email: string }
-  | { ok: false; reason: "signed_out" | "forbidden" | "not_configured"; email?: string };
+  | { ok: false; reason: "signed_out" | "forbidden" | "not_configured" | "infrastructure"; email?: string };
 
 export type AdminOrder = {
   id: string;
@@ -105,6 +110,8 @@ export type AdminProductsData = {
   wiperSets: AdminWiperSet[];
   rearAddons: AdminRearAddon[];
 };
+
+export type { AdminOrderListResult };
 
 export type AdminOverviewData = {
   orders: AdminOrder[];
@@ -281,33 +288,14 @@ type EnquiryRow = {
 };
 
 export async function checkAdminAccess(): Promise<AdminCheck> {
-  const allowedEmails = getAllowedAdminEmails();
-
-  if (!allowedEmails.length) {
-    return { ok: false, reason: "not_configured" };
-  }
-
-  const supabase = await createClient();
-  const {
-    data: { user }
-  } = await supabase.auth.getUser();
-  const email = user?.email?.toLowerCase();
-
-  if (!email) {
-    return { ok: false, reason: "signed_out" };
-  }
-
-  if (!allowedEmails.includes(email)) {
-    return { ok: false, reason: "forbidden", email };
-  }
-
-  return { ok: true, email };
+  const access = await checkCentralAdminAccess();
+  if (access.ok) return { ok: true, email: access.context.email };
+  return { ok: false, reason: access.reason, email: access.email };
 }
 
 export async function requireAdminAccess() {
-  const access = await checkAdminAccess();
-  if (!access.ok) throw new Error("Admin access denied.");
-  return access;
+  const context = await requireCentralAdminAccess();
+  return { ok: true as const, email: context.email, context };
 }
 
 export async function loadAdminDashboardData() {
@@ -349,6 +337,33 @@ export async function loadAdminOverviewData(): Promise<AdminOverviewData> {
 export async function loadAdminOrdersData() {
   await requireAdminAccess();
   return loadAdminOrdersDataInternal();
+}
+
+export async function loadAdminOrderListData(searchParams: Record<string, unknown>): Promise<AdminOrderListResult> {
+  const access = await requireCentralAdminAccess();
+  const query = parseAdminOrderListQuery(searchParams);
+
+  try {
+    return await listAdminOrders(query, access, createAdminOrderRepository());
+  } catch (error) {
+    console.error("admin.order_list_failed", {
+      operation: "loadAdminOrderListData",
+      adminAuthUserId: access.authUserId,
+      filters: {
+        search: query.search ? "[present]" : undefined,
+        orderStatus: query.orderStatus,
+        fulfilmentStatus: query.fulfilmentStatus,
+        needsAttention: query.needsAttention,
+        dateFrom: query.dateFrom,
+        dateTo: query.dateTo,
+        page: query.page,
+        pageSize: query.pageSize,
+        sort: query.sort
+      },
+      error: getAdminErrorLogDetails(error)
+    });
+    throw error;
+  }
 }
 
 export async function loadAdminOrderDetailData(orderId: string) {
@@ -714,17 +729,28 @@ async function listAdminEnquiries() {
   }));
 }
 
-function getAllowedAdminEmails() {
-  return (process.env.ADMIN_EMAILS ?? "")
-    .split(",")
-    .map((email) => email.trim().toLowerCase())
-    .filter(Boolean);
-}
-
 function getAdminOrThrow() {
   const supabase = createSupabaseAdminClient();
   if (!supabase) throw new Error("SUPABASE_SERVICE_ROLE_KEY is required for admin.");
   return supabase;
+}
+
+function getAdminErrorLogDetails(error: unknown) {
+  if (error instanceof Error) {
+    return { name: error.name, message: error.message };
+  }
+
+  if (error && typeof error === "object") {
+    const candidate = error as { code?: unknown; message?: unknown; details?: unknown; hint?: unknown };
+    return {
+      code: typeof candidate.code === "string" ? candidate.code : undefined,
+      message: typeof candidate.message === "string" ? candidate.message : undefined,
+      details: typeof candidate.details === "string" ? candidate.details : undefined,
+      hint: typeof candidate.hint === "string" ? candidate.hint : undefined
+    };
+  }
+
+  return { message: "Unknown admin query failure" };
 }
 
 function groupBy<T>(items: T[], getKey: (item: T) => string) {

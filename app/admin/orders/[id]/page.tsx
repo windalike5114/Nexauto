@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import { formatMoney } from "@/lib/catalog";
 import { loadAdminOrderDetailData } from "@/lib/queries/admin";
@@ -9,7 +8,7 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminOrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const order = await loadOrder(id);
+  const order = await loadAdminOrderDetailData(id);
 
   return (
     <main className="min-h-screen bg-zinc-100 px-4 py-8 sm:px-6 lg:px-8">
@@ -121,14 +120,6 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
       </div>
     </main>
   );
-}
-
-async function loadOrder(id: string) {
-  try {
-    return await loadAdminOrderDetailData(id);
-  } catch {
-    notFound();
-  }
 }
 
 function InfoBlock({ title, children }: { title: string; children: ReactNode }) {

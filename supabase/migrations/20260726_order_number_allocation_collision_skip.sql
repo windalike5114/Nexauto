@@ -1,10 +1,6 @@
--- Run this once in Supabase SQL Editor before relying on strict sequential order numbers.
--- Format: NEX00001, NEX00002, ...
-
-alter table orders
-  add column if not exists order_number text unique;
-
-create sequence if not exists nex_order_number_seq start 1;
+-- Make order number allocation resilient to existing historical/manual numbers.
+-- Format remains NEX00001, NEX00002, ...
+-- If the generated number already exists, the function consumes it and tries the next value.
 
 create or replace function allocate_nex_order_number(order_uuid uuid)
 returns text
@@ -60,8 +56,6 @@ begin
       raise exception 'Order % was not found while allocating an order number.', order_uuid;
     exception
       when unique_violation then
-        -- A historical or manually assigned order already uses this number.
-        -- Consume the sequence value and try the next natural number.
         continue;
     end;
   end loop;

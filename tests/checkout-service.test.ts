@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { createCheckoutSession, type CheckoutServiceDependencies, type PendingCheckoutOrderInput } from "../lib/application/checkout/create-checkout-session";
 import { buildStripeSessionParams, getStripeLineAmountTotal } from "../lib/infrastructure/stripe/create-checkout-session";
 import type { CartItem } from "../lib/types";
@@ -349,4 +350,13 @@ test("Stripe metadata mapping is stable and compact", async () => {
   assert.equal("items" in (params.metadata ?? {}), false);
   assert.equal("vehicle" in (params.metadata ?? {}), false);
   assert.equal("products_subtotal" in (params.metadata ?? {}), false);
+});
+
+test("order number allocation skips existing numbers instead of failing on unique collision", () => {
+  const migration = readFileSync("supabase/migrations/20260726_order_number_allocation_collision_skip.sql", "utf8");
+
+  assert.match(migration, /loop/);
+  assert.match(migration, /nextval\('nex_order_number_seq'\)/);
+  assert.match(migration, /when unique_violation then/);
+  assert.match(migration, /continue/);
 });

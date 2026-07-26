@@ -12,7 +12,8 @@ export function OrdersSection({ orders }: { orders: AccountOrder[] }) {
             <article key={order.id} className="rounded-lg border border-black/10 bg-zinc-50 p-4">
               <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                 <div>
-                  <p className="font-mono text-xs font-black text-steel">Order Number {order.orderNumber}</p>
+                  <p className="text-xs font-black uppercase tracking-[0.14em] text-steel">Order</p>
+                  <p className="mt-1 font-mono text-xl font-black leading-none text-ink">{order.orderNumber}</p>
                   <h3 className="mt-1 text-xl font-black">{formatMoney(order.total)}</h3>
                   <p className="mt-1 text-sm font-bold text-steel">Order Date {new Date(order.orderDate).toLocaleDateString("en-NZ")}</p>
                 </div>
