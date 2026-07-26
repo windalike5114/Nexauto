@@ -32,12 +32,21 @@ begin
       update orders
       set
         order_number = next_order_number,
-        items_snapshot = jsonb_set(
-          coalesce(items_snapshot, '{}'::jsonb),
-          '{order_number}',
-          to_jsonb(next_order_number),
-          true
-        ),
+        items_snapshot = case
+          when items_snapshot is null then jsonb_build_object('order_number', next_order_number)
+          when jsonb_typeof(items_snapshot) = 'object' then jsonb_set(
+            items_snapshot,
+            '{order_number}',
+            to_jsonb(next_order_number),
+            true
+          )
+          else jsonb_build_object(
+            'order_number',
+            next_order_number,
+            'legacy_items_snapshot',
+            items_snapshot
+          )
+        end,
         updated_at = now()
       where id = order_uuid
         and order_number is null;

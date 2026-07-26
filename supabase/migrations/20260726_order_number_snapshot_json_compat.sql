@@ -1,6 +1,7 @@
--- Make order number allocation resilient to existing historical/manual numbers.
--- Format remains NEX00001, NEX00002, ...
--- If the generated number already exists, the function consumes it and tries the next value.
+-- Make order number allocation compatible with historical items_snapshot shapes.
+-- Some early orders stored items_snapshot as a JSON array, so jsonb_set(..., '{order_number}', ...)
+-- fails because arrays require integer path elements. Preserve those legacy snapshots under
+-- legacy_items_snapshot and store order_number in a stable object wrapper.
 
 create or replace function allocate_nex_order_number(order_uuid uuid)
 returns text

@@ -360,3 +360,20 @@ test("order number allocation skips existing numbers instead of failing on uniqu
   assert.match(migration, /when unique_violation then/);
   assert.match(migration, /continue/);
 });
+
+test("order number allocation handles legacy array item snapshots", () => {
+  const migration = readFileSync("supabase/migrations/20260726_order_number_snapshot_json_compat.sql", "utf8");
+
+  assert.match(migration, /jsonb_typeof\(items_snapshot\) = 'object'/);
+  assert.match(migration, /legacy_items_snapshot/);
+  assert.match(migration, /jsonb_build_object\(\s*'order_number'/);
+});
+
+test("historical order number backfill only fills missing values in creation order", () => {
+  const migration = readFileSync("supabase/migrations/20260726_backfill_order_numbers.sql", "utf8");
+
+  assert.match(migration, /where order_number is null/);
+  assert.match(migration, /order by created_at asc, id asc/);
+  assert.match(migration, /allocate_nex_order_number\(order_record\.id\)/);
+  assert.match(migration, /setval\(\s*'nex_order_number_seq'/);
+});
