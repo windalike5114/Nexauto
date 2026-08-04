@@ -21,6 +21,19 @@ export type WiperFitmentResult = {
   rearLengthIn: number | null;
 };
 
+const PRIORITY_NZ_MAKES = [
+  "Toyota",
+  "Ford",
+  "Mazda",
+  "Nissan",
+  "Mitsubishi",
+  "Honda",
+  "Subaru",
+  "Hyundai",
+  "Kia",
+  "Suzuki"
+];
+
 type ApplicationMakeRow = {
   vehicle_applications: {
     vehicle_makes: WiperFitmentMake | WiperFitmentMake[] | null;
@@ -82,7 +95,7 @@ export async function listWiperFitmentMakes() {
     if (make?.id) makes.set(make.id, { id: make.id, name: make.name });
   }
 
-  return [...makes.values()].sort((a, b) => a.name.localeCompare(b.name));
+  return sortMakesForNzFinder([...makes.values()]);
 }
 
 export async function listWiperFitmentModels(makeId: string) {
@@ -171,6 +184,21 @@ function toNumber(value: string | number | null) {
   if (value === null) return null;
   const number = Number(value);
   return Number.isFinite(number) ? number : null;
+}
+
+function sortMakesForNzFinder(makes: WiperFitmentMake[]) {
+  const priority = new Map(PRIORITY_NZ_MAKES.map((name, index) => [name.toLowerCase(), index]));
+
+  return [...makes].sort((left, right) => {
+    const leftPriority = priority.get(left.name.toLowerCase());
+    const rightPriority = priority.get(right.name.toLowerCase());
+
+    if (leftPriority !== undefined || rightPriority !== undefined) {
+      return (leftPriority ?? Number.MAX_SAFE_INTEGER) - (rightPriority ?? Number.MAX_SAFE_INTEGER);
+    }
+
+    return left.name.localeCompare(right.name);
+  });
 }
 
 async function selectAll<T>(query: { range: (from: number, to: number) => PromiseLike<{ data: T[] | null; error: unknown }> }, size = 1000) {

@@ -1326,6 +1326,8 @@ select distinct
 from wiper_length_fitments
 where driver_length_in is not null
   and passenger_length_in is not null
+  and driver_length_in > 0
+  and passenger_length_in > 0
 on conflict (slug) do update set
   sku = excluded.sku,
   name = excluded.name,
@@ -1352,6 +1354,7 @@ select distinct
   true
 from wiper_length_fitments
 where rear_length_in is not null
+  and rear_length_in > 0
 on conflict (slug) do update set
   name = excluded.name,
   rear_length_in = excluded.rear_length_in,

@@ -52,6 +52,10 @@ function parseWorkbook(inputPath, options) {
     raw: false
   });
 
+  if (isBrandModelSheet(rawRows[0])) {
+    return parseBrandModelWorkbook(rawRows, inputPath, options, sheetName);
+  }
+
   let currentMake = "";
   const rows = [];
 
@@ -147,6 +151,156 @@ function parseWorkbook(inputPath, options) {
     sheetName,
     rows
   };
+}
+
+function isBrandModelSheet(headerRow = []) {
+  const values = headerRow.map((value) => cleanText(value).toLowerCase());
+
+  return (
+    values[0] === "brand" &&
+    values[1] === "model" &&
+    values[3] === "front driver" &&
+    values[4] === "front passenger"
+  );
+}
+
+function parseBrandModelWorkbook(rawRows, inputPath, options, sheetName) {
+  let currentMake = "";
+  const rows = [];
+
+  rawRows.forEach((row, index) => {
+    const rowNumber = index + 1;
+    const values = Array.from({ length: 7 }, (_, valueIndex) => cleanText(row[valueIndex]));
+    const rawValues = {
+      a: values[0],
+      b: values[1],
+      c: values[2],
+      d: values[3],
+      e: values[4],
+      f: values[5],
+      g: values[6],
+      h: ""
+    };
+    const notes = [];
+    let detectedRowType = "unknown";
+    let parseStatus = "skipped";
+    let parsedValues = {};
+
+    if (rowNumber === 1 && isBrandModelSheet(row)) {
+      detectedRowType = "header";
+      parseStatus = "skipped";
+    } else {
+      const brand = cleanText(values[0]);
+      const model = cleanText(values[1]);
+      const detail = cleanText(values[2]);
+      const driver = extractLength(values[3]);
+      const passenger = extractLength(values[4]);
+      const rear = extractLength(values[5]);
+
+      if (brand) currentMake = brand;
+
+      if (!brand && !model && !detail && !driver.value && !passenger.value && !rear.value) {
+        detectedRowType = "empty";
+        parseStatus = "skipped";
+      } else if (!model || !detail) {
+        detectedRowType = "pollution";
+        parseStatus = "skipped";
+        notes.push("Missing model or year detail.");
+      } else if (!currentMake) {
+        detectedRowType = "model_fitment";
+        parseStatus = "error";
+        notes.push("No current make found for model row.");
+      } else {
+        detectedRowType = "model_fitment";
+        const detailParts = parseYearDetail(detail);
+
+        if (!detailParts.ok) notes.push(`Could not parse year range: ${detail}`);
+        if (!driver.value && !passenger.value && !rear.value) {
+          notes.push("No wiper length values found.");
+        }
+
+        parseStatus = notes.length ? "warning" : "ok";
+        if (!detailParts.ok) parseStatus = "error";
+        if (!driver.value && !passenger.value && !rear.value) parseStatus = "warning";
+
+        parsedValues = {
+          market: options.market,
+          make: currentMake,
+          model: buildBrandModelName(model, detailParts.qualifier),
+          start: detailParts.start,
+          end: detailParts.end,
+          driver_length_in: driver.value,
+          driver_length_source: driver.value ? "D" : null,
+          passenger_length_in: passenger.value,
+          passenger_length_source: passenger.value ? "E" : null,
+          rear_length_in: rear.value,
+          rear_length_source: rear.value ? "F" : null
+        };
+      }
+    }
+
+    rows.push({
+      row_number: rowNumber,
+      raw_values: rawValues,
+      detected_row_type: detectedRowType,
+      parse_status: parseStatus,
+      parse_notes: notes,
+      parsed_values: parsedValues
+    });
+  });
+
+  return {
+    sourceFile: inputPath,
+    sourceName: options.sourceName,
+    market: options.market,
+    sheetName,
+    rows
+  };
+}
+
+function parseYearDetail(value) {
+  const raw = cleanText(value);
+  const rangeMatch = raw.match(/((?:19|20)\d{2})\s*[-–]\s*((?:19|20)\d{2})/);
+
+  if (!rangeMatch) {
+    return {
+      ok: false,
+      qualifier: cleanDetailQualifier(raw),
+      start: { ok: false, raw, year: null, month: null, precision: null },
+      end: { ok: false, raw, year: null, month: null, precision: null }
+    };
+  }
+
+  const prefix = raw.slice(0, rangeMatch.index).trim();
+  const suffix = raw.slice((rangeMatch.index ?? 0) + rangeMatch[0].length).trim();
+  const qualifier = cleanDetailQualifier([prefix, suffix].filter(Boolean).join(" "));
+  const startRaw = rangeMatch[1];
+  const endRaw = rangeMatch[2];
+
+  return {
+    ok: true,
+    qualifier,
+    start: { ok: true, raw: raw, year: Number(startRaw), month: null, precision: "year" },
+    end: { ok: true, raw: raw, year: Number(endRaw), month: null, precision: "year" }
+  };
+}
+
+function cleanDetailQualifier(value) {
+  return cleanText(value)
+    .replace(/[()]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function buildBrandModelName(model, qualifier) {
+  const base = cleanText(model);
+  const detail = cleanText(qualifier);
+
+  if (!detail) return base;
+  if (normalizeKey(detail) === normalizeKey(base)) return base;
+  if (normalizeKey(detail).startsWith(`${normalizeKey(base)} `)) return detail;
+
+  return `${base} ${detail}`;
 }
 
 function readRow(row) {

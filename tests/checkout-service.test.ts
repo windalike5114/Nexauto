@@ -352,6 +352,31 @@ test("Stripe metadata mapping is stable and compact", async () => {
   assert.equal("products_subtotal" in (params.metadata ?? {}), false);
 });
 
+test("Stripe checkout requires a New Zealand shipping address for wallet and BNPL methods", async () => {
+  let adapterInput: Parameters<typeof buildStripeSessionParams>[0] | null = null;
+  const { dependencies } = baseDependencies({
+    payments: {
+      async createCheckoutSession(input) {
+        adapterInput = input;
+        return { sessionId: "cs_test", checkoutUrl: "https://checkout.test" };
+      }
+    }
+  });
+  await runCheckout(dependencies);
+  assert(adapterInput);
+  const params = buildStripeSessionParams(adapterInput);
+
+  assert.deepEqual(params.payment_method_types, ["card", "afterpay_clearpay"]);
+  assert.equal(params.billing_address_collection, "required");
+  assert.deepEqual(params.shipping_address_collection, { allowed_countries: ["NZ"] });
+  assert.equal(params.custom_text?.shipping_address?.message, "Please enter the delivery address where your order should be shipped.");
+  assert.deepEqual(params.customer_update, {
+    name: "auto",
+    address: "auto",
+    shipping: "auto"
+  });
+});
+
 test("order number allocation skips existing numbers instead of failing on unique collision", () => {
   const migration = readFileSync("supabase/migrations/20260726_order_number_allocation_collision_skip.sql", "utf8");
 
