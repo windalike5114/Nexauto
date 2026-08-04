@@ -5,7 +5,10 @@ import { requireAdminAccess as requireCentralAdminAccess } from "@/lib/applicati
 import { parseAdminOrderListQuery } from "@/lib/application/admin/admin-order-list-query.schema";
 import { listAdminOrders } from "@/lib/application/admin/list-admin-orders";
 import type { AdminOrderListResult } from "@/lib/application/admin/admin-order-list.types";
+import { getAdminOrderDetail } from "@/lib/application/admin/get-admin-order-detail";
+import type { AdminOrderDetail } from "@/lib/application/admin/admin-order-detail.types";
 import { createAdminOrderRepository } from "@/lib/infrastructure/supabase/admin-order.repository";
+import { createAdminOrderDetailRepository } from "@/lib/infrastructure/supabase/admin-order-detail.repository";
 
 export type AdminCheck =
   | { ok: true; email: string }
@@ -366,24 +369,9 @@ export async function loadAdminOrderListData(searchParams: Record<string, unknow
   }
 }
 
-export async function loadAdminOrderDetailData(orderId: string) {
-  await requireAdminAccess();
-  const supabase = getAdminOrThrow();
-  const { data, error } = await supabase
-    .from("orders")
-    .select("id,email,customer_name,subtotal,currency,status,created_at,stripe_session_id,stripe_payment_intent_id,shipping_address,billing_address,items_snapshot")
-    .eq("id", orderId)
-    .single();
-
-  if (error) throw error;
-
-  const [items, vehicles, fulfillments] = await Promise.all([
-    listOrderItems([orderId]),
-    listOrderVehicles([orderId]),
-    listFulfillments([orderId])
-  ]);
-
-  return mapAdminOrders([data as OrderRow], items, vehicles, fulfillments)[0];
+export async function loadAdminOrderDetailData(orderId: string): Promise<AdminOrderDetail> {
+  const { context } = await requireAdminAccess();
+  return getAdminOrderDetail(orderId, context, createAdminOrderDetailRepository());
 }
 
 export async function loadAdminProductsData(): Promise<AdminProductsData> {

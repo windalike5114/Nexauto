@@ -1,6 +1,18 @@
 import Link from "next/link";
-import type { ReactNode } from "react";
-import { formatMoney } from "@/lib/catalog";
+import { AdminOrderAttentionCard } from "@/components/admin/order-detail/admin-order-attention-card";
+import { AdminOrderCustomerCard } from "@/components/admin/order-detail/admin-order-customer-card";
+import { AdminOrderEmailCard } from "@/components/admin/order-detail/admin-order-email-card";
+import { AdminOrderError } from "@/components/admin/order-detail/admin-order-error";
+import { AdminOrderFulfilmentCard } from "@/components/admin/order-detail/admin-order-fulfilment-card";
+import { AdminOrderHeader } from "@/components/admin/order-detail/admin-order-header";
+import { AdminOrderItemsCard } from "@/components/admin/order-detail/admin-order-items-card";
+import { AdminOrderPaymentCard } from "@/components/admin/order-detail/admin-order-payment-card";
+import { AdminOrderPricingCard } from "@/components/admin/order-detail/admin-order-pricing-card";
+import { AdminOrderTimeline } from "@/components/admin/order-detail/admin-order-timeline";
+import { AdminOrderVehiclesCard } from "@/components/admin/order-detail/admin-order-vehicles-card";
+import { AdminOrderWebhookCard } from "@/components/admin/order-detail/admin-order-webhook-card";
+import { AdminOrderDetailInvalidIdError, AdminOrderDetailNotFoundError } from "@/lib/application/admin/get-admin-order-detail";
+import { AdminConfigurationError, AdminForbiddenError, AdminInfrastructureError, AdminUnauthenticatedError } from "@/lib/domain/admin/admin-access.errors";
 import { loadAdminOrderDetailData } from "@/lib/queries/admin";
 import { updateFulfillmentAction } from "../../actions";
 
@@ -8,7 +20,13 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminOrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const order = await loadAdminOrderDetailData(id);
+  const result = await loadOrder(id);
+  if (!result.ok) return <AdminOrderError title={result.title} message={result.message} />;
+
+  const order = result.order;
+  const emailErrors = order.sectionErrors.filter((error) => error.section === "email");
+  const webhookErrors = order.sectionErrors.filter((error) => error.section === "webhook");
+  const timelineErrors = order.sectionErrors.filter((error) => error.section === "audit");
 
   return (
     <main className="min-h-screen bg-zinc-100 px-4 py-8 sm:px-6 lg:px-8">
@@ -17,145 +35,66 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
           Back to orders
         </Link>
 
-        <div className="mt-5 rounded-lg border border-black/10 bg-white p-6 shadow-sm">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-            <div>
-              <p className="font-mono text-xs font-bold uppercase tracking-[0.14em] text-steel">{order.id}</p>
-              <h1 className="mt-2 text-3xl font-black">Order {order.orderNumber}</h1>
-              <p className="mt-2 text-sm font-bold text-steel">{new Date(order.createdAt).toLocaleString("en-NZ")}</p>
+        <div className="mt-5 grid gap-5">
+          <AdminOrderHeader order={order} />
+          <AdminOrderAttentionCard warnings={order.warnings} />
+
+          <div className="grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
+            <div className="grid gap-5">
+              <AdminOrderItemsCard items={order.items} />
+              <AdminOrderFulfilmentCard fulfilments={order.fulfilments} items={order.items} vehicles={order.vehicleSnapshots} action={updateFulfillmentAction} />
+              <AdminOrderVehiclesCard vehicles={order.vehicleSnapshots} />
             </div>
-            <div className="flex flex-wrap gap-2">
-              <Badge>{order.status}</Badge>
-              <Badge>{formatMoney(order.subtotal)}</Badge>
-              {order.fulfillment ? <Badge>{order.fulfillment.connectorStatus}</Badge> : null}
+            <div className="grid content-start gap-5">
+              <AdminOrderCustomerCard customer={order.customer} />
+              <AdminOrderPaymentCard payment={order.payment} />
+              <AdminOrderPricingCard pricing={order.pricing} />
             </div>
           </div>
 
-          <div className="mt-6 grid gap-4 lg:grid-cols-3">
-            <InfoBlock title="Customer">
-              <p className="font-black">{order.customerName ?? "No name"}</p>
-              <p className="mt-1 text-sm font-bold text-steel">{order.email ?? "No email"}</p>
-            </InfoBlock>
-            <InfoBlock title="Payment">
-              <p className="text-sm font-bold text-steel">Stripe session</p>
-              <p className="mt-1 break-all font-mono text-xs font-bold">{order.stripeSessionId ?? "Not attached"}</p>
-              <p className="mt-3 text-sm font-bold text-steel">Payment intent</p>
-              <p className="mt-1 break-all font-mono text-xs font-bold">{order.stripePaymentIntentId ?? "Not attached"}</p>
-            </InfoBlock>
-            <InfoBlock title="Vehicle">
-              {order.vehicle ? (
-                <>
-                  <p className="font-black">
-                    {order.vehicle.make} {order.vehicle.model}
-                  </p>
-                  <p className="mt-1 text-sm font-bold text-steel">{order.vehicle.year}</p>
-                </>
-              ) : (
-                <p className="text-sm font-bold text-steel">No vehicle snapshot saved.</p>
-              )}
-            </InfoBlock>
+          <div className="grid gap-5 lg:grid-cols-2">
+            <AdminOrderEmailCard events={order.emailEvents} errors={emailErrors} />
+            <AdminOrderWebhookCard events={order.webhookEvents} errors={webhookErrors} />
           </div>
+          <AdminOrderTimeline events={order.auditTimeline} errors={timelineErrors} />
         </div>
-
-        <div className="mt-5 grid gap-5 lg:grid-cols-[1.4fr_0.9fr]">
-          <section className="rounded-lg border border-black/10 bg-white p-6 shadow-sm">
-            <h2 className="text-xl font-black">Items</h2>
-            <div className="mt-4 grid gap-3">
-              {order.items.map((item) => (
-                <article key={item.id} className="rounded border border-black/10 bg-zinc-50 p-4">
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                    <div>
-                      <h3 className="font-black">{item.productName}</h3>
-                      <p className="mt-1 font-mono text-xs font-bold text-steel">{item.sku}</p>
-                      <p className="mt-2 text-sm font-bold text-steel">{formatSizeSummary(item.attributes)}</p>
-                    </div>
-                    <p className="font-black">
-                      {item.qty} x {formatMoney(item.unitPrice)}
-                    </p>
-                  </div>
-                </article>
-              ))}
-              {order.items.length === 0 ? <p className="text-sm font-bold text-steel">No item rows saved yet.</p> : null}
-            </div>
-          </section>
-
-          <section className="rounded-lg border border-black/10 bg-white p-6 shadow-sm">
-            <h2 className="text-xl font-black">Shipping address</h2>
-            <p className="mt-4 whitespace-pre-wrap text-sm font-bold leading-6 text-steel">{formatAddress(order.shippingAddress)}</p>
-            <h2 className="mt-8 text-xl font-black">Billing address</h2>
-            <p className="mt-4 whitespace-pre-wrap text-sm font-bold leading-6 text-steel">{formatAddress(order.billingAddress)}</p>
-          </section>
-        </div>
-
-        <section className="mt-5 rounded-lg border border-black/10 bg-white p-6 shadow-sm">
-          <h2 className="text-xl font-black">Wiper fulfilment</h2>
-          {order.fulfillment ? (
-            <form action={updateFulfillmentAction} className="mt-5 grid gap-3 lg:grid-cols-[repeat(4,minmax(0,1fr))_auto]">
-              <input type="hidden" name="fulfillmentId" value={order.fulfillment.id} />
-              <Field label="Driver connector" name="driverConnector" defaultValue={order.fulfillment.driverConnector ?? ""} />
-              <Field label="Passenger connector" name="passengerConnector" defaultValue={order.fulfillment.passengerConnector ?? ""} />
-              <Field label="Rear connector" name="rearConnector" defaultValue={order.fulfillment.rearConnector ?? ""} />
-              <label className="block">
-                <span className="text-xs font-black uppercase tracking-[0.14em] text-steel">Status</span>
-                <select name="connectorStatus" defaultValue={order.fulfillment.connectorStatus} className="mt-2 h-11 w-full rounded border border-black/10 bg-white px-3 text-sm font-bold">
-                  {["pending", "selected", "packed", "fulfilled", "issue"].map((status) => (
-                    <option key={status} value={status}>
-                      {status}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <button type="submit" className="mt-6 h-11 rounded bg-ink px-5 text-sm font-black text-white lg:mt-7">
-                Save
-              </button>
-              <label className="block lg:col-span-5">
-                <span className="text-xs font-black uppercase tracking-[0.14em] text-steel">Admin note</span>
-                <textarea name="adminNote" defaultValue={order.fulfillment.adminNote ?? ""} className="mt-2 min-h-20 w-full rounded border border-black/10 p-3 text-sm font-bold" />
-              </label>
-            </form>
-          ) : (
-            <p className="mt-4 text-sm font-bold text-steel">No wiper fulfilment row saved yet. It will be created when Stripe confirms payment for wiper pair orders.</p>
-          )}
-        </section>
       </div>
     </main>
   );
 }
 
-function InfoBlock({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <section className="rounded border border-black/10 bg-zinc-50 p-4">
-      <p className="text-xs font-black uppercase tracking-[0.14em] text-steel">{title}</p>
-      <div className="mt-3">{children}</div>
-    </section>
-  );
+async function loadOrder(id: string) {
+  try {
+    return { ok: true as const, order: await loadAdminOrderDetailData(id) };
+  } catch (error) {
+    if (error instanceof AdminUnauthenticatedError) {
+      return { ok: false as const, title: "Admin sign-in required", message: "Please sign in with an admin account before opening order details." };
+    }
+    if (error instanceof AdminForbiddenError) {
+      return { ok: false as const, title: "Admin access required", message: "This account is not allowed to view admin order details." };
+    }
+    if (error instanceof AdminConfigurationError) {
+      return { ok: false as const, title: "Admin configuration missing", message: "Admin access is not configured for this environment." };
+    }
+    if (error instanceof AdminOrderDetailInvalidIdError) {
+      return { ok: false as const, title: "Invalid order", message: "This order link does not contain a valid order ID." };
+    }
+    if (error instanceof AdminOrderDetailNotFoundError) {
+      return { ok: false as const, title: "Order not found", message: "No order exists for this ID." };
+    }
+    if (error instanceof AdminInfrastructureError) {
+      return { ok: false as const, title: "Admin service unavailable", message: "Admin access could not be verified. Please try again shortly." };
+    }
+    console.error("admin.order_detail_failed", { error: getErrorLogDetails(error) });
+    return { ok: false as const, title: "Order detail unavailable", message: "The critical order detail data could not be loaded safely." };
+  }
 }
 
-function Field({ label, name, defaultValue }: { label: string; name: string; defaultValue: string }) {
-  return (
-    <label className="block">
-      <span className="text-xs font-black uppercase tracking-[0.14em] text-steel">{label}</span>
-      <input name={name} defaultValue={defaultValue} className="mt-2 h-11 w-full rounded border border-black/10 px-3 text-sm font-bold" />
-    </label>
-  );
-}
-
-function Badge({ children }: { children: ReactNode }) {
-  return <span className="rounded bg-zinc-100 px-3 py-1 text-xs font-black uppercase tracking-[0.12em] text-steel">{children}</span>;
-}
-
-function formatAddress(address: Record<string, unknown>) {
-  const line1 = address.line1;
-  const line2 = address.line2;
-  const city = address.city;
-  const postalCode = address.postal_code;
-  const country = address.country;
-  return [line1, line2, city, postalCode, country].filter(Boolean).join("\n") || "Not provided";
-}
-
-function formatSizeSummary(attributes: Record<string, unknown>) {
-  const driver = attributes.driver_length;
-  const passenger = attributes.passenger_length;
-  const rear = attributes.rear_length;
-  return [driver ? `Driver ${driver}` : "", passenger ? `Passenger ${passenger}` : "", rear ? `Rear ${rear}` : ""].filter(Boolean).join(" / ");
+function getErrorLogDetails(error: unknown) {
+  if (error instanceof Error) return { name: error.name, message: error.message };
+  if (error && typeof error === "object") {
+    const candidate = error as { code?: unknown; message?: unknown };
+    return { code: candidate.code, message: candidate.message };
+  }
+  return { message: "Unknown order detail error" };
 }
