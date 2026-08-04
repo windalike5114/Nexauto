@@ -36,21 +36,25 @@ export default function CartPage() {
       return;
     }
 
-    const response = await fetch("/api/checkout", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "x-checkout-request-id": getStableCheckoutRequestId() },
-      body: JSON.stringify({
-        items,
-        couponCode: couponCode || undefined,
-        welcomeRewardApplied: welcomeRewardStatus === "applied"
-      })
-    });
-    const data = (await response.json()) as { url?: string; error?: string };
-    if (data.url) {
-      window.location.href = data.url;
-      return;
+    try {
+      const response = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-checkout-request-id": getStableCheckoutRequestId() },
+        body: JSON.stringify({
+          items,
+          couponCode: couponCode || undefined,
+          welcomeRewardApplied: welcomeRewardStatus === "applied"
+        })
+      });
+      const data = await readCheckoutResponse(response);
+      if (response.ok && data.url) {
+        window.location.href = data.url;
+        return;
+      }
+      alert(data.error ?? "Checkout could not be started. Please try again.");
+    } catch {
+      alert("Checkout could not be started. Please try again.");
     }
-    alert(data.error ?? "Checkout is not configured yet.");
   }
 
   return (
@@ -265,4 +269,16 @@ function getVehicleLabel(item: ReturnType<typeof useCart>["items"][number]) {
   if (typeof vehicle === "string" && vehicle.trim()) return vehicle;
 
   return [item.attributes.vehicle_year, item.attributes.vehicle_make, item.attributes.vehicle_model].filter(Boolean).join(" ");
+}
+
+async function readCheckoutResponse(response: Response) {
+  const contentType = response.headers.get("content-type") ?? "";
+
+  if (contentType.includes("application/json")) {
+    return (await response.json()) as { url?: string; error?: string };
+  }
+
+  return {
+    error: response.ok ? "Checkout could not be started." : `Checkout is temporarily unavailable. Please try again.`
+  };
 }

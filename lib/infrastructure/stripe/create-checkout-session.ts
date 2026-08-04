@@ -43,11 +43,6 @@ export function buildStripeSessionParams(input: StripeCheckoutSessionAdapterInpu
     allow_promotion_codes: false,
     customer_email: input.customerEmail ?? undefined,
     customer_creation: "if_required",
-    customer_update: {
-      name: "auto",
-      address: "auto",
-      shipping: "auto"
-    },
     billing_address_collection: "required",
     shipping_address_collection: {
       allowed_countries: ["NZ"]

@@ -360,14 +360,16 @@ function CartDrawer({ recentlyAdded }: { recentlyAdded: CartItem | null }) {
           welcomeRewardApplied: welcomeRewardStatus === "applied"
         })
       });
-      const data = (await response.json()) as { url?: string; error?: string };
+      const data = await readCheckoutResponse(response);
 
-      if (data.url) {
+      if (response.ok && data.url) {
         window.location.href = data.url;
         return;
       }
 
-      alert(data.error ?? "Checkout is not configured yet.");
+      alert(data.error ?? "Checkout could not be started. Please try again.");
+    } catch {
+      alert("Checkout could not be started. Please try again.");
     } finally {
       setCheckingOut(false);
     }
@@ -558,6 +560,18 @@ function readSavedCoupon() {
     window.localStorage.removeItem(couponStorageKey);
     return "";
   }
+}
+
+async function readCheckoutResponse(response: Response) {
+  const contentType = response.headers.get("content-type") ?? "";
+
+  if (contentType.includes("application/json")) {
+    return (await response.json()) as { url?: string; error?: string };
+  }
+
+  return {
+    error: response.ok ? "Checkout could not be started." : "Checkout is temporarily unavailable. Please try again."
+  };
 }
 
 function saveCouponCode(couponCode: string) {

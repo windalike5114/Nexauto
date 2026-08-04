@@ -370,11 +370,7 @@ test("Stripe checkout requires a New Zealand shipping address for wallet and BNP
   assert.equal(params.billing_address_collection, "required");
   assert.deepEqual(params.shipping_address_collection, { allowed_countries: ["NZ"] });
   assert.equal(params.custom_text?.shipping_address?.message, "Please enter the delivery address where your order should be shipped.");
-  assert.deepEqual(params.customer_update, {
-    name: "auto",
-    address: "auto",
-    shipping: "auto"
-  });
+  assert.equal(params.customer_update, undefined);
 });
 
 test("order number allocation skips existing numbers instead of failing on unique collision", () => {
