@@ -7,8 +7,11 @@ import { listAdminOrders } from "@/lib/application/admin/list-admin-orders";
 import type { AdminOrderListResult } from "@/lib/application/admin/admin-order-list.types";
 import { getAdminOrderDetail } from "@/lib/application/admin/get-admin-order-detail";
 import type { AdminOrderDetail } from "@/lib/application/admin/admin-order-detail.types";
+import { getAdminCustomerDetail } from "@/lib/application/admin/get-admin-customer-detail";
+import type { AdminCustomerDetail } from "@/lib/application/admin/admin-customer-detail.types";
 import { createAdminOrderRepository } from "@/lib/infrastructure/supabase/admin-order.repository";
 import { createAdminOrderDetailRepository } from "@/lib/infrastructure/supabase/admin-order-detail.repository";
+import { createAdminCustomerDetailRepository } from "@/lib/infrastructure/supabase/admin-customer-detail.repository";
 
 export type AdminCheck =
   | { ok: true; email: string }
@@ -372,6 +375,11 @@ export async function loadAdminOrderListData(searchParams: Record<string, unknow
 export async function loadAdminOrderDetailData(orderId: string): Promise<AdminOrderDetail> {
   const { context } = await requireAdminAccess();
   return getAdminOrderDetail(orderId, context, createAdminOrderDetailRepository());
+}
+
+export async function loadAdminCustomerDetailData(customerProfileId: string): Promise<AdminCustomerDetail> {
+  const { context } = await requireAdminAccess();
+  return getAdminCustomerDetail(customerProfileId, context, createAdminCustomerDetailRepository());
 }
 
 export async function loadAdminProductsData(): Promise<AdminProductsData> {

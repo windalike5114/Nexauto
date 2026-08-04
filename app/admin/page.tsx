@@ -647,24 +647,30 @@ function CustomersPanel({ customers }: { customers: AdminCustomer[] }) {
   return (
     <Panel title="Customers" className="mt-0">
       <div className="overflow-hidden rounded-lg border border-black/10">
-        <div className="hidden grid-cols-[1fr_220px_90px_130px_120px] gap-3 border-b border-black/10 bg-zinc-50 px-4 py-3 text-xs font-black uppercase tracking-[0.14em] text-steel lg:grid">
+        <div className="hidden grid-cols-[1fr_220px_90px_130px_120px_110px] gap-3 border-b border-black/10 bg-zinc-50 px-4 py-3 text-xs font-black uppercase tracking-[0.14em] text-steel lg:grid">
           <span>Customer</span>
           <span>Email</span>
           <span>Orders</span>
           <span>Total Spent</span>
           <span>Joined</span>
+          <span>Profile</span>
         </div>
         <div className="divide-y divide-black/10">
           {customers.map((customer) => (
-            <article key={customer.id} className="grid gap-3 px-4 py-4 text-sm lg:grid-cols-[1fr_220px_90px_130px_120px] lg:items-center">
+            <article key={customer.id} className="grid gap-3 px-4 py-4 text-sm lg:grid-cols-[1fr_220px_90px_130px_120px_110px] lg:items-center">
               <div>
-                <p className="font-black">{customer.name ?? "Customer"}</p>
+                <Link href={`/admin/customers/${customer.id}`} className="font-black hover:text-signal">
+                  {customer.name ?? "Customer"}
+                </Link>
                 <p className="font-mono text-xs font-bold text-steel">{customer.id.slice(0, 8)}</p>
               </div>
               <p className="break-all font-bold text-steel">{customer.email}</p>
               <p className="font-black">{customer.orderCount}</p>
               <p className="font-black">{formatMoney(customer.totalSpent)}</p>
               <p className="font-bold text-steel">{new Date(customer.joinedAt).toLocaleDateString("en-NZ")}</p>
+              <Link href={`/admin/customers/${customer.id}`} className="inline-flex h-9 items-center justify-center rounded bg-ink px-3 text-xs font-black text-white hover:bg-black">
+                View
+              </Link>
             </article>
           ))}
         </div>
