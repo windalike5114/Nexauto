@@ -6,7 +6,7 @@ export function createStripeCheckoutSessionAdapter(stripe: Stripe): CheckoutPaym
   return {
     async createCheckoutSession(input) {
       const session = await stripe.checkout.sessions.create(buildStripeSessionParams(input), {
-        idempotencyKey: input.checkoutRequestId
+        idempotencyKey: input.orderId
       });
 
       if (!session.url) throw new Error("Stripe checkout session URL is missing.");

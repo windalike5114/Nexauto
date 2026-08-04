@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { createCheckoutSession, type CheckoutServiceDependencies, type PendingCheckoutOrderInput } from "../lib/application/checkout/create-checkout-session";
-import { buildStripeSessionParams, getStripeLineAmountTotal } from "../lib/infrastructure/stripe/create-checkout-session";
+import { buildStripeSessionParams, createStripeCheckoutSessionAdapter, getStripeLineAmountTotal } from "../lib/infrastructure/stripe/create-checkout-session";
 import type { CartItem } from "../lib/types";
 
 const vehicleApplicationId = "e8122c4c-8844-42cc-bc17-dc7117abd24c";
@@ -279,6 +279,54 @@ test("idempotent retry passes stable request id to payment adapter context", asy
   await runCheckout(dependencies, { checkoutRequestId: "retry-1" });
 
   assert.equal(capturedRequestId, "retry-1");
+});
+
+test("Stripe adapter uses pending order id as the Stripe idempotency key", async () => {
+  let capturedIdempotencyKey = "";
+  const stripe = {
+    checkout: {
+      sessions: {
+        async create(_params: unknown, options: { idempotencyKey?: string }) {
+          capturedIdempotencyKey = options.idempotencyKey ?? "";
+          return { id: "cs_test_1", url: "https://checkout.stripe.test/session" };
+        }
+      }
+    }
+  };
+  const adapter = createStripeCheckoutSessionAdapter(stripe as never);
+  const cartItem = trustedFrontPair(cartFrontPair());
+
+  await adapter.createCheckoutSession({
+    checkoutRequestId: "same-request",
+    orderId: "order-unique-1",
+    orderNumber: "NEX00001",
+    siteUrl: "https://nexautoparts.co.nz",
+    customerEmail: null,
+    items: [
+      {
+        cartItem,
+        id: cartItem.variantId,
+        productId: cartItem.productId,
+        sku: cartItem.sku,
+        name: cartItem.name,
+        price: cartItem.price,
+        attributes: cartItem.attributes
+      }
+    ],
+    vehicle: null,
+    pricing: {
+      productSubtotalMinor: 5999,
+      bundleDiscountMinor: 0,
+      welcomeRewardMinor: 0,
+      couponDiscountMinor: 0,
+      shippingMinor: 0,
+      gstIncludedMinor: 782,
+      grandTotalMinor: 5999
+    },
+    couponCode: null
+  });
+
+  assert.equal(capturedIdempotencyKey, "order-unique-1");
 });
 
 test("canonical order draft preserves product, vehicle, and pricing snapshots", async () => {
