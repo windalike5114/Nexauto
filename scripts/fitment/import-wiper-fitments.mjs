@@ -166,6 +166,7 @@ function isBrandModelSheet(headerRow = []) {
 
 function parseBrandModelWorkbook(rawRows, inputPath, options, sheetName) {
   let currentMake = "";
+  const frontConflictKeys = findBrandModelFrontConflictKeys(rawRows);
   const rows = [];
 
   rawRows.forEach((row, index) => {
@@ -226,7 +227,9 @@ function parseBrandModelWorkbook(rawRows, inputPath, options, sheetName) {
         parsedValues = {
           market: options.market,
           make: currentMake,
-          model: buildBrandModelName(model, detailParts.qualifier),
+          model: buildBrandModelName(model, detailParts.qualifier, {
+            useQualifier: frontConflictKeys.has(brandModelYearKey(currentMake, model, detailParts))
+          }),
           start: detailParts.start,
           end: detailParts.end,
           driver_length_in: driver.value,
@@ -256,6 +259,46 @@ function parseBrandModelWorkbook(rawRows, inputPath, options, sheetName) {
     sheetName,
     rows
   };
+}
+
+function findBrandModelFrontConflictKeys(rawRows) {
+  let currentMake = "";
+  const grouped = new Map();
+
+  rawRows.slice(1).forEach((row) => {
+    const values = Array.from({ length: 7 }, (_, valueIndex) => cleanText(row[valueIndex]));
+    const brand = values[0];
+    const model = values[1];
+    const detail = values[2];
+    const driver = extractLength(values[3]);
+    const passenger = extractLength(values[4]);
+
+    if (brand) currentMake = brand;
+    if (!currentMake || !model || !detail || !driver.value || !passenger.value) return;
+
+    const detailParts = parseYearDetail(detail);
+    if (!detailParts.ok) return;
+
+    const key = brandModelYearKey(currentMake, model, detailParts);
+    const frontLengths = `${driver.value}:${passenger.value}`;
+    if (!grouped.has(key)) grouped.set(key, new Set());
+    grouped.get(key).add(frontLengths);
+  });
+
+  return new Set(
+    [...grouped.entries()]
+      .filter(([, lengths]) => lengths.size > 1)
+      .map(([key]) => key)
+  );
+}
+
+function brandModelYearKey(make, model, detailParts) {
+  return [
+    normalizeKey(make),
+    normalizeKey(model),
+    detailParts.start.year ?? "",
+    detailParts.end.year ?? ""
+  ].join(":");
 }
 
 function parseYearDetail(value) {
@@ -292,13 +335,14 @@ function cleanDetailQualifier(value) {
     .trim();
 }
 
-function buildBrandModelName(model, qualifier) {
+function buildBrandModelName(model, qualifier, options = {}) {
   const base = cleanText(model);
   const detail = cleanText(qualifier);
 
   if (!detail) return base;
   if (normalizeKey(detail) === normalizeKey(base)) return base;
   if (normalizeKey(detail).startsWith(`${normalizeKey(base)} `)) return detail;
+  if (!options.useQualifier) return base;
 
   return `${base} ${detail}`;
 }
