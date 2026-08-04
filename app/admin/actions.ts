@@ -1,27 +1,130 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import Stripe from "stripe";
+import { retryOrderConfirmationEmail } from "@/lib/application/email/retry-order-confirmation-email";
+import { retryStripeWebhookEvent } from "@/lib/application/webhooks/retry-stripe-webhook-event";
+import { createSupabaseOrderEmailService } from "@/lib/infrastructure/supabase/order-email.repository";
+import { createSupabaseOrderEmailRetryRepository } from "@/lib/infrastructure/supabase/order-email-retry.repository";
+import { createSupabaseOrderFinalisationRepository } from "@/lib/infrastructure/supabase/order-finalisation.repository";
+import { createSupabaseStripeWebhookEventRepository } from "@/lib/infrastructure/supabase/stripe-webhook-event.repository";
+import { createSupabaseWebhookRecoveryRepository } from "@/lib/infrastructure/supabase/webhook-recovery.repository";
+import { createWebhookCustomerEnrichmentService } from "@/lib/infrastructure/supabase/webhook-customer-enrichment";
+import { writeSystemAuditEvent } from "@/lib/infrastructure/supabase/audit.repository";
+import { createStripeEventRetrieval } from "@/lib/infrastructure/stripe/event-retrieval";
 import { createSupabaseAdminClient } from "@/lib/supabase";
 import { requireAdminAccess } from "@/lib/queries/admin";
 
+const fulfilmentStatuses = new Set(["pending", "selected", "packed", "fulfilled", "issue"]);
+
 export async function updateFulfillmentAction(formData: FormData) {
-  await requireAdminAccess();
+  const access = await requireAdminAccess();
   const supabase = getAdminOrThrow();
   const id = requiredString(formData, "fulfillmentId");
+  const connectorStatus = requiredString(formData, "connectorStatus");
+
+  if (!fulfilmentStatuses.has(connectorStatus)) {
+    throw new Error("Connector status is not allowed.");
+  }
+
+  const { data: existing, error: existingError } = await supabase
+    .from("order_wiper_fulfillment")
+    .select("id,order_id,connector_status")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (existingError) throw existingError;
+  if (!existing?.order_id) throw new Error("Fulfilment row was not found.");
+
   const { error } = await supabase
     .from("order_wiper_fulfillment")
     .update({
       driver_connector: optionalString(formData, "driverConnector"),
       passenger_connector: optionalString(formData, "passengerConnector"),
       rear_connector: optionalString(formData, "rearConnector"),
-      connector_status: requiredString(formData, "connectorStatus"),
+      connector_status: connectorStatus,
       admin_note: optionalString(formData, "adminNote"),
       updated_at: new Date().toISOString()
     })
     .eq("id", id);
 
   if (error) throw error;
+  await writeSystemAuditEvent({
+    eventType: "admin_fulfilment_updated",
+    entityType: "order",
+    entityId: existing.order_id,
+    actorType: "admin",
+    actorId: access.context.authUserId,
+    summary: "Admin updated wiper fulfilment connector details.",
+    metadata: {
+      fulfilmentId: id,
+      previousStatus: existing.connector_status,
+      nextStatus: connectorStatus
+    }
+  });
   revalidatePath("/admin");
+  revalidatePath(`/admin/orders/${existing.order_id}`);
+}
+
+export async function retryOrderEmailAction(formData: FormData) {
+  const access = await requireAdminAccess();
+  const orderId = requiredString(formData, "orderId");
+  const emailEventId = optionalString(formData, "emailEventId");
+  const result = await retryOrderConfirmationEmail({ orderId, emailEventId: emailEventId ?? undefined }, { repository: createSupabaseOrderEmailRetryRepository() });
+
+  await writeSystemAuditEvent({
+    eventType: "admin_email_retry",
+    entityType: "order",
+    entityId: orderId,
+    actorType: "admin",
+    actorId: access.context.authUserId,
+    summary: "Admin retried an order confirmation email.",
+    metadata: {
+      emailEventId: result.emailEventId,
+      result: result.status
+    }
+  });
+
+  revalidatePath("/admin");
+  revalidatePath(`/admin/orders/${orderId}`);
+}
+
+export async function retryStripeWebhookAction(formData: FormData) {
+  const access = await requireAdminAccess();
+  const orderId = requiredString(formData, "orderId");
+  const stripeEventId = requiredString(formData, "stripeEventId");
+  if (!process.env.STRIPE_SECRET_KEY) throw new Error("Stripe is not configured.");
+
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+  const result = await retryStripeWebhookEvent(
+    { stripeEventId },
+    {
+      recovery: createSupabaseWebhookRecoveryRepository(),
+      stripeEvents: createStripeEventRetrieval(stripe),
+      events: createSupabaseStripeWebhookEventRepository(),
+      orders: createSupabaseOrderFinalisationRepository(),
+      customers: createWebhookCustomerEnrichmentService(),
+      emails: createSupabaseOrderEmailService(),
+      logger: console
+    }
+  );
+
+  await writeSystemAuditEvent({
+    eventType: "admin_webhook_retry",
+    entityType: "order",
+    entityId: orderId,
+    actorType: "admin",
+    actorId: access.context.authUserId,
+    summary: "Admin retried a Stripe webhook event.",
+    metadata: {
+      stripeEventId,
+      result: result.status,
+      resultOrderId: result.orderId ?? null
+    }
+  });
+
+  revalidatePath("/admin");
+  revalidatePath(`/admin/orders/${orderId}`);
 }
 
 export async function updateVariantAction(formData: FormData) {

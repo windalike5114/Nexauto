@@ -1,7 +1,17 @@
 import type { AdminOrderDetailSectionError, AdminOrderDetailWebhookEvent } from "@/lib/application/admin/admin-order-detail.types";
 import { AdminOrderSectionError } from "./admin-order-section-error";
 
-export function AdminOrderWebhookCard({ events, errors }: { events: AdminOrderDetailWebhookEvent[]; errors: AdminOrderDetailSectionError[] }) {
+export function AdminOrderWebhookCard({
+  orderId,
+  events,
+  errors,
+  retryAction
+}: {
+  orderId: string;
+  events: AdminOrderDetailWebhookEvent[];
+  errors: AdminOrderDetailSectionError[];
+  retryAction: (formData: FormData) => Promise<void>;
+}) {
   return (
     <section className="rounded-lg border border-black/10 bg-white p-5 shadow-sm">
       <h2 className="text-lg font-black">Stripe webhook events</h2>
@@ -25,12 +35,25 @@ export function AdminOrderWebhookCard({ events, errors }: { events: AdminOrderDe
               <Meta label="Processed" value={event.processedAt ? formatDate(event.processedAt) : "Not processed"} />
               <Meta label="Error" value={event.errorSummary ?? "None"} />
             </dl>
+            {canRetry(event.status) ? (
+              <form action={retryAction} className="mt-4">
+                <input type="hidden" name="orderId" value={orderId} />
+                <input type="hidden" name="stripeEventId" value={event.stripeEventId} />
+                <button type="submit" className="rounded bg-ink px-3 py-2 text-xs font-black uppercase tracking-[0.12em] text-white hover:bg-black">
+                  Retry webhook
+                </button>
+              </form>
+            ) : null}
           </article>
         ))}
         {!events.length && !errors.length ? <p className="text-sm font-bold text-steel">No related Stripe webhook events recorded.</p> : null}
       </div>
     </section>
   );
+}
+
+function canRetry(status: string) {
+  return status === "failed_retryable";
 }
 
 function Meta({ label, value }: { label: string; value: string }) {

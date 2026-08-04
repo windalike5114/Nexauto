@@ -1,7 +1,17 @@
 import type { AdminOrderDetailEmailEvent, AdminOrderDetailSectionError } from "@/lib/application/admin/admin-order-detail.types";
 import { AdminOrderSectionError } from "./admin-order-section-error";
 
-export function AdminOrderEmailCard({ events, errors }: { events: AdminOrderDetailEmailEvent[]; errors: AdminOrderDetailSectionError[] }) {
+export function AdminOrderEmailCard({
+  orderId,
+  events,
+  errors,
+  retryAction
+}: {
+  orderId: string;
+  events: AdminOrderDetailEmailEvent[];
+  errors: AdminOrderDetailSectionError[];
+  retryAction: (formData: FormData) => Promise<void>;
+}) {
   return (
     <section className="rounded-lg border border-black/10 bg-white p-5 shadow-sm">
       <h2 className="text-lg font-black">Email events</h2>
@@ -24,12 +34,25 @@ export function AdminOrderEmailCard({ events, errors }: { events: AdminOrderDeta
               <Meta label="Attempts" value={String(event.attemptCount ?? 0)} />
               <Meta label="Error" value={event.lastErrorSummary ?? event.errorCode ?? "None"} />
             </dl>
+            {canRetry(event.status) ? (
+              <form action={retryAction} className="mt-4">
+                <input type="hidden" name="orderId" value={orderId} />
+                <input type="hidden" name="emailEventId" value={event.id} />
+                <button type="submit" className="rounded bg-ink px-3 py-2 text-xs font-black uppercase tracking-[0.12em] text-white hover:bg-black">
+                  Retry email
+                </button>
+              </form>
+            ) : null}
           </article>
         ))}
         {!events.length && !errors.length ? <p className="text-sm font-bold text-steel">No related order email events recorded.</p> : null}
       </div>
     </section>
   );
+}
+
+function canRetry(status: string) {
+  return status === "failed" || status === "failed_retryable";
 }
 
 function Meta({ label, value, mono = false }: { label: string; value: string; mono?: boolean }) {

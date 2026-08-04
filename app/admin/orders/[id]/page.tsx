@@ -14,7 +14,7 @@ import { AdminOrderWebhookCard } from "@/components/admin/order-detail/admin-ord
 import { AdminOrderDetailInvalidIdError, AdminOrderDetailNotFoundError } from "@/lib/application/admin/get-admin-order-detail";
 import { AdminConfigurationError, AdminForbiddenError, AdminInfrastructureError, AdminUnauthenticatedError } from "@/lib/domain/admin/admin-access.errors";
 import { loadAdminOrderDetailData } from "@/lib/queries/admin";
-import { updateFulfillmentAction } from "../../actions";
+import { retryOrderEmailAction, retryStripeWebhookAction, updateFulfillmentAction } from "../../actions";
 
 export const dynamic = "force-dynamic";
 
@@ -53,8 +53,8 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
           </div>
 
           <div className="grid gap-5 lg:grid-cols-2">
-            <AdminOrderEmailCard events={order.emailEvents} errors={emailErrors} />
-            <AdminOrderWebhookCard events={order.webhookEvents} errors={webhookErrors} />
+            <AdminOrderEmailCard orderId={order.identity.id} events={order.emailEvents} errors={emailErrors} retryAction={retryOrderEmailAction} />
+            <AdminOrderWebhookCard orderId={order.identity.id} events={order.webhookEvents} errors={webhookErrors} retryAction={retryStripeWebhookAction} />
           </div>
           <AdminOrderTimeline events={order.auditTimeline} errors={timelineErrors} />
         </div>

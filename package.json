@@ -13,6 +13,7 @@
     "test:admin-authorization": "node --import tsx --test tests/admin-authorization.test.ts",
     "test:admin-orders": "node --import tsx --test tests/admin-orders.test.ts",
     "test:admin-order-detail": "node --import tsx --test tests/admin-order-detail.test.ts",
+    "test:admin-safe-actions": "node --import tsx --test tests/admin-safe-actions.test.ts",
     "test:vehicles": "node --import tsx --test tests/customer-vehicles.test.ts",
     "test:order-claiming": "node --import tsx --test tests/customer-order-claiming.test.ts",
     "test:checkout": "node --import tsx --test tests/domain-contracts.test.ts tests/pricing-engine.test.ts tests/checkout-service.test.ts tests/stripe-webhook.test.ts tests/operational-recovery.test.ts",
