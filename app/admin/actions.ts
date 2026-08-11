@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import Stripe from "stripe";
 import { retryOrderConfirmationEmail } from "@/lib/application/email/retry-order-confirmation-email";
 import { retryStripeWebhookEvent } from "@/lib/application/webhooks/retry-stripe-webhook-event";
@@ -149,13 +150,56 @@ export async function updateVariantAction(formData: FormData) {
     .eq("id", id);
 
   if (error) throw error;
-  revalidatePath("/admin");
+
+  const { data: variantRow, error: variantRowError } = await supabase
+    .from("product_variants")
+    .select("product_id")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (variantRowError) throw variantRowError;
+  if (!variantRow?.product_id) throw new Error("Updated variant could not be reloaded.");
+
+  const { data: productRow, error: productRowError } = await supabase
+    .from("products")
+    .select("slug")
+    .eq("id", variantRow.product_id)
+    .maybeSingle();
+
+  if (productRowError) throw productRowError;
+
+  const { data: activeVariants, error: activeVariantsError } = await supabase
+    .from("product_variants")
+    .select("price")
+    .eq("product_id", variantRow.product_id)
+    .eq("active", true);
+
+  if (activeVariantsError) throw activeVariantsError;
+
+  const displayPrice = ((activeVariants ?? []) as Array<{ price: string | number }>)
+    .map((entry) => Number(entry.price))
+    .filter((entry) => Number.isFinite(entry))
+    .sort((a, b) => a - b)[0] ?? price;
+
+  const { error: syncProductError } = await supabase
+    .from("products")
+    .update({
+      price: displayPrice,
+      updated_at: new Date().toISOString()
+    })
+    .eq("id", variantRow.product_id);
+
+  if (syncProductError) throw syncProductError;
+
+  revalidateCatalogViews(productRow?.slug ?? null);
+  redirect(buildAdminSuccessUrl("products", "variant") as never);
 }
 
 export async function updateWiperSetAction(formData: FormData) {
   await requireAdminAccess();
   const supabase = getAdminOrThrow();
   const id = requiredString(formData, "wiperSetId");
+  const sku = requiredString(formData, "sku");
   const price = Number(requiredString(formData, "price"));
   const compareAtPriceValue = optionalString(formData, "compareAtPrice");
   const compareAtPrice = compareAtPriceValue ? Number(compareAtPriceValue) : null;
@@ -175,7 +219,9 @@ export async function updateWiperSetAction(formData: FormData) {
     .eq("id", id);
 
   if (error) throw error;
-  revalidatePath("/admin");
+  revalidateCatalogViews();
+  revalidatePath(`/wipers/${sku}`);
+  redirect(buildAdminSuccessUrl("products", "wiper-set") as never);
 }
 
 export async function updateRearAddonAction(formData: FormData) {
@@ -198,7 +244,8 @@ export async function updateRearAddonAction(formData: FormData) {
     .eq("id", id);
 
   if (error) throw error;
-  revalidatePath("/admin");
+  revalidateCatalogViews();
+  redirect(buildAdminSuccessUrl("products", "rear-addon") as never);
 }
 
 export async function updateProductContentAction(formData: FormData) {
@@ -226,9 +273,27 @@ export async function updateProductContentAction(formData: FormData) {
     .eq("id", id);
 
   if (error) throw error;
-  revalidatePath("/admin");
-  revalidatePath("/shop");
-  revalidatePath("/");
+
+  const { data: productRow, error: productRowError } = await supabase
+    .from("products")
+    .select("slug")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (productRowError) throw productRowError;
+
+  const { error: variantsError } = await supabase
+    .from("product_variants")
+    .update({
+      price,
+      updated_at: new Date().toISOString()
+    })
+    .eq("product_id", id);
+
+  if (variantsError) throw variantsError;
+
+  revalidateCatalogViews(productRow?.slug ?? null);
+  redirect(buildAdminSuccessUrl("content", "product-content") as never);
 }
 
 function getAdminOrThrow() {
@@ -248,6 +313,21 @@ function optionalString(formData: FormData, key: string) {
   if (typeof value !== "string") return null;
   const trimmed = value.trim();
   return trimmed ? trimmed : null;
+}
+
+function revalidateCatalogViews(productSlug?: string | null) {
+  revalidatePath("/admin");
+  revalidatePath("/");
+  revalidatePath("/shop");
+  revalidatePath("/promotion");
+
+  if (productSlug) {
+    revalidatePath(`/products/${productSlug}`);
+  }
+}
+
+function buildAdminSuccessUrl(tab: "products" | "content", saved: "variant" | "wiper-set" | "rear-addon" | "product-content") {
+  return `/admin?tab=${tab}&saved=${saved}`;
 }
 
 function parseDetailSections(value: string | null) {

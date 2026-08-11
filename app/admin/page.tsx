@@ -49,6 +49,7 @@ export const dynamic = "force-dynamic";
 
 type AdminSearchParams = {
   tab?: string;
+  saved?: string;
   search?: string;
   orderStatus?: string;
   fulfilmentStatus?: string;
@@ -103,6 +104,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
   const params = await searchParams;
   const activeTab = flatTabs.some((tab) => tab.id === params.tab) ? params.tab! : "overview";
   const access = await checkAdminAccess();
+  const saveNotice = getAdminSaveNotice(params.saved, activeTab);
 
   if (!access.ok) {
     return <AdminGate reason={access.reason} email={access.email} />;
@@ -116,6 +118,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
         <AdminSidebar activeTab={activeTab} />
         <section className="min-w-0 px-4 py-6 sm:px-6 lg:px-8">
           <AdminTopBar email={access.email} activeTab={activeTab} />
+          {saveNotice ? <AdminSaveNotice message={saveNotice} /> : null}
 
           {activeTab === "overview" ? (
             <OverviewPanel
@@ -250,6 +253,14 @@ function AdminTopBar({ email, activeTab }: { email: string; activeTab: string })
         <div className="rounded-lg bg-ink px-3 py-2 text-sm font-black text-white">{email}</div>
       </div>
     </header>
+  );
+}
+
+function AdminSaveNotice({ message }: { message: string }) {
+  return (
+    <div className="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-900">
+      {message}
+    </div>
   );
 }
 
@@ -494,6 +505,7 @@ function ProductsPanel({
           {wiperSets.slice(0, 24).map((wiperSet) => (
             <form key={wiperSet.id} action={updateWiperSetAction} className="grid gap-3 rounded border border-black/10 bg-zinc-50 p-3 md:grid-cols-[1fr_120px_120px_100px_auto] md:items-end">
               <input type="hidden" name="wiperSetId" value={wiperSet.id} />
+              <input type="hidden" name="sku" value={wiperSet.sku} />
               <div>
                 <p className="font-black">{wiperSet.name}</p>
                 <p className="font-mono text-xs font-bold text-steel">{wiperSet.sku}</p>
@@ -870,6 +882,23 @@ function Toggle({ label, name, defaultChecked }: { label: string; name: string; 
       <span className="text-sm font-black">{label}</span>
     </label>
   );
+}
+
+function getAdminSaveNotice(saved: string | undefined, activeTab: string) {
+  if (!saved) return null;
+
+  const noticeBySaved: Record<string, string> = {
+    variant: "Variant price and stock updated. Product card and detail pricing have been refreshed.",
+    "wiper-set": "Wiper pair pricing updated successfully.",
+    "rear-addon": "Rear add-on pricing updated successfully.",
+    "product-content": "Product content saved. Product detail, list price, and variant pricing have been refreshed."
+  };
+
+  if (activeTab !== "products" && activeTab !== "content") {
+    return null;
+  }
+
+  return noticeBySaved[saved] ?? null;
 }
 
 function EmptyState({ text }: { text: string }) {
