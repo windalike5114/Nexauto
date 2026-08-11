@@ -297,6 +297,11 @@ test("idempotent retry passes stable request id to payment adapter context", asy
 test("Stripe adapter uses pending order id as the Stripe idempotency key", async () => {
   let capturedIdempotencyKey = "";
   const stripe = {
+    customers: {
+      async create() {
+        return { id: "cus_test_1" };
+      }
+    },
     checkout: {
       sessions: {
         async create(_params: unknown, options: { idempotencyKey?: string }) {
@@ -341,6 +346,77 @@ test("Stripe adapter uses pending order id as the Stripe idempotency key", async
   });
 
   assert.equal(capturedIdempotencyKey, "order-unique-1");
+});
+
+test("Stripe adapter creates an English customer with the pre-collected delivery address", async () => {
+  let capturedCustomer: Record<string, unknown> | null = null;
+  let capturedCustomerIdempotencyKey = "";
+  let capturedSessionParams: ReturnType<typeof buildStripeSessionParams> | null = null;
+  const stripe = {
+    customers: {
+      async create(params: Record<string, unknown>, options: { idempotencyKey?: string }) {
+        capturedCustomer = params;
+        capturedCustomerIdempotencyKey = options.idempotencyKey ?? "";
+        return { id: "cus_test_1" };
+      }
+    },
+    checkout: {
+      sessions: {
+        async create(params: ReturnType<typeof buildStripeSessionParams>) {
+          capturedSessionParams = params;
+          return { id: "cs_test_1", url: "https://checkout.stripe.test/session" };
+        }
+      }
+    }
+  };
+  const adapter = createStripeCheckoutSessionAdapter(stripe as never);
+  const cartItem = trustedFrontPair(cartFrontPair());
+
+  await adapter.createCheckoutSession({
+    checkoutRequestId: "request-1",
+    orderId: "order-1",
+    orderNumber: "NEX00001",
+    siteUrl: "https://nexautoparts.co.nz",
+    customerEmail: "buyer@example.co.nz",
+    shippingAddress,
+    items: [
+      {
+        cartItem,
+        id: cartItem.variantId,
+        productId: cartItem.productId,
+        sku: cartItem.sku,
+        name: cartItem.name,
+        price: cartItem.price,
+        attributes: cartItem.attributes
+      }
+    ],
+    vehicle: null,
+    pricing: {
+      productSubtotalMinor: 5999,
+      bundleDiscountMinor: 0,
+      welcomeRewardMinor: 0,
+      couponDiscountMinor: 0,
+      shippingMinor: 0,
+      gstIncludedMinor: 782,
+      grandTotalMinor: 5999
+    },
+    couponCode: null
+  });
+
+  assert.equal(capturedCustomerIdempotencyKey, "customer:order-1");
+  assert.equal(capturedCustomer?.email, "buyer@example.co.nz");
+  assert.deepEqual(capturedCustomer?.preferred_locales, ["en"]);
+  assert.deepEqual(capturedCustomer?.address, {
+    line1: "12 Queen Street",
+    line2: undefined,
+    city: "Auckland",
+    state: "Auckland",
+    postal_code: "1010",
+    country: "NZ"
+  });
+  assert.equal(capturedSessionParams?.customer, "cus_test_1");
+  assert.equal(capturedSessionParams?.customer_email, undefined);
+  assert.equal(capturedSessionParams?.billing_address_collection, "auto");
 });
 
 test("canonical order draft preserves product, vehicle, and pricing snapshots", async () => {
@@ -429,7 +505,7 @@ test("Stripe checkout uses pre-collected NexAutoParts shipping address instead o
   const params = buildStripeSessionParams(adapterInput);
 
   assert.deepEqual(params.payment_method_types, ["card", "afterpay_clearpay"]);
-  assert.equal(params.billing_address_collection, "required");
+  assert.equal(params.billing_address_collection, "auto");
   assert.equal(params.shipping_address_collection, undefined);
   assert.equal(params.custom_text, undefined);
   assert.equal(params.customer_update, undefined);

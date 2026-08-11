@@ -5,7 +5,8 @@ import { CHECKOUT_CONTRACT_VERSION, PRICING_VERSION } from "@/lib/application/ch
 export function createStripeCheckoutSessionAdapter(stripe: Stripe): CheckoutPaymentAdapter {
   return {
     async createCheckoutSession(input) {
-      const session = await stripe.checkout.sessions.create(buildStripeSessionParams(input), {
+      const stripeCustomerId = input.customerEmail ? await createCheckoutCustomer(stripe, input) : undefined;
+      const session = await stripe.checkout.sessions.create(buildStripeSessionParams({ ...input, stripeCustomerId }), {
         idempotencyKey: input.orderId
       });
 
@@ -41,9 +42,10 @@ export function buildStripeSessionParams(input: StripeCheckoutSessionAdapterInpu
       }
     },
     allow_promotion_codes: false,
-    customer_email: input.customerEmail ?? undefined,
-    customer_creation: "if_required",
-    billing_address_collection: "required",
+    customer: input.stripeCustomerId,
+    customer_email: input.stripeCustomerId ? undefined : input.customerEmail ?? undefined,
+    customer_creation: input.stripeCustomerId ? undefined : "if_required",
+    billing_address_collection: "auto",
     shipping_options: [
       {
         shipping_rate_data: {
@@ -81,6 +83,45 @@ export function buildStripeSessionParams(input: StripeCheckoutSessionAdapterInpu
     metadata: buildStripeMetadata(input),
     success_url: `${input.siteUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${input.siteUrl}/checkout/cancel`
+  };
+}
+
+async function createCheckoutCustomer(stripe: Stripe, input: StripeCheckoutSessionAdapterInput) {
+  const address = toStripeAddress(input.shippingAddress);
+  const customer = await stripe.customers.create(
+    {
+      email: input.customerEmail ?? undefined,
+      name: input.shippingAddress.recipientName,
+      phone: input.shippingAddress.phone,
+      address,
+      shipping: {
+        name: input.shippingAddress.recipientName,
+        phone: input.shippingAddress.phone,
+        address
+      },
+      preferred_locales: ["en"],
+      metadata: {
+        order_id: input.orderId,
+        order_number: input.orderNumber,
+        source: "nexauto_checkout"
+      }
+    },
+    {
+      idempotencyKey: `customer:${input.orderId}`
+    }
+  );
+
+  return customer.id;
+}
+
+function toStripeAddress(address: StripeCheckoutSessionAdapterInput["shippingAddress"]): Stripe.AddressParam {
+  return {
+    line1: address.line1,
+    line2: address.line2 || undefined,
+    city: address.city,
+    state: address.region || address.suburb || undefined,
+    postal_code: address.postcode,
+    country: "NZ"
   };
 }
 

@@ -102,6 +102,7 @@ export type StripeCheckoutSessionAdapterInput = {
   orderNumber: string;
   siteUrl: string;
   customerEmail: string | null;
+  stripeCustomerId?: string;
   shippingAddress: CheckoutShippingAddress;
   items: TrustedCheckoutItem[];
   vehicle: ReturnType<typeof buildVehicleMetadata>;
