@@ -9,6 +9,8 @@ const footerGroups = [
     links: [
       ["Shop All", "/shop"],
       ["Wiper Blades", "/shop"],
+      ["Batteries", "/products/vehicle-fit-battery"],
+      ["Filters", "/products/vehicle-fit-oil-filter"],
       ["Vehicle Finder", "/"],
       ["New Arrivals", "/shop"]
     ]

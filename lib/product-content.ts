@@ -4,7 +4,9 @@ import type { Product } from "@/lib/types";
 const mainWiperProductImage = blobMediaAssets.images.find((asset) => asset.name === "nexautowiper1")?.url ?? "/products/wiper-blade.png";
 
 export function productImage(product: Product) {
-  if (product.slug === "premium-rear-wiper-blade") return "/products/rear-wiper-blade.jpg";
+  if (product.slug === "premium-rear-wiper-blade") return "/products/rear-wiper-blade.png";
+  if (product.slug === "vehicle-fit-battery") return "/products/vehicle-battery.png";
+  if (product.slug === "vehicle-fit-oil-filter") return "/products/vehicle-oil-filter.png";
   if (product.category === "wiper") return mainWiperProductImage;
   if (product.category === "bulb") return "/products/halogen-bulb.png";
   return product.images[0] ?? "";

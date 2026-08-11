@@ -1,13 +1,15 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { ArrowRight, CheckCircle2, Mail, ShieldCheck, ShoppingCart, Truck, Wrench } from "lucide-react";
+import { ArrowRight, Battery, CheckCircle2, Mail, ShieldCheck, ShoppingCart, Sparkles, Truck, Wrench } from "lucide-react";
 import { HomeNewsletterSignup } from "@/components/home-newsletter-signup";
 import { WiperFitmentFinder } from "@/components/wiper-fitment-finder";
 import { formatMoney } from "@/lib/catalog";
+import { productImage } from "@/lib/product-content";
 import { wiperPairPricing } from "@/lib/pricing";
+import { listProducts } from "@/lib/queries/catalog";
 import { listWiperSets } from "@/lib/queries/wiper-commerce";
-import type { WiperSet } from "@/lib/types";
+import type { Product, WiperSet } from "@/lib/types";
 import { getWiperSetPreviewImage } from "@/lib/wiper-product-images";
 
 export const dynamic = "force-dynamic";
@@ -19,7 +21,8 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  const popularWiperSets = await loadPopularWiperSets();
+  const { popularWiperSets, morePartsProducts } = await loadHomeData();
+  const popularCards = buildPopularCards(popularWiperSets, morePartsProducts);
 
   return (
     <main className="bg-white">
@@ -62,25 +65,50 @@ export default async function HomePage() {
         </div>
       </section>
 
+      <section className="border-b border-black/10 bg-white">
+        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 sm:py-5 lg:px-8">
+          <div className="grid gap-3 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
+            <div className="rounded-2xl border border-black/10 bg-[#F8FAFC] p-4 shadow-sm sm:p-5">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-xs font-black uppercase tracking-[0.16em] text-signal sm:text-sm sm:tracking-[0.18em]">New categories now live</p>
+                  <p className="mt-1 text-base font-black text-ink sm:text-lg">Rear Wipers, Lighting Bundles, Batteries & Oil Filters</p>
+                </div>
+                <Link href="/shop" className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-ink px-4 text-sm font-black text-white transition hover:-translate-y-0.5 hover:bg-black">
+                  Explore More Parts
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <CategoryPill href="/products/premium-rear-wiper-blade" icon={<Wrench className="h-4 w-4" />} label="Rear Wipers" />
+              <CategoryPill href="/products/h11-headlight-license-plate-bulb-bundle" icon={<Sparkles className="h-4 w-4" />} label="Lighting Bundles" />
+              <CategoryPill href="/products/vehicle-fit-battery" icon={<Battery className="h-4 w-4" />} label="Batteries" />
+              <CategoryPill href="/products/vehicle-fit-oil-filter" icon={<ShoppingCart className="h-4 w-4" />} label="Oil Filters" />
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section className="border-b border-black/10 bg-[#F8FAFC]">
         <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
           <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-sm font-black uppercase tracking-[0.18em] text-signal">Popular Products</p>
-              <h2 className="mt-2 text-2xl font-black sm:text-3xl">Bestselling Front Wiper Blade Pairs</h2>
+              <h2 className="mt-2 text-2xl font-black sm:text-3xl">Popular Parts for New Zealand Drivers</h2>
               <p className="mt-2 max-w-2xl text-sm font-bold leading-6 text-steel">
-                On sale now with $20 off front pair pricing and launch shipping waived NZ-wide.
+                Front wiper pairs remain the main focus, with new rear wiper, lighting, battery and filter categories now available to browse.
               </p>
             </div>
             <Link href="/shop" className="inline-flex h-11 items-center gap-2 rounded-lg border border-black/10 bg-white px-4 text-sm font-black text-ink shadow-sm transition hover:-translate-y-0.5 hover:border-ink hover:shadow-md">
-              View all blade sizes
+              View all parts
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
 
           <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-2 sm:mx-0 sm:gap-4 sm:px-0">
-            {popularWiperSets.map((wiperSet) => (
-              <PopularSkuCard key={wiperSet.id} wiperSet={wiperSet} />
+            {popularCards.map((card) => (
+              <PopularCard key={card.id} card={card} />
             ))}
           </div>
         </div>
@@ -168,6 +196,29 @@ export default async function HomePage() {
       </div>
 
       <section className="border-t border-black/10 bg-[#F8FAFC]">
+        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+          <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-sm font-black uppercase tracking-[0.18em] text-signal">More Parts</p>
+              <h2 className="mt-2 text-2xl font-black sm:text-3xl">More Parts for New Zealand Drivers</h2>
+              <p className="mt-2 max-w-3xl text-sm font-bold leading-6 text-steel">
+                Beyond front wiper pairs, NexAutoParts is expanding into rear wipers, lighting bundles, batteries and oil filters.
+              </p>
+            </div>
+            <Link href="/shop" className="inline-flex h-11 items-center gap-2 rounded-lg border border-black/10 bg-white px-4 text-sm font-black text-ink shadow-sm transition hover:-translate-y-0.5 hover:border-ink hover:shadow-md">
+              Browse More Parts
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {morePartsProducts.map((product) => (
+              <MorePartsCard key={product.id} product={product} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="border-t border-black/10 bg-[#F8FAFC]">
         <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
           <div className="relative min-h-[500px] overflow-hidden rounded-[20px] bg-ink shadow-panel sm:min-h-[460px] lg:min-h-[430px]">
             <Image
@@ -220,12 +271,22 @@ export default async function HomePage() {
   );
 }
 
-async function loadPopularWiperSets() {
+async function loadHomeData() {
   try {
-    const wiperSets = await listWiperSets();
-    return pickPopularWiperSets(wiperSets);
+    const [wiperSets, wiperProducts, bulbProducts, batteryProducts, filterProducts] = await Promise.all([
+      listWiperSets(),
+      listProducts("wiper"),
+      listProducts("bulb"),
+      listProducts("battery"),
+      listProducts("filter")
+    ]);
+
+    return {
+      popularWiperSets: pickPopularWiperSets(wiperSets),
+      morePartsProducts: pickMorePartsProducts([...wiperProducts, ...bulbProducts, ...batteryProducts, ...filterProducts])
+    };
   } catch {
-    return [];
+    return { popularWiperSets: [], morePartsProducts: [] };
   }
 }
 
@@ -237,6 +298,27 @@ function pickPopularWiperSets(wiperSets: WiperSet[]) {
   return [...preferred, ...fallback].slice(0, 6);
 }
 
+function pickMorePartsProducts(products: Product[]) {
+  const preferredSlugs = [
+    "premium-rear-wiper-blade",
+    "h11-headlight-license-plate-bulb-bundle",
+    "vehicle-fit-battery",
+    "vehicle-fit-oil-filter"
+  ];
+  const bySlug = new Map(products.map((product) => [product.slug, product]));
+  return preferredSlugs.map((slug) => bySlug.get(slug)).filter((product): product is Product => Boolean(product));
+}
+
+type PopularCardData =
+  | { id: string; kind: "wiper"; wiperSet: WiperSet }
+  | { id: string; kind: "product"; product: Product };
+
+function buildPopularCards(wiperSets: WiperSet[], morePartsProducts: Product[]) {
+  const wiperCards = wiperSets.slice(0, 4).map((wiperSet) => ({ id: wiperSet.id, kind: "wiper" as const, wiperSet }));
+  const productCards = morePartsProducts.slice(0, 2).map((product) => ({ id: product.id, kind: "product" as const, product }));
+  return [...wiperCards.slice(0, 2), ...productCards, ...wiperCards.slice(2, 4)].slice(0, 6);
+}
+
 function TrustPill({ icon, text }: { icon: React.ReactNode; text: string }) {
   return (
     <div className="flex min-h-11 items-center gap-2 rounded-lg border border-white/18 bg-white/12 px-3 text-xs font-black text-white shadow-sm backdrop-blur sm:min-h-12 sm:px-4 sm:text-sm">
@@ -246,7 +328,11 @@ function TrustPill({ icon, text }: { icon: React.ReactNode; text: string }) {
   );
 }
 
-function PopularSkuCard({ wiperSet }: { wiperSet: WiperSet }) {
+function PopularCard({ card }: { card: PopularCardData }) {
+  return card.kind === "wiper" ? <PopularWiperCard wiperSet={card.wiperSet} /> : <PopularProductCard product={card.product} />;
+}
+
+function PopularWiperCard({ wiperSet }: { wiperSet: WiperSet }) {
   const image = getWiperSetPreviewImage(wiperSet);
   const compareAtPrice = wiperSet.compareAtPrice ?? wiperPairPricing.compareAtPrice;
 
@@ -280,6 +366,105 @@ function PopularSkuCard({ wiperSet }: { wiperSet: WiperSet }) {
           </Link>
         </div>
       </div>
+    </article>
+  );
+}
+
+function PopularProductCard({ product }: { product: Product }) {
+  const image = productImage(product);
+  const isBundle = product.slug === "h11-headlight-license-plate-bulb-bundle";
+  const isOutOfStock = product.slug === "vehicle-fit-battery" || product.slug === "vehicle-fit-oil-filter";
+  const strap = product.slug === "premium-rear-wiper-blade"
+    ? 'Selectable sizes from 8" to 16"'
+    : isBundle
+      ? "4 x H11 bulbs + licence plate lights"
+      : "Contact us to confirm vehicle fitment";
+
+  return (
+    <article className="min-w-[218px] overflow-hidden rounded-lg border border-black/10 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-panel sm:min-w-[260px]">
+      <div className="relative aspect-[4/3] bg-zinc-50">
+        <span className={`absolute left-3 top-3 z-10 rounded px-2 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-white ${isBundle ? "bg-signal" : isOutOfStock ? "bg-zinc-600" : "bg-ink"}`}>
+          {isBundle ? "Bundle" : isOutOfStock ? "Coming Soon" : "New"}
+        </span>
+        <Image src={image} alt={`${product.name} preview`} fill className="object-contain p-5" sizes="260px" />
+      </div>
+      <div className="p-4 sm:p-5">
+        <h3 className="text-base font-black sm:text-lg">{product.name}</h3>
+        <p className="mt-2 text-sm font-black text-steel">{strap}</p>
+        <p className="mt-3 text-xs font-black text-steel">{isOutOfStock ? "Vehicle-specific matching available via support" : "Now available in More Parts"}</p>
+        <div className="mt-4 grid gap-3 sm:flex sm:items-center sm:justify-between">
+          <p className="flex flex-wrap items-baseline gap-2">
+            <span className="text-lg font-black">{formatMoney(product.price)}</span>
+          </p>
+          <Link href={`/products/${product.slug}`} className="inline-flex h-10 items-center justify-center rounded bg-ink px-3 text-sm font-black text-white transition hover:-translate-y-0.5 hover:bg-black">
+            View Details
+          </Link>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function CategoryPill({
+  href,
+  icon,
+  label
+}: {
+  href:
+    | "/shop"
+    | "/products/premium-rear-wiper-blade"
+    | "/products/h11-headlight-license-plate-bulb-bundle"
+    | "/products/vehicle-fit-battery"
+    | "/products/vehicle-fit-oil-filter";
+  icon: React.ReactNode;
+  label: string;
+}) {
+  return (
+    <Link href={href} className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-black/10 bg-white px-4 text-sm font-black text-ink shadow-sm transition hover:-translate-y-0.5 hover:border-ink hover:shadow-md">
+      <span className="text-signal">{icon}</span>
+      <span>{label}</span>
+    </Link>
+  );
+}
+
+function MorePartsCard({ product }: { product: Product }) {
+  const image = productImage(product);
+  const isComingSoon = product.slug === "vehicle-fit-battery" || product.slug === "vehicle-fit-oil-filter";
+  const eyebrow =
+    product.slug === "premium-rear-wiper-blade"
+      ? "Rear Wipers"
+      : product.slug === "h11-headlight-license-plate-bulb-bundle"
+        ? "Lighting Bundles"
+        : product.slug === "vehicle-fit-battery"
+          ? "Batteries"
+          : "Oil Filters";
+
+  return (
+    <article className="overflow-hidden rounded-xl border border-black/10 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-panel">
+      <Link href={`/products/${product.slug}`} className="block">
+        <div className="relative aspect-[4/3] bg-zinc-50">
+          <Image src={image} alt={product.name} fill className="object-contain p-5" sizes="(min-width: 1280px) 25vw, (min-width: 768px) 50vw, 100vw" />
+          {isComingSoon ? (
+            <span className="absolute left-3 top-3 rounded bg-zinc-700 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-white">
+              Coming Soon
+            </span>
+          ) : null}
+        </div>
+        <div className="space-y-3 p-5">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-signal">{eyebrow}</p>
+            <h3 className="mt-2 text-xl font-black text-ink">{product.name}</h3>
+            <p className="mt-2 text-sm leading-6 text-steel">{product.description}</p>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-lg font-black text-ink">{formatMoney(product.price)}</span>
+            <span className="inline-flex items-center gap-2 text-sm font-black text-ink">
+              View Details
+              <ArrowRight className="h-4 w-4" />
+            </span>
+          </div>
+        </div>
+      </Link>
     </article>
   );
 }
