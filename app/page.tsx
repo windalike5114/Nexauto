@@ -337,35 +337,34 @@ function PopularWiperCard({ wiperSet }: { wiperSet: WiperSet }) {
   const compareAtPrice = wiperSet.compareAtPrice ?? wiperPairPricing.compareAtPrice;
 
   return (
-    <article className="min-w-[218px] overflow-hidden rounded-lg border border-black/10 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-panel sm:min-w-[260px]">
-      <div className="relative aspect-[4/3] bg-zinc-50">
-        <span className="absolute left-3 top-3 z-10 rounded bg-signal px-2 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-white">
-          Sale
-        </span>
-        <Image
-          src={image}
-          alt={`${wiperSet.name} preview`}
-          fill
-          className="object-contain p-5"
-          sizes="260px"
-        />
-      </div>
-      <div className="p-4 sm:p-5">
-        <h3 className="text-base font-black sm:text-lg">Front Wiper Blade Pair</h3>
-        <p className="mt-2 text-sm font-black text-steel">
-          Driver {wiperSet.driverLengthIn}" + Passenger {wiperSet.passengerLengthIn}"
-        </p>
-        <p className="mt-3 text-xs font-black text-steel">Save $20 - launch shipping waived</p>
-        <div className="mt-4 grid gap-3 sm:flex sm:items-center sm:justify-between">
-          <p className="flex flex-wrap items-baseline gap-2">
-            <span className="text-lg font-black">{formatMoney(wiperSet.price)}</span>
-            <span className="text-xs font-bold text-steel line-through">{formatMoney(compareAtPrice)}</span>
-          </p>
-          <Link href={`/wipers/${wiperSet.sku}`} className="inline-flex h-10 items-center justify-center rounded bg-ink px-3 text-sm font-black text-white transition hover:-translate-y-0.5 hover:bg-black">
-            View Details
-          </Link>
+    <article className="min-w-[260px] overflow-hidden rounded-xl border border-black/10 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-panel">
+      <Link href={`/wipers/${wiperSet.sku}`} className="block">
+        <div className="relative aspect-[4/3] bg-zinc-50">
+          <Image src={image} alt={`${wiperSet.name} preview`} fill className="object-contain p-5" sizes="260px" />
+          <span className="absolute left-3 top-3 rounded bg-signal px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-white">
+            Sale
+          </span>
         </div>
-      </div>
+        <div className="space-y-3 p-5">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-signal">Front Wiper Pairs</p>
+            <h3 className="mt-2 text-xl font-black text-ink">Front Wiper Blade Pair</h3>
+            <p className="mt-2 text-sm leading-6 text-steel">
+              Driver {wiperSet.driverLengthIn}" + Passenger {wiperSet.passengerLengthIn}" with launch sale pricing and waived NZ shipping.
+            </p>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="flex flex-wrap items-baseline gap-2">
+              <span className="text-lg font-black text-ink">{formatMoney(wiperSet.price)}</span>
+              <span className="text-xs font-bold text-steel line-through">{formatMoney(compareAtPrice)}</span>
+            </span>
+            <span className="inline-flex items-center gap-2 text-sm font-black text-ink">
+              View Details
+              <ArrowRight className="h-4 w-4" />
+            </span>
+          </div>
+        </div>
+      </Link>
     </article>
   );
 }
@@ -381,27 +380,14 @@ function PopularProductCard({ product }: { product: Product }) {
       : "Contact us to confirm vehicle fitment";
 
   return (
-    <article className="min-w-[218px] overflow-hidden rounded-lg border border-black/10 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-panel sm:min-w-[260px]">
-      <div className="relative aspect-[4/3] bg-zinc-50">
-        <span className={`absolute left-3 top-3 z-10 rounded px-2 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-white ${isBundle ? "bg-signal" : isOutOfStock ? "bg-zinc-600" : "bg-ink"}`}>
-          {isBundle ? "Bundle" : isOutOfStock ? "Coming Soon" : "New"}
-        </span>
-        <Image src={image} alt={`${product.name} preview`} fill className="object-contain p-5" sizes="260px" />
-      </div>
-      <div className="p-4 sm:p-5">
-        <h3 className="text-base font-black sm:text-lg">{product.name}</h3>
-        <p className="mt-2 text-sm font-black text-steel">{strap}</p>
-        <p className="mt-3 text-xs font-black text-steel">{isOutOfStock ? "Vehicle-specific matching available via support" : "Now available in More Parts"}</p>
-        <div className="mt-4 grid gap-3 sm:flex sm:items-center sm:justify-between">
-          <p className="flex flex-wrap items-baseline gap-2">
-            <span className="text-lg font-black">{formatMoney(product.price)}</span>
-          </p>
-          <Link href={`/products/${product.slug}`} className="inline-flex h-10 items-center justify-center rounded bg-ink px-3 text-sm font-black text-white transition hover:-translate-y-0.5 hover:bg-black">
-            View Details
-          </Link>
-        </div>
-      </div>
-    </article>
+    <MorePartsCard
+      product={product}
+      minWidthClass="min-w-[260px]"
+      eyebrowOverride={isBundle ? "Lighting Bundles" : undefined}
+      badgeOverride={isBundle ? "Bundle" : isOutOfStock ? "Coming Soon" : "New"}
+      badgeToneOverride={isBundle ? "bg-signal" : isOutOfStock ? "bg-zinc-700" : "bg-ink"}
+      descriptionOverride={isOutOfStock ? "Vehicle-specific matching available via support." : strap}
+    />
   );
 }
 
@@ -427,26 +413,43 @@ function CategoryPill({
   );
 }
 
-function MorePartsCard({ product }: { product: Product }) {
+function MorePartsCard({
+  product,
+  minWidthClass,
+  eyebrowOverride,
+  badgeOverride,
+  badgeToneOverride,
+  descriptionOverride
+}: {
+  product: Product;
+  minWidthClass?: string;
+  eyebrowOverride?: string;
+  badgeOverride?: string | null;
+  badgeToneOverride?: string;
+  descriptionOverride?: string;
+}) {
   const image = productImage(product);
   const isComingSoon = product.slug === "vehicle-fit-battery" || product.slug === "vehicle-fit-oil-filter";
   const eyebrow =
-    product.slug === "premium-rear-wiper-blade"
+    eyebrowOverride ??
+    (product.slug === "premium-rear-wiper-blade"
       ? "Rear Wipers"
       : product.slug === "h11-headlight-license-plate-bulb-bundle"
         ? "Lighting Bundles"
         : product.slug === "vehicle-fit-battery"
           ? "Batteries"
-          : "Oil Filters";
+          : "Oil Filters");
+  const badge = badgeOverride ?? (isComingSoon ? "Coming Soon" : null);
+  const badgeTone = badgeToneOverride ?? "bg-zinc-700";
 
   return (
-    <article className="overflow-hidden rounded-xl border border-black/10 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-panel">
+    <article className={`${minWidthClass ?? ""} overflow-hidden rounded-xl border border-black/10 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-panel`}>
       <Link href={`/products/${product.slug}`} className="block">
         <div className="relative aspect-[4/3] bg-zinc-50">
           <Image src={image} alt={product.name} fill className="object-contain p-5" sizes="(min-width: 1280px) 25vw, (min-width: 768px) 50vw, 100vw" />
-          {isComingSoon ? (
-            <span className="absolute left-3 top-3 rounded bg-zinc-700 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-white">
-              Coming Soon
+          {badge ? (
+            <span className={`absolute left-3 top-3 rounded px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-white ${badgeTone}`}>
+              {badge}
             </span>
           ) : null}
         </div>
@@ -454,7 +457,7 @@ function MorePartsCard({ product }: { product: Product }) {
           <div>
             <p className="text-xs font-black uppercase tracking-[0.18em] text-signal">{eyebrow}</p>
             <h3 className="mt-2 text-xl font-black text-ink">{product.name}</h3>
-            <p className="mt-2 text-sm leading-6 text-steel">{product.description}</p>
+            <p className="mt-2 text-sm leading-6 text-steel">{descriptionOverride ?? product.description}</p>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-lg font-black text-ink">{formatMoney(product.price)}</span>
