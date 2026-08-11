@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { ShieldCheck, Truck, Wrench } from "lucide-react";
 import { notFound } from "next/navigation";
 import { ProductConfigurator } from "@/components/product-configurator";
@@ -23,6 +24,8 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
   const category = categories.find((entry) => entry.slug === product.category);
   const content = productDetailContent(product);
   const image = productImage(product);
+  const allVariantsOutOfStock = variants.length > 0 && variants.every((variant) => variant.stock <= 0);
+  const needsContactSupport = product.slug === "vehicle-fit-battery" || product.slug === "vehicle-fit-oil-filter";
 
   return (
     <main>
@@ -56,7 +59,26 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
             <p className="mt-4 text-lg leading-8 text-steel">{product.description}</p>
             <p className="mt-5 text-3xl font-black">{formatMoney(product.price)}</p>
           </div>
+          {needsContactSupport ? (
+            <section className="rounded-lg border border-signal/20 bg-[#F8FAFC] p-5">
+              <p className="text-sm font-black text-ink">Vehicle-specific fitment requires confirmation.</p>
+              <p className="mt-2 text-sm font-bold leading-6 text-steel">
+                Contact us with your make, model, year, and engine details before ordering so we can confirm the correct part.
+              </p>
+              <Link
+                href="/contact"
+                className="mt-4 inline-flex h-11 items-center justify-center rounded bg-ink px-4 text-sm font-black text-white transition hover:-translate-y-0.5 hover:bg-black"
+              >
+                Contact Us
+              </Link>
+            </section>
+          ) : null}
           <ProductConfigurator product={product} attributes={attributes} variants={variants} />
+          {allVariantsOutOfStock ? (
+            <p className="rounded-lg border border-black/10 bg-zinc-50 px-4 py-3 text-sm font-bold text-steel">
+              This product is currently out of stock.
+            </p>
+          ) : null}
           {product.category === "wiper" ? <WiperFitmentFinder compact /> : null}
         </section>
       </section>

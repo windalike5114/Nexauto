@@ -30,7 +30,7 @@ type ShopSearchParams = {
 
 export default async function ShopPage({ searchParams }: { searchParams: Promise<ShopSearchParams> }) {
   const params = await searchParams;
-  const { wiperSets, lightingProducts, error } = await loadShopData();
+  const { wiperSets, lightingProducts, accessoryProducts, error } = await loadShopData();
   const filteredWiperSets = applyShopFilters(wiperSets, params);
   const pageSize = getPageSize(params.show);
   const totalPages = Math.max(1, Math.ceil(filteredWiperSets.length / pageSize));
@@ -192,6 +192,23 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
               </div>
             </section>
           ) : null}
+
+          {accessoryProducts.length > 0 ? (
+            <section className="mt-10 border-t border-black/10 pt-8 sm:mt-12 sm:pt-10">
+              <div className="mb-4 sm:mb-5">
+                <p className="text-xs font-black uppercase tracking-[0.16em] text-signal sm:text-sm sm:tracking-[0.18em]">More Parts</p>
+                <h2 className="mt-2 text-xl font-black sm:text-2xl">Rear Wipers, Batteries & Filters</h2>
+                <p className="mt-2 max-w-2xl text-sm font-bold leading-6 text-steel">
+                  Browse the rear wiper range and upcoming vehicle-fit parts categories.
+                </p>
+              </div>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                {accessoryProducts.map((product) => (
+                  <ShopProductCard key={product.id} product={product} />
+                ))}
+              </div>
+            </section>
+          ) : null}
         </section>
       </div>
     </main>
@@ -200,13 +217,21 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
 
 async function loadShopData() {
   try {
-    const [wiperSets, bulbProducts] = await Promise.all([listWiperSets(), listProducts("bulb")]);
+    const [wiperSets, bulbProducts, wiperProducts, batteryProducts, filterProducts] = await Promise.all([
+      listWiperSets(),
+      listProducts("bulb"),
+      listProducts("wiper"),
+      listProducts("battery"),
+      listProducts("filter")
+    ]);
     const lightingProducts = pickShopLightingProducts(bulbProducts);
-    return { wiperSets, lightingProducts, error: "" };
+    const accessoryProducts = pickShopAccessoryProducts([...wiperProducts, ...batteryProducts, ...filterProducts]);
+    return { wiperSets, lightingProducts, accessoryProducts, error: "" };
   } catch (error) {
     return {
       wiperSets: [],
       lightingProducts: [],
+      accessoryProducts: [],
       error: error instanceof Error ? error.message : "Could not load Supabase wiper SKU data."
     };
   }
@@ -214,6 +239,12 @@ async function loadShopData() {
 
 function pickShopLightingProducts(products: Product[]) {
   const preferredSlugs = ["h11-headlight-license-plate-bulb-bundle"];
+  const bySlug = new Map(products.map((product) => [product.slug, product]));
+  return preferredSlugs.map((slug) => bySlug.get(slug)).filter((product): product is Product => Boolean(product));
+}
+
+function pickShopAccessoryProducts(products: Product[]) {
+  const preferredSlugs = ["premium-rear-wiper-blade", "vehicle-fit-battery", "vehicle-fit-oil-filter"];
   const bySlug = new Map(products.map((product) => [product.slug, product]));
   return preferredSlugs.map((slug) => bySlug.get(slug)).filter((product): product is Product => Boolean(product));
 }
@@ -291,6 +322,7 @@ function WiperSetCard({ wiperSet }: { wiperSet: WiperSet }) {
 
 function ShopProductCard({ product }: { product: Product }) {
   const image = productImage(product);
+  const meta = getShopProductMeta(product);
 
   return (
     <Link
@@ -299,9 +331,11 @@ function ShopProductCard({ product }: { product: Product }) {
       aria-label={`View ${product.name}`}
     >
       <div className="relative aspect-[1/0.72] bg-zinc-50 sm:aspect-[1/0.82]">
-        <span className="absolute left-2 top-2 z-10 rounded bg-signal px-2 py-1 text-[10px] font-black uppercase tracking-[0.1em] text-white sm:left-3 sm:top-3 sm:tracking-[0.12em]">
-          Bundle
-        </span>
+        {meta.badge ? (
+          <span className={`absolute left-2 top-2 z-10 rounded px-2 py-1 text-[10px] font-black uppercase tracking-[0.1em] text-white sm:left-3 sm:top-3 sm:tracking-[0.12em] ${meta.badgeTone}`}>
+            {meta.badge}
+          </span>
+        ) : null}
         {image ? (
           <Image
             src={image}
@@ -320,7 +354,7 @@ function ShopProductCard({ product }: { product: Product }) {
         <div>
           <h2 className="text-sm font-black leading-snug text-ink sm:text-base">{product.name}</h2>
           <p className="mt-1.5 text-sm font-black leading-5 text-steel sm:mt-2 sm:text-[15px]">
-            4 x H11 bulbs + licence plate lights
+            {meta.subtitle}
           </p>
         </div>
 
@@ -328,7 +362,7 @@ function ShopProductCard({ product }: { product: Product }) {
           <span className="text-lg font-black text-ink">{formatMoney(product.price)}</span>
         </div>
 
-        <p className="hidden text-xs font-black text-steel sm:block">Ships from Auckland</p>
+        <p className="hidden text-xs font-black text-steel sm:block">{meta.footnote}</p>
 
         <span className="inline-flex h-10 w-full items-center justify-center rounded bg-ink px-3 text-sm font-black text-white sm:h-[42px]">
           View Details
@@ -336,6 +370,33 @@ function ShopProductCard({ product }: { product: Product }) {
       </div>
     </Link>
   );
+}
+
+function getShopProductMeta(product: Product) {
+  if (product.slug === "h11-headlight-license-plate-bulb-bundle") {
+    return {
+      badge: "Bundle",
+      badgeTone: "bg-signal",
+      subtitle: "4 x H11 bulbs + licence plate lights",
+      footnote: "Ships from Auckland"
+    };
+  }
+
+  if (product.slug === "premium-rear-wiper-blade") {
+    return {
+      badge: "Rear Wiper",
+      badgeTone: "bg-ink",
+      subtitle: 'Selectable sizes from 8" to 16"',
+      footnote: "Vehicle fitment may vary"
+    };
+  }
+
+  return {
+    badge: "Out of stock",
+    badgeTone: "bg-zinc-600",
+    subtitle: "Contact us to confirm the correct fitment for your vehicle",
+    footnote: "Coming soon"
+  };
 }
 
 function ServicePill({ label }: { label: string }) {

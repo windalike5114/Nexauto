@@ -4,6 +4,7 @@ import type { Product } from "@/lib/types";
 const mainWiperProductImage = blobMediaAssets.images.find((asset) => asset.name === "nexautowiper1")?.url ?? "/products/wiper-blade.png";
 
 export function productImage(product: Product) {
+  if (product.slug === "premium-rear-wiper-blade") return "/products/rear-wiper-blade.jpg";
   if (product.category === "wiper") return mainWiperProductImage;
   if (product.category === "bulb") return "/products/halogen-bulb.png";
   return product.images[0] ?? "";
@@ -13,6 +14,27 @@ export function productDetailContent(product: Product) {
   const databaseSections = product.detailSections;
 
   if (product.category === "wiper") {
+    if (product.slug === "premium-rear-wiper-blade") {
+      return {
+        kicker: "Rear visibility support",
+        intro:
+          "A premium rear wiper blade option for vehicles that require a separate rear screen blade. Select the correct blade length, and contact us if you need help confirming fitment for your vehicle.",
+        highlights: ["Rear blade sizes 8 to 16 inch", "Quiet everyday wipe", "Suitable for NZ road conditions"],
+        sections: databaseSections.length
+          ? databaseSections
+          : [
+              {
+                title: "Rear window coverage",
+                body: "Designed for rear screen wiping performance where a separate rear blade is fitted. Choose the listed blade length that matches your vehicle requirement."
+              },
+              {
+                title: "Fitment support",
+                body: "Rear blade attachment styles can vary between vehicles. If you are unsure which rear blade size or fitting applies, contact NexAutoParts with your vehicle details before ordering."
+              }
+            ]
+      };
+    }
+
     return {
       kicker: "Built for daily visibility",
       intro:
@@ -70,6 +92,40 @@ export function productDetailContent(product: Product) {
             {
               title: "Expandable category logic",
               body: "The same attribute system can later support beam color, wattage, pack size, or premium bulb tiers."
+            }
+          ]
+    };
+  }
+
+  if (product.slug === "vehicle-fit-battery") {
+    return {
+      kicker: "Vehicle-specific battery supply",
+      intro:
+        "Battery fitment depends on the exact vehicle, engine bay layout, hold-down style, terminal orientation, and required cold-cranking performance. Contact us with your vehicle details so we can confirm the correct option.",
+      highlights: ["Vehicle-specific battery matching", "Contact before ordering", "Future stocked category"],
+      sections: databaseSections.length
+        ? databaseSections
+        : [
+            {
+              title: "Fitment confirmation required",
+              body: "Battery selection should be confirmed against the vehicle application before supply. This listing is provided so the category is visible while stocked options are being expanded."
+            }
+          ]
+    };
+  }
+
+  if (product.slug === "vehicle-fit-oil-filter") {
+    return {
+      kicker: "Engine-specific filter matching",
+      intro:
+        "Oil filter fitment depends on the exact engine and production application. Contact us with your vehicle details so we can confirm the correct oil filter before ordering.",
+      highlights: ["Engine-specific fitment", "Contact before ordering", "Future stocked category"],
+      sections: databaseSections.length
+        ? databaseSections
+        : [
+            {
+              title: "Fitment confirmation required",
+              body: "Oil filters vary by engine code and production range. This listing keeps the category visible while the full fitment-backed range is being prepared."
             }
           ]
     };

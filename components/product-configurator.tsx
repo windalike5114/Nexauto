@@ -26,9 +26,10 @@ export function ProductConfigurator({
   const { addItem } = useCart();
 
   const variant = useMemo(() => findMatchingVariant(variants, selected), [selected, variants]);
+  const available = Boolean(variant && variant.stock > 0);
 
   function handleAdd() {
-    if (!variant) return;
+    if (!variant || variant.stock <= 0) return;
 
     addItem({
       productId: product.id,
@@ -81,7 +82,9 @@ export function ProductConfigurator({
           </div>
           <div className="text-right">
             <p className="text-2xl font-black">{formatMoney(variant?.price ?? product.price)}</p>
-            <p className="text-xs font-bold text-steel">{variant ? `${variant.stock} in stock` : "Unavailable"}</p>
+            <p className="text-xs font-bold text-steel">
+              {variant ? (variant.stock > 0 ? `${variant.stock} in stock` : "Out of stock") : "Unavailable"}
+            </p>
           </div>
         </div>
       </div>
@@ -98,12 +101,12 @@ export function ProductConfigurator({
         </div>
         <button
           type="button"
-          disabled={!variant}
+          disabled={!available}
           onClick={handleAdd}
           className="inline-flex h-12 flex-1 items-center justify-center gap-2 rounded bg-signal px-5 font-black text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-zinc-300"
         >
           {added ? <Check className="h-5 w-5" /> : <ShoppingBag className="h-5 w-5" />}
-          {added ? "Added" : "Add to cart"}
+          {added ? "Added" : available ? "Add to cart" : "Out of stock"}
         </button>
       </div>
     </div>
