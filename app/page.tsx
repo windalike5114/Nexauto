@@ -337,35 +337,36 @@ function PopularWiperCard({ wiperSet }: { wiperSet: WiperSet }) {
   const compareAtPrice = wiperSet.compareAtPrice ?? wiperPairPricing.compareAtPrice;
 
   return (
-    <article className="min-w-[260px] overflow-hidden rounded-xl border border-black/10 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-panel">
-      <Link href={`/wipers/${wiperSet.sku}`} className="block">
-        <div className="relative aspect-[4/3] bg-zinc-50">
-          <Image src={image} alt={`${wiperSet.name} preview`} fill className="object-contain p-5" sizes="260px" />
-          <span className="absolute left-3 top-3 rounded bg-signal px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-white">
-            Sale
+    <Link
+      href={`/wipers/${wiperSet.sku}`}
+      className="block min-w-[260px] overflow-hidden rounded-xl border border-black/10 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-panel"
+    >
+      <div className="relative aspect-[4/3] bg-zinc-50">
+        <Image src={image} alt={`${wiperSet.name} preview`} fill className="object-contain p-5" sizes="260px" />
+        <span className="absolute left-3 top-3 rounded bg-signal px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-white">
+          Sale
+        </span>
+      </div>
+      <div className="space-y-3 p-5">
+        <div>
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-signal">Front Wiper Pairs</p>
+          <h3 className="mt-2 text-xl font-black text-ink">Front Wiper Blade Pair</h3>
+          <p className="mt-2 text-sm leading-6 text-steel">
+            Driver {wiperSet.driverLengthIn}" + Passenger {wiperSet.passengerLengthIn}" with launch sale pricing and waived NZ shipping.
+          </p>
+        </div>
+        <div className="flex items-center justify-between">
+          <span className="flex flex-wrap items-baseline gap-2">
+            <span className="text-lg font-black text-ink">{formatMoney(wiperSet.price)}</span>
+            <span className="text-xs font-bold text-steel line-through">{formatMoney(compareAtPrice)}</span>
+          </span>
+          <span className="inline-flex items-center gap-2 text-sm font-black text-ink">
+            View Details
+            <ArrowRight className="h-4 w-4" />
           </span>
         </div>
-        <div className="space-y-3 p-5">
-          <div>
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-signal">Front Wiper Pairs</p>
-            <h3 className="mt-2 text-xl font-black text-ink">Front Wiper Blade Pair</h3>
-            <p className="mt-2 text-sm leading-6 text-steel">
-              Driver {wiperSet.driverLengthIn}" + Passenger {wiperSet.passengerLengthIn}" with launch sale pricing and waived NZ shipping.
-            </p>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="flex flex-wrap items-baseline gap-2">
-              <span className="text-lg font-black text-ink">{formatMoney(wiperSet.price)}</span>
-              <span className="text-xs font-bold text-steel line-through">{formatMoney(compareAtPrice)}</span>
-            </span>
-            <span className="inline-flex items-center gap-2 text-sm font-black text-ink">
-              View Details
-              <ArrowRight className="h-4 w-4" />
-            </span>
-          </div>
-        </div>
-      </Link>
-    </article>
+      </div>
+    </Link>
   );
 }
 
