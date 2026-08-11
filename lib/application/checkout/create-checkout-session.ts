@@ -2,6 +2,7 @@ import { calculateOrderPricing, type CalculatedOrderPricing } from "@/lib/applic
 import { compareLegacyCartPricing } from "@/lib/application/pricing/pricing-comparison";
 import type { CouponBenefit, PricingInputItem } from "@/lib/application/pricing/pricing-input";
 import { fromMinorUnits, toMinorUnits } from "@/lib/domain/shared/money";
+import type { CheckoutShippingAddress } from "@/lib/domain/checkout/shipping-address";
 import type { CartItem } from "@/lib/types";
 import { CHECKOUT_CONTRACT_VERSION, PRICING_VERSION, type RewardState } from "./checkout-contract";
 import type { CreateCheckoutCommand } from "./checkout-command";
@@ -72,6 +73,7 @@ export type PendingCheckoutOrderInput = {
   checkoutRequestId: string;
   items: TrustedCheckoutItem[];
   customerEmail: string | null;
+  shippingAddress: CheckoutShippingAddress;
   vehicle: ReturnType<typeof buildVehicleMetadata>;
   currency: "nzd";
   pricing: {
@@ -100,6 +102,7 @@ export type StripeCheckoutSessionAdapterInput = {
   orderNumber: string;
   siteUrl: string;
   customerEmail: string | null;
+  shippingAddress: CheckoutShippingAddress;
   items: TrustedCheckoutItem[];
   vehicle: ReturnType<typeof buildVehicleMetadata>;
   pricing: CalculatedOrderPricing["result"];
@@ -143,6 +146,7 @@ export async function createCheckoutSession(command: CreateCheckoutCommand, depe
     checkoutRequestId: command.checkoutRequestId,
     items: trustedCheckoutItems,
     customerEmail: command.customer.email,
+    shippingAddress: command.shippingAddress,
     vehicle,
     currency: "nzd",
     pricing: {
@@ -175,6 +179,7 @@ export async function createCheckoutSession(command: CreateCheckoutCommand, depe
       orderNumber: pendingOrder.orderNumber,
       siteUrl: command.siteUrl,
       customerEmail: command.customer.email,
+      shippingAddress: command.shippingAddress,
       items: trustedCheckoutItems,
       vehicle,
       pricing,

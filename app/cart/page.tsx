@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Gift, Trash2 } from "lucide-react";
 import { useCart } from "@/components/cart-provider";
 import { formatAttributeName, formatMoney } from "@/lib/catalog";
@@ -24,8 +25,8 @@ export default function CartPage() {
     setCouponDraft,
     applyCoupon,
     clearCoupon,
-    getStableCheckoutRequestId
   } = useCart();
+  const router = useRouter();
   const selectedVehicle = getSelectedVehicle(items);
   const pricing = calculateCartPricing(items);
   const totals = calculateOrderTotals(pricing, couponDiscount + welcomeRewardDiscount);
@@ -36,25 +37,7 @@ export default function CartPage() {
       return;
     }
 
-    try {
-      const response = await fetch("/api/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "x-checkout-request-id": getStableCheckoutRequestId() },
-        body: JSON.stringify({
-          items,
-          couponCode: couponCode || undefined,
-          welcomeRewardApplied: welcomeRewardStatus === "applied"
-        })
-      });
-      const data = await readCheckoutResponse(response);
-      if (response.ok && data.url) {
-        window.location.href = data.url;
-        return;
-      }
-      alert(data.error ?? "Checkout could not be started. Please try again.");
-    } catch {
-      alert("Checkout could not be started. Please try again.");
-    }
+    router.push("/checkout");
   }
 
   return (
@@ -219,13 +202,13 @@ export default function CartPage() {
               {totals.discount > 0 ? <SummaryRow label="Discount" value={`-${formatMoney(totals.discount)}`} highlight /> : null}
               <SummaryRow label="Grand total" value={`NZD ${formatMoney(totals.grandTotal)}`} strong />
             </div>
-            <p className="mt-3 text-sm leading-6 text-steel">GST is included where applicable. Delivery address is confirmed in Stripe Checkout.</p>
+            <p className="mt-3 text-sm leading-6 text-steel">GST is included where applicable. Delivery address is confirmed before payment.</p>
             <button
               type="button"
               onClick={checkout}
               className="mt-5 h-12 w-full rounded bg-signal px-5 font-black text-white hover:bg-red-700"
             >
-              Checkout
+              Continue to checkout
             </button>
           </aside>
         </div>
@@ -269,16 +252,4 @@ function getVehicleLabel(item: ReturnType<typeof useCart>["items"][number]) {
   if (typeof vehicle === "string" && vehicle.trim()) return vehicle;
 
   return [item.attributes.vehicle_year, item.attributes.vehicle_make, item.attributes.vehicle_model].filter(Boolean).join(" ");
-}
-
-async function readCheckoutResponse(response: Response) {
-  const contentType = response.headers.get("content-type") ?? "";
-
-  if (contentType.includes("application/json")) {
-    return (await response.json()) as { url?: string; error?: string };
-  }
-
-  return {
-    error: response.ok ? "Checkout could not be started." : `Checkout is temporarily unavailable. Please try again.`
-  };
 }

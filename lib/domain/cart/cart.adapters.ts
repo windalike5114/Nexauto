@@ -3,6 +3,7 @@ import type { CartItem as LegacyCartItem } from "@/lib/types";
 import { isLooseUuid } from "@/lib/domain/shared/uuid";
 import { AttributeRecordSchema, AttributeValueSchema, CartItemSchema, CartVehicleContextSchema } from "./cart.schema";
 import type { Cart, CartItem } from "./cart.types";
+import { CheckoutShippingAddressSchema } from "@/lib/domain/checkout/shipping-address";
 
 export const LegacyCartItemSchema = z
   .object({
@@ -24,6 +25,13 @@ export const LegacyCartItemSchema = z
 export const LegacyCheckoutPayloadSchema = z
   .object({
     items: z.array(LegacyCartItemSchema).min(1),
+    customer: z
+      .object({
+        email: z.string().email().optional()
+      })
+      .strict()
+      .optional(),
+    shippingAddress: CheckoutShippingAddressSchema,
     couponCode: z.string().trim().min(1).max(64).optional(),
     welcomeRewardApplied: z.boolean().optional()
   })
@@ -49,6 +57,8 @@ export function adaptLegacyCartItemToCanonical(item: z.infer<typeof LegacyCartIt
 export function adaptLegacyCheckoutPayload(payload: LegacyCheckoutPayload): {
   cart: Cart;
   legacyItems: LegacyCartItem[];
+  customer: { email?: string };
+  shippingAddress: z.infer<typeof CheckoutShippingAddressSchema>;
   couponCode?: string;
   welcomeRewardApplied: boolean;
 } {
@@ -63,6 +73,8 @@ export function adaptLegacyCheckoutPayload(payload: LegacyCheckoutPayload): {
       }
     },
     legacyItems: payload.items.map((item) => item as LegacyCartItem),
+    customer: payload.customer ?? {},
+    shippingAddress: payload.shippingAddress,
     couponCode: payload.couponCode,
     welcomeRewardApplied: payload.welcomeRewardApplied ?? false
   };

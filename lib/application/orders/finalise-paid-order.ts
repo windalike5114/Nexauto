@@ -50,6 +50,7 @@ export type FinalisableOrder = {
   status: string;
   stripeSessionId: string | null;
   stripePaymentIntentId: string | null;
+  shippingAddress: Record<string, unknown>;
   itemsSnapshot: PendingOrderSnapshot;
 };
 

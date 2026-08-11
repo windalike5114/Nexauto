@@ -6,6 +6,17 @@ import { buildStripeSessionParams, createStripeCheckoutSessionAdapter, getStripe
 import type { CartItem } from "../lib/types";
 
 const vehicleApplicationId = "e8122c4c-8844-42cc-bc17-dc7117abd24c";
+const shippingAddress = {
+  recipientName: "Buyer One",
+  phone: "0211234567",
+  line1: "12 Queen Street",
+  suburb: "Auckland Central",
+  city: "Auckland",
+  region: "Auckland",
+  postcode: "1010",
+  country: "NZ" as const,
+  source: "manual" as const
+};
 
 function cartFrontPair(sku = "WPFP2418", vehicle = "Toyota Hilux 2018"): CartItem {
   return {
@@ -100,6 +111,7 @@ async function runCheckout(dependencies: CheckoutServiceDependencies, overrides:
       customer: {
         email: null
       },
+      shippingAddress,
       siteUrl: "https://nexautoparts.co.nz",
       ...overrides
     },
@@ -113,6 +125,7 @@ test("successful guest checkout returns checkout URL", async () => {
 
   assert.equal(result.checkoutUrl, "https://checkout.stripe.test/session");
   assert.equal(persisted.pendingOrders[0].customerEmail, null);
+  assert.deepEqual(persisted.pendingOrders[0].shippingAddress, shippingAddress);
   assert.equal(persisted.attached[0], "cs_test_1");
 });
 
@@ -302,6 +315,7 @@ test("Stripe adapter uses pending order id as the Stripe idempotency key", async
     orderNumber: "NEX00001",
     siteUrl: "https://nexautoparts.co.nz",
     customerEmail: null,
+    shippingAddress,
     items: [
       {
         cartItem,
@@ -400,7 +414,7 @@ test("Stripe metadata mapping is stable and compact", async () => {
   assert.equal("products_subtotal" in (params.metadata ?? {}), false);
 });
 
-test("Stripe checkout requires a New Zealand shipping address for wallet and BNPL methods", async () => {
+test("Stripe checkout uses pre-collected NexAutoParts shipping address instead of wallet shipping collection", async () => {
   let adapterInput: Parameters<typeof buildStripeSessionParams>[0] | null = null;
   const { dependencies } = baseDependencies({
     payments: {
@@ -416,8 +430,8 @@ test("Stripe checkout requires a New Zealand shipping address for wallet and BNP
 
   assert.deepEqual(params.payment_method_types, ["card", "afterpay_clearpay"]);
   assert.equal(params.billing_address_collection, "required");
-  assert.deepEqual(params.shipping_address_collection, { allowed_countries: ["NZ"] });
-  assert.equal(params.custom_text?.shipping_address?.message, "Please enter the delivery address where your order should be shipped.");
+  assert.equal(params.shipping_address_collection, undefined);
+  assert.equal(params.custom_text, undefined);
   assert.equal(params.customer_update, undefined);
 });
 

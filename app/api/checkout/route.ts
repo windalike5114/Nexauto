@@ -44,14 +44,16 @@ export async function POST(request: Request) {
   const checkoutRequestId = getCheckoutRequestId(request);
 
   try {
+    const customerEmail = user?.email ?? checkoutRequest.data.customer.email ?? null;
     const result = await createCheckoutSession(
       {
         checkoutRequestId,
         items: checkoutRequest.data.legacyItems,
+        shippingAddress: checkoutRequest.data.shippingAddress,
         couponCode: checkoutRequest.data.couponCode,
         welcomeRewardApplied: checkoutRequest.data.welcomeRewardApplied,
         customer: {
-          email: user?.email ?? null,
+          email: customerEmail,
           userId: user?.id ?? null
         },
         siteUrl: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"

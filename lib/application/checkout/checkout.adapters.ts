@@ -1,11 +1,14 @@
 import { ZodError } from "zod";
 import { adaptLegacyCheckoutPayload, LegacyCheckoutPayloadSchema } from "@/lib/domain/cart/cart.adapters";
 import type { Cart } from "@/lib/domain/cart/cart.types";
+import type { CheckoutShippingAddress } from "@/lib/domain/checkout/shipping-address";
 import type { CartItem as LegacyCartItem } from "@/lib/types";
 
 export type ValidatedCheckoutRequest = {
   cart: Cart;
   legacyItems: LegacyCartItem[];
+  customer: { email?: string };
+  shippingAddress: CheckoutShippingAddress;
   couponCode?: string;
   welcomeRewardApplied: boolean;
 };

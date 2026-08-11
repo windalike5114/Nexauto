@@ -33,6 +33,7 @@ function order(overrides: Partial<FinalisableOrder> = {}): FinalisableOrder {
     status: "pending",
     stripeSessionId: "cs_test_1",
     stripePaymentIntentId: null,
+    shippingAddress: { line1: "12 Queen Street", city: "Auckland", postcode: "1010", country: "NZ" },
     itemsSnapshot: {
       order_number: "NEX00001",
       items: [

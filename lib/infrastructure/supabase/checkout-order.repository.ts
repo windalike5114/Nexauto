@@ -14,10 +14,13 @@ export function createSupabaseCheckoutOrderRepository(): CheckoutOrderRepository
         .from("orders")
         .insert({
           email: input.customerEmail,
+          customer_name: input.shippingAddress.recipientName,
+          shipping_address: input.shippingAddress,
           items_snapshot: {
             checkout_version: input.pricing.checkoutVersion,
             pricing_version: input.pricing.pricingVersion,
             checkout_request_id: input.checkoutRequestId,
+            shipping_address: input.shippingAddress,
             items: itemsSnapshot,
             vehicle: input.vehicle,
             pricing: input.pricing,
@@ -46,6 +49,7 @@ export function createSupabaseCheckoutOrderRepository(): CheckoutOrderRepository
         pricing_version: input.pricing.pricingVersion,
         checkout_request_id: input.checkoutRequestId,
         order_number: orderNumber,
+        shipping_address: input.shippingAddress,
         items: itemsSnapshot,
         vehicle: input.vehicle,
         pricing: input.pricing,

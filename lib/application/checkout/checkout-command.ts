@@ -1,4 +1,5 @@
 import type { CartItem } from "@/lib/types";
+import type { CheckoutShippingAddress } from "@/lib/domain/checkout/shipping-address";
 
 export type CheckoutCustomerContext = {
   email: string | null;
@@ -8,6 +9,7 @@ export type CheckoutCustomerContext = {
 export type CreateCheckoutCommand = {
   checkoutRequestId: string;
   items: CartItem[];
+  shippingAddress: CheckoutShippingAddress;
   couponCode?: string;
   welcomeRewardApplied: boolean;
   customer: CheckoutCustomerContext;

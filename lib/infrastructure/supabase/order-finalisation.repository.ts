@@ -19,6 +19,7 @@ type OrderRow = {
   status: string;
   stripe_session_id: string | null;
   stripe_payment_intent_id: string | null;
+  shipping_address: Record<string, unknown> | null;
   items_snapshot: unknown;
 };
 
@@ -34,7 +35,7 @@ export function createSupabaseOrderFinalisationRepository(): OrderFinalisationRe
       for (const [column, value] of selectors) {
         const { data, error } = await supabase
           .from("orders")
-          .select("id,email,customer_name,subtotal,currency,status,stripe_session_id,stripe_payment_intent_id,items_snapshot")
+          .select("id,email,customer_name,subtotal,currency,status,stripe_session_id,stripe_payment_intent_id,shipping_address,items_snapshot")
           .eq(column, value)
           .maybeSingle();
         if (error) throw error;
@@ -49,6 +50,7 @@ export function createSupabaseOrderFinalisationRepository(): OrderFinalisationRe
       const orderNumber = getOrderNumberFromSnapshot(input.order.id, input.order.itemsSnapshot);
       const items = input.order.itemsSnapshot.items ?? [];
       const session = input.session;
+      const shippingAddress = getFulfilmentShippingAddress(input.order.shippingAddress, session.shipping_details?.address);
       const paymentIntentId = typeof session.payment_intent === "string" ? session.payment_intent : session.payment_intent?.id ?? null;
       const stripeSnapshot = {
         session_id: session.id,
@@ -70,7 +72,7 @@ export function createSupabaseOrderFinalisationRepository(): OrderFinalisationRe
         .update({
           email: session.customer_details?.email ?? session.customer_email ?? input.order.email,
           customer_name: session.customer_details?.name ?? input.order.customerName,
-          shipping_address: session.shipping_details?.address ?? {},
+          shipping_address: shippingAddress,
           billing_address: session.customer_details?.address ?? {},
           items_snapshot: finalSnapshot,
           pricing_snapshot: finalSnapshot.pricing ?? null,
@@ -101,7 +103,7 @@ export function createSupabaseOrderFinalisationRepository(): OrderFinalisationRe
         currency: session.currency ?? input.order.currency,
         items,
         vehicle: input.order.itemsSnapshot.vehicle,
-        shippingAddress: (session.shipping_details?.address ?? {}) as Record<string, unknown>,
+        shippingAddress,
         billingAddress: (session.customer_details?.address ?? {}) as Record<string, unknown>
       };
     },
@@ -244,8 +246,14 @@ function mapOrder(row: OrderRow): FinalisableOrder {
     status: row.status,
     stripeSessionId: row.stripe_session_id,
     stripePaymentIntentId: row.stripe_payment_intent_id,
+    shippingAddress: row.shipping_address ?? {},
     itemsSnapshot: normalizeSnapshot(row.items_snapshot)
   };
+}
+
+function getFulfilmentShippingAddress(preCollected: Record<string, unknown> | null | undefined, stripeAddress: Record<string, unknown> | null | undefined) {
+  if (preCollected && Object.keys(preCollected).length > 0) return preCollected;
+  return stripeAddress ?? {};
 }
 
 function normalizeSnapshot(value: unknown): PendingOrderSnapshot {

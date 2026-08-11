@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { validateCheckoutRequest } from "../lib/application/checkout/checkout.adapters";
 import { PricingDiscountLineSchema, PricingResultSchema } from "../lib/domain/pricing/pricing.schema";
 import { OrderDraftSchema, OrderStatusSchema } from "../lib/domain/orders/order.schema";
@@ -29,6 +30,20 @@ const validPayload = {
       }
     }
   ],
+  customer: {
+    email: "customer@example.co.nz"
+  },
+  shippingAddress: {
+    recipientName: "Customer One",
+    phone: "0211234567",
+    line1: "12 Queen Street",
+    suburb: "Auckland Central",
+    city: "Auckland",
+    region: "Auckland",
+    postcode: "1010",
+    country: "NZ",
+    source: "manual"
+  },
   couponCode: "SAVE20",
   welcomeRewardApplied: false
 };
@@ -42,6 +57,15 @@ test("valid cart payload is accepted and adapted to canonical cart", () => {
   assert.equal(result.data.cart.items[0].quantity, 1);
   assert.equal(result.data.cart.items[0].product.sku, "WPFP2418");
   assert.equal(result.data.cart.items[0].vehicle?.make, "Honda");
+  assert.equal(result.data.customer.email, "customer@example.co.nz");
+  assert.equal(result.data.shippingAddress.country, "NZ");
+});
+
+test("checkout payload without a NexAutoParts delivery address is rejected", () => {
+  const { shippingAddress: _shippingAddress, ...payloadWithoutAddress } = validPayload;
+  const result = validateCheckoutRequest(payloadWithoutAddress);
+
+  assert.equal(result.ok, false);
 });
 
 test("invalid quantity is rejected", () => {
@@ -248,4 +272,13 @@ test("existing CartProvider checkout payload remains compatible", () => {
 
   assert.equal(result.data.legacyItems[0].productId, "wiper_set");
   assert.equal(result.data.legacyItems[0].price, 59.99);
+});
+
+test("Geoapify address autocomplete keeps API key server side and restricts to NZ", () => {
+  const checkoutPage = readFileSync("app/checkout/page.tsx", "utf8");
+  const route = readFileSync("app/api/address/autocomplete/route.ts", "utf8");
+
+  assert.doesNotMatch(checkoutPage, /NEXT_PUBLIC_GEOAPIFY|api\.geoapify\.com/);
+  assert.match(route, /process\.env\.GEOAPIFY_API_KEY/);
+  assert.match(route, /countrycode:nz/);
 });

@@ -44,14 +44,6 @@ export function buildStripeSessionParams(input: StripeCheckoutSessionAdapterInpu
     customer_email: input.customerEmail ?? undefined,
     customer_creation: "if_required",
     billing_address_collection: "required",
-    shipping_address_collection: {
-      allowed_countries: ["NZ"]
-    },
-    custom_text: {
-      shipping_address: {
-        message: "Please enter the delivery address where your order should be shipped."
-      }
-    },
     shipping_options: [
       {
         shipping_rate_data: {

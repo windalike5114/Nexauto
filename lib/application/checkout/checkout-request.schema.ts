@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { CartSchema, CartVehicleContextSchema } from "@/lib/domain/cart/cart.schema";
+import { CheckoutShippingAddressSchema } from "@/lib/domain/checkout/shipping-address";
 
 export const CheckoutCustomerContextSchema = z
   .object({
@@ -14,6 +15,7 @@ export const CheckoutRequestSchema = z
     cart: CartSchema.optional(),
     customer: CheckoutCustomerContextSchema.optional(),
     vehicle: CartVehicleContextSchema.optional(),
+    shippingAddress: CheckoutShippingAddressSchema,
     couponCode: z.string().trim().min(1).max(64).optional(),
     welcomeRewardApplied: z.boolean().optional()
   })

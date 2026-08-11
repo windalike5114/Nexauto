@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { CheckCircle2, Gift, Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react";
 import { formatAttributeName, formatMoney } from "@/lib/catalog";
@@ -332,8 +333,8 @@ function CartDrawer({ recentlyAdded }: { recentlyAdded: CartItem | null }) {
     setCouponDraft,
     applyCoupon,
     clearCoupon,
-    getStableCheckoutRequestId
   } = useCart();
+  const router = useRouter();
   const drawerRef = useRef<HTMLDivElement | null>(null);
   const [checkingOut, setCheckingOut] = useState(false);
   const pricing = calculateCartPricing(items);
@@ -350,24 +351,8 @@ function CartDrawer({ recentlyAdded }: { recentlyAdded: CartItem | null }) {
     setCheckingOut(true);
 
     try {
-      const requestId = getStableCheckoutRequestId();
-      const response = await fetch("/api/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "x-checkout-request-id": requestId },
-        body: JSON.stringify({
-          items,
-          couponCode: couponCode || undefined,
-          welcomeRewardApplied: welcomeRewardStatus === "applied"
-        })
-      });
-      const data = await readCheckoutResponse(response);
-
-      if (response.ok && data.url) {
-        window.location.href = data.url;
-        return;
-      }
-
-      alert(data.error ?? "Checkout could not be started. Please try again.");
+      closeDrawer();
+      router.push("/checkout");
     } catch {
       alert("Checkout could not be started. Please try again.");
     } finally {
@@ -560,18 +545,6 @@ function readSavedCoupon() {
     window.localStorage.removeItem(couponStorageKey);
     return "";
   }
-}
-
-async function readCheckoutResponse(response: Response) {
-  const contentType = response.headers.get("content-type") ?? "";
-
-  if (contentType.includes("application/json")) {
-    return (await response.json()) as { url?: string; error?: string };
-  }
-
-  return {
-    error: response.ok ? "Checkout could not be started." : "Checkout is temporarily unavailable. Please try again."
-  };
 }
 
 function saveCouponCode(couponCode: string) {
