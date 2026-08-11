@@ -280,7 +280,7 @@ function mapOrder(row: OrderRow): AdminOrderDetailOrderRow {
   return {
     id: row.id,
     orderNumber: row.order_number ?? null,
-    legacyOrderNumber: getOrderNumberFromSnapshot(row.id, row.items_snapshot),
+    legacyOrderNumber: getOrderNumberFromSnapshot(row.items_snapshot) ?? "Order number pending",
     email: row.email,
     customerName: row.customer_name,
     customerProfileId: row.customer_profile_id,

@@ -219,7 +219,7 @@ export async function listCustomerOrders(emailInput: string) {
 
     return {
       id: order.id,
-      orderNumber: getOrderNumberFromSnapshot(order.id, order.items_snapshot),
+      orderNumber: getOrderNumberFromSnapshot(order.items_snapshot) ?? "Order processing",
       orderDate: order.created_at,
       status: customerStatus.label,
       paymentStatus: order.status,
@@ -316,7 +316,7 @@ async function hydrateCustomerOrders(supabase: ReturnType<typeof getAdminOrThrow
 
     return {
       id: order.id,
-      orderNumber: getOrderNumberFromSnapshot(order.id, order.items_snapshot),
+      orderNumber: getOrderNumberFromSnapshot(order.items_snapshot) ?? "Order processing",
       orderDate: order.created_at,
       status: customerStatus.label,
       paymentStatus: order.status,

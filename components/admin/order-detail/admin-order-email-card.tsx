@@ -30,7 +30,6 @@ export function AdminOrderEmailCard({
             </div>
             <dl className="mt-3 grid gap-2 text-xs font-bold text-steel">
               <Meta label="Updated" value={formatDate(event.displayTimestamp)} />
-              <Meta label="Provider ID" value={event.resendEmailId ?? "Not attached"} mono />
               <Meta label="Attempts" value={String(event.attemptCount ?? 0)} />
               <Meta label="Error" value={event.lastErrorSummary ?? event.errorCode ?? "None"} />
             </dl>
@@ -55,11 +54,11 @@ function canRetry(status: string) {
   return status === "failed" || status === "failed_retryable";
 }
 
-function Meta({ label, value, mono = false }: { label: string; value: string; mono?: boolean }) {
+function Meta({ label, value }: { label: string; value: string }) {
   return (
     <div>
       <dt className="uppercase tracking-[0.12em]">{label}</dt>
-      <dd className={`mt-1 break-all text-ink ${mono ? "font-mono" : ""}`}>{value}</dd>
+      <dd className="mt-1 break-all text-ink">{value}</dd>
     </div>
   );
 }

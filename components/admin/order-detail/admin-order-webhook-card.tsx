@@ -24,7 +24,6 @@ export function AdminOrderWebhookCard({
             <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <h3 className="font-black">{event.eventType}</h3>
-                <p className="mt-1 break-all font-mono text-xs font-bold text-steel">{event.stripeEventId}</p>
               </div>
               <span className={`w-fit rounded px-3 py-1 text-xs font-black uppercase tracking-[0.12em] ring-1 ${tone(event.classification)}`}>{event.status}</span>
             </div>

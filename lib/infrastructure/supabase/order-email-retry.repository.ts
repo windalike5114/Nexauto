@@ -115,7 +115,7 @@ function toFinalisedOrder(order: NonNullable<Awaited<ReturnType<typeof loadFinal
   const snapshot = order.items_snapshot ?? {};
   return {
     orderId: order.id,
-    orderNumber: snapshot.order_number ?? getOrderNumberFromSnapshot(order.id, snapshot),
+    orderNumber: snapshot.order_number ?? getOrderNumberFromSnapshot(snapshot) ?? "Order number pending",
     email: order.email,
     customerName: order.customer_name,
     subtotal: Number(order.subtotal),

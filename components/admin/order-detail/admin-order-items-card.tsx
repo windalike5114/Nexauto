@@ -21,14 +21,12 @@ export function AdminOrderItemsCard({ items }: { items: AdminOrderDetailItem[] }
                 <p className="mt-1 text-sm font-bold text-steel">Line total {formatMoney(item.lineTotal)}</p>
               </div>
             </div>
-            <dl className="mt-4 grid gap-2 text-xs font-bold text-steel sm:grid-cols-2">
-              <Meta label="Product type" value={item.productType.replace(/_/g, " ")} />
-              <Meta label="Line subtotal" value={item.lineSubtotal === null ? "Unavailable" : formatMoney(item.lineSubtotal)} />
-              <Meta label="Line discount" value={item.lineDiscount === null ? "Unavailable" : formatMoney(item.lineDiscount)} />
-              <Meta label="Wiper set ID" value={item.wiperSetId ?? "Not attached"} mono />
-              <Meta label="Vehicle application ID" value={item.vehicleApplicationId ?? "Not attached"} mono />
-              <Meta label="Source line key" value={item.sourceLineKey ?? "Not attached"} mono />
-            </dl>
+            {(item.lineSubtotal !== null || item.lineDiscount !== null) ? (
+              <dl className="mt-4 grid gap-2 text-xs font-bold text-steel sm:grid-cols-2">
+                {item.lineSubtotal !== null ? <Meta label="Line subtotal" value={formatMoney(item.lineSubtotal)} /> : null}
+                {item.lineDiscount !== null ? <Meta label="Line discount" value={formatMoney(item.lineDiscount)} /> : null}
+              </dl>
+            ) : null}
           </article>
         ))}
         {items.length === 0 ? <p className="text-sm font-bold text-steel">No item rows saved yet.</p> : null}
@@ -37,11 +35,11 @@ export function AdminOrderItemsCard({ items }: { items: AdminOrderDetailItem[] }
   );
 }
 
-function Meta({ label, value, mono = false }: { label: string; value: string; mono?: boolean }) {
+function Meta({ label, value }: { label: string; value: string }) {
   return (
     <div>
       <dt className="uppercase tracking-[0.12em]">{label}</dt>
-      <dd className={`mt-1 break-all text-ink ${mono ? "font-mono" : ""}`}>{value}</dd>
+      <dd className="mt-1 break-all text-ink">{value}</dd>
     </div>
   );
 }

@@ -7,7 +7,7 @@ import type {
 } from "@/lib/application/orders/finalise-paid-order";
 import type { OrderFinalisationRepository } from "@/lib/application/webhooks/process-stripe-event";
 import { isLooseUuid } from "@/lib/domain/shared/uuid";
-import { getOrderNumberFromSnapshot } from "@/lib/order-number";
+import { allocateOrderNumber } from "@/lib/order-number";
 import { createSupabaseAdminClient } from "@/lib/supabase";
 
 type OrderRow = {
@@ -47,7 +47,7 @@ export function createSupabaseOrderFinalisationRepository(): OrderFinalisationRe
 
     async finalisePaidOrder(input) {
       const supabase = getAdmin();
-      const orderNumber = getOrderNumberFromSnapshot(input.order.id, input.order.itemsSnapshot);
+      const orderNumber = await allocateOrderNumber(supabase, input.order.id);
       const items = input.order.itemsSnapshot.items ?? [];
       const session = input.session;
       const shippingAddress = getFulfilmentShippingAddress(input.order.shippingAddress, session.shipping_details?.address);

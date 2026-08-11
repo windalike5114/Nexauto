@@ -8,24 +8,15 @@ export function AdminOrderVehiclesCard({ vehicles }: { vehicles: AdminOrderDetai
         {vehicles.map((vehicle) => (
           <article key={vehicle.id} className="rounded border border-black/10 bg-zinc-50 p-4">
             <h3 className="font-black">{vehicle.label}</h3>
-            <dl className="mt-3 grid gap-2 text-xs font-bold text-steel">
-              <Meta label="Vehicle application ID" value={vehicle.vehicleApplicationId ?? "Not attached"} mono />
-              <Meta label="Customer vehicle ID" value={vehicle.customerVehicleId ?? "Not attached"} mono />
-              <Meta label="Fitment range" value={[vehicle.startRaw, vehicle.endRaw].filter(Boolean).join(" - ") || "Not stored"} />
-            </dl>
+            {[vehicle.startRaw, vehicle.endRaw].filter(Boolean).length ? (
+              <p className="mt-2 text-sm font-bold text-steel">
+                Fitment range: {[vehicle.startRaw, vehicle.endRaw].filter(Boolean).join(" - ")}
+              </p>
+            ) : null}
           </article>
         ))}
         {vehicles.length === 0 ? <p className="text-sm font-bold text-steel">No vehicle snapshot saved.</p> : null}
       </div>
     </section>
-  );
-}
-
-function Meta({ label, value, mono = false }: { label: string; value: string; mono?: boolean }) {
-  return (
-    <div>
-      <dt className="uppercase tracking-[0.12em]">{label}</dt>
-      <dd className={`mt-1 break-all text-ink ${mono ? "font-mono" : ""}`}>{value}</dd>
-    </div>
   );
 }

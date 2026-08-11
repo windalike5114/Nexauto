@@ -8,12 +8,8 @@ export function AdminOrderHeader({ order }: { order: AdminOrderDetail }) {
     <section className="rounded-lg border border-black/10 bg-white p-6 shadow-sm">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
-          <p className="font-mono text-xs font-bold uppercase tracking-[0.14em] text-steel">{order.identity.id}</p>
           <h1 className="mt-2 text-3xl font-black">Order {order.identity.orderNumber}</h1>
-          <p className="mt-2 text-sm font-bold text-steel">
-            {new Date(order.identity.createdAt).toLocaleString("en-NZ")}
-            {order.identity.orderNumberSource === "legacy_fallback" ? " · legacy order number fallback" : ""}
-          </p>
+          <p className="mt-2 text-sm font-bold text-steel">{new Date(order.identity.createdAt).toLocaleString("en-NZ")}</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Badge>{order.identity.status}</Badge>

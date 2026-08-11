@@ -27,7 +27,7 @@ export default async function CheckoutSuccessPage({ searchParams }: { searchPara
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-xs font-black uppercase tracking-[0.14em] text-steel">Order number</p>
-                <p className="mt-1 text-lg font-black">{order.orderNumber}</p>
+                <p className="mt-1 text-lg font-black">{order.orderNumber ?? "Allocating order number..."}</p>
               </div>
               <span className="rounded bg-white px-3 py-1 text-xs font-black uppercase tracking-[0.12em] text-steel">{order.status}</span>
             </div>
@@ -75,7 +75,7 @@ async function loadOrderByStripeSession(sessionId: string | undefined) {
 
   return {
     id: data.id as string,
-    orderNumber: getOrderNumberFromSnapshot(data.id as string, data.items_snapshot),
+    orderNumber: getOrderNumberFromSnapshot(data.items_snapshot),
     email: data.email as string | null,
     customerName: data.customer_name as string | null,
     subtotal: Number(data.subtotal),

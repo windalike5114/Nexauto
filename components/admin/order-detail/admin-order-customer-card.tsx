@@ -10,7 +10,6 @@ export function AdminOrderCustomerCard({ customer }: { customer: AdminOrderDetai
           <p className="mt-1 break-all text-sm font-bold text-steel">{customer.email ?? "No email"}</p>
           <p className="mt-1 text-sm font-bold text-steel">{customer.phone ?? "No phone"}</p>
           <p className="mt-3 text-xs font-black uppercase tracking-[0.12em] text-steel">{customer.accountType === "account" ? "Account order" : "Guest order"}</p>
-          {customer.customerProfileId ? <p className="mt-1 break-all font-mono text-xs font-bold text-steel">{customer.customerProfileId}</p> : null}
         </Info>
         <Info title="Shipping snapshot">
           <Address value={customer.shippingAddress} />

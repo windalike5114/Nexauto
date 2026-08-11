@@ -1,4 +1,3 @@
-import { allocateOrderNumber } from "@/lib/order-number";
 import { createSupabaseAdminClient } from "@/lib/supabase";
 import type { CheckoutOrderRepository, PendingCheckoutOrderInput } from "@/lib/application/checkout/create-checkout-session";
 import { isLooseUuid } from "@/lib/domain/shared/uuid";
@@ -43,12 +42,10 @@ export function createSupabaseCheckoutOrderRepository(): CheckoutOrderRepository
       }
 
       const orderId = order.id as string;
-      const orderNumber = await allocateOrderNumber(supabase, orderId);
       const snapshot = {
         checkout_version: input.pricing.checkoutVersion,
         pricing_version: input.pricing.pricingVersion,
         checkout_request_id: input.checkoutRequestId,
-        order_number: orderNumber,
         shipping_address: input.shippingAddress,
         items: itemsSnapshot,
         vehicle: input.vehicle,
@@ -109,7 +106,7 @@ export function createSupabaseCheckoutOrderRepository(): CheckoutOrderRepository
         if (vehicleError) throw new Error(vehicleError.message);
       }
 
-      return { id: orderId, orderNumber };
+      return { id: orderId, orderNumber: null };
     },
 
     async attachStripeSession(orderId, stripeSessionId) {

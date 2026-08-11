@@ -12,7 +12,6 @@ import type {
 } from "@/lib/application/admin/admin-order-list.types";
 import { adminPendingStaleAfterHours } from "@/lib/application/admin/admin-order-list.types";
 import type { AdminAccessContext } from "@/lib/domain/admin/admin-access.types";
-import { getOrderNumberFromSnapshot } from "@/lib/order-number";
 
 const fulfilmentPriority = ["issue", "pending", "selected", "packed", "fulfilled"];
 const failedEmailStatuses = new Set(["failed", "failed_retryable", "bounced", "complained"]);
@@ -69,7 +68,7 @@ export function mapOrderListItem(
 
   return {
     id: order.id,
-    orderNumber: order.orderNumber || getOrderNumberFromSnapshot(order.id, null),
+    orderNumber: order.orderNumber || "Order number pending",
     createdAt: order.createdAt,
     customerName: order.customerName,
     customerEmail: order.email,

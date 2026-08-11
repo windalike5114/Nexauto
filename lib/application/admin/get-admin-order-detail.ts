@@ -42,6 +42,7 @@ export async function getAdminOrderDetail(orderId: string, access: AdminAccessCo
 
   const data = await repository.loadOrderDetail(orderId, access);
   if (!data.order) throw new AdminOrderDetailNotFoundError();
+  if (!["paid", "refunded"].includes(data.order.status)) throw new AdminOrderDetailNotFoundError();
 
   const order = data.order;
   const vehicleSnapshots = data.vehicleSnapshots.map((vehicle): AdminOrderDetailVehicleSnapshot => ({
@@ -150,9 +151,6 @@ export function buildWarnings(input: {
   const warnings: AdminOrderDetailWarning[] = [];
   const wiperItems = input.items.filter((item) => item.productType !== "non_wiper");
 
-  if (input.pricing.source === "items_snapshot" || input.pricing.source === "order_items" || input.pricing.source === "legacy_unavailable") {
-    warnings.push(warning("pricing_snapshot_legacy", "information", "Legacy pricing basis", "This order is using a legacy pricing snapshot fallback for display.", false));
-  }
   if (input.pricing.invariant.matches === false) {
     warnings.push(warning("pricing_invariant_mismatch", "warning", "Pricing mismatch", "Stored pricing values do not reconcile. Preserve the historical amounts and review before fulfilment.", false));
   }

@@ -42,7 +42,7 @@ export type CheckoutCustomerRepository = {
 };
 
 export type CheckoutOrderRepository = {
-  createPendingOrder(input: PendingCheckoutOrderInput): Promise<{ id: string; orderNumber: string }>;
+  createPendingOrder(input: PendingCheckoutOrderInput): Promise<{ id: string; orderNumber: string | null }>;
   attachStripeSession(orderId: string, stripeSessionId: string): Promise<void>;
   markCheckoutSessionFailed(orderId: string, reason: string): Promise<void>;
 };
@@ -99,7 +99,7 @@ export type PendingCheckoutOrderInput = {
 export type StripeCheckoutSessionAdapterInput = {
   checkoutRequestId: string;
   orderId: string;
-  orderNumber: string;
+  orderNumber: string | null;
   siteUrl: string;
   customerEmail: string | null;
   stripeCustomerId?: string;
@@ -211,7 +211,6 @@ export async function createCheckoutSession(command: CreateCheckoutCommand, depe
   logger.info("checkout.completed", {
     ...logContext,
     orderId: pendingOrder.id,
-    orderNumber: pendingOrder.orderNumber,
     stripeSessionId: stripeSession.sessionId
   });
 

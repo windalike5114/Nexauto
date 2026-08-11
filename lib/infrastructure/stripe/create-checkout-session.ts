@@ -21,6 +21,14 @@ export function createStripeCheckoutSessionAdapter(stripe: Stripe): CheckoutPaym
 }
 
 export function buildStripeSessionParams(input: StripeCheckoutSessionAdapterInput): Stripe.Checkout.SessionCreateParams {
+  const invoiceMetadata: Stripe.MetadataParam = {
+    order_id: input.orderId,
+    checkout_request_id: input.checkoutRequestId,
+    checkout_version: CHECKOUT_CONTRACT_VERSION,
+    pricing_version: PRICING_VERSION
+  };
+  if (input.orderNumber) invoiceMetadata.order_number = input.orderNumber;
+
   return {
     mode: "payment",
     locale: "en",
@@ -31,14 +39,8 @@ export function buildStripeSessionParams(input: StripeCheckoutSessionAdapterInpu
     invoice_creation: {
       enabled: true,
       invoice_data: {
-        metadata: {
-          order_id: input.orderId,
-          order_number: input.orderNumber,
-          checkout_request_id: input.checkoutRequestId,
-          checkout_version: CHECKOUT_CONTRACT_VERSION,
-          pricing_version: PRICING_VERSION
-        },
-        description: `NexAutoParts order ${input.orderNumber}`
+        metadata: invoiceMetadata,
+        description: input.orderNumber ? `NexAutoParts order ${input.orderNumber}` : `NexAutoParts pending order ${input.orderId}`
       }
     },
     allow_promotion_codes: false,
@@ -102,7 +104,6 @@ async function createCheckoutCustomer(stripe: Stripe, input: StripeCheckoutSessi
       preferred_locales: ["en"],
       metadata: {
         order_id: input.orderId,
-        order_number: input.orderNumber,
         source: "nexauto_checkout"
       }
     },
@@ -126,15 +127,16 @@ function toStripeAddress(address: StripeCheckoutSessionAdapterInput["shippingAdd
 }
 
 function buildStripeMetadata(input: StripeCheckoutSessionAdapterInput): Stripe.MetadataParam {
-  return {
+  const metadata: Stripe.MetadataParam = {
     order_id: input.orderId,
-    order_number: input.orderNumber,
     checkout_request_id: input.checkoutRequestId,
     checkout_version: CHECKOUT_CONTRACT_VERSION,
     pricing_version: PRICING_VERSION,
     reward_requested: input.pricing.welcomeRewardMinor > 0 ? "true" : "false",
     source: "nexauto"
   };
+  if (input.orderNumber) metadata.order_number = input.orderNumber;
+  return metadata;
 }
 
 export function getStripeLineAmountTotal(items: TrustedCheckoutItem[]) {

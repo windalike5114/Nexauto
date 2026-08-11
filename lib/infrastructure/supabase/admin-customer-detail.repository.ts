@@ -193,7 +193,7 @@ function mapProfile(row: CustomerProfileRow): AdminCustomerDetailProfileRow {
 function mapOrder(row: OrderRow): AdminCustomerDetailOrderRow {
   return {
     id: row.id,
-    orderNumber: row.order_number ?? getOrderNumberFromSnapshot(row.id, row.items_snapshot ?? null),
+    orderNumber: row.order_number ?? getOrderNumberFromSnapshot(row.items_snapshot ?? null) ?? "Order number pending",
     email: row.email,
     customerName: row.customer_name,
     subtotal: Number(row.subtotal),

@@ -21,7 +21,6 @@ export function AdminOrderTimeline({ events, errors }: { events: AdminOrderDetai
                 <p className="mt-1 text-xs font-bold text-steel">{formatDate(event.timestamp)}</p>
               </div>
             </div>
-            {event.relatedIdentifier ? <p className="mt-3 break-all font-mono text-xs font-bold text-steel">{event.relatedIdentifier}</p> : null}
           </article>
         ))}
         {!events.length && !errors.length ? <p className="text-sm font-bold text-steel">No persisted timeline events recorded.</p> : null}

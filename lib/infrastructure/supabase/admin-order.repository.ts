@@ -61,6 +61,7 @@ type EmailRow = {
 const orderSelect = "id,order_number,email,customer_name,customer_profile_id,subtotal,currency,status,created_at";
 const legacyOrderSelect = "id,items_snapshot,email,customer_name,customer_profile_id,subtotal,currency,status,created_at";
 const failedEmailStatuses = ["failed", "failed_retryable", "bounced", "complained"];
+const visibleOrderStatuses = ["paid", "refunded"];
 
 export function createAdminOrderRepository(): AdminOrderListRepository {
   return {
@@ -232,9 +233,9 @@ async function listOrderIdsByFulfilmentStatus(status: string) {
 }
 
 function applyOrderFilters(request: SupabaseOrderFilter, query: AdminOrderListQuery, attentionOrderIds?: string[], fulfilmentOrderIds?: string[], includeOrderNumber = true) {
-  let next = request;
+  let next = request.in("status", visibleOrderStatuses);
   if (query.search) next = next.or(buildOrderSearchOrFilterWithOptions(query.search, { includeOrderNumber }));
-  if (query.orderStatus) next = next.eq("status", query.orderStatus);
+  if (query.orderStatus && visibleOrderStatuses.includes(query.orderStatus)) next = next.eq("status", query.orderStatus);
   if (query.dateFrom) next = next.gte("created_at", query.dateFrom);
   if (query.dateTo) next = next.lte("created_at", query.dateTo);
   if (attentionOrderIds) next = next.in("id", attentionOrderIds);
@@ -253,7 +254,7 @@ function applyOrderSort(request: SupabaseOrderFilter, sort: AdminOrderListQuery[
 function mapOrderRow(row: OrderRow): AdminOrderRow {
   return {
     id: row.id,
-    orderNumber: row.order_number ?? getOrderNumberFromSnapshot(row.id, row.items_snapshot ?? null),
+    orderNumber: row.order_number ?? getOrderNumberFromSnapshot(row.items_snapshot ?? null) ?? "",
     email: row.email,
     customerName: row.customer_name,
     customerProfileId: row.customer_profile_id,

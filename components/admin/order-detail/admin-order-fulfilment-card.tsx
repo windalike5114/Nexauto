@@ -32,9 +32,6 @@ export function AdminOrderFulfilmentCard({
                 <Meta label="Driver" value={formatLength(fulfilment.driverLengthIn)} />
                 <Meta label="Passenger" value={formatLength(fulfilment.passengerLengthIn)} />
                 <Meta label="Rear" value={formatLength(fulfilment.rearLengthIn)} />
-                <Meta label="Wiper set ID" value={fulfilment.wiperSetId ?? "Not attached"} mono />
-                <Meta label="Vehicle application ID" value={fulfilment.vehicleApplicationId ?? "Not attached"} mono />
-                <Meta label="Relationship" value={fulfilment.relationship.label} />
               </dl>
               <form action={action} className="mt-5 grid gap-3 lg:grid-cols-[repeat(4,minmax(0,1fr))_auto]">
                 <input type="hidden" name="fulfillmentId" value={fulfilment.id} />
@@ -77,11 +74,11 @@ function Field({ label, name, defaultValue }: { label: string; name: string; def
   );
 }
 
-function Meta({ label, value, mono = false }: { label: string; value: string; mono?: boolean }) {
+function Meta({ label, value }: { label: string; value: string }) {
   return (
     <div>
       <dt className="text-xs font-black uppercase tracking-[0.12em]">{label}</dt>
-      <dd className={`mt-1 break-all text-ink ${mono ? "font-mono text-xs" : ""}`}>{value}</dd>
+      <dd className="mt-1 break-all text-ink">{value}</dd>
     </div>
   );
 }

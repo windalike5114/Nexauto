@@ -14,7 +14,7 @@ export function AdminOrderFilters({ query }: { query: AdminOrderListQuery }) {
           className="mt-2 h-11 w-full rounded border border-black/10 bg-white px-3 text-sm font-bold outline-none focus:border-ink"
         />
       </label>
-      <Select label="Order status" name="orderStatus" value={query.orderStatus} options={["pending", "paid", "cancelled", "refunded", "failed"]} />
+      <Select label="Order status" name="orderStatus" value={query.orderStatus} options={["paid", "refunded"]} />
       <Select label="Fulfilment" name="fulfilmentStatus" value={query.fulfilmentStatus} options={["pending", "selected", "packed", "fulfilled", "issue"]} />
       <Select label="Sort" name="sort" value={query.sort} options={["order_desc", "order_asc", "created_desc", "created_asc"]} labels={sortLabels} />
       <Select label="Page size" name="pageSize" value={String(query.pageSize)} options={["25", "50", "100"]} />

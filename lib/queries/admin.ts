@@ -435,6 +435,7 @@ async function listAdminOrderRows() {
   const { data: ordersData, error: ordersError } = await supabase
     .from("orders")
     .select("id,email,customer_name,subtotal,currency,status,created_at,stripe_session_id,stripe_payment_intent_id,shipping_address,billing_address,items_snapshot")
+    .in("status", ["paid", "refunded"])
     .order("created_at", { ascending: false })
     .limit(50);
 
@@ -454,7 +455,7 @@ function mapAdminOrders(
   const fulfillmentByOrder = new Map(fulfillments.map((fulfillment) => [fulfillment.orderId, fulfillment]));
   return orders.map((order): AdminOrder => ({
     id: order.id,
-    orderNumber: getOrderNumberFromSnapshot(order.id, order.items_snapshot),
+    orderNumber: getOrderNumberFromSnapshot(order.items_snapshot) ?? "Order number pending",
     email: order.email,
     customerName: order.customer_name,
     subtotal: Number(order.subtotal),
@@ -667,6 +668,7 @@ async function listAdminCustomers() {
       .from("orders")
       .select("email,subtotal")
       .not("email", "is", null)
+      .in("status", ["paid", "refunded"])
       .limit(500)
   ]);
 
