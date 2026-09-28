@@ -76,6 +76,7 @@ function deps(overrides: Partial<StripeWebhookDependencies> = {}) {
     completed: [] as Array<{ status: string; relatedOrderId?: string | null; errorSummary?: string | null }>,
     finaliseCount: 0,
     emailCount: 0,
+    internalAlertCount: 0,
     enrichmentCount: 0,
     expired: 0,
     failed: 0
@@ -125,6 +126,10 @@ function deps(overrides: Partial<StripeWebhookDependencies> = {}) {
       async sendOrderConfirmation() {
         state.emailCount += 1;
         return "sent";
+      },
+      async sendNewOrderAlert() {
+        state.internalAlertCount += 1;
+        return "sent";
       }
     },
     logger: {
@@ -173,6 +178,7 @@ test("first paid event finalises order and sends email once", async () => {
   assert.equal(result.status, "processed");
   assert.equal(state.finaliseCount, 1);
   assert.equal(state.emailCount, 1);
+  assert.equal(state.internalAlertCount, 1);
   assert.equal(state.completed[0].status, "processed");
 });
 
@@ -287,6 +293,7 @@ test("checkout expired marks checkout expired and does not email", async () => {
   assert.equal(result.status, "processed_deferred");
   assert.equal(state.expired, 1);
   assert.equal(state.emailCount, 0);
+  assert.equal(state.internalAlertCount, 0);
 });
 
 test("payment_intent.payment_failed records failure without unrelated order mutation", async () => {
@@ -331,6 +338,10 @@ test("email failure is non-critical and event is processed", async () => {
       async sendOrderConfirmation() {
         state.emailCount += 1;
         return "failed_retryable";
+      },
+      async sendNewOrderAlert() {
+        state.internalAlertCount += 1;
+        return "sent";
       }
     }
   });
@@ -338,4 +349,27 @@ test("email failure is non-critical and event is processed", async () => {
 
   assert.equal(result.status, "processed");
   assert.equal(state.emailCount, 1);
+  assert.equal(state.internalAlertCount, 1);
+});
+
+test("internal order alert failure is non-critical and paid order still completes", async () => {
+  const { dependencies, state } = deps({
+    emails: {
+      async sendOrderConfirmation() {
+        state.emailCount += 1;
+        return "sent";
+      },
+      async sendNewOrderAlert() {
+        state.internalAlertCount += 1;
+        return "failed_retryable";
+      }
+    }
+  });
+
+  const result = await processStripeEvent(event(), dependencies);
+
+  assert.equal(result.status, "processed");
+  assert.equal(state.emailCount, 1);
+  assert.equal(state.internalAlertCount, 1);
+  assert.equal(state.finaliseCount, 1);
 });

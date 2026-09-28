@@ -7,6 +7,7 @@ export type EmailType =
   | "contact_internal"
   | "contact_confirmation"
   | "order_confirmation"
+  | "order_internal_notification"
   | "payment_confirmation"
   | "payment_failed"
   | "shipping_confirmation"

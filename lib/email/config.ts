@@ -1,6 +1,7 @@
 export const emailAddresses = {
   support: process.env.EMAIL_SUPPORT ?? "support@nexautoparts.co.nz",
   sales: process.env.EMAIL_SALES ?? "sales@nexautoparts.co.nz",
+  orders: process.env.EMAIL_ORDERS ?? "orders@nexautoparts.co.nz",
   info: process.env.EMAIL_INFO ?? "info@nexautoparts.co.nz",
   admin: process.env.EMAIL_ADMIN ?? "admin@nexautoparts.co.nz",
   accounts: process.env.EMAIL_ACCOUNTS ?? "accounts@nexautoparts.co.nz"

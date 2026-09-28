@@ -49,6 +49,7 @@ export type CustomerEnrichmentService = {
 
 export type OrderEmailService = {
   sendOrderConfirmation(order: FinalisedOrder): Promise<"sent" | "skipped" | "failed_retryable">;
+  sendNewOrderAlert(order: FinalisedOrder): Promise<"sent" | "skipped" | "failed_retryable">;
 };
 
 export type StripeWebhookLogger = {
@@ -145,6 +146,10 @@ async function processClaimedEvent(
       orderId: finalised.orderId
     });
     await dependencies.emails.sendOrderConfirmation(finalised);
+    await runNonCritical("new_order_alert", () => dependencies.emails.sendNewOrderAlert(finalised), logger, {
+      stripeEventId: command.id,
+      orderId: finalised.orderId
+    });
 
     return { received: true, status: "processed", orderId: finalised.orderId };
   }
@@ -276,7 +281,7 @@ function buildSourceLineKeys(snapshot: import("@/lib/application/orders/finalise
   return (snapshot.items ?? []).map((item, index) => String(item.source_line_key ?? item.attributes?.finalisation_line_key ?? item.attributes?.source_line_key ?? `line-${index}-${item.sku}`));
 }
 
-async function runNonCritical(name: string, fn: () => Promise<void>, logger: StripeWebhookLogger, context: Record<string, unknown>) {
+async function runNonCritical(name: string, fn: () => Promise<unknown>, logger: StripeWebhookLogger, context: Record<string, unknown>) {
   try {
     await fn();
   } catch (error) {
