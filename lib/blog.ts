@@ -17,6 +17,173 @@ export type BlogArticle = {
 
 export const blogArticles: BlogArticle[] = [
   {
+    slug: "new-auto-parts-now-available-at-nexautoparts",
+    title: "New Auto Parts Now Available at NexAutoParts",
+    seoTitle: "New Auto Parts Now Available at NexAutoParts NZ",
+    description:
+      "NexAutoParts has expanded beyond wiper blades with selected H11 bulbs, number plate lights, oil filters and vehicle-fit battery enquiries for New Zealand drivers.",
+    category: "NexAutoParts News",
+    publishedAt: "2026-08-11",
+    readingMinutes: 4,
+    intro: [
+      "NexAutoParts has expanded our replacement auto parts range beyond wiper blades.",
+      "Alongside our existing front and rear wiper products, we now offer selected H11 headlight bulbs, number plate lights, oil filters and vehicle-fit battery enquiries for common maintenance needs.",
+      "The goal is straightforward: make it easier for New Zealand drivers to source everyday replacement parts from one store, while still checking fitment properly before purchase where needed."
+    ],
+    sections: [
+      {
+        heading: "What is now available",
+        paragraphs: [
+          "Our current additions focus on practical replacement parts that customers often need alongside wipers or routine vehicle servicing.",
+          "These new lines are being introduced gradually so we can keep the product range clear, useful and easier to support."
+        ],
+        bullets: [
+          "H11 headlight bulbs",
+          "Number plate lights",
+          "Oil filters",
+          "Vehicle-fit battery enquiries",
+          "Rear wiper blade options"
+        ]
+      },
+      {
+        heading: "H11 headlight bulbs",
+        paragraphs: [
+          "H11 bulbs are commonly used in headlights and fog lights across a wide range of vehicles. If a bulb has failed or become noticeably dimmer, replacing it can improve visibility and restore a more even beam pattern.",
+          "Not every vehicle within the same model range uses the same bulb type, so checking compatibility first remains important."
+        ]
+      },
+      {
+        heading: "Number plate lights",
+        paragraphs: [
+          "Number plate lights are easy to overlook, but they are still part of the vehicle's required lighting system. We now stock selected replacement options suitable for common applications.",
+          "Some vehicles use a simple replaceable bulb, while others use a complete lamp assembly or LED unit, so customers should still confirm the correct setup before ordering if unsure."
+        ]
+      },
+      {
+        heading: "Oil filters and batteries",
+        paragraphs: [
+          "Oil filters and batteries are now being introduced as fitment-led parts rather than universal products. These are not items that should be selected by appearance alone.",
+          "The correct oil filter depends on the engine and filter specification. The correct battery depends on dimensions, terminal layout, battery type and electrical requirements."
+        ],
+        bullets: [
+          "Vehicle make and model are not always enough",
+          "Engine details can change the correct oil filter",
+          "Battery tray size alone does not guarantee the right battery",
+          "Registration or engine code can help confirm compatibility"
+        ]
+      },
+      {
+        heading: "If you are not sure which part fits",
+        paragraphs: [
+          "For products such as oil filters and batteries, the safest approach is to contact us before ordering. This avoids guesswork and reduces the chance of receiving a part that is close, but not correct.",
+          "When contacting NexAutoParts, send your vehicle details so we can check the available options properly."
+        ],
+        bullets: [
+          "Make",
+          "Model",
+          "Year",
+          "Engine size or engine code if known",
+          "Registration number if available"
+        ]
+      },
+      {
+        heading: "What this range expansion means",
+        paragraphs: [
+          "NexAutoParts is still focused on practical, fitment-aware parts rather than building a broad catalogue full of generic listings.",
+          "As the range grows, we will continue to add products where we can support clear fitment guidance and a better buying experience for New Zealand customers."
+        ]
+      }
+    ]
+  },
+  {
+    slug: "how-to-check-if-an-auto-part-fits-your-vehicle",
+    title: "How to Check if an Auto Part Fits Your Vehicle",
+    seoTitle: "How to Check if an Auto Part Fits Your Vehicle in NZ",
+    description:
+      "Learn why auto parts should be matched using more than make and model, and what vehicle details to check before ordering bulbs, oil filters, batteries and other fitment-sensitive parts.",
+    category: "Vehicle Parts Guide",
+    publishedAt: "2026-08-11",
+    readingMinutes: 5,
+    intro: [
+      "Finding a replacement auto part is not always as simple as searching by make and model.",
+      "Two vehicles with the same model name can still use different bulbs, filters, batteries or other service parts depending on engine, production year, trim level or market specification.",
+      "That is why fitment matters. The more accurate the vehicle details, the easier it is to confirm the correct part before ordering."
+    ],
+    sections: [
+      {
+        heading: "Start with the right vehicle details",
+        paragraphs: [
+          "Before choosing a replacement part, collect the basic vehicle information first. This is the simplest way to reduce mismatches and unnecessary returns.",
+          "Where possible, use the full vehicle details rather than relying only on a badge name."
+        ],
+        bullets: [
+          "Make",
+          "Model",
+          "Year",
+          "Engine size",
+          "Engine code if known",
+          "Registration number"
+        ]
+      },
+      {
+        heading: "Why make and model are not always enough",
+        paragraphs: [
+          "A single model range can run across different years, facelifts and engine options. Those changes can affect what part actually fits the vehicle.",
+          "This is especially important for products such as bulbs, oil filters and batteries, where the difference may not be obvious from the outside."
+        ]
+      },
+      {
+        heading: "Headlight bulbs",
+        paragraphs: [
+          "Headlight bulbs are matched by bulb type, not just by vehicle name. One version of a model may use an H11 bulb, while another may use a different base or application.",
+          "If you are replacing a failed bulb, check the existing bulb or confirm the vehicle specification before ordering."
+        ]
+      },
+      {
+        heading: "Oil filters",
+        paragraphs: [
+          "Oil filters are matched to the engine and filtration setup, not just the body shape or badge. The same model can use different engines over time, and those engines may require different filters.",
+          "If you have the existing filter number, engine code or registration number, that information can make fitment confirmation much more reliable."
+        ]
+      },
+      {
+        heading: "Car batteries",
+        paragraphs: [
+          "Choosing a battery involves more than physical size. Depending on the vehicle, you may also need the correct terminal position, battery technology, capacity and cold cranking performance.",
+          "A battery that appears to fit the tray may still be the wrong specification for the vehicle."
+        ],
+        bullets: [
+          "Dimensions",
+          "Terminal layout",
+          "Battery type",
+          "Capacity",
+          "Cold Cranking Amps (CCA)"
+        ]
+      },
+      {
+        heading: "Number plate lights and small lighting parts",
+        paragraphs: [
+          "Smaller lighting parts are usually more straightforward, but there can still be variation between bulb-only replacements and full lamp assemblies.",
+          "Checking the original part before ordering is still a sensible step."
+        ]
+      },
+      {
+        heading: "If you cannot find your vehicle online",
+        paragraphs: [
+          "Online catalogues do not always list every possible vehicle, engine or production variation. That does not necessarily mean the part is unavailable.",
+          "If your application is unclear, contact NexAutoParts with your vehicle details and we can help check the suitable option before you place the order."
+        ]
+      },
+      {
+        heading: "The safest way to buy fitment-sensitive parts",
+        paragraphs: [
+          "If you already know the exact part number, ordering is simple. If you are not certain, the better option is to confirm fitment first rather than guessing.",
+          "This is particularly important for oil filters and batteries, where the wrong specification can create unnecessary delays or extra cost."
+        ]
+      }
+    ]
+  },
+  {
     slug: "how-to-find-correct-wiper-blade-size",
     title: "How to Find the Right Wiper Blade Size for Your Car",
     seoTitle: "How to Find the Right Wiper Blade Size for Your Car",
