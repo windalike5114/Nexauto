@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { findWiperLengthFitments } from "@/lib/queries/wiper-fitment";
+import { findWiperLengthFitments, type WiperFitmentApplicationKind } from "@/lib/queries/wiper-fitment";
 import { getWiperRearAddonByLength, getWiperSetByLengths } from "@/lib/queries/wiper-commerce";
 
 export async function GET(request: Request) {
@@ -7,13 +7,19 @@ export async function GET(request: Request) {
   const makeId = searchParams.get("makeId");
   const modelId = searchParams.get("modelId");
   const year = Number(searchParams.get("year"));
+  const applicationId = searchParams.get("applicationId");
+  const applicationKind = searchParams.get("applicationKind");
 
   if (!makeId || !modelId || !Number.isFinite(year)) {
     return NextResponse.json({ error: "makeId, modelId, and year are required." }, { status: 400 });
   }
 
   try {
-    const fitments = await findWiperLengthFitments(makeId, modelId, year);
+    const selection =
+      applicationId && (applicationKind === "legacy" || applicationKind === "canonical")
+        ? { applicationId, applicationKind: applicationKind as WiperFitmentApplicationKind }
+        : undefined;
+    const fitments = await findWiperLengthFitments(makeId, modelId, year, selection);
     const enrichedFitments = await Promise.all(
       fitments.map(async (fitment) => {
         const [frontPair, rearAddon] = await Promise.all([

@@ -6,6 +6,7 @@ const forbiddenOwnershipFields = ["customerProfileId", "customer_profile_id", "a
 const BaseVehicleSchema = z
   .object({
     applicationId: z.string().uuid("Vehicle application id is invalid."),
+    applicationKind: z.enum(["legacy", "canonical"]).default("legacy"),
     year: z.coerce.number().int().min(1900).max(2100),
     label: z.string().trim().max(80).nullable().optional(),
     source: z.string().trim().max(40).optional(),
@@ -26,6 +27,7 @@ const BaseVehicleSchema = z
 
 export const CustomerVehicleInputSchema = BaseVehicleSchema.transform((value) => ({
   applicationId: value.applicationId,
+  applicationKind: value.applicationKind,
   year: value.year,
   label: normalizeOptionalText(value.label),
   source: normalizeOptionalText(value.source) ?? "fitment_lookup",
@@ -38,7 +40,7 @@ export const CustomerVehiclePatchSchema = z
   })
   .passthrough()
   .superRefine((value, context) => {
-    for (const field of [...forbiddenOwnershipFields, "applicationId", "vehicle_application_id", "year", "make", "model"]) {
+    for (const field of [...forbiddenOwnershipFields, "applicationId", "applicationKind", "vehicle_application_id", "vehicle_fitment_application_id", "year", "make", "model"]) {
       if (field in value) {
         context.addIssue({
           code: z.ZodIssueCode.custom,

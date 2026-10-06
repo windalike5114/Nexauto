@@ -81,7 +81,10 @@ export function adaptLegacyCheckoutPayload(payload: LegacyCheckoutPayload): {
 }
 
 function extractVehicleContext(attributes: z.infer<typeof AttributeRecordSchema>) {
-  const applicationId = asString(attributes.vehicle_application_id);
+  const canonicalApplicationId = asString(attributes.vehicle_fitment_application_id);
+  const legacyApplicationId = asString(attributes.vehicle_application_id);
+  const applicationId = canonicalApplicationId ?? legacyApplicationId;
+  const applicationKind = canonicalApplicationId ? "canonical" as const : legacyApplicationId ? "legacy" as const : undefined;
   const make = asString(attributes.vehicle_make);
   const model = asString(attributes.vehicle_model);
   const year = attributes.vehicle_year;
@@ -98,6 +101,7 @@ function extractVehicleContext(attributes: z.infer<typeof AttributeRecordSchema>
 
   return CartVehicleContextSchema.parse({
     applicationId,
+    applicationKind,
     make,
     model,
     year,

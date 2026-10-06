@@ -328,7 +328,7 @@ async function createPendingOrder(orders: CheckoutOrderRepository, input: Pendin
 }
 
 export function buildVehicleMetadata(items: TrustedCheckoutItem[]) {
-  const attributes = items.map((item) => item.attributes).find((entry) => entry.vehicle_application_id || entry.vehicle_make || entry.vehicle_model || entry.vehicle_year || entry.vehicle);
+  const attributes = items.map((item) => item.attributes).find((entry) => entry.vehicle_application_id || entry.vehicle_fitment_application_id || entry.vehicle_make || entry.vehicle_model || entry.vehicle_year || entry.vehicle);
 
   return toLegacyVehicleSnapshot(normalizeVehicleContext(attributes));
 }

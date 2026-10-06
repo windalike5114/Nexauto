@@ -106,25 +106,47 @@ export function createSupabaseCheckoutProductRepository(): CheckoutProductReposi
 }
 
 async function validateVehicleApplicationReferences(items: CartItem[]) {
-  const ids = [
+  const legacyIds = [
     ...new Set(
       items
         .map((item) => item.attributes.vehicle_application_id)
         .filter((value): value is string => typeof value === "string" && value.trim().length > 0)
     )
   ];
+  const canonicalIds = [
+    ...new Set(
+      items
+        .map((item) => item.attributes.vehicle_fitment_application_id)
+        .filter((value): value is string => typeof value === "string" && value.trim().length > 0)
+    )
+  ];
 
-  if (!ids.length) return;
-  if (ids.some((id) => !isLooseUuid(id))) {
+  if (!legacyIds.length && !canonicalIds.length) return;
+  if ([...legacyIds, ...canonicalIds].some((id) => !isLooseUuid(id))) {
     throw new ProductUnavailableError("Vehicle fitment reference is invalid.");
   }
 
   const supabase = createSupabaseAdminClient();
   if (!supabase) throw new ProductUnavailableError("Vehicle fitment could not be verified.");
-  const { data, error } = await supabase.from("vehicle_applications").select("id").in("id", ids);
+  const [legacyResult, canonicalResult] = await Promise.all([
+    legacyIds.length
+      ? supabase.from("vehicle_applications").select("id").in("id", legacyIds).eq("active", true)
+      : Promise.resolve({ data: [], error: null }),
+    canonicalIds.length
+      ? supabase
+          .from("vehicle_fitment_applications")
+          .select("id,vehicle_wiper_fitments!inner(id,fitment_status,wiper_configurations!inner(configuration_status))")
+          .in("id", canonicalIds)
+          .eq("active", true)
+          .eq("fitment_status", "published")
+          .eq("vehicle_wiper_fitments.fitment_status", "published")
+          .eq("vehicle_wiper_fitments.wiper_configurations.configuration_status", "published")
+      : Promise.resolve({ data: [], error: null })
+  ]);
 
-  if (error) throw error;
-  if ((data ?? []).length !== ids.length) {
+  if (legacyResult.error) throw legacyResult.error;
+  if (canonicalResult.error) throw canonicalResult.error;
+  if ((legacyResult.data ?? []).length !== legacyIds.length || (canonicalResult.data ?? []).length !== canonicalIds.length) {
     throw new ProductUnavailableError("Vehicle fitment reference is no longer available.");
   }
 }

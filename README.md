@@ -83,15 +83,35 @@ Run these SQL files in Supabase SQL Editor when setting up a fresh database:
 supabase/schema.sql
 supabase/fitment_schema.sql
 supabase/wiper_commerce_schema.sql
+supabase/migrations/20261006_vehicle_catalog_v2.sql
 ```
+
+The V2 migration adds canonical generation, variant, chassis, source mapping,
+review, wiper configuration, and reusable product fitment tables without
+removing the legacy fitment tables. See `docs/vehicle-catalog-v2-upgrade.md`
+for the staged cutover plan.
 
 Then import fitment data and verify:
 
 ```bash
+npm run vehicle-catalog:report
+npm run vehicle-catalog:import
+npm run wiper-sources:report
+npm run wiper-sources:import
 npm run fitment:import
 npm run fitment:check
 npm run wiper-commerce:check
 ```
+
+Run `vehicle-catalog:report` before every V2 import. Records marked `review`
+remain in the source and review tables but are not promoted into canonical
+generation, variant, chassis, or application records.
+
+`wiper-sources:report` is read-only and compares all four supplied wiper
+workbooks against the Machter backbone. `wiper-sources:import` stages the
+reviewed report in V2; it never publishes a fitment automatically. See
+`docs/vehicle-catalog-review-notes.md` for current counts and manual-review
+items.
 
 ## Wiper SKU Flow
 

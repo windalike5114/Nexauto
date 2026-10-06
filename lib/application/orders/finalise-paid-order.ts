@@ -14,6 +14,7 @@ export type PendingOrderSnapshotItem = {
   bundle_discount?: number;
   source_line_key?: string;
   vehicle_application_id?: string | null;
+  vehicle_fitment_application_id?: string | null;
   wiper_set_id?: string | null;
   vehicle_snapshot?: Record<string, unknown>;
   product_snapshot?: Record<string, unknown>;
@@ -27,6 +28,7 @@ export type PendingOrderSnapshot = {
   items?: PendingOrderSnapshotItem[];
   vehicle?: {
     a?: string | number | null;
+    k?: string | number | null;
     make?: string | number | null;
     model?: string | number | null;
     year?: string | number | null;

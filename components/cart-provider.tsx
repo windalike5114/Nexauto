@@ -758,6 +758,7 @@ function buildLineId(item: CartItem) {
     item.variantId,
     item.sku,
     String(item.attributes.vehicle_application_id ?? ""),
+    String(item.attributes.vehicle_fitment_application_id ?? ""),
     String(item.attributes.vehicle ?? ""),
     stableAttributeSignature(item.attributes)
   ].join("|");
@@ -797,5 +798,5 @@ function getVehicleLabel(item: CartItem) {
 }
 
 function isCustomerVisibleAttribute(key: string) {
-  return !["vehicle", "vehicle_application_id", "vehicle_make", "vehicle_model", "vehicle_year"].includes(key);
+  return !["vehicle", "vehicle_application_id", "vehicle_fitment_application_id", "vehicle_make", "vehicle_model", "vehicle_year"].includes(key);
 }

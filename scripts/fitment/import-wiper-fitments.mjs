@@ -3,6 +3,7 @@ import path from "node:path";
 import process from "node:process";
 import { createClient } from "@supabase/supabase-js";
 import XLSX from "xlsx";
+import { normalizeWiperLength } from "./wiper-normalization.mjs";
 
 const DEFAULT_FILE = "C:\\Users\\Sanli\\Desktop\\CAT078.xlsx";
 const SOURCE_NAME = "CAT078";
@@ -102,7 +103,11 @@ function parseWorkbook(inputPath, options) {
         const end = parseMonthYear(values[2]);
         const driver = chooseLength(values[3], "D", values[5], "F");
         const passenger = chooseLength(values[4], "E", values[6], "G");
-        const rear = extractLength(values[7]);
+        const rear = extractLength(values[7], "rear");
+
+        for (const length of [driver, passenger, rear]) {
+          if (length.issue) notes.push(length.issue);
+        }
 
         if (!start.ok) notes.push(`Could not parse start date: ${values[1]}`);
         if (!end.ok) notes.push(`Could not parse end date: ${values[2]}`);
@@ -194,9 +199,13 @@ function parseBrandModelWorkbook(rawRows, inputPath, options, sheetName) {
       const brand = cleanText(values[0]);
       const model = cleanText(values[1]);
       const detail = cleanText(values[2]);
-      const driver = extractLength(values[3]);
-      const passenger = extractLength(values[4]);
-      const rear = extractLength(values[5]);
+      const driver = extractLength(values[3], "front");
+      const passenger = extractLength(values[4], "front");
+      const rear = extractLength(values[5], "rear");
+
+      for (const length of [driver, passenger, rear]) {
+        if (length.issue) notes.push(length.issue);
+      }
 
       if (brand) currentMake = brand;
 
@@ -270,8 +279,8 @@ function findBrandModelFrontConflictKeys(rawRows) {
     const brand = values[0];
     const model = values[1];
     const detail = values[2];
-    const driver = extractLength(values[3]);
-    const passenger = extractLength(values[4]);
+    const driver = extractLength(values[3], "front");
+    const passenger = extractLength(values[4], "front");
 
     if (brand) currentMake = brand;
     if (!currentMake || !model || !detail || !driver.value || !passenger.value) return;
@@ -411,28 +420,26 @@ function parseMonthYear(value) {
 }
 
 function chooseLength(primaryValue, primarySource, fallbackValue, fallbackSource) {
-  const primary = extractLength(primaryValue);
+  const primary = extractLength(primaryValue, "front");
   if (primary.value) {
-    return { value: primary.value, source: primarySource, raw: primary.raw };
+    return { value: primary.value, source: primarySource, raw: primary.raw, issue: null };
   }
 
-  const fallback = extractLength(fallbackValue);
+  const fallback = extractLength(fallbackValue, "front");
   if (fallback.value) {
-    return { value: fallback.value, source: fallbackSource, raw: fallback.raw };
+    return { value: fallback.value, source: fallbackSource, raw: fallback.raw, issue: null };
   }
 
-  return { value: null, source: null, raw: "" };
+  return {
+    value: null,
+    source: null,
+    raw: primary.raw || fallback.raw,
+    issue: primary.issue || fallback.issue
+  };
 }
 
-function extractLength(value) {
-  const raw = cleanText(value);
-  const match = raw.match(/\d+(?:\.\d+)?/);
-
-  if (!match) {
-    return { value: null, raw };
-  }
-
-  return { value: Number(match[0]), raw };
+function extractLength(value, position) {
+  return normalizeWiperLength(value, position);
 }
 
 function buildReport(parsed) {
@@ -458,7 +465,8 @@ function buildReport(parsed) {
     total_rows: parsed.rows.length,
     counts,
     status_counts: statusCounts,
-    importable_rows: okRows.filter(hasAnyLength).length,
+    importable_rows: okRows.filter(isImportableRow).length,
+    review_rows: okRows.filter((row) => hasAnyLength(row) && hasBlockingLengthIssue(row)).length,
     warning_sample: warnings.slice(0, 25),
     error_sample: errors.slice(0, 25)
   };
@@ -480,10 +488,25 @@ function hasAnyLength(row) {
   return Boolean(values.driver_length_in || values.passenger_length_in || values.rear_length_in);
 }
 
+function hasBlockingLengthIssue(row) {
+  return row.parse_notes.some((note) => (
+    note.startsWith("Unsupported ") || note.startsWith("Unmapped ")
+  ));
+}
+
+function isImportableRow(row) {
+  return (
+    (row.parse_status === "ok" || row.parse_status === "warning")
+    && hasAnyLength(row)
+    && !hasBlockingLengthIssue(row)
+  );
+}
+
 function printReport(report, reportPath) {
   console.log(`Fitment report written to ${reportPath}`);
   console.log(`Rows: ${report.total_rows}`);
   console.log(`Importable wiper rows: ${report.importable_rows}`);
+  console.log(`Wiper rows requiring size review: ${report.review_rows}`);
   console.log(`Row types: ${JSON.stringify(report.counts)}`);
   console.log(`Statuses: ${JSON.stringify(report.status_counts)}`);
 
@@ -542,9 +565,7 @@ async function importToSupabase(parsed, report) {
   }));
   await insertChunks(supabase, "fitment_import_rows", rowsToInsert, 500);
 
-  const importableRows = parsed.rows.filter((row) => (
-    (row.parse_status === "ok" || row.parse_status === "warning") && hasAnyLength(row)
-  ));
+  const importableRows = parsed.rows.filter(isImportableRow);
 
   const makeNames = [...new Set(importableRows.map((row) => row.parsed_values.make))];
   await insertChunks(

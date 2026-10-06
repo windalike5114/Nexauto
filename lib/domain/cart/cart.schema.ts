@@ -23,6 +23,7 @@ export const CartProductReferenceSchema = z
 export const CartVehicleContextSchema = z
   .object({
     applicationId: z.string().trim().min(1).optional(),
+    applicationKind: z.enum(["legacy", "canonical"]).optional(),
     make: z.string().trim().min(1).optional(),
     model: z.string().trim().min(1).optional(),
     year: z.coerce.number().int().min(1900).max(2100).optional(),

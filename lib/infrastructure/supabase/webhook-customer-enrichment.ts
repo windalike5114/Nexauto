@@ -13,6 +13,7 @@ export function createWebhookCustomerEnrichmentService(): CustomerEnrichmentServ
           order.email,
           {
             applicationId: String(order.vehicle.a),
+            applicationKind: order.vehicle.k === "canonical" ? "canonical" : "legacy",
             make: String(order.vehicle.make),
             model: String(order.vehicle.model),
             year: Number(order.vehicle.year)

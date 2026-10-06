@@ -8,6 +8,7 @@ export const LooseUuidSchema = z
 
 export type NormalizedVehicleContext = {
   applicationId: string | null;
+  applicationKind: "legacy" | "canonical" | null;
   make: string | null;
   model: string | null;
   year: number | null;
@@ -24,7 +25,10 @@ export type NormalizedVehicleContext = {
 export function normalizeVehicleContext(input: Record<string, unknown> | null | undefined): NormalizedVehicleContext | null {
   if (!input) return null;
 
-  const applicationId = normalizeOptionalUuid(input.applicationId ?? input.vehicle_application_id);
+  const canonicalApplicationId = normalizeOptionalUuid(input.vehicle_fitment_application_id);
+  const legacyApplicationId = normalizeOptionalUuid(input.applicationId ?? input.vehicle_application_id);
+  const applicationId = canonicalApplicationId ?? legacyApplicationId;
+  const applicationKind = canonicalApplicationId ? "canonical" : applicationId ? "legacy" : null;
   const make = cleanString(input.make ?? input.vehicle_make);
   const model = cleanString(input.model ?? input.vehicle_model);
   const year = normalizeYear(input.year ?? input.vehicle_year);
@@ -42,6 +46,7 @@ export function normalizeVehicleContext(input: Record<string, unknown> | null | 
 
   return {
     applicationId,
+    applicationKind,
     make,
     model,
     year,
@@ -61,6 +66,7 @@ export function toLegacyVehicleSnapshot(vehicle: NormalizedVehicleContext | null
 
   return {
     a: vehicle.applicationId,
+    k: vehicle.applicationKind,
     m: vehicle.make,
     d: vehicle.model,
     y: vehicle.year,

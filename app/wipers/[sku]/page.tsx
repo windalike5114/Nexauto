@@ -15,6 +15,7 @@ export const dynamic = "force-dynamic";
 type WiperSkuSearchParams = {
   vehicle?: string;
   applicationId?: string;
+  applicationKind?: "legacy" | "canonical";
   make?: string;
   model?: string;
   year?: string;
@@ -62,6 +63,7 @@ export default async function WiperSkuPage({
     query.applicationId && query.make && query.model && query.year
       ? {
           applicationId: query.applicationId,
+          applicationKind: query.applicationKind === "canonical" ? "canonical" as const : "legacy" as const,
           make: decodeURIComponent(query.make),
           model: decodeURIComponent(query.model),
           year: Number(query.year)

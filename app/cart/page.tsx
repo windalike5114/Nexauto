@@ -218,7 +218,7 @@ export default function CartPage() {
 }
 
 function getCartLineId(item: ReturnType<typeof useCart>["items"][number]) {
-  return item.lineId ?? [item.productId, item.variantId, item.sku, item.attributes.vehicle_application_id ?? "", item.attributes.vehicle ?? ""].join("|");
+  return item.lineId ?? [item.productId, item.variantId, item.sku, item.attributes.vehicle_application_id ?? "", item.attributes.vehicle_fitment_application_id ?? "", item.attributes.vehicle ?? ""].join("|");
 }
 
 function getSelectedVehicle(items: ReturnType<typeof useCart>["items"]) {
@@ -244,7 +244,7 @@ function SummaryRow({ label, value, highlight = false, strong = false }: { label
 }
 
 function isCustomerVisibleAttribute(key: string) {
-  return !["vehicle", "vehicle_application_id", "vehicle_make", "vehicle_model", "vehicle_year"].includes(key);
+  return !["vehicle", "vehicle_application_id", "vehicle_fitment_application_id", "vehicle_make", "vehicle_model", "vehicle_year"].includes(key);
 }
 
 function getVehicleLabel(item: ReturnType<typeof useCart>["items"][number]) {

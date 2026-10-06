@@ -22,8 +22,18 @@ test("valid saved vehicle input is normalized", () => {
     label: "  Hilux work ute  "
   });
   assert.equal(parsed.year, 2018);
+  assert.equal(parsed.applicationKind, "legacy");
   assert.equal(parsed.label, "Hilux work ute");
   assert.equal(parsed.source, "fitment_lookup");
+});
+
+test("canonical saved vehicle input preserves application kind", () => {
+  const parsed = parseCustomerVehicleInput({
+    applicationId: "11111111-1111-4111-8111-111111111111",
+    applicationKind: "canonical",
+    year: 2022
+  });
+  assert.equal(parsed.applicationKind, "canonical");
 });
 
 test("saved vehicle input rejects browser ownership fields", () => {
@@ -115,6 +125,7 @@ test("customer vehicle migration contains RPC/RLS/default hardening", () => {
 function vehicleInput(applicationId: string, year: number): CustomerVehicleInput {
   return {
     applicationId,
+    applicationKind: "legacy",
     year,
     label: null,
     source: "fitment_lookup",

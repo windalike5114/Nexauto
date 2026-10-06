@@ -10,10 +10,19 @@ type FinderOption = {
   name: string;
 };
 
+type FinderVariantOption = FinderOption & {
+  key: string;
+  applicationKind: "legacy" | "canonical";
+};
+
 type FitmentResult = {
   applicationId: string;
+  applicationKind: "legacy" | "canonical";
   make: string;
   model: string;
+  generationName: string | null;
+  variantName: string | null;
+  bodyStyle: string | null;
   startRaw: string | null;
   endRaw: string | null;
   driverLengthIn: number | null;
@@ -44,7 +53,7 @@ export function WiperFitmentFinder({
   compact = false,
   directToProduct = false,
   title = "Find wiper sizes by vehicle",
-  description = "Select make, model, and year to check blade lengths before choosing your wiper variant.",
+  description = "Select make, model, year, and body variant to check the correct blade lengths.",
   directButtonLabel = "Find wipers for my car",
   footnote,
   onVehicleSaved
@@ -61,9 +70,11 @@ export function WiperFitmentFinder({
   const [makes, setMakes] = useState<FinderOption[]>([]);
   const [models, setModels] = useState<FinderOption[]>([]);
   const [years, setYears] = useState<number[]>([]);
+  const [variants, setVariants] = useState<FinderVariantOption[]>([]);
   const [makeId, setMakeId] = useState("");
   const [modelId, setModelId] = useState("");
   const [year, setYear] = useState("");
+  const [variantKey, setVariantKey] = useState("");
   const [fitments, setFitments] = useState<FitmentResult[]>([]);
   const [loading, setLoading] = useState("makes");
   const [error, setError] = useState("");
@@ -113,6 +124,11 @@ export function WiperFitmentFinder({
     if (!makeId) {
       setModels([]);
       setModelId("");
+      setYears([]);
+      setYear("");
+      setVariants([]);
+      setVariantKey("");
+      setFitments([]);
       return;
     }
 
@@ -121,6 +137,8 @@ export function WiperFitmentFinder({
     setError("");
     setModelId("");
     setYear("");
+    setVariantKey("");
+    setVariants([]);
     setYears([]);
     setFitments([]);
     fetchJson<{ models: FinderOption[] }>(`/api/fitment/wipers/models?makeId=${makeId}`)
@@ -150,6 +168,8 @@ export function WiperFitmentFinder({
     setLoading("years");
     setError("");
     setYear("");
+    setVariantKey("");
+    setVariants([]);
     setFitments([]);
     fetchJson<{ years: number[] }>(`/api/fitment/wipers/years?makeId=${makeId}&modelId=${modelId}`)
       .then((data) => {
@@ -169,11 +189,39 @@ export function WiperFitmentFinder({
 
   useEffect(() => {
     if (!makeId || !modelId || !year) {
+      setVariants([]);
+      setVariantKey("");
       setFitments([]);
       return;
     }
 
-    if (directToProduct) {
+    let active = true;
+    setLoading("variants");
+    setError("");
+    setVariantKey("");
+    setFitments([]);
+    fetchJson<{ variants: FinderVariantOption[] }>(`/api/fitment/wipers/variants?makeId=${makeId}&modelId=${modelId}&year=${year}`)
+      .then((data) => {
+        if (!active) return;
+        setVariants(data.variants);
+        if (data.variants.length === 1) setVariantKey(data.variants[0].key);
+      })
+      .catch((nextError) => {
+        if (active) setError(nextError.message);
+      })
+      .finally(() => {
+        if (active) setLoading("");
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [makeId, modelId, year]);
+
+  const selectedVariant = useMemo(() => variants.find((entry) => entry.key === variantKey) ?? null, [variantKey, variants]);
+
+  useEffect(() => {
+    if (!makeId || !modelId || !year || !selectedVariant || directToProduct) {
       setFitments([]);
       return;
     }
@@ -181,7 +229,14 @@ export function WiperFitmentFinder({
     let active = true;
     setLoading("results");
     setError("");
-    fetchJson<{ fitments: FitmentResult[] }>(`/api/fitment/wipers/results?makeId=${makeId}&modelId=${modelId}&year=${year}`)
+    const query = new URLSearchParams({
+      makeId,
+      modelId,
+      year,
+      applicationId: selectedVariant.id,
+      applicationKind: selectedVariant.applicationKind
+    });
+    fetchJson<{ fitments: FitmentResult[] }>(`/api/fitment/wipers/results?${query}`)
       .then((data) => {
         if (active) setFitments(data.fitments);
       })
@@ -195,7 +250,7 @@ export function WiperFitmentFinder({
     return () => {
       active = false;
     };
-  }, [directToProduct, makeId, modelId, year]);
+  }, [directToProduct, makeId, modelId, selectedVariant, year]);
 
   const selectedMake = useMemo(() => makes.find((entry) => entry.id === makeId)?.name ?? "", [makeId, makes]);
   const selectedModel = useMemo(() => models.find((entry) => entry.id === modelId)?.name ?? "", [modelId, models]);
@@ -215,6 +270,7 @@ export function WiperFitmentFinder({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           applicationId: primaryFitment.applicationId,
+          applicationKind: primaryFitment.applicationKind,
           make: selectedMake,
           model: selectedModel,
           year
@@ -230,8 +286,8 @@ export function WiperFitmentFinder({
   }
 
   async function findAndGoToProduct() {
-    if (!makeId || !modelId || !year) {
-      setError("Select make, model, and year first.");
+    if (!makeId || !modelId || !year || !selectedVariant) {
+      setError("Select make, model, year, and variant first.");
       return;
     }
 
@@ -239,9 +295,14 @@ export function WiperFitmentFinder({
     setError("");
 
     try {
-      const data = await fetchJson<{ fitments: FitmentResult[] }>(
-        `/api/fitment/wipers/results?makeId=${makeId}&modelId=${modelId}&year=${year}`
-      );
+      const query = new URLSearchParams({
+        makeId,
+        modelId,
+        year,
+        applicationId: selectedVariant.id,
+        applicationKind: selectedVariant.applicationKind
+      });
+      const data = await fetchJson<{ fitments: FitmentResult[] }>(`/api/fitment/wipers/results?${query}`);
       const nextFitment = data.fitments.find((entry) => entry.frontPair);
 
       if (!nextFitment?.frontPair) {
@@ -284,7 +345,7 @@ export function WiperFitmentFinder({
         </div>
       </div>
 
-      <div className={`mt-5 grid gap-3 sm:mt-6 sm:gap-4 ${compact ? "grid-cols-1" : "md:grid-cols-3"}`}>
+      <div className={`mt-5 grid gap-3 sm:mt-6 sm:gap-4 ${compact ? "grid-cols-1" : "md:grid-cols-2 xl:grid-cols-4"}`}>
         <SelectControl label="Make" value={makeId} disabled={busy && loading === "makes"} onChange={setMakeId}>
           <option value="">Select make</option>
           {makes.map((entry) => (
@@ -311,12 +372,21 @@ export function WiperFitmentFinder({
             </option>
           ))}
         </SelectControl>
+
+        <SelectControl label="Variant / Body" value={variantKey} disabled={!year || loading === "variants"} onChange={setVariantKey}>
+          <option value="">Select variant</option>
+          {variants.map((entry) => (
+            <option key={entry.key} value={entry.key}>
+              {entry.name}
+            </option>
+          ))}
+        </SelectControl>
       </div>
 
       {directToProduct ? (
         <button
           type="button"
-          disabled={!makeId || !modelId || !year || searching}
+          disabled={!makeId || !modelId || !year || !selectedVariant || searching}
           onClick={findAndGoToProduct}
           className="mt-5 inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-xl bg-signal px-5 py-4 text-sm font-black text-white shadow-lg shadow-red-900/15 transition hover:-translate-y-0.5 hover:bg-red-700 hover:shadow-xl disabled:translate-y-0 disabled:bg-zinc-300 disabled:shadow-none sm:mt-6"
         >
@@ -486,6 +556,7 @@ function buildWiperSkuHref({
 
   if (vehicle) params.set("vehicle", vehicle);
   if (fitment.applicationId) params.set("applicationId", fitment.applicationId);
+  params.set("applicationKind", fitment.applicationKind);
   if (make) params.set("make", make);
   if (model) params.set("model", model);
   if (year) params.set("year", year);

@@ -7,6 +7,7 @@ import { createSupabaseAdminClient } from "@/lib/supabase";
 type VehicleRow = {
   id: string;
   vehicle_application_id: string | null;
+  vehicle_fitment_application_id: string | null;
   label: string | null;
   make_snapshot: string;
   model_snapshot: string;
@@ -19,9 +20,13 @@ type VehicleRow = {
 export function createSupabaseAccountVehicleRepository(): CustomerVehicleRepository {
   return {
     async save(context, input) {
-      const { data, error } = await getAdmin().rpc("save_customer_vehicle", {
+      const rpc = input.applicationKind === "canonical" ? "save_customer_vehicle_v2" : "save_customer_vehicle";
+      const applicationParameter = input.applicationKind === "canonical"
+        ? { p_vehicle_fitment_application_id: input.applicationId }
+        : { p_vehicle_application_id: input.applicationId };
+      const { data, error } = await getAdmin().rpc(rpc, {
         p_auth_user_id: context.authUserId,
-        p_vehicle_application_id: input.applicationId,
+        ...applicationParameter,
         p_year: input.year,
         p_label: input.label,
         p_source: input.source,
@@ -71,7 +76,7 @@ export function createSupabaseAccountVehicleRepository(): CustomerVehicleReposit
 function mapVehicle(row: VehicleRow): CustomerVehicle {
   return {
     id: row.id,
-    applicationId: row.vehicle_application_id,
+    applicationId: row.vehicle_fitment_application_id ?? row.vehicle_application_id,
     label: row.label,
     make: row.make_snapshot,
     model: row.model_snapshot,

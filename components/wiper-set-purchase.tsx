@@ -18,6 +18,7 @@ export function WiperSetPurchase({
   vehicle: string;
   vehicleContext: {
     applicationId: string;
+    applicationKind: "legacy" | "canonical";
     make: string;
     model: string;
     year: number;
@@ -46,7 +47,9 @@ export function WiperSetPurchase({
         ...(vehicle ? { vehicle } : {}),
         ...(vehicleContext
           ? {
-              vehicle_application_id: vehicleContext.applicationId,
+              ...(vehicleContext.applicationKind === "canonical"
+                ? { vehicle_fitment_application_id: vehicleContext.applicationId }
+                : { vehicle_application_id: vehicleContext.applicationId }),
               vehicle_make: vehicleContext.make,
               vehicle_model: vehicleContext.model,
               vehicle_year: vehicleContext.year
@@ -71,7 +74,9 @@ export function WiperSetPurchase({
           ...(vehicle ? { vehicle } : {}),
           ...(vehicleContext
             ? {
-                vehicle_application_id: vehicleContext.applicationId,
+                ...(vehicleContext.applicationKind === "canonical"
+                  ? { vehicle_fitment_application_id: vehicleContext.applicationId }
+                  : { vehicle_application_id: vehicleContext.applicationId }),
                 vehicle_make: vehicleContext.make,
                 vehicle_model: vehicleContext.model,
                 vehicle_year: vehicleContext.year
