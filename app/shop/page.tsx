@@ -55,11 +55,11 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
 
       {error ? <div className="mb-6 rounded-lg border border-signal/30 bg-white p-5 text-sm font-bold text-signal">{error}</div> : null}
 
-      <div id="vehicle-finder" className="mb-7 scroll-mt-28 rounded-2xl bg-[#EEF5FB] p-2.5 shadow-panel ring-1 ring-black/5 sm:mb-10 sm:p-4">
+      <div id="vehicle-finder" className="mb-7 scroll-mt-36 rounded-2xl bg-[#EEF5FB] p-2.5 shadow-panel ring-1 ring-black/5 sm:mb-10 sm:p-4">
         <WiperFitmentFinder
           directToProduct
           title="Find Wipers for Your Vehicle"
-          description="Select your vehicle details to find the recommended front wiper blade sizes."
+          description="Select your make, model and year to find matching wipers."
           directButtonLabel="Find Compatible Wipers"
           footnote="Vehicle details are used to identify the recommended blade size combination. Please review the fitment information before ordering."
         />

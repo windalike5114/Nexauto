@@ -54,7 +54,7 @@ export default async function HomePage() {
             </div>
           </div>
 
-          <div id="vehicle-finder" className="scroll-mt-24 self-center">
+          <div id="vehicle-finder" className="scroll-mt-36 self-center">
             <div className="mb-3 rounded-2xl border border-white/18 bg-white/14 p-3 text-white shadow-lg backdrop-blur sm:p-4">
               <p className="text-xs font-black uppercase tracking-[0.16em] text-signal">Limited launch offer</p>
               <p className="mt-1 text-base font-black sm:text-lg">Save $20 on every front wiper blade pair</p>

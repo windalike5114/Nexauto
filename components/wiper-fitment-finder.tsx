@@ -10,6 +10,10 @@ type FinderOption = {
   name: string;
 };
 
+type FinderModelOption = FinderOption & {
+  aliases: string[];
+};
+
 type FinderVariantOption = FinderOption & {
   key: string;
   applicationKind: "legacy" | "canonical";
@@ -18,13 +22,7 @@ type FinderVariantOption = FinderOption & {
 type FitmentResult = {
   applicationId: string;
   applicationKind: "legacy" | "canonical";
-  make: string;
-  model: string;
-  generationName: string | null;
-  variantName: string | null;
-  bodyStyle: string | null;
-  startRaw: string | null;
-  endRaw: string | null;
+  yearRange: string;
   driverLengthIn: number | null;
   passengerLengthIn: number | null;
   rearLengthIn: number | null;
@@ -53,7 +51,7 @@ export function WiperFitmentFinder({
   compact = false,
   directToProduct = false,
   title = "Find wiper sizes by vehicle",
-  description = "Select make, model, year, and body variant to check the correct blade lengths.",
+  description = "Select your make, model and year to find matching wipers.",
   directButtonLabel = "Find wipers for my car",
   footnote,
   onVehicleSaved
@@ -68,13 +66,14 @@ export function WiperFitmentFinder({
 }) {
   const router = useRouter();
   const [makes, setMakes] = useState<FinderOption[]>([]);
-  const [models, setModels] = useState<FinderOption[]>([]);
+  const [models, setModels] = useState<FinderModelOption[]>([]);
   const [years, setYears] = useState<number[]>([]);
   const [variants, setVariants] = useState<FinderVariantOption[]>([]);
   const [makeId, setMakeId] = useState("");
   const [modelId, setModelId] = useState("");
   const [year, setYear] = useState("");
   const [variantKey, setVariantKey] = useState("");
+  const [requiresVariantSelection, setRequiresVariantSelection] = useState(false);
   const [fitments, setFitments] = useState<FitmentResult[]>([]);
   const [loading, setLoading] = useState("makes");
   const [error, setError] = useState("");
@@ -128,6 +127,7 @@ export function WiperFitmentFinder({
       setYear("");
       setVariants([]);
       setVariantKey("");
+      setRequiresVariantSelection(false);
       setFitments([]);
       return;
     }
@@ -138,10 +138,11 @@ export function WiperFitmentFinder({
     setModelId("");
     setYear("");
     setVariantKey("");
+    setRequiresVariantSelection(false);
     setVariants([]);
     setYears([]);
     setFitments([]);
-    fetchJson<{ models: FinderOption[] }>(`/api/fitment/wipers/models?makeId=${makeId}`)
+    fetchJson<{ models: FinderModelOption[] }>(`/api/fitment/wipers/models?makeId=${makeId}`)
       .then((data) => {
         if (active) setModels(data.models);
       })
@@ -161,6 +162,10 @@ export function WiperFitmentFinder({
     if (!makeId || !modelId) {
       setYears([]);
       setYear("");
+      setVariants([]);
+      setVariantKey("");
+      setRequiresVariantSelection(false);
+      setFitments([]);
       return;
     }
 
@@ -169,6 +174,7 @@ export function WiperFitmentFinder({
     setError("");
     setYear("");
     setVariantKey("");
+    setRequiresVariantSelection(false);
     setVariants([]);
     setFitments([]);
     fetchJson<{ years: number[] }>(`/api/fitment/wipers/years?makeId=${makeId}&modelId=${modelId}`)
@@ -191,6 +197,7 @@ export function WiperFitmentFinder({
     if (!makeId || !modelId || !year) {
       setVariants([]);
       setVariantKey("");
+      setRequiresVariantSelection(false);
       setFitments([]);
       return;
     }
@@ -199,12 +206,18 @@ export function WiperFitmentFinder({
     setLoading("variants");
     setError("");
     setVariantKey("");
+    setRequiresVariantSelection(false);
     setFitments([]);
-    fetchJson<{ variants: FinderVariantOption[] }>(`/api/fitment/wipers/variants?makeId=${makeId}&modelId=${modelId}&year=${year}`)
+    fetchJson<{
+      variants: FinderVariantOption[];
+      automaticVariant: FinderVariantOption | null;
+      requiresSelection: boolean;
+    }>(`/api/fitment/wipers/variants?makeId=${makeId}&modelId=${modelId}&year=${year}`)
       .then((data) => {
         if (!active) return;
         setVariants(data.variants);
-        if (data.variants.length === 1) setVariantKey(data.variants[0].key);
+        setRequiresVariantSelection(data.requiresSelection);
+        if (data.automaticVariant) setVariantKey(data.automaticVariant.key);
       })
       .catch((nextError) => {
         if (active) setError(nextError.message);
@@ -287,7 +300,7 @@ export function WiperFitmentFinder({
 
   async function findAndGoToProduct() {
     if (!makeId || !modelId || !year || !selectedVariant) {
-      setError("Select make, model, year, and variant first.");
+      setError(requiresVariantSelection ? "Select the version or body style first." : "Select make, model and year first.");
       return;
     }
 
@@ -345,7 +358,7 @@ export function WiperFitmentFinder({
         </div>
       </div>
 
-      <div className={`mt-5 grid gap-3 sm:mt-6 sm:gap-4 ${compact ? "grid-cols-1" : "md:grid-cols-2 xl:grid-cols-4"}`}>
+      <div className={`mt-5 grid gap-3 sm:mt-6 sm:gap-4 ${compact ? "grid-cols-1" : requiresVariantSelection ? "md:grid-cols-2 xl:grid-cols-4" : "md:grid-cols-3"}`}>
         <SelectControl label="Make" value={makeId} disabled={busy && loading === "makes"} onChange={setMakeId}>
           <option value="">Select make</option>
           {makes.map((entry) => (
@@ -373,15 +386,23 @@ export function WiperFitmentFinder({
           ))}
         </SelectControl>
 
-        <SelectControl label="Variant / Body" value={variantKey} disabled={!year || loading === "variants"} onChange={setVariantKey}>
-          <option value="">Select variant</option>
-          {variants.map((entry) => (
-            <option key={entry.key} value={entry.key}>
-              {entry.name}
-            </option>
-          ))}
-        </SelectControl>
+        {requiresVariantSelection ? (
+          <SelectControl label="Version" value={variantKey} disabled={!year || loading === "variants"} onChange={setVariantKey}>
+            <option value="">Select version / body</option>
+            {variants.map((entry) => (
+              <option key={entry.key} value={entry.key}>
+                {entry.name}
+              </option>
+            ))}
+          </SelectControl>
+        ) : null}
       </div>
+
+      {requiresVariantSelection ? (
+        <p className="mt-3 text-xs font-bold leading-5 text-steel">
+          This year has more than one possible fitment. Choose the version or body style; chassis details are shown only to help distinguish it.
+        </p>
+      ) : null}
 
       {directToProduct ? (
         <button
@@ -421,7 +442,7 @@ export function WiperFitmentFinder({
                   <LengthPill label="Rear" value={primaryFitment.rearLengthIn} />
                 </div>
                 <p className="mt-3 text-xs font-bold text-steel">
-                  Fitment range: {primaryFitment.startRaw ?? "?"} - {primaryFitment.endRaw ?? "?"}. Connector is handled internally.
+                  Fitment range: {primaryFitment.yearRange}. Connector is handled internally.
                 </p>
                 <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center">
                   {accountEmail ? (
@@ -520,7 +541,13 @@ function LengthPill({ label, value }: { label: string; value: number | null }) {
   return (
     <div className="rounded border border-black/10 bg-white p-3">
       <p className="text-xs font-black uppercase tracking-[0.14em] text-steel">{label}</p>
-      <p className="mt-1 text-2xl font-black">{value ? `${value}"` : "N/A"}</p>
+      <p className="mt-1 text-2xl font-black">
+        {value ? (
+          <>
+            {value}" <span className="text-sm font-bold text-steel">/ {Math.round(value * 25.4)} mm</span>
+          </>
+        ) : "N/A"}
+      </p>
     </div>
   );
 }

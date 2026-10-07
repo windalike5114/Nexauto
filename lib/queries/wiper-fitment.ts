@@ -2,6 +2,10 @@ import { createSupabaseServerClient } from "@/lib/supabase";
 
 export type WiperFitmentMake = { id: string; name: string };
 export type WiperFitmentModel = { id: string; name: string };
+export type WiperFitmentModelGroup = WiperFitmentModel & {
+  aliases: string[];
+  modelIds: string[];
+};
 export type WiperFitmentApplicationKind = "legacy" | "canonical";
 
 export type WiperFitmentVariant = {
@@ -9,6 +13,12 @@ export type WiperFitmentVariant = {
   key: string;
   name: string;
   applicationKind: WiperFitmentApplicationKind;
+};
+
+export type WiperFitmentVariantResolution = {
+  variants: WiperFitmentVariant[];
+  automaticVariant: WiperFitmentVariant | null;
+  requiresSelection: boolean;
 };
 
 export type WiperFitmentResult = {
@@ -21,9 +31,18 @@ export type WiperFitmentResult = {
   bodyStyle: string | null;
   startRaw: string | null;
   endRaw: string | null;
+  startYear: number | null;
+  endYear: number | null;
   driverLengthIn: number | null;
   passengerLengthIn: number | null;
   rearLengthIn: number | null;
+};
+
+export type PublicWiperFitmentResult = Pick<
+  WiperFitmentResult,
+  "applicationId" | "applicationKind" | "driverLengthIn" | "passengerLengthIn" | "rearLengthIn"
+> & {
+  yearRange: string;
 };
 
 const PRIORITY_NZ_MAKES = ["Toyota", "Ford", "Mazda", "Nissan", "Mitsubishi", "Honda", "Subaru", "Hyundai", "Kia", "Suzuki"];
@@ -181,13 +200,21 @@ export async function listWiperFitmentModels(makeId: string) {
     const identity = getCanonicalIdentity(row);
     if (identity?.make.id === makeId) models.set(identity.model.id, identity.model);
   }
-  return [...models.values()].sort((a, b) => a.name.localeCompare(b.name));
+  return groupWiperFitmentModels([...models.values()]);
 }
 
 export async function listWiperFitmentYears(makeId: string, modelId: string) {
+  const group = await resolveWiperFitmentModelGroup(makeId, modelId);
+  if (!group) return [];
+
   const supabase = getSupabaseOrThrow();
   const [legacy, canonical] = await Promise.all([
-    supabase.from("vehicle_applications").select("year_start,year_end").eq("make_id", makeId).eq("model_id", modelId).eq("active", true),
+    supabase
+      .from("vehicle_applications")
+      .select("year_start,year_end")
+      .eq("make_id", makeId)
+      .in("model_id", group.modelIds)
+      .eq("active", true),
     loadPublishedCanonicalFitments(supabase)
   ]);
   if (legacy.error) throw legacy.error;
@@ -195,9 +222,10 @@ export async function listWiperFitmentYears(makeId: string, modelId: string) {
 
   const years = new Set<number>();
   for (const row of (legacy.data ?? []) as ApplicationYearRow[]) addYears(years, row.year_start, row.year_end, false);
+  const modelIds = new Set(group.modelIds);
   for (const row of canonical.data) {
     const identity = getCanonicalIdentity(row);
-    if (identity?.make.id === makeId && identity.model.id === modelId) {
+    if (identity?.make.id === makeId && modelIds.has(identity.model.id)) {
       addYears(years, identity.application.year_start, identity.application.year_end, true);
     }
   }
@@ -205,13 +233,9 @@ export async function listWiperFitmentYears(makeId: string, modelId: string) {
 }
 
 export async function listWiperFitmentVariants(makeId: string, modelId: string, year: number) {
-  const results = await findWiperLengthFitments(makeId, modelId, year);
-  return results.map((fitment): WiperFitmentVariant => ({
-    id: fitment.applicationId,
-    key: `${fitment.applicationKind}:${fitment.applicationId}`,
-    name: getVariantLabel(fitment),
-    applicationKind: fitment.applicationKind
-  }));
+  const { group, results } = await loadWiperLengthFitments(makeId, modelId, year);
+  if (!group) return { variants: [], automaticVariant: null, requiresSelection: false };
+  return buildWiperFitmentVariantResolution(results, group.name);
 }
 
 export async function findWiperLengthFitments(
@@ -220,13 +244,26 @@ export async function findWiperLengthFitments(
   year: number,
   selection?: { applicationId: string; applicationKind: WiperFitmentApplicationKind }
 ) {
+  const { results } = await loadWiperLengthFitments(makeId, modelId, year, selection);
+  return results;
+}
+
+async function loadWiperLengthFitments(
+  makeId: string,
+  modelId: string,
+  year: number,
+  selection?: { applicationId: string; applicationKind: WiperFitmentApplicationKind }
+) {
+  const group = await resolveWiperFitmentModelGroup(makeId, modelId);
+  if (!group) return { group: null, results: [] as WiperFitmentResult[] };
+
   const supabase = getSupabaseOrThrow();
   const [legacy, canonical] = await Promise.all([
     supabase
       .from("vehicle_applications")
       .select(`id,start_raw,end_raw,year_start,year_end,vehicle_makes(name),vehicle_models(name),wiper_length_fitments(driver_length_in,passenger_length_in,rear_length_in)`)
       .eq("make_id", makeId)
-      .eq("model_id", modelId)
+      .in("model_id", group.modelIds)
       .lte("year_start", year)
       .gte("year_end", year)
       .eq("active", true)
@@ -239,14 +276,17 @@ export async function findWiperLengthFitments(
   const legacyResults = ((legacy.data ?? []) as unknown as ApplicationFitmentRow[])
     .map(mapLegacyFitmentRow)
     .filter((entry): entry is WiperFitmentResult => Boolean(entry));
+  const modelIds = new Set(group.modelIds);
   const canonicalResults = canonical.data
-    .filter((row) => canonicalFitsVehicle(row, makeId, modelId, year))
+    .filter((row) => canonicalFitsVehicle(row, makeId, modelIds, year))
     .map(mapCanonicalFitmentRow)
     .filter((entry): entry is WiperFitmentResult => Boolean(entry));
 
-  return [...legacyResults, ...canonicalResults]
+  const results = [...legacyResults, ...canonicalResults]
     .filter((entry) => !selection || (entry.applicationId === selection.applicationId && entry.applicationKind === selection.applicationKind))
-    .sort(compareFitments);
+    .sort((left, right) => compareFitments(left, right, group.name));
+
+  return { group, results };
 }
 
 function mapLegacyFitmentRow(row: ApplicationFitmentRow): WiperFitmentResult | null {
@@ -262,6 +302,8 @@ function mapLegacyFitmentRow(row: ApplicationFitmentRow): WiperFitmentResult | n
     bodyStyle: null,
     startRaw: row.start_raw,
     endRaw: row.end_raw,
+    startYear: row.year_start,
+    endYear: row.year_end,
     driverLengthIn: toNumber(fitment.driver_length_in),
     passengerLengthIn: toNumber(fitment.passenger_length_in),
     rearLengthIn: toNumber(fitment.rear_length_in)
@@ -284,6 +326,8 @@ export function mapCanonicalFitmentRow(row: CanonicalFitmentRow): WiperFitmentRe
     bodyStyle: variant?.body_style ?? null,
     startRaw: identity.application.year_start ? String(identity.application.year_start) : null,
     endRaw: identity.application.year_end ? String(identity.application.year_end) : "ON",
+    startYear: identity.application.year_start,
+    endYear: identity.application.year_end,
     driverLengthIn: blades.get("driver") ?? null,
     passengerLengthIn: blades.get("passenger") ?? null,
     rearLengthIn: blades.get("rear") ?? null
@@ -304,9 +348,9 @@ function getCanonicalIdentity(row: CanonicalFitmentRow) {
   };
 }
 
-function canonicalFitsVehicle(row: CanonicalFitmentRow, makeId: string, modelId: string, year: number) {
+function canonicalFitsVehicle(row: CanonicalFitmentRow, makeId: string, modelIds: Set<string>, year: number) {
   const identity = getCanonicalIdentity(row);
-  if (!identity || identity.make.id !== makeId || identity.model.id !== modelId) return false;
+  if (!identity || identity.make.id !== makeId || !modelIds.has(identity.model.id)) return false;
   const { year_start: start, year_end: end } = identity.application;
   return (!start || start <= year) && (!end || end >= year);
 }
@@ -332,10 +376,43 @@ function addYears(years: Set<number>, start: number | null, end: number | null, 
   for (let year = start; year <= finalYear; year += 1) years.add(year);
 }
 
-function getVariantLabel(fitment: WiperFitmentResult) {
-  if (fitment.applicationKind === "legacy") return `Standard · ${fitment.startRaw ?? "?"}-${fitment.endRaw ?? "?"}`;
-  const parts = [fitment.generationName, fitment.variantName, formatBodyStyle(fitment.bodyStyle)].filter(Boolean);
-  return parts.length ? parts.join(" · ") : `${fitment.startRaw ?? "?"}-${fitment.endRaw ?? "ON"}`;
+export function toPublicWiperFitmentResult(fitment: WiperFitmentResult): PublicWiperFitmentResult {
+  return {
+    applicationId: fitment.applicationId,
+    applicationKind: fitment.applicationKind,
+    yearRange: formatWiperFitmentYearRange(fitment),
+    driverLengthIn: fitment.driverLengthIn,
+    passengerLengthIn: fitment.passengerLengthIn,
+    rearLengthIn: fitment.rearLengthIn
+  };
+}
+
+export function formatWiperFitmentVariantLabel(fitment: WiperFitmentResult, displayModelName?: string) {
+  const modelVersion = displayModelName ? extractModelVersion(fitment.model, displayModelName) : null;
+  if (fitment.applicationKind === "legacy") {
+    const descriptor = extractParentheticalDescriptors(fitment.startRaw, fitment.endRaw);
+    const chassis = descriptor && (!modelVersion || !containsWholeValue(modelVersion, descriptor)) ? descriptor : null;
+    return [modelVersion || descriptor || "Standard", formatWiperFitmentYearRange(fitment), modelVersion ? chassis : null]
+      .filter(Boolean)
+      .join(" · ");
+  }
+  const parts = [modelVersion, fitment.generationName, fitment.variantName, formatBodyStyle(fitment.bodyStyle)].filter(Boolean);
+  return parts.length ? parts.join(" · ") : formatWiperFitmentYearRange(fitment);
+}
+
+export function formatWiperFitmentYearRange(fitment: WiperFitmentResult) {
+  if (fitment.startYear) {
+    if (fitment.endYear && fitment.endYear !== fitment.startYear) return `${fitment.startYear}–${fitment.endYear}`;
+    if (fitment.endYear === fitment.startYear) return String(fitment.startYear);
+    if (fitment.applicationKind === "canonical") return `${fitment.startYear}–ON`;
+  }
+
+  const start = normalizeRangeText(fitment.startRaw);
+  const end = normalizeRangeText(fitment.endRaw);
+  if (start && end && start.toLowerCase() === end.toLowerCase()) return start;
+  if (start && end && containsWholeValue(start, end)) return start;
+  if (start && end && containsWholeValue(end, start)) return end;
+  return start && end ? `${start}–${end}` : start || end || "Unknown";
 }
 
 function formatBodyStyle(value: string | null) {
@@ -343,9 +420,143 @@ function formatBodyStyle(value: string | null) {
   return value.replace(/_/g, " ").replace(/\b\w/g, (character) => character.toUpperCase());
 }
 
-function compareFitments(left: WiperFitmentResult, right: WiperFitmentResult) {
+function compareFitments(left: WiperFitmentResult, right: WiperFitmentResult, displayModelName?: string) {
   if (left.applicationKind !== right.applicationKind) return left.applicationKind === "canonical" ? -1 : 1;
-  return getVariantLabel(left).localeCompare(getVariantLabel(right));
+  return formatWiperFitmentVariantLabel(left, displayModelName).localeCompare(formatWiperFitmentVariantLabel(right, displayModelName));
+}
+
+export function groupWiperFitmentModels(models: WiperFitmentModel[]): WiperFitmentModelGroup[] {
+  const uniqueModels = [...new Map(models.map((model) => [model.id, model])).values()];
+  const names = [...new Set(uniqueModels.map((model) => normalizeModelName(model.name)))];
+  const groups = new Map<string, WiperFitmentModel[]>();
+
+  for (const model of uniqueModels) {
+    const groupName = findDisplayModelName(model.name, names);
+    const members = groups.get(groupName) ?? [];
+    members.push(model);
+    groups.set(groupName, members);
+  }
+
+  return [...groups.entries()]
+    .map(([name, members]) => {
+      const sortedMembers = [...members].sort((left, right) => left.name.localeCompare(right.name) || left.id.localeCompare(right.id));
+      const representative = sortedMembers.find((model) => normalizeModelName(model.name).toLowerCase() === name.toLowerCase()) ?? sortedMembers[0];
+      return {
+        id: representative.id,
+        name,
+        aliases: [...new Set(sortedMembers.map((model) => normalizeModelName(model.name)))],
+        modelIds: sortedMembers.map((model) => model.id)
+      };
+    })
+    .sort((left, right) => left.name.localeCompare(right.name));
+}
+
+export function buildWiperFitmentVariantResolution(
+  fitments: WiperFitmentResult[],
+  displayModelName: string
+): WiperFitmentVariantResolution {
+  const variants = fitments.map((fitment): WiperFitmentVariant => ({
+    id: fitment.applicationId,
+    key: `${fitment.applicationKind}:${fitment.applicationId}`,
+    name: formatWiperFitmentVariantLabel(fitment, displayModelName),
+    applicationKind: fitment.applicationKind
+  }));
+  const automaticVariant = canProveFitmentsEquivalent(fitments, displayModelName) ? variants[0] ?? null : null;
+  return {
+    variants,
+    automaticVariant,
+    requiresSelection: variants.length > 1 && !automaticVariant
+  };
+}
+
+async function resolveWiperFitmentModelGroup(makeId: string, modelId: string) {
+  const groups = await listWiperFitmentModels(makeId);
+  return groups.find((group) => group.modelIds.includes(modelId)) ?? null;
+}
+
+function findDisplayModelName(modelName: string, knownNames: string[]) {
+  const normalized = normalizeModelName(modelName);
+  const candidates = knownNames
+    .filter((candidate) => candidate.length < normalized.length && normalized.toLowerCase().startsWith(`${candidate.toLowerCase()} `))
+    .sort((left, right) => right.length - left.length);
+
+  for (const candidate of candidates) {
+    const suffix = normalized.slice(candidate.length).replace(/^\s*[–—-]\s*/, "").trim();
+    const hasExplicitSeparator = new RegExp(`^${escapeRegExp(candidate)}\\s+[–—-]\\s+`, "i").test(normalized);
+    if (hasExplicitSeparator || looksLikeVehicleVersion(suffix)) return candidate;
+  }
+  return normalized;
+}
+
+function looksLikeVehicleVersion(suffix: string) {
+  const bodyStyle = /\b(sedan|saloon|wagon|estate|hatch|hatchback|liftback|ute|utility|van|coupe|convertible|cab|suv|pickup|roadster)\b/gi;
+  const withoutBodyStyles = suffix.replace(bodyStyle, " ").replace(/\b(series|mk)\b/gi, " ");
+  const tokens = withoutBodyStyles.split(/[\s,()/–—-]+/).filter(Boolean);
+  const isChassisToken = (token: string) => /^(?:[A-Z]{1,3}|(?=[A-Z0-9]*[A-Z])(?=[A-Z0-9]*\d)[A-Z0-9]{2,})$/.test(token);
+  const hasVersionSignal = withoutBodyStyles !== suffix || tokens.some(isChassisToken);
+  return hasVersionSignal && tokens.every(isChassisToken);
+}
+
+function extractModelVersion(modelName: string, displayModelName: string) {
+  const normalizedModel = normalizeModelName(modelName);
+  const normalizedDisplay = normalizeModelName(displayModelName);
+  if (normalizedModel.toLowerCase() === normalizedDisplay.toLowerCase()) return null;
+  if (!normalizedModel.toLowerCase().startsWith(`${normalizedDisplay.toLowerCase()} `)) return normalizedModel;
+  return normalizedModel.slice(normalizedDisplay.length).replace(/^\s*[–—-]\s*/, "").trim() || null;
+}
+
+function canProveFitmentsEquivalent(fitments: WiperFitmentResult[], displayModelName: string) {
+  if (fitments.length <= 1) return fitments.length === 1;
+  const first = fitments[0];
+  if (!hasCompleteKnownFitment(first)) return false;
+  const firstSignature = fitmentSignature(first, displayModelName);
+  return fitments.every((fitment) => hasCompleteKnownFitment(fitment) && fitmentSignature(fitment, displayModelName) === firstSignature);
+}
+
+function hasCompleteKnownFitment(fitment: WiperFitmentResult) {
+  return fitment.driverLengthIn !== null && fitment.passengerLengthIn !== null && fitment.rearLengthIn !== null;
+}
+
+function fitmentSignature(fitment: WiperFitmentResult, displayModelName: string) {
+  const version = [
+    extractModelVersion(fitment.model, displayModelName) || "standard",
+    fitment.generationName,
+    fitment.variantName,
+    formatBodyStyle(fitment.bodyStyle)
+  ]
+    .filter(Boolean)
+    .join("|")
+    .toLowerCase();
+  return `${version}:${fitment.driverLengthIn}:${fitment.passengerLengthIn}:${fitment.rearLengthIn}`;
+}
+
+function normalizeModelName(value: string) {
+  return value.replace(/\s+/g, " ").trim();
+}
+
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function extractParentheticalDescriptors(...values: Array<string | null>) {
+  const descriptors = new Set<string>();
+  for (const value of values) {
+    for (const match of value?.matchAll(/\(([^)]+)\)/g) ?? []) {
+      const descriptor = normalizeRangeText(match[1] ?? null);
+      if (descriptor) descriptors.add(descriptor);
+    }
+  }
+  return [...descriptors].join(", ");
+}
+
+function normalizeRangeText(value: string | null) {
+  return value?.replace(/\s+/g, " ").trim() ?? "";
+}
+
+function containsWholeValue(container: string, value: string) {
+  if (!value) return false;
+  const escaped = value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return new RegExp(`(^|[^A-Za-z0-9])${escaped}([^A-Za-z0-9]|$)`, "i").test(container);
 }
 
 function toNumber(value: string | number | null) {

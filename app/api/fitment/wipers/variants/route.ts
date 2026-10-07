@@ -1,23 +1,34 @@
-import { NextResponse } from "next/server";
+import {
+  fitmentJson,
+  guardFitmentApiRequest,
+  hasOnlySearchParams,
+  parseFitmentId,
+  parseVehicleYear
+} from "@/lib/application/fitment/public-api";
 import { listWiperFitmentVariants } from "@/lib/queries/wiper-fitment";
 
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const makeId = searchParams.get("makeId");
-  const modelId = searchParams.get("modelId");
-  const year = Number(searchParams.get("year"));
+const MAX_PUBLIC_VARIANTS = 50;
 
-  if (!makeId || !modelId || !Number.isFinite(year)) {
-    return NextResponse.json({ error: "makeId, modelId, and year are required." }, { status: 400 });
+export async function GET(request: Request) {
+  const guard = guardFitmentApiRequest(request);
+  if (guard.response) return guard.response;
+
+  const { searchParams } = new URL(request.url);
+  const makeId = parseFitmentId(searchParams.get("makeId"));
+  const modelId = parseFitmentId(searchParams.get("modelId"));
+  const year = parseVehicleYear(searchParams.get("year"));
+
+  if (!makeId || !modelId || !year || !hasOnlySearchParams(searchParams, ["makeId", "modelId", "year"])) {
+    return fitmentJson({ error: "Valid makeId, modelId, and year values are required." }, guard, { status: 400 });
   }
 
   try {
-    const variants = await listWiperFitmentVariants(makeId, modelId, year);
-    return NextResponse.json({ variants });
-  } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Could not load vehicle variants." },
-      { status: 500 }
-    );
+    const resolution = await listWiperFitmentVariants(makeId, modelId, year);
+    return fitmentJson({
+      ...resolution,
+      variants: resolution.variants.slice(0, MAX_PUBLIC_VARIANTS)
+    }, guard);
+  } catch {
+    return fitmentJson({ error: "Could not load vehicle variants." }, guard, { status: 500 });
   }
 }

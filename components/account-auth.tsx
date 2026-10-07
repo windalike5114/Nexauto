@@ -204,12 +204,29 @@ export function AccountAuth({ initialMode = "sign-in" }: { initialMode?: Account
       const make = makes.makes.find((entry) => sameText(entry.name, vehicle.make));
       if (!make) throw new Error("Could not match vehicle make.");
 
-      const models = await fetchJson<{ models: Array<{ id: string; name: string }> }>(`/api/fitment/wipers/models?makeId=${make.id}`);
-      const model = models.models.find((entry) => sameText(entry.name, vehicle.model));
+      const models = await fetchJson<{ models: Array<{ id: string; name: string; aliases: string[] }> }>(`/api/fitment/wipers/models?makeId=${make.id}`);
+      const model = models.models.find(
+        (entry) => sameText(entry.name, vehicle.model) || entry.aliases.some((alias) => sameText(alias, vehicle.model))
+      );
       if (!model) throw new Error("Could not match vehicle model.");
 
+      const variants = await fetchJson<{
+        variants: Array<{ id: string; key: string; applicationKind: "legacy" | "canonical" }>;
+        automaticVariant: { id: string; key: string; applicationKind: "legacy" | "canonical" } | null;
+        requiresSelection: boolean;
+      }>(`/api/fitment/wipers/variants?makeId=${make.id}&modelId=${model.id}&year=${vehicle.year}`);
+      const selectedVariant = variants.variants.find((entry) => entry.id === vehicle.applicationId) ?? variants.automaticVariant;
+      if (!selectedVariant) throw new Error("Please confirm this vehicle's version in the vehicle finder.");
+
+      const query = new URLSearchParams({
+        makeId: make.id,
+        modelId: model.id,
+        year: String(vehicle.year),
+        applicationId: selectedVariant.id,
+        applicationKind: selectedVariant.applicationKind
+      });
       const data = await fetchJson<{ fitments: FitmentResult[] }>(
-        `/api/fitment/wipers/results?makeId=${make.id}&modelId=${model.id}&year=${vehicle.year}`
+        `/api/fitment/wipers/results?${query}`
       );
       const fitment = data.fitments.find((entry) => entry.frontPair);
 
@@ -218,6 +235,7 @@ export function AccountAuth({ initialMode = "sign-in" }: { initialMode?: Account
       const params = new URLSearchParams({
         vehicle: vehicleLabel(vehicle),
         applicationId: fitment.applicationId,
+        applicationKind: selectedVariant.applicationKind,
         make: vehicle.make,
         model: vehicle.model,
         year: String(vehicle.year)

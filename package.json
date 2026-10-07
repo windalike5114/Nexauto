@@ -29,7 +29,7 @@
     "test:fitment-schema": "node --test --test-isolation=none tests/vehicle-catalog-v2-migration.test.mjs",
     "test:vehicle-catalog-normalization": "node --test --test-isolation=none tests/vehicle-catalog-normalization.test.mjs",
     "test:wiper-source-matching": "node --test --test-isolation=none tests/wiper-source-normalization.test.mjs tests/vehicle-wiper-matcher.test.mjs",
-    "test:wiper-finder": "node --import tsx --test tests/wiper-fitment-query.test.ts tests/customer-vehicles.test.ts",
+    "test:wiper-finder": "node --import tsx --test tests/wiper-fitment-query.test.ts tests/fitment-api-security.test.ts tests/customer-vehicles.test.ts",
     "wiper-commerce:check": "node scripts/fitment/check-wiper-commerce.mjs"
   },
   "dependencies": {

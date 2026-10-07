@@ -1,6 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { mapCanonicalFitmentRow, type CanonicalFitmentRow } from "../lib/queries/wiper-fitment";
+import {
+  buildWiperFitmentVariantResolution,
+  groupWiperFitmentModels,
+  mapCanonicalFitmentRow,
+  type CanonicalFitmentRow,
+  type WiperFitmentResult
+} from "../lib/queries/wiper-fitment";
 
 test("canonical fitment mapper preserves generation, body, and blade positions", () => {
   const result = mapCanonicalFitmentRow(canonicalRow());
@@ -18,6 +24,48 @@ test("canonical fitment mapper preserves generation, body, and blade positions",
 
 test("canonical fitment mapper rejects incomplete relationships", () => {
   assert.equal(mapCanonicalFitmentRow({ ...canonicalRow(), wiper_configurations: null }), null);
+});
+
+test("model groups collapse chassis and body variants while retaining every source model id", () => {
+  const groups = groupWiperFitmentModels([
+    { id: "falcon", name: "Falcon" },
+    { id: "falcon-ba-bf", name: "Falcon - BA - BF" },
+    { id: "falcon-au-sedan", name: "Falcon AU Sedan" },
+    { id: "land-cruiser", name: "Land Cruiser" },
+    { id: "land-cruiser-prado", name: "Land Cruiser Prado" },
+    { id: "yaris", name: "Yaris" },
+    { id: "yaris-hatch", name: "Yaris Hatch" },
+    { id: "yaris-verso", name: "Yaris Verso P2" }
+  ]);
+
+  const falcon = groups.find((group) => group.name === "Falcon");
+  assert.deepEqual(falcon?.modelIds, ["falcon", "falcon-ba-bf", "falcon-au-sedan"]);
+  assert.deepEqual(falcon?.aliases, ["Falcon", "Falcon - BA - BF", "Falcon AU Sedan"]);
+  assert.equal(groups.some((group) => group.name === "Land Cruiser Prado"), true);
+  assert.deepEqual(groups.find((group) => group.name === "Yaris")?.modelIds, ["yaris", "yaris-hatch"]);
+  assert.equal(groups.some((group) => group.name === "Yaris Verso P2"), true);
+});
+
+test("variant selection is skipped for a unique fitment but retained for distinct versions", () => {
+  const single = buildWiperFitmentVariantResolution([legacyFitment()], "Falcon");
+  assert.equal(single.requiresSelection, false);
+  assert.equal(single.automaticVariant?.name, "BA Sedan · 2002–2005");
+
+  const distinct = buildWiperFitmentVariantResolution([
+    legacyFitment(),
+    { ...legacyFitment(), applicationId: "application-2", model: "Falcon BF Wagon" }
+  ], "Falcon");
+  assert.equal(distinct.requiresSelection, true);
+  assert.equal(distinct.automaticVariant, null);
+});
+
+test("incomplete duplicate fitments are not treated as proven equivalent", () => {
+  const fitment = { ...legacyFitment(), rearLengthIn: null };
+  const resolution = buildWiperFitmentVariantResolution([
+    fitment,
+    { ...fitment, applicationId: "application-2" }
+  ], "Falcon");
+  assert.equal(resolution.requiresSelection, true);
 });
 
 function canonicalRow(): CanonicalFitmentRow {
@@ -53,5 +101,24 @@ function canonicalRow(): CanonicalFitmentRow {
         { position: "rear", length_in: 12 }
       ]
     }
+  };
+}
+
+function legacyFitment(): WiperFitmentResult {
+  return {
+    applicationId: "application-1",
+    applicationKind: "legacy",
+    make: "Ford",
+    model: "Falcon BA Sedan",
+    generationName: null,
+    variantName: null,
+    bodyStyle: null,
+    startRaw: "2002 - 2005 (BA)",
+    endRaw: "2002 - 2005 (BA)",
+    startYear: 2002,
+    endYear: 2005,
+    driverLengthIn: 22,
+    passengerLengthIn: 22,
+    rearLengthIn: 16
   };
 }
