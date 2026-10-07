@@ -51,7 +51,7 @@ export function WiperFitmentFinder({
   compact = false,
   directToProduct = false,
   title = "Find wiper sizes by vehicle",
-  description = "Select your make, model and year to find matching wipers.",
+  description = "Select your make, model, year and body or chassis to find matching wipers.",
   directButtonLabel = "Find wipers for my car",
   footnote,
   onVehicleSaved
@@ -300,7 +300,7 @@ export function WiperFitmentFinder({
 
   async function findAndGoToProduct() {
     if (!makeId || !modelId || !year || !selectedVariant) {
-      setError(requiresVariantSelection ? "Select the version or body style first." : "Select make, model and year first.");
+      setError(requiresVariantSelection ? "Select the body, chassis, or generation first." : "Select make, model and year first.");
       return;
     }
 
@@ -358,7 +358,7 @@ export function WiperFitmentFinder({
         </div>
       </div>
 
-      <div className={`mt-5 grid gap-3 sm:mt-6 sm:gap-4 ${compact ? "grid-cols-1" : requiresVariantSelection ? "md:grid-cols-2 xl:grid-cols-4" : "md:grid-cols-3"}`}>
+      <div className={`mt-5 grid gap-3 sm:mt-6 sm:gap-4 ${compact ? "grid-cols-1" : "md:grid-cols-2 xl:grid-cols-4"}`}>
         <SelectControl label="Make" value={makeId} disabled={busy && loading === "makes"} onChange={setMakeId}>
           <option value="">Select make</option>
           {makes.map((entry) => (
@@ -386,21 +386,19 @@ export function WiperFitmentFinder({
           ))}
         </SelectControl>
 
-        {requiresVariantSelection ? (
-          <SelectControl label="Version" value={variantKey} disabled={!year || loading === "variants"} onChange={setVariantKey}>
-            <option value="">Select version / body</option>
-            {variants.map((entry) => (
-              <option key={entry.key} value={entry.key}>
-                {entry.name}
-              </option>
-            ))}
-          </SelectControl>
-        ) : null}
+        <SelectControl label="Body / Chassis" value={variantKey} disabled={!year || loading === "variants"} onChange={setVariantKey}>
+          <option value="">Select body / chassis</option>
+          {variants.map((entry) => (
+            <option key={entry.key} value={entry.key}>
+              {entry.name}
+            </option>
+          ))}
+        </SelectControl>
       </div>
 
       {requiresVariantSelection ? (
         <p className="mt-3 text-xs font-bold leading-5 text-steel">
-          This year has more than one possible fitment. Choose the version or body style; chassis details are shown only to help distinguish it.
+          This year has more than one possible fitment. Choose the body, chassis, or generation shown for your vehicle.
         </p>
       ) : null}
 

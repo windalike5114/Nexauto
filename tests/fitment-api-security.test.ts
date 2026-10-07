@@ -80,6 +80,10 @@ test("legacy variant labels use numeric years and deduplicate repeated raw names
   assert.equal(formatWiperFitmentVariantLabel(legacyFitment()), "NHP10 · 2011–2025");
 });
 
+test("canonical variant labels show body, chassis or generation with years without duplicates", () => {
+  assert.equal(formatWiperFitmentVariantLabel(canonicalFitment()), "E210 · Hatchback · 2019–ON");
+});
+
 test("all public fitment routes use the shared guard and hide database error messages", () => {
   for (const route of ["makes", "models", "years", "variants", "results"]) {
     const source = readFileSync(`app/api/fitment/wipers/${route}/route.ts`, "utf8");
@@ -107,6 +111,25 @@ function legacyFitment(): WiperFitmentResult {
     endYear: 2025,
     driverLengthIn: 26,
     passengerLengthIn: 14,
+    rearLengthIn: 12
+  };
+}
+
+function canonicalFitment(): WiperFitmentResult {
+  return {
+    applicationId: UUID,
+    applicationKind: "canonical",
+    make: "Toyota",
+    model: "Corolla",
+    generationName: "E210",
+    variantName: "Hatchback",
+    bodyStyle: "hatchback",
+    startRaw: null,
+    endRaw: null,
+    startYear: 2019,
+    endYear: null,
+    driverLengthIn: 26,
+    passengerLengthIn: 16,
     rearLengthIn: 12
   };
 }

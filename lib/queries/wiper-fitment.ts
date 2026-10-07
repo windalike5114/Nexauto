@@ -434,7 +434,20 @@ export function formatWiperFitmentVariantLabel(fitment: WiperFitmentResult, disp
       .filter(Boolean)
       .join(" · ");
   }
-  const parts = [modelVersion, fitment.generationName, fitment.variantName, formatBodyStyle(fitment.bodyStyle)].filter(Boolean);
+  const seen = new Set<string>();
+  const parts = [
+    modelVersion,
+    fitment.generationName,
+    fitment.variantName,
+    formatBodyStyle(fitment.bodyStyle),
+    formatWiperFitmentYearRange(fitment)
+  ].filter((part): part is string => {
+    if (!part) return false;
+    const key = part.trim().toLocaleLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
   return parts.length ? parts.join(" · ") : formatWiperFitmentYearRange(fitment);
 }
 

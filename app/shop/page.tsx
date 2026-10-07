@@ -59,7 +59,7 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
         <WiperFitmentFinder
           directToProduct
           title="Find Wipers for Your Vehicle"
-          description="Select your make, model and year to find matching wipers."
+          description="Select your make, model, year and body or chassis to find matching wipers."
           directButtonLabel="Find Compatible Wipers"
           footnote="Vehicle details are used to identify the recommended blade size combination. Please review the fitment information before ordering."
         />
