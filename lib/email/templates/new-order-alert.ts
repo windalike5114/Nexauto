@@ -27,6 +27,8 @@ export type NewOrderAlertInput = {
     make: string;
     model: string;
     year: number;
+    series?: string;
+    body?: string;
   } | null;
   emailEventId?: string | null;
 };
@@ -48,13 +50,7 @@ export async function sendNewOrderAlertEmail(input: NewOrderAlertInput) {
     })
     .join("");
 
-  const vehicleRows = input.vehicle
-    ? renderRows([
-        ["Vehicle make", input.vehicle.make],
-        ["Vehicle model", input.vehicle.model],
-        ["Vehicle year", input.vehicle.year]
-      ])
-    : "";
+  const vehicleRows = input.vehicle ? renderRows(buildVehicleRows(input.vehicle)) : "";
 
   await sendEmail({
     type: "order_internal_notification",
@@ -112,13 +108,28 @@ export async function sendNewOrderAlertEmail(input: NewOrderAlertInput) {
       "",
       `Subtotal: ${formatMoney(input.subtotal)}`,
       `Total: ${formatMoney(input.total)}`,
-      input.vehicle ? `Vehicle: ${input.vehicle.make} ${input.vehicle.model} ${input.vehicle.year}` : "",
+      input.vehicle ? `Vehicle: ${formatVehicle(input.vehicle)}` : "",
       "",
       `Admin: ${siteUrl}/admin/orders/${input.orderId}`
     ]
       .filter(Boolean)
       .join("\n")
   });
+}
+
+function formatVehicle(vehicle: NonNullable<NewOrderAlertInput["vehicle"]>) {
+  return [`${vehicle.make} ${vehicle.model} ${vehicle.year}`, vehicle.series, vehicle.body].filter(Boolean).join(" · ");
+}
+
+function buildVehicleRows(vehicle: NonNullable<NewOrderAlertInput["vehicle"]>): Array<[string, unknown]> {
+  const rows: Array<[string, unknown]> = [
+    ["Vehicle make", vehicle.make],
+    ["Vehicle model", vehicle.model],
+    ["Vehicle year", vehicle.year]
+  ];
+  if (vehicle.series) rows.push(["Generation", vehicle.series]);
+  if (vehicle.body) rows.push(["Body / chassis", vehicle.body]);
+  return rows;
 }
 
 function getSizeSummary(attributes: Record<string, unknown>) {

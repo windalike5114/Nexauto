@@ -58,7 +58,9 @@ export async function retryOrderConfirmationEmail(
         ? {
             make: String(claim.order.vehicle.make),
             model: String(claim.order.vehicle.model),
-            year: Number(claim.order.vehicle.year)
+            year: Number(claim.order.vehicle.year),
+            series: optionalString(claim.order.vehicle.series),
+            body: optionalString(claim.order.vehicle.body)
           }
         : null
     });
@@ -72,4 +74,9 @@ export async function retryOrderConfirmationEmail(
     });
     throw new EmailRetryError("EMAIL_RETRY_INFRASTRUCTURE", "Order confirmation email retry failed.");
   }
+}
+
+function optionalString(value: unknown) {
+  const normalized = value === null || value === undefined ? "" : String(value).trim();
+  return normalized || undefined;
 }

@@ -17,6 +17,7 @@ test("canonical fitment mapper preserves generation, body, and blade positions",
   assert.equal(result.make, "Toyota");
   assert.equal(result.model, "Corolla");
   assert.equal(result.generationName, "E210");
+  assert.deepEqual(result.chassisCodes, ["MZEA12", "ZWE211"]);
   assert.equal(result.bodyStyle, "hatchback");
   assert.equal(result.driverLengthIn, 26);
   assert.equal(result.passengerLengthIn, 16);
@@ -119,6 +120,11 @@ function canonicalRow(): CanonicalFitmentRow {
         id: "generation-1",
         name: "E210",
         active: true,
+        vehicle_chassis_assignments: [
+          { id: "assignment-1", variant_id: "variant-1", is_primary: true, vehicle_chassis_codes: { code: "MZEA12" } },
+          { id: "assignment-2", variant_id: null, is_primary: false, vehicle_chassis_codes: { code: "ZWE211" } },
+          { id: "assignment-3", variant_id: "other-variant", is_primary: false, vehicle_chassis_codes: { code: "NRE210" } }
+        ],
         vehicle_models: {
           id: "model-1",
           name: "Corolla",

@@ -230,7 +230,8 @@ function getSelectedVehicle(items: ReturnType<typeof useCart>["items"]) {
   const make = items.find((item) => typeof item.attributes.vehicle_make === "string")?.attributes.vehicle_make;
   const model = items.find((item) => typeof item.attributes.vehicle_model === "string")?.attributes.vehicle_model;
   const year = items.find((item) => typeof item.attributes.vehicle_year !== "undefined")?.attributes.vehicle_year;
-  const vehicle = [make, model, year].filter(Boolean).join(" ");
+  const bodyChassis = items.find((item) => typeof item.attributes.vehicle_body_chassis === "string")?.attributes.vehicle_body_chassis;
+  const vehicle = [[make, model, year].filter(Boolean).join(" "), bodyChassis].filter(Boolean).join(" · ");
   return vehicle || "";
 }
 
@@ -244,12 +245,15 @@ function SummaryRow({ label, value, highlight = false, strong = false }: { label
 }
 
 function isCustomerVisibleAttribute(key: string) {
-  return !["vehicle", "vehicle_application_id", "vehicle_fitment_application_id", "vehicle_make", "vehicle_model", "vehicle_year"].includes(key);
+  return !["vehicle", "vehicle_application_id", "vehicle_fitment_application_id", "vehicle_make", "vehicle_model", "vehicle_year", "vehicle_series", "vehicle_body", "vehicle_body_chassis"].includes(key);
 }
 
 function getVehicleLabel(item: ReturnType<typeof useCart>["items"][number]) {
   const vehicle = item.attributes.vehicle;
   if (typeof vehicle === "string" && vehicle.trim()) return vehicle;
 
-  return [item.attributes.vehicle_year, item.attributes.vehicle_make, item.attributes.vehicle_model].filter(Boolean).join(" ");
+  return [
+    [item.attributes.vehicle_year, item.attributes.vehicle_make, item.attributes.vehicle_model].filter(Boolean).join(" "),
+    item.attributes.vehicle_body_chassis ?? item.attributes.vehicle_body
+  ].filter(Boolean).join(" · ");
 }

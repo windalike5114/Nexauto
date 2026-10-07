@@ -8,6 +8,11 @@ export function AdminOrderVehiclesCard({ vehicles }: { vehicles: AdminOrderDetai
         {vehicles.map((vehicle) => (
           <article key={vehicle.id} className="rounded border border-black/10 bg-zinc-50 p-4">
             <h3 className="font-black">{vehicle.label}</h3>
+            {vehicle.bodyChassis ? (
+              <p className="mt-2 break-words text-sm font-black text-ink">
+                Body / chassis: {vehicle.bodyChassis}
+              </p>
+            ) : null}
             {[vehicle.startRaw, vehicle.endRaw].filter(Boolean).length ? (
               <p className="mt-2 text-sm font-bold text-steel">
                 Fitment range: {[vehicle.startRaw, vehicle.endRaw].filter(Boolean).join(" - ")}

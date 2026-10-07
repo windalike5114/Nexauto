@@ -32,6 +32,8 @@ export type PendingOrderSnapshot = {
     make?: string | number | null;
     model?: string | number | null;
     year?: string | number | null;
+    series?: string | number | null;
+    body?: string | number | null;
   } | null;
   pricing?: {
     finalSubtotal?: number;

@@ -25,6 +25,7 @@ const validPayload = {
         vehicle_make: "Honda",
         vehicle_model: "Accord",
         vehicle_year: 2009,
+        vehicle_body_chassis: "CU2 · Sedan · 2008–2015",
         driver_length: "24\"",
         passenger_length: "18\""
       }
@@ -57,6 +58,7 @@ test("valid cart payload is accepted and adapted to canonical cart", () => {
   assert.equal(result.data.cart.items[0].quantity, 1);
   assert.equal(result.data.cart.items[0].product.sku, "WPFP2418");
   assert.equal(result.data.cart.items[0].vehicle?.make, "Honda");
+  assert.equal(result.data.cart.items[0].vehicle?.body, "CU2 · Sedan · 2008–2015");
   assert.equal(result.data.customer.email, "customer@example.co.nz");
   assert.equal(result.data.shippingAddress.country, "NZ");
 });

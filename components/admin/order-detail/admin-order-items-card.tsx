@@ -13,6 +13,9 @@ export function AdminOrderItemsCard({ items }: { items: AdminOrderDetailItem[] }
                 <h3 className="font-black">{item.productName}</h3>
                 <p className="mt-1 font-mono text-xs font-bold text-steel">{item.sku}</p>
                 <p className="mt-2 text-sm font-bold text-steel">{formatSizeSummary(item.attributes)}</p>
+                {formatVehicleSummary(item.attributes) ? (
+                  <p className="mt-2 break-words text-sm font-bold text-ink">Vehicle: {formatVehicleSummary(item.attributes)}</p>
+                ) : null}
               </div>
               <div className="text-left sm:text-right">
                 <p className="font-black">
@@ -33,6 +36,12 @@ export function AdminOrderItemsCard({ items }: { items: AdminOrderDetailItem[] }
       </div>
     </section>
   );
+}
+
+function formatVehicleSummary(attributes: Record<string, unknown>) {
+  const base = [attributes.vehicle_year, attributes.vehicle_make, attributes.vehicle_model].filter(Boolean).join(" ");
+  const bodyChassis = attributes.vehicle_body_chassis ?? attributes.vehicle_body;
+  return [base, bodyChassis].filter(Boolean).join(" · ");
 }
 
 function Meta({ label, value }: { label: string; value: string }) {

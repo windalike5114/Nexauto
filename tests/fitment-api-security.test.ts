@@ -81,7 +81,7 @@ test("legacy variant labels use numeric years and deduplicate repeated raw names
 });
 
 test("canonical variant labels show body, chassis or generation with years without duplicates", () => {
-  assert.equal(formatWiperFitmentVariantLabel(canonicalFitment()), "E210 · Hatchback · 2019–ON");
+  assert.equal(formatWiperFitmentVariantLabel(canonicalFitment()), "MZEA12 / ZWE211 · E210 · Hatchback · 2019–ON");
 });
 
 test("all public fitment routes use the shared guard and hide database error messages", () => {
@@ -122,6 +122,7 @@ function canonicalFitment(): WiperFitmentResult {
     make: "Toyota",
     model: "Corolla",
     generationName: "E210",
+    chassisCodes: ["MZEA12", "ZWE211"],
     variantName: "Hatchback",
     bodyStyle: "hatchback",
     startRaw: null,

@@ -794,9 +794,12 @@ function getVehicleLabel(item: CartItem) {
   const vehicle = item.attributes.vehicle;
   if (typeof vehicle === "string" && vehicle.trim()) return vehicle;
 
-  return [item.attributes.vehicle_year, item.attributes.vehicle_make, item.attributes.vehicle_model].filter(Boolean).join(" ");
+  return [
+    [item.attributes.vehicle_year, item.attributes.vehicle_make, item.attributes.vehicle_model].filter(Boolean).join(" "),
+    item.attributes.vehicle_body_chassis ?? item.attributes.vehicle_body
+  ].filter(Boolean).join(" · ");
 }
 
 function isCustomerVisibleAttribute(key: string) {
-  return !["vehicle", "vehicle_application_id", "vehicle_fitment_application_id", "vehicle_make", "vehicle_model", "vehicle_year"].includes(key);
+  return !["vehicle", "vehicle_application_id", "vehicle_fitment_application_id", "vehicle_make", "vehicle_model", "vehicle_year", "vehicle_series", "vehicle_body", "vehicle_body_chassis"].includes(key);
 }

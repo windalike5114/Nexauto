@@ -30,6 +30,8 @@ export type OrderConfirmationEmailInput = {
     make: string;
     model: string;
     year: number;
+    series?: string;
+    body?: string;
   } | null;
 };
 
@@ -51,13 +53,7 @@ export async function sendOrderConfirmationEmail(input: OrderConfirmationEmailIn
     })
     .join("");
 
-  const vehicleRows = input.vehicle
-    ? renderRows([
-        ["Vehicle make", input.vehicle.make],
-        ["Vehicle model", input.vehicle.model],
-        ["Vehicle year", input.vehicle.year]
-      ])
-    : "";
+  const vehicleRows = input.vehicle ? renderRows(buildVehicleRows(input.vehicle)) : "";
 
   await sendEmail({
     type: "order_confirmation",
@@ -122,13 +118,28 @@ export async function sendOrderConfirmationEmail(input: OrderConfirmationEmailIn
       "",
       `Subtotal: ${formatMoney(input.subtotal)}`,
       `Total: ${formatMoney(input.total)}`,
-      input.vehicle ? `Vehicle: ${input.vehicle.make} ${input.vehicle.model} ${input.vehicle.year}` : "",
+      input.vehicle ? `Vehicle: ${formatVehicle(input.vehicle)}` : "",
       "",
       `Support: ${emailAddresses.support}`
     ]
       .filter(Boolean)
       .join("\n")
   });
+}
+
+function formatVehicle(vehicle: NonNullable<OrderConfirmationEmailInput["vehicle"]>) {
+  return [`${vehicle.make} ${vehicle.model} ${vehicle.year}`, vehicle.series, vehicle.body].filter(Boolean).join(" · ");
+}
+
+function buildVehicleRows(vehicle: NonNullable<OrderConfirmationEmailInput["vehicle"]>): Array<[string, unknown]> {
+  const rows: Array<[string, unknown]> = [
+    ["Vehicle make", vehicle.make],
+    ["Vehicle model", vehicle.model],
+    ["Vehicle year", vehicle.year]
+  ];
+  if (vehicle.series) rows.push(["Generation", vehicle.series]);
+  if (vehicle.body) rows.push(["Body / chassis", vehicle.body]);
+  return rows;
 }
 
 export function formatOrderNumber(orderId: string) {

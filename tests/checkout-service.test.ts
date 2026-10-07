@@ -35,6 +35,7 @@ function cartFrontPair(sku = "WPFP2418", vehicle = "Toyota Hilux 2018"): CartIte
       vehicle_make: vehicle.split(" ")[0],
       vehicle_model: vehicle.split(" ").slice(1, -1).join(" "),
       vehicle_year: Number(vehicle.split(" ").at(-1)),
+      vehicle_body_chassis: "AN10 / AN20 / AN30 · Double Cab · 2005–2015",
       driver_length: "24\"",
       passenger_length: "18\""
     }
@@ -426,6 +427,7 @@ test("canonical order draft preserves product, vehicle, and pricing snapshots", 
 
   assert.equal(draft.items[0].name, "Premium Front Wiper Blade Pair WPFP2418");
   assert.equal(draft.vehicle?.make, "Toyota");
+  assert.equal(draft.vehicle?.body, "AN10 / AN20 / AN30 · Double Cab · 2005–2015");
   assert.equal(draft.pricing.productsSubtotal, 59.99);
   assert.equal(draft.pricing.checkoutVersion, "1E");
   assert.equal(draft.pricing.pricingVersion, "2026-07-v1");

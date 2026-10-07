@@ -32,8 +32,8 @@ export function normalizeVehicleContext(input: Record<string, unknown> | null | 
   const make = cleanString(input.make ?? input.vehicle_make);
   const model = cleanString(input.model ?? input.vehicle_model);
   const year = normalizeYear(input.year ?? input.vehicle_year);
-  const series = cleanString(input.series ?? input.generation);
-  const body = cleanString(input.body ?? input.variant);
+  const series = cleanString(input.series ?? input.generation ?? input.vehicle_series);
+  const body = cleanString(input.body ?? input.variant ?? input.vehicle_body_chassis ?? input.vehicle_body);
   const label = cleanString(input.label ?? input.vehicle);
   const driverSize = normalizeLengthLabel(input.driverSize ?? input.driver_length);
   const passengerSize = normalizeLengthLabel(input.passengerSize ?? input.passenger_length);

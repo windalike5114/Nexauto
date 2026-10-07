@@ -210,6 +210,8 @@ function buildVehicleSnapshot(attributes: PendingCheckoutOrderInput["items"][num
     make: attributes.vehicle_make ?? null,
     model: attributes.vehicle_model ?? null,
     year: attributes.vehicle_year ?? null,
+    series: attributes.vehicle_series ?? null,
+    body_chassis: attributes.vehicle_body_chassis ?? attributes.vehicle_body ?? null,
     label: attributes.vehicle ?? null,
     driver_length: attributes.driver_length ?? null,
     passenger_length: attributes.passenger_length ?? null,

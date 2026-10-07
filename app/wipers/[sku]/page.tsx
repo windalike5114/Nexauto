@@ -19,6 +19,7 @@ type WiperSkuSearchParams = {
   make?: string;
   model?: string;
   year?: string;
+  bodyChassis?: string;
   rearAddonId?: string;
 };
 
@@ -66,11 +67,15 @@ export default async function WiperSkuPage({
           applicationKind: query.applicationKind === "canonical" ? "canonical" as const : "legacy" as const,
           make: decodeURIComponent(query.make),
           model: decodeURIComponent(query.model),
-          year: Number(query.year)
+          year: Number(query.year),
+          bodyChassis: cleanVehicleDetail(query.bodyChassis)
         }
       : null;
   const vehicle = vehicleContext
-    ? `${vehicleContext.make} ${vehicleContext.model} ${vehicleContext.year}`
+    ? [
+        `${vehicleContext.make} ${vehicleContext.model} ${vehicleContext.year}`,
+        vehicleContext.bodyChassis
+      ].filter(Boolean).join(" · ")
     : query.vehicle
       ? decodeURIComponent(query.vehicle)
       : "";
@@ -243,6 +248,10 @@ export default async function WiperSkuPage({
       </section>
     </main>
   );
+}
+
+function cleanVehicleDetail(value: string | undefined) {
+  return value?.trim().replace(/\s+/g, " ").slice(0, 240) ?? "";
 }
 
 function getImageUrl(name: string) {

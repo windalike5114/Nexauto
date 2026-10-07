@@ -22,6 +22,7 @@ export function WiperSetPurchase({
     make: string;
     model: string;
     year: number;
+    bodyChassis: string;
   } | null;
 }) {
   const [includeRear, setIncludeRear] = useState(Boolean(rearAddon));
@@ -52,7 +53,8 @@ export function WiperSetPurchase({
                 : { vehicle_application_id: vehicleContext.applicationId }),
               vehicle_make: vehicleContext.make,
               vehicle_model: vehicleContext.model,
-              vehicle_year: vehicleContext.year
+              vehicle_year: vehicleContext.year,
+              ...(vehicleContext.bodyChassis ? { vehicle_body_chassis: vehicleContext.bodyChassis } : {})
             }
           : {})
       }
@@ -79,7 +81,8 @@ export function WiperSetPurchase({
                   : { vehicle_application_id: vehicleContext.applicationId }),
                 vehicle_make: vehicleContext.make,
                 vehicle_model: vehicleContext.model,
-                vehicle_year: vehicleContext.year
+                vehicle_year: vehicleContext.year,
+                ...(vehicleContext.bodyChassis ? { vehicle_body_chassis: vehicleContext.bodyChassis } : {})
               }
             : {})
         }

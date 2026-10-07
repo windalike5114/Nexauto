@@ -293,6 +293,8 @@ function buildVehicleSnapshot(item: PendingOrderSnapshotItem) {
     make: item.attributes.vehicle_make ?? null,
     model: item.attributes.vehicle_model ?? null,
     year: item.attributes.vehicle_year ?? null,
+    series: item.attributes.vehicle_series ?? null,
+    body_chassis: item.attributes.vehicle_body_chassis ?? item.attributes.vehicle_body ?? null,
     label: item.attributes.vehicle ?? null,
     driver_length: item.attributes.driver_length ?? null,
     passenger_length: item.attributes.passenger_length ?? null,

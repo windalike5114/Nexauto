@@ -45,6 +45,7 @@ test("multiple items, vehicles, and fulfilments are preserved", async () => {
   assert.equal(detail.vehicleSnapshots.length, 2);
   assert.equal(detail.fulfilments.length, 2);
   assert.deepEqual(detail.items.map((item) => item.sku), ["WPFP2418", "H11-BUNDLE"]);
+  assert.equal(detail.vehicleSnapshots[0].bodyChassis, "AN10 / AN20 / AN30 · Double Cab · 2005–2015");
 });
 
 test("canonical pricing snapshot is preferred and reconciled", async () => {
@@ -280,7 +281,12 @@ function item(overrides: Partial<AdminOrderDetailItemRow> = {}): AdminOrderDetai
     variantId: "44444444-4444-4444-8444-444444444444",
     sku: "WPFP2418",
     productName: "Premium Front Wiper Blade Pair",
-    attributes: { driver_length: 24, passenger_length: 18, vehicle_application_id: "22222222-2222-4222-8222-222222222222" },
+    attributes: {
+      driver_length: 24,
+      passenger_length: 18,
+      vehicle_application_id: "22222222-2222-4222-8222-222222222222",
+      vehicle_body_chassis: "AN10 / AN20 / AN30 · Double Cab · 2005–2015"
+    },
     qty: 1,
     unitPrice: 59.99,
     lineSubtotal: 59.99,

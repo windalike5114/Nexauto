@@ -42,7 +42,9 @@ export function createSupabaseOrderEmailService(): OrderEmailService {
             ? {
                 make: String(order.vehicle.make),
                 model: String(order.vehicle.model),
-                year: Number(order.vehicle.year)
+                year: Number(order.vehicle.year),
+                series: optionalString(order.vehicle.series),
+                body: optionalString(order.vehicle.body)
               }
             : null
         });
@@ -84,7 +86,9 @@ export function createSupabaseOrderEmailService(): OrderEmailService {
             ? {
                 make: String(order.vehicle.make),
                 model: String(order.vehicle.model),
-                year: Number(order.vehicle.year)
+                year: Number(order.vehicle.year),
+                series: optionalString(order.vehicle.series),
+                body: optionalString(order.vehicle.body)
               }
             : null
         });
@@ -95,6 +99,11 @@ export function createSupabaseOrderEmailService(): OrderEmailService {
       }
     }
   };
+}
+
+function optionalString(value: unknown) {
+  const normalized = value === null || value === undefined ? "" : String(value).trim();
+  return normalized || undefined;
 }
 
 async function claimEmail(order: FinalisedOrder) {

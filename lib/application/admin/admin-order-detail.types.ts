@@ -205,6 +205,7 @@ export type AdminOrderDetailItem = AdminOrderDetailItemRow & {
 
 export type AdminOrderDetailVehicleSnapshot = AdminOrderDetailVehicleSnapshotRow & {
   label: string;
+  bodyChassis: string | null;
 };
 
 export type AdminOrderDetailFulfilment = AdminOrderDetailFulfilmentRow & {

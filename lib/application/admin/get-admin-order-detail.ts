@@ -45,19 +45,24 @@ export async function getAdminOrderDetail(orderId: string, access: AdminAccessCo
   if (!["paid", "refunded"].includes(data.order.status)) throw new AdminOrderDetailNotFoundError();
 
   const order = data.order;
-  const vehicleSnapshots = data.vehicleSnapshots.map((vehicle): AdminOrderDetailVehicleSnapshot => ({
+  const baseVehicleSnapshots = data.vehicleSnapshots.map((vehicle): AdminOrderDetailVehicleSnapshot => ({
     ...vehicle,
-    label: formatVehicleLabel(vehicle.year, vehicle.make, vehicle.model)
+    label: formatVehicleLabel(vehicle.year, vehicle.make, vehicle.model),
+    bodyChassis: null
   }));
   const items = data.items.map((item): AdminOrderDetailItem => {
     const productType = classifyItem(item);
     return {
       ...item,
       productType,
-      relatedVehicleSnapshotIds: findRelatedVehicleSnapshotIds(item.vehicleApplicationId, vehicleSnapshots),
+      relatedVehicleSnapshotIds: findRelatedVehicleSnapshotIds(item.vehicleApplicationId, baseVehicleSnapshots),
       relatedFulfilmentIds: []
     };
   });
+  const vehicleSnapshots = baseVehicleSnapshots.map((vehicle) => ({
+    ...vehicle,
+    bodyChassis: findVehicleBodyChassis(vehicle, items)
+  }));
   const fulfilments = data.fulfilments.map((fulfilment): AdminOrderDetailFulfilment => ({
     ...fulfilment,
     relationship: relateFulfilment(fulfilment, items)
@@ -111,6 +116,33 @@ export async function getAdminOrderDetail(orderId: string, access: AdminAccessCo
     warnings,
     sectionErrors: data.sectionErrors
   };
+}
+
+function findVehicleBodyChassis(vehicle: AdminOrderDetailVehicleSnapshot, items: AdminOrderDetailItem[]) {
+  const matchingItem = items.find((item) => {
+    const itemApplicationId = getFirstString(
+      item.vehicleApplicationId,
+      item.attributes.vehicle_fitment_application_id,
+      item.attributes.vehicle_application_id,
+      item.vehicleSnapshot.vehicle_fitment_application_id,
+      item.vehicleSnapshot.vehicle_application_id
+    );
+    if (vehicle.vehicleApplicationId && itemApplicationId === vehicle.vehicleApplicationId) return true;
+    return sameValue(item.attributes.vehicle_make, vehicle.make)
+      && sameValue(item.attributes.vehicle_model, vehicle.model)
+      && Number(item.attributes.vehicle_year) === vehicle.year;
+  });
+  if (!matchingItem) return null;
+  return getFirstString(
+    matchingItem.attributes.vehicle_body_chassis,
+    matchingItem.attributes.vehicle_body,
+    matchingItem.vehicleSnapshot.body_chassis,
+    matchingItem.vehicleSnapshot.body
+  );
+}
+
+function sameValue(left: unknown, right: unknown) {
+  return String(left ?? "").trim().toLocaleLowerCase() === String(right ?? "").trim().toLocaleLowerCase();
 }
 
 export function mapPricing(order: Pick<AdminOrderDetailOrderRow, "currency" | "subtotal" | "pricingSnapshot" | "itemsSnapshot">, items: AdminOrderDetailItem[]): AdminOrderDetailPricing {

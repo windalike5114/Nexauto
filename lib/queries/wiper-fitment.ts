@@ -27,6 +27,7 @@ export type WiperFitmentResult = {
   make: string;
   model: string;
   generationName: string | null;
+  chassisCodes?: string[];
   variantName: string | null;
   bodyStyle: string | null;
   startRaw: string | null;
@@ -61,6 +62,12 @@ const CANONICAL_FITMENT_SELECT = `
       id,
       name,
       active,
+      vehicle_chassis_assignments(
+        id,
+        variant_id,
+        is_primary,
+        vehicle_chassis_codes(code)
+      ),
       vehicle_models!inner(
         id,
         name,
@@ -114,6 +121,12 @@ type CanonicalGeneration = {
   id: string;
   name: string;
   active: boolean;
+  vehicle_chassis_assignments?: Array<{
+    id: string;
+    variant_id: string | null;
+    is_primary: boolean;
+    vehicle_chassis_codes: { code: string } | Array<{ code: string }> | null;
+  }> | null;
   vehicle_models: CanonicalModel | CanonicalModel[] | null;
 };
 
@@ -299,6 +312,7 @@ function mapLegacyFitmentRow(row: ApplicationFitmentRow): WiperFitmentResult | n
     make: single(row.vehicle_makes)?.name ?? "",
     model: single(row.vehicle_models)?.name ?? "",
     generationName: null,
+    chassisCodes: [],
     variantName: null,
     bodyStyle: null,
     startRaw: row.start_raw,
@@ -316,6 +330,11 @@ export function mapCanonicalFitmentRow(row: CanonicalFitmentRow): WiperFitmentRe
   const configuration = single(row.wiper_configurations);
   if (!identity || !configuration) return null;
   const variant = single(identity.application.vehicle_variants);
+  const chassisCodes = (identity.generation.vehicle_chassis_assignments ?? [])
+    .filter((assignment) => !assignment.variant_id || assignment.variant_id === variant?.id)
+    .sort((left, right) => Number(right.is_primary) - Number(left.is_primary))
+    .map((assignment) => single(assignment.vehicle_chassis_codes)?.code?.trim() ?? "")
+    .filter(Boolean);
   const blades = new Map(configuration.wiper_configuration_blades.map((blade) => [blade.position, toNumber(blade.length_in)]));
   return {
     applicationId: identity.application.id,
@@ -323,6 +342,7 @@ export function mapCanonicalFitmentRow(row: CanonicalFitmentRow): WiperFitmentRe
     make: identity.make.name,
     model: identity.model.name,
     generationName: identity.generation.name,
+    chassisCodes: [...new Set(chassisCodes)],
     variantName: variant?.name ?? null,
     bodyStyle: variant?.body_style ?? null,
     startRaw: identity.application.year_start ? String(identity.application.year_start) : null,
@@ -437,6 +457,7 @@ export function formatWiperFitmentVariantLabel(fitment: WiperFitmentResult, disp
   const seen = new Set<string>();
   const parts = [
     modelVersion,
+    fitment.chassisCodes?.join(" / ") || null,
     fitment.generationName,
     fitment.variantName,
     formatBodyStyle(fitment.bodyStyle),

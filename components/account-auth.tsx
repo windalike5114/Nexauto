@@ -211,8 +211,8 @@ export function AccountAuth({ initialMode = "sign-in" }: { initialMode?: Account
       if (!model) throw new Error("Could not match vehicle model.");
 
       const variants = await fetchJson<{
-        variants: Array<{ id: string; key: string; applicationKind: "legacy" | "canonical" }>;
-        automaticVariant: { id: string; key: string; applicationKind: "legacy" | "canonical" } | null;
+        variants: Array<{ id: string; key: string; name: string; applicationKind: "legacy" | "canonical" }>;
+        automaticVariant: { id: string; key: string; name: string; applicationKind: "legacy" | "canonical" } | null;
         requiresSelection: boolean;
       }>(`/api/fitment/wipers/variants?makeId=${make.id}&modelId=${model.id}&year=${vehicle.year}`);
       const selectedVariant = variants.variants.find((entry) => entry.id === vehicle.applicationId) ?? variants.automaticVariant;
@@ -238,7 +238,8 @@ export function AccountAuth({ initialMode = "sign-in" }: { initialMode?: Account
         applicationKind: selectedVariant.applicationKind,
         make: vehicle.make,
         model: vehicle.model,
-        year: String(vehicle.year)
+        year: String(vehicle.year),
+        bodyChassis: selectedVariant.name
       });
       if (fitment.rearAddon) params.set("rearAddonId", fitment.rearAddon.id);
       router.push(`/wipers/${fitment.frontPair.sku}?${params.toString()}` as never);

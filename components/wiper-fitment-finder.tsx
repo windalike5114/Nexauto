@@ -269,7 +269,6 @@ export function WiperFitmentFinder({
   const selectedModel = useMemo(() => models.find((entry) => entry.id === modelId)?.name ?? "", [modelId, models]);
   const busy = Boolean(loading);
   const primaryFitment = fitments[0];
-  const selectedVehicle = `${selectedMake} ${selectedModel} ${year}`.trim();
 
   async function saveVehicleToGarage() {
     if (!primaryFitment || !year) return;
@@ -330,6 +329,7 @@ export function WiperFitmentFinder({
           make: selectedMake,
           model: selectedModel,
           year,
+          bodyChassis: selectedVariant.name,
           rearAddon: nextFitment.rearAddon
         }) as never
       );
@@ -358,7 +358,7 @@ export function WiperFitmentFinder({
         </div>
       </div>
 
-      <div className={`mt-5 grid gap-3 sm:mt-6 sm:gap-4 ${compact ? "grid-cols-1" : "md:grid-cols-2 xl:grid-cols-4"}`}>
+      <div className={`mt-5 grid gap-3 sm:mt-6 sm:gap-4 ${compact ? "grid-cols-1" : "md:grid-cols-2 xl:grid-cols-[minmax(0,0.8fr)_minmax(0,1fr)_minmax(0,0.7fr)_minmax(0,1.8fr)]"}`}>
         <SelectControl label="Make" value={makeId} disabled={busy && loading === "makes"} onChange={setMakeId}>
           <option value="">Select make</option>
           {makes.map((entry) => (
@@ -395,6 +395,13 @@ export function WiperFitmentFinder({
           ))}
         </SelectControl>
       </div>
+
+      {selectedVariant ? (
+        <p className="mt-3 rounded-lg border border-black/10 bg-zinc-50 px-3 py-2 text-sm font-bold leading-6 text-ink">
+          <span className="mr-2 text-xs font-black uppercase tracking-[0.12em] text-steel">Selected body / chassis</span>
+          <span className="break-words">{selectedVariant.name}</span>
+        </p>
+      ) : null}
 
       {requiresVariantSelection ? (
         <p className="mt-3 text-xs font-bold leading-5 text-steel">
@@ -481,6 +488,7 @@ export function WiperFitmentFinder({
                         make: selectedMake,
                         model: selectedModel,
                         year,
+                        bodyChassis: selectedVariant?.name ?? "",
                         rearAddon: primaryFitment.rearAddon
                       }) as never
                     }
@@ -567,6 +575,7 @@ function buildWiperSkuHref({
   make,
   model,
   year,
+  bodyChassis,
   rearAddon
 }: {
   frontPair: WiperSetResult;
@@ -574,6 +583,7 @@ function buildWiperSkuHref({
   make: string;
   model: string;
   year: string;
+  bodyChassis: string;
   rearAddon: WiperRearAddonResult | null;
 }) {
   const params = new URLSearchParams();
@@ -585,6 +595,7 @@ function buildWiperSkuHref({
   if (make) params.set("make", make);
   if (model) params.set("model", model);
   if (year) params.set("year", year);
+  if (bodyChassis) params.set("bodyChassis", bodyChassis);
   if (rearAddon) params.set("rearAddonId", rearAddon.id);
 
   const query = params.toString();

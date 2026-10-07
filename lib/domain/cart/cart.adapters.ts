@@ -89,7 +89,9 @@ function extractVehicleContext(attributes: z.infer<typeof AttributeRecordSchema>
   const model = asString(attributes.vehicle_model);
   const year = attributes.vehicle_year;
   const label = asString(attributes.vehicle);
-  const hasStructuredVehicle = Boolean(applicationId || make || model || year);
+  const body = asString(attributes.vehicle_body_chassis ?? attributes.vehicle_body);
+  const series = asString(attributes.vehicle_series);
+  const hasStructuredVehicle = Boolean(applicationId || make || model || year || body || series);
 
   if (!hasStructuredVehicle) {
     return label ? CartVehicleContextSchema.parse({ label }) : undefined;
@@ -105,6 +107,8 @@ function extractVehicleContext(attributes: z.infer<typeof AttributeRecordSchema>
     make,
     model,
     year,
+    body,
+    series,
     label
   });
 }
