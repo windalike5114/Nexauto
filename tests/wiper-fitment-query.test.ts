@@ -3,6 +3,7 @@ import test from "node:test";
 import {
   buildWiperFitmentVariantResolution,
   groupWiperFitmentModels,
+  groupWiperFitmentModelsUsingMaster,
   mapCanonicalFitmentRow,
   type CanonicalFitmentRow,
   type WiperFitmentResult
@@ -44,6 +45,41 @@ test("model groups collapse chassis and body variants while retaining every sour
   assert.equal(groups.some((group) => group.name === "Land Cruiser Prado"), true);
   assert.deepEqual(groups.find((group) => group.name === "Yaris")?.modelIds, ["yaris", "yaris-hatch"]);
   assert.equal(groups.some((group) => group.name === "Yaris Verso P2"), true);
+});
+
+test("Machter master models remain authoritative instead of being merged into shorter marketing names", () => {
+  const groups = groupWiperFitmentModelsUsingMaster([
+    { id: "legacy-falcon", name: "Falcon - BA - BF" },
+    { id: "legacy-verso", name: "Yaris Verso P2" },
+    { id: "legacy-cross", name: "Yaris Cross" },
+    { id: "legacy-gr", name: "Yaris GR" }
+  ], [
+    { id: "master-falcon", name: "Falcon" },
+    { id: "master-yaris", name: "Yaris" },
+    { id: "master-verso", name: "Yaris Verso" },
+    { id: "master-cross", name: "Yaris Cross" }
+  ]);
+
+  assert.deepEqual(groups.map((group) => group.name), ["Falcon", "Yaris", "Yaris Cross", "Yaris Verso"]);
+  assert.deepEqual(groups.find((group) => group.name === "Falcon")?.modelIds, ["master-falcon", "legacy-falcon"]);
+  assert.deepEqual(groups.find((group) => group.name === "Yaris Verso")?.modelIds, ["master-verso", "legacy-verso"]);
+});
+
+test("master model matching tolerates make prefixes and punctuation differences", () => {
+  const groups = groupWiperFitmentModelsUsingMaster([
+    { id: "legacy-3", name: "Mazda3 - BK" },
+    { id: "legacy-bt50", name: "BT-50" },
+    { id: "legacy-landcruiser", name: "Landcruiser - 100 Series" },
+    { id: "legacy-prado", name: "Landcruiser Prado - 120 Series" },
+    { id: "legacy-land-cruiser-prado", name: "Land Cruiser Prado" }
+  ], [
+    { id: "master-3", name: "3" },
+    { id: "master-bt50", name: "BT50" },
+    { id: "master-landcruiser", name: "Land Cruiser" },
+    { id: "master-prado", name: "Prado" }
+  ], "Mazda");
+  assert.deepEqual(groups.map((group) => group.name), ["3", "BT50", "Land Cruiser", "Prado"]);
+  assert.deepEqual(groups.find((group) => group.name === "Prado")?.aliases, ["Land Cruiser Prado", "Landcruiser Prado - 120 Series", "Prado"]);
 });
 
 test("variant selection is skipped for a unique fitment but retained for distinct versions", () => {

@@ -23,6 +23,8 @@
     "fitment:check": "node scripts/fitment/check-fitment-counts.mjs",
     "vehicle-catalog:report": "node scripts/fitment/import-vehicle-catalog-v2.mjs --report-only",
     "vehicle-catalog:import": "node scripts/fitment/import-vehicle-catalog-v2.mjs --apply",
+    "vehicle-catalog:map-legacy": "node scripts/fitment/map-legacy-applications-v2.mjs --report-only",
+    "vehicle-catalog:apply-legacy-map": "node scripts/fitment/map-legacy-applications-v2.mjs --apply",
     "wiper-sources:report": "node scripts/fitment/analyze-wiper-source-matches.mjs",
     "wiper-sources:import": "node scripts/fitment/import-wiper-observations-v2.mjs --apply",
     "test:fitment-normalization": "node --test --test-isolation=none tests/wiper-fitment-normalization.test.mjs",

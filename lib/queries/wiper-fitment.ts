@@ -184,9 +184,10 @@ export async function listWiperFitmentMakes() {
 
 export async function listWiperFitmentModels(makeId: string) {
   const supabase = getSupabaseOrThrow();
-  const [legacy, canonical] = await Promise.all([
+  const [legacy, canonical, masterCatalog] = await Promise.all([
     supabase.from("vehicle_applications").select("model_id,vehicle_models(id,name)").eq("make_id", makeId).eq("active", true).order("model_id"),
-    loadPublishedCanonicalFitments(supabase)
+    loadPublishedCanonicalFitments(supabase),
+    loadMachterMasterModels(supabase, makeId)
   ]);
   if (legacy.error) throw legacy.error;
   if (canonical.error) throw canonical.error;
@@ -200,7 +201,7 @@ export async function listWiperFitmentModels(makeId: string) {
     const identity = getCanonicalIdentity(row);
     if (identity?.make.id === makeId) models.set(identity.model.id, identity.model);
   }
-  return groupWiperFitmentModels([...models.values()]);
+  return groupWiperFitmentModelsUsingMaster([...models.values()], masterCatalog.models, masterCatalog.requestedMakeName);
 }
 
 export async function listWiperFitmentYears(makeId: string, modelId: string) {
@@ -369,6 +370,43 @@ async function loadPublishedCanonicalFitments(supabase: ReturnType<typeof getSup
   return { data: (result.data ?? []) as unknown as CanonicalFitmentRow[], error: result.error };
 }
 
+async function loadMachterMasterModels(supabase: ReturnType<typeof getSupabaseOrThrow>, makeId: string) {
+  const [{ data: source, error: sourceError }, { data: makes, error: makesError }] = await Promise.all([
+    supabase.from("catalog_data_sources").select("id").eq("code", "MACHTER_VEHICLE_CATALOG").eq("active", true).maybeSingle(),
+    supabase.from("vehicle_makes").select("id,name")
+  ]);
+  if (sourceError) throw sourceError;
+  if (makesError) throw makesError;
+  const requestedMake = (makes ?? []).find((make) => make.id === makeId) ?? null;
+  const targetMakeKey = requestedMake ? canonicalMakeNameKey(requestedMake.name) : "";
+  const makeCandidates = requestedMake
+    ? (makes ?? []).filter((make) => canonicalMakeNameKey(make.name) === targetMakeKey)
+    : [];
+  const canonicalMake = requestedMake
+    ? makeCandidates.find((make) => normalizeModelName(make.name).toLowerCase() === targetMakeKey) ?? makeCandidates[0] ?? requestedMake
+    : null;
+  if (!source || !canonicalMake) return { models: [], requestedMakeName: requestedMake?.name ?? "" };
+
+  const [aliases, models] = await Promise.all([
+    selectAll(
+      supabase
+        .from("vehicle_entity_aliases")
+        .select("model_id")
+        .eq("data_source_id", source.id)
+        .eq("entity_type", "model")
+        .eq("alias_kind", "name")
+    ),
+    supabase.from("vehicle_models").select("id,name").eq("make_id", canonicalMake.id)
+  ]);
+  if (aliases.error) throw aliases.error;
+  if (models.error) throw models.error;
+  const masterIds = new Set((aliases.data ?? []).map((alias: { model_id: string | null }) => alias.model_id).filter(Boolean));
+  return {
+    models: ((models.data ?? []) as WiperFitmentModel[]).filter((model) => masterIds.has(model.id)),
+    requestedMakeName: requestedMake?.name ?? ""
+  };
+}
+
 function addYears(years: Set<number>, start: number | null, end: number | null, allowOpenEnded: boolean) {
   if (!start) return;
   const finalYear = end ?? (allowOpenEnded ? new Date().getFullYear() : null);
@@ -451,6 +489,38 @@ export function groupWiperFitmentModels(models: WiperFitmentModel[]): WiperFitme
     .sort((left, right) => left.name.localeCompare(right.name));
 }
 
+export function groupWiperFitmentModelsUsingMaster(
+  models: WiperFitmentModel[],
+  masterModels: WiperFitmentModel[],
+  makeName?: string
+): WiperFitmentModelGroup[] {
+  const masterGroups = new Map<string, { master: WiperFitmentModel; members: Map<string, WiperFitmentModel> }>();
+  const unmatched: WiperFitmentModel[] = [];
+
+  for (const model of models) {
+    const master = resolveMasterModel(model.name, masterModels, makeName);
+    if (!master) {
+      unmatched.push(model);
+      continue;
+    }
+    const group = masterGroups.get(master.id) ?? { master, members: new Map() };
+    group.members.set(master.id, master);
+    group.members.set(model.id, model);
+    masterGroups.set(master.id, group);
+  }
+
+  const mastered = [...masterGroups.values()].map(({ master, members }) => {
+    const sortedMembers = [...members.values()].sort((left, right) => left.name.localeCompare(right.name) || left.id.localeCompare(right.id));
+    return {
+      id: master.id,
+      name: master.name,
+      aliases: [...new Set(sortedMembers.map((model) => normalizeModelName(model.name)))],
+      modelIds: sortedMembers.map((model) => model.id)
+    };
+  });
+  return [...mastered, ...groupWiperFitmentModels(unmatched)].sort((left, right) => left.name.localeCompare(right.name));
+}
+
 export function buildWiperFitmentVariantResolution(
   fitments: WiperFitmentResult[],
   displayModelName: string
@@ -486,6 +556,47 @@ function findDisplayModelName(modelName: string, knownNames: string[]) {
     if (hasExplicitSeparator || looksLikeVehicleVersion(suffix)) return candidate;
   }
   return normalized;
+}
+
+function resolveMasterModel(modelName: string, masterModels: WiperFitmentModel[], makeName?: string) {
+  const candidates = [normalizeModelName(modelName)];
+  if (makeName && candidates[0].toLowerCase().startsWith(makeName.toLowerCase())) {
+    const withoutMake = candidates[0].slice(makeName.length).replace(/^\s*[–—-]?\s*/, "").trim();
+    if (withoutMake) candidates.push(withoutMake);
+  }
+
+  for (const candidate of candidates) {
+    const exact = masterModels.find((model) => normalizeMasterKey(model.name) === normalizeMasterKey(candidate));
+    if (exact) return exact;
+    const displayName = findDisplayModelName(candidate, masterModels.map((model) => normalizeModelName(model.name)));
+    const matched = masterModels.find((model) => normalizeModelName(model.name).toLowerCase() === displayName.toLowerCase());
+    if (matched) return matched;
+
+    const contained = masterModels.filter((model) => containsWholeValue(candidate, model.name));
+    if (contained.length === 1) return contained[0];
+    if (contained.length > 1) {
+      const ending = contained.filter((model) => (
+        !/[,/]/.test(candidate)
+        && normalizeModelName(candidate).toLowerCase().endsWith(normalizeModelName(model.name).toLowerCase())
+      ));
+      if (ending.length === 1) return ending[0];
+      continue;
+    }
+
+    const compactCandidate = normalizeMasterKey(candidate);
+    const compactPrefixes = masterModels
+      .filter((model) => compactCandidate.startsWith(normalizeMasterKey(model.name)))
+      .sort((left, right) => normalizeMasterKey(right.name).length - normalizeMasterKey(left.name).length);
+    const compactMaster = compactPrefixes[0];
+    if (compactMaster) {
+      const remainder = compactCandidate.slice(normalizeMasterKey(compactMaster.name).length);
+      const hasVersionSignal = /[–—-]/.test(candidate)
+        || /\b(sedan|wagon|hatch|liftback|ute|van|coupe|suv|pickup)\b/i.test(candidate)
+        || /\d/.test(remainder);
+      if (hasVersionSignal) return compactMaster;
+    }
+  }
+  return null;
 }
 
 function looksLikeVehicleVersion(suffix: string) {
@@ -532,6 +643,22 @@ function fitmentSignature(fitment: WiperFitmentResult, displayModelName: string)
 
 function normalizeModelName(value: string) {
   return value.replace(/\s+/g, " ").trim();
+}
+
+function normalizeMasterKey(value: string) {
+  return normalizeModelName(value).normalize("NFKC").toLowerCase().replace(/[^\p{L}\p{N}]+/gu, "");
+}
+
+function canonicalMakeNameKey(value: string) {
+  const key = normalizeModelName(value).toLowerCase();
+  const aliases: Record<string, string> = {
+    fpv: "ford",
+    "ford fpv": "ford",
+    mercedes: "mercedes benz",
+    "mazda eunos": "eunos",
+    "range rover": "land rover"
+  };
+  return aliases[key] ?? key;
 }
 
 function escapeRegExp(value: string) {
