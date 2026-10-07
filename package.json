@@ -29,6 +29,7 @@
     "wiper-sources:import": "node scripts/fitment/import-wiper-observations-v2.mjs --apply",
     "wiper-master:legacy-assist": "node scripts/fitment/analyze-legacy-assisted-reconciliation.mjs",
     "wiper-master:reconcile": "node scripts/fitment/reconcile-wiper-master-v2.mjs",
+    "wiper-master:review-tasks": "node scripts/fitment/export-wiper-review-tasks.mjs",
     "test:fitment-normalization": "node --test --test-isolation=none tests/wiper-fitment-normalization.test.mjs",
     "test:fitment-schema": "node --test --test-isolation=none tests/vehicle-catalog-v2-migration.test.mjs",
     "test:vehicle-catalog-normalization": "node --test --test-isolation=none tests/vehicle-catalog-normalization.test.mjs",

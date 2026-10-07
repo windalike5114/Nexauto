@@ -29,16 +29,30 @@ const autoReady = readSheet(screen, "B_可自动确认");
 const fieldReview = readSheet(screen, "D_实车人工确认");
 const coverageReview = readSheet(screen, "E_外源资料补充");
 const assistedReady = readSheet(assisted, "老库辅助唯一匹配");
+const sourceReviewRows = [...fieldReview, ...coverageReview];
+const authoritativeSourceReady = authoritative
+  ? sourceReviewRows.filter((row) => (
+      row.proposed_application_id
+      && row.normalized_driver_in
+      && row.normalized_passenger_in
+      && parseConfigurationKey(row.configuration_key)
+    )).map((row) => ({
+      ...row,
+      promotion_rule: "authoritative_user_source",
+      target_application_id: row.proposed_application_id
+    }))
+  : [];
 
 const toAccept = [
   ...autoReady.map((row) => ({ ...row, promotion_rule: "unique_multi_source_match", target_application_id: row.proposed_application_id })),
-  ...assistedReady.map((row) => ({ ...row, promotion_rule: "approved_legacy_bridge_exact_fitment", target_application_id: row.assisted_application_id }))
+  ...assistedReady.map((row) => ({ ...row, promotion_rule: "approved_legacy_bridge_exact_fitment", target_application_id: row.assisted_application_id })),
+  ...authoritativeSourceReady
 ];
 const trusted = [
   ...alreadyMatched.map((row) => ({ ...row, promotion_rule: "existing_unique_multi_source_match", target_application_id: row.proposed_application_id })),
   ...toAccept
 ];
-const sourceExceptions = [...fieldReview, ...coverageReview]
+const sourceExceptions = (authoritative ? [] : sourceReviewRows)
   .filter((row) => row.current_database_status === "accepted")
   .map((row) => ({ ...row, target_application_id: row.proposed_application_id }));
 
@@ -139,6 +153,7 @@ const report = {
     already_safe_observations: alreadyMatched.length,
     direct_auto_accept: autoReady.length,
     legacy_assisted_accept: assistedReady.length,
+    authoritative_source_accept: authoritativeSourceReady.length,
     source_exceptions_to_reopen: sourceExceptions.length,
     trusted_observations_after_apply: trusted.length,
     publishable_applications: publishable.length,
@@ -162,7 +177,13 @@ if (args.apply) await applyChanges(report);
 async function applyChanges(currentReport) {
   if (currentReport.counts.direct_auto_accept !== 183) throw new Error("Expected 183 direct auto-accept rows; aborting.");
   if (currentReport.counts.legacy_assisted_accept !== 10) throw new Error("Expected 10 legacy-assisted rows; aborting.");
-  if (currentReport.counts.source_exceptions_to_reopen !== 52) throw new Error("Expected 52 source exceptions to reopen; aborting.");
+  if (authoritative && currentReport.counts.authoritative_source_accept !== 141) {
+    throw new Error("Expected 141 authoritative source rows; aborting.");
+  }
+  const expectedSourceExceptions = authoritative ? 0 : 52;
+  if (currentReport.counts.source_exceptions_to_reopen !== expectedSourceExceptions) {
+    throw new Error(`Expected ${expectedSourceExceptions} source exceptions to reopen; aborting.`);
+  }
   if (!currentReport.publishable.length) throw new Error("No fitments passed publication safeguards.");
 
   const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
@@ -173,7 +194,11 @@ async function applyChanges(currentReport) {
     ...overriddenObservationIds
   ]);
   const affectedRecordIds = unique(observations.filter((row) => affectedObservationIds.includes(row.id)).map((row) => row.source_record_id));
-  const affectedAppIds = unique(publishable.map((row) => row.vehicle_application_id));
+  const blockedAppIds = unique(blocked.map((row) => row.vehicle_application_id));
+  const affectedAppIds = unique([
+    ...publishable.map((row) => row.vehicle_application_id),
+    ...blockedAppIds
+  ]);
   const publicationConfigKeys = unique(publishable.map((row) => row.configuration_key));
   const acceptanceConfigKeys = unique(toAccept.map((row) => row.configuration_key));
   const configKeysToEnsure = unique([...publicationConfigKeys, ...acceptanceConfigKeys]);
@@ -257,7 +282,9 @@ async function applyChanges(currentReport) {
     entity_type: "application",
     mapping_index: 0,
     mapping_status: "approved",
-    confidence: row.promotion_rule === "approved_legacy_bridge_exact_fitment" ? 0.97 : 0.99,
+    confidence: row.promotion_rule === "authoritative_user_source"
+      ? 1
+      : row.promotion_rule === "approved_legacy_bridge_exact_fitment" ? 0.97 : 0.99,
     vehicle_application_id: row.target_application_id,
     match_reasons: [row.promotion_rule],
     reviewed_at: new Date().toISOString(),
@@ -284,7 +311,7 @@ async function applyChanges(currentReport) {
       reviewed_by: "automation:wiper-master-reconciliation-v1",
       reviewed_at: new Date().toISOString()
     }).in("source_record_id", acceptedRecordIds).eq("review_status", "open")
-      .in("issue_type", ["vehicle_identity_match", "wiper_size_or_source_parse"]);
+      .in("issue_type", ["vehicle_identity_match", "wiper_size_or_source_parse", "source_evidence_review"]);
     if (error) throw error;
   }
 
@@ -308,6 +335,15 @@ async function applyChanges(currentReport) {
   await insertChunks(db, "fitment_review_queue", reviewRows, 100);
 
   const affectedConfigIds = unique(publicationConfigKeys.map((value) => configByKey.get(value)?.id).filter(Boolean));
+  let unpublishedBlockedFitments = 0;
+  if (blockedAppIds.length) {
+    const { data, error } = await db.from("vehicle_wiper_fitments").update({
+      fitment_status: "review",
+      notes: "Publication paused because authoritative Wiper Master rows require body/chassis/year separation or a saleable product."
+    }).in("vehicle_application_id", blockedAppIds).eq("fitment_status", "published").select("id");
+    if (error) throw error;
+    unpublishedBlockedFitments = data?.length ?? 0;
+  }
   const { error: configError } = await db.from("wiper_configurations")
     .update({ configuration_status: "published", notes: "Published by deterministic Wiper Master reconciliation v1." })
     .in("id", affectedConfigIds);
@@ -346,7 +382,8 @@ async function applyChanges(currentReport) {
     authoritative,
     backup: backupPath,
     published_fitments: fitmentRows.length,
-    superseded_observations: overriddenObservationIds.length
+    superseded_observations: overriddenObservationIds.length,
+    unpublished_blocked_fitments: unpublishedBlockedFitments
   }, null, 2));
 }
 
