@@ -27,6 +27,8 @@
     "vehicle-catalog:apply-legacy-map": "node scripts/fitment/map-legacy-applications-v2.mjs --apply",
     "wiper-sources:report": "node scripts/fitment/analyze-wiper-source-matches.mjs",
     "wiper-sources:import": "node scripts/fitment/import-wiper-observations-v2.mjs --apply",
+    "wiper-master:legacy-assist": "node scripts/fitment/analyze-legacy-assisted-reconciliation.mjs",
+    "wiper-master:reconcile": "node scripts/fitment/reconcile-wiper-master-v2.mjs",
     "test:fitment-normalization": "node --test --test-isolation=none tests/wiper-fitment-normalization.test.mjs",
     "test:fitment-schema": "node --test --test-isolation=none tests/vehicle-catalog-v2-migration.test.mjs",
     "test:vehicle-catalog-normalization": "node --test --test-isolation=none tests/vehicle-catalog-normalization.test.mjs",
