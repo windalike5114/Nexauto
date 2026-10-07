@@ -10,6 +10,10 @@ const bridgeMigration = readFileSync(
   "supabase/migrations/20261007_nexauto_v2_fitment_bridge.sql",
   "utf8"
 );
+const wiperMasterAuthorityMigration = readFileSync(
+  "supabase/migrations/20261007_wiper_master_authority.sql",
+  "utf8"
+);
 
 test("vehicle catalogue V2 has independent canonical identity tables", () => {
   for (const table of [
@@ -55,4 +59,11 @@ test("application bridge supports canonical vehicles without weakening publicati
   assert.match(bridgeMigration, /fitments\.fitment_status = 'published'/i);
   assert.match(bridgeMigration, /configurations\.configuration_status = 'published'/i);
   assert.match(bridgeMigration, /grant execute[\s\S]+to service_role/i);
+});
+
+test("user-provided Wiper Master remains authoritative across deployments", () => {
+  assert.match(wiperMasterAuthorityMigration, /where code = 'WIPER_MASTER'/i);
+  assert.match(wiperMasterAuthorityMigration, /product_fitment_priority = 1/i);
+  assert.match(wiperMasterAuthorityMigration, /authoritative_product_fitment', true/i);
+  assert.match(wiperMasterAuthorityMigration, /user_source_overrides_external_sources/i);
 });

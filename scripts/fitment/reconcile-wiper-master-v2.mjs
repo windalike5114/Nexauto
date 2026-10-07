@@ -5,6 +5,9 @@ import XLSX from "xlsx";
 import { createClient } from "@supabase/supabase-js";
 
 const args = parseArgs(process.argv.slice(2));
+// User-provided Wiper Master data is authoritative by default. The opt-out is
+// retained for audit-only comparisons with the previous consensus policy.
+const authoritative = !Boolean(args["require-external-consensus"]);
 loadEnvFile(path.join(process.cwd(), ".env.local"));
 if (!args.screen || !args.assisted) {
   throw new Error("Pass --screen <screening.xlsx> and --assisted <legacy-assisted.xlsx>. Add --apply only after reviewing the report.");
@@ -84,7 +87,8 @@ const publishable = [];
 const blocked = [];
 for (const [applicationId, rows] of trustedByApp.entries()) {
   const trustedConfigKeys = unique(rows.map((row) => row.configuration_key));
-  const acceptedConfigKeys = unique((acceptedByApp.get(applicationId) ?? []).map((row) => row.proposed_configuration_key).filter(Boolean));
+  const acceptedRows = acceptedByApp.get(applicationId) ?? [];
+  const acceptedConfigKeys = unique(acceptedRows.map((row) => row.proposed_configuration_key).filter(Boolean));
   const config = trustedConfigKeys.length === 1 ? configByKey.get(trustedConfigKeys[0]) : null;
   const application = appById.get(applicationId);
   const configBlades = config ? bladesByConfig.get(config.id) ?? [] : [];
@@ -96,7 +100,12 @@ for (const [applicationId, rows] of trustedByApp.entries()) {
   if (application && (!application.active || application.fitment_status !== "published")) reasons.push("canonical_application_not_published");
   if (trustedConfigKeys.length !== 1) reasons.push("trusted_configuration_conflict");
   if (trustedConfigKeys.length === 1 && !parsedConfig) reasons.push("configuration_key_invalid");
-  if (acceptedConfigKeys.length !== 1 || acceptedConfigKeys[0] !== trustedConfigKeys[0]) reasons.push("accepted_observation_conflict");
+  const conflictingAcceptedRows = trustedConfigKeys.length === 1
+    ? acceptedRows.filter((row) => row.proposed_configuration_key && row.proposed_configuration_key !== trustedConfigKeys[0])
+    : [];
+  if (!authoritative && (acceptedConfigKeys.length !== 1 || acceptedConfigKeys[0] !== trustedConfigKeys[0])) {
+    reasons.push("accepted_observation_conflict");
+  }
   if (trustedConfigKeys.length === 1 && (!driver || !passenger)) reasons.push("front_blades_missing");
   if (trustedConfigKeys.length === 1 && driver && passenger && !productKeys.has(frontPairKey(driver, passenger))) reasons.push("active_front_product_missing");
   const result = {
@@ -107,6 +116,7 @@ for (const [applicationId, rows] of trustedByApp.entries()) {
     supporting_observation_count: rows.length,
     accepted_configuration_count: acceptedConfigKeys.length,
     existing_fitment_id: config ? fitmentsByPair.get(`${applicationId}:${config.id}`)?.id ?? "" : "",
+    overridden_observation_ids: authoritative ? conflictingAcceptedRows.map((row) => row.id).join(" | ") : "",
     block_reasons: reasons.join(" | ")
   };
   if (reasons.length) blocked.push(result);
@@ -119,6 +129,7 @@ const report = {
   inputs: { screen: screenPath, assisted: assistedPath },
   policy: {
     multi_source_master_required: true,
+    wiper_master_authoritative: authoritative,
     exact_legacy_bridge_allowed: true,
     unique_configuration_required: true,
     active_front_product_required: true,
@@ -132,7 +143,8 @@ const report = {
     trusted_observations_after_apply: trusted.length,
     publishable_applications: publishable.length,
     blocked_applications: blocked.length,
-    configurations_to_create: unique(toAccept.map((row) => row.configuration_key).filter((value) => !configByKey.has(value))).length
+    configurations_to_create: unique(toAccept.map((row) => row.configuration_key).filter((value) => !configByKey.has(value))).length,
+    observations_to_supersede: unique(publishable.flatMap((row) => row.overridden_observation_ids.split(" | ").filter(Boolean))).length
   },
   blocked_reason_counts: countBy(blocked.flatMap((row) => row.block_reasons.split(" | ").filter(Boolean)), (reason) => reason),
   accept_rows: toAccept,
@@ -155,7 +167,11 @@ async function applyChanges(currentReport) {
 
   const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
   const backupPath = path.resolve(args.backup ?? path.join(path.dirname(reportPath), `wiper-master-before-apply-${timestamp}.json`));
-  const affectedObservationIds = unique([...toAccept, ...sourceExceptions].map((row) => row.database_observation_id));
+  const overriddenObservationIds = unique(publishable.flatMap((row) => row.overridden_observation_ids.split(" | ").filter(Boolean)));
+  const affectedObservationIds = unique([
+    ...[...toAccept, ...sourceExceptions].map((row) => row.database_observation_id),
+    ...overriddenObservationIds
+  ]);
   const affectedRecordIds = unique(observations.filter((row) => affectedObservationIds.includes(row.id)).map((row) => row.source_record_id));
   const affectedAppIds = unique(publishable.map((row) => row.vehicle_application_id));
   const publicationConfigKeys = unique(publishable.map((row) => row.configuration_key));
@@ -169,7 +185,8 @@ async function applyChanges(currentReport) {
     reviews: await selectInChunks(db, "fitment_review_queue", "source_record_id", affectedRecordIds, "*"),
     configurations: configurations.filter((row) => affectedConfigIdsBefore.includes(row.id)),
     configurations_missing_before_apply: configKeysToEnsure.filter((value) => !configByKey.has(value)),
-    fitments: existingFitments.filter((row) => affectedAppIds.includes(row.vehicle_application_id))
+    fitments: existingFitments.filter((row) => affectedAppIds.includes(row.vehicle_application_id)),
+    data_sources: (await db.from("catalog_data_sources").select("*").eq("code", "WIPER_MASTER")).data ?? []
   };
   fs.writeFileSync(backupPath, JSON.stringify(backup, null, 2));
 
@@ -209,6 +226,31 @@ async function applyChanges(currentReport) {
     };
   });
   await upsertChunks(db, "wiper_fitment_observations", exceptionUpdates, 100, "id");
+
+  const overriddenUpdates = overriddenObservationIds.map((id) => {
+    const current = observationById.get(id);
+    return {
+      ...current,
+      observation_status: "superseded",
+      notes: unique([...(current.notes ?? []), "Superseded by the user-provided authoritative Wiper Master."])
+    };
+  });
+  await upsertChunks(db, "wiper_fitment_observations", overriddenUpdates, 100, "id");
+
+  const overriddenPairs = unique(overriddenUpdates
+    .filter((row) => row.vehicle_application_id && row.wiper_configuration_id)
+    .map((row) => `${row.vehicle_application_id}:${row.wiper_configuration_id}`));
+  for (const pair of overriddenPairs) {
+    const [vehicleApplicationId, wiperConfigurationId] = pair.split(":");
+    const { error } = await db.from("vehicle_wiper_fitments")
+      .update({
+        fitment_status: "superseded",
+        notes: "Superseded by the user-provided authoritative Wiper Master."
+      })
+      .eq("vehicle_application_id", vehicleApplicationId)
+      .eq("wiper_configuration_id", wiperConfigurationId);
+    if (error) throw error;
+  }
 
   const mappingRows = toAccept.map((row) => ({
     source_record_id: recordIdByObservationId.get(row.database_observation_id),
@@ -275,12 +317,37 @@ async function applyChanges(currentReport) {
     vehicle_application_id: row.vehicle_application_id,
     wiper_configuration_id: configByKey.get(row.configuration_key).id,
     fitment_status: "published",
-    confidence: 0.99,
-    notes: `Published from corroborated Wiper Master rows ${row.supporting_wiper_master_rows}.`
+    confidence: authoritative ? 1 : 0.99,
+    notes: authoritative
+      ? `Published from authoritative user-provided Wiper Master rows ${row.supporting_wiper_master_rows}.`
+      : `Published from corroborated Wiper Master rows ${row.supporting_wiper_master_rows}.`
   }));
   await upsertChunks(db, "vehicle_wiper_fitments", fitmentRows, 100, "vehicle_application_id,wiper_configuration_id");
 
-  console.log(JSON.stringify({ applied: true, backup: backupPath, published_fitments: fitmentRows.length }, null, 2));
+  if (authoritative) {
+    const { data: source, error: sourceError } = await db.from("catalog_data_sources")
+      .select("id,metadata").eq("code", "WIPER_MASTER").single();
+    if (sourceError) throw sourceError;
+    const { error: priorityError } = await db.from("catalog_data_sources").update({
+      vehicle_identity_priority: 5,
+      product_fitment_priority: 1,
+      metadata: {
+        ...(source.metadata ?? {}),
+        authoritative_vehicle_identity: true,
+        authoritative_product_fitment: true,
+        conflict_policy: "user_source_overrides_external_sources"
+      }
+    }).eq("id", source.id);
+    if (priorityError) throw priorityError;
+  }
+
+  console.log(JSON.stringify({
+    applied: true,
+    authoritative,
+    backup: backupPath,
+    published_fitments: fitmentRows.length,
+    superseded_observations: overriddenObservationIds.length
+  }, null, 2));
 }
 
 function readSheet(workbook, name) {
