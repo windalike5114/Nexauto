@@ -1,9 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { ArrowRight, Battery, CheckCircle2, Mail, ShieldCheck, ShoppingCart, Sparkles, Truck, Wrench } from "lucide-react";
+import { ArrowRight, BatteryCharging, CheckCircle2, CloudRainWind, Filter, Lightbulb, Mail, ShieldCheck, ShoppingCart, Truck, Wrench } from "lucide-react";
 import { HomeNewsletterSignup } from "@/components/home-newsletter-signup";
-import { WiperFitmentFinder } from "@/components/wiper-fitment-finder";
+import { VehiclePartsFinder } from "@/components/vehicle-parts-finder";
 import { formatMoney } from "@/lib/catalog";
 import { productImage } from "@/lib/product-content";
 import { wiperPairPricing } from "@/lib/pricing";
@@ -37,55 +37,49 @@ export default async function HomePage() {
         />
         <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/48 to-black/18" />
 
-        <div className="relative mx-auto grid min-h-[calc(100svh-105px)] max-w-7xl content-center gap-7 px-4 py-8 sm:px-6 sm:py-12 lg:min-h-[calc(100vh-73px)] lg:grid-cols-[0.84fr_1.16fr] lg:gap-10 lg:px-8">
+        <div className="relative mx-auto grid min-h-[calc(100svh-105px)] max-w-7xl content-center gap-7 px-4 py-8 sm:px-6 sm:py-12 lg:min-h-[calc(100vh-73px)] lg:grid-cols-[0.82fr_1.18fr] lg:gap-10 lg:px-8">
           <div className="flex flex-col justify-center text-white">
-            <p className="text-xs font-black uppercase tracking-[0.16em] text-white/80 sm:text-sm sm:tracking-[0.18em]">NZ auto parts and wiper fitment</p>
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-white/80 sm:text-sm sm:tracking-[0.18em]">Vehicle-first auto parts for New Zealand</p>
             <h1 className="mt-3 max-w-3xl text-3xl font-black leading-tight sm:mt-4 sm:text-6xl">
-              Quality Auto Parts for New Zealand Drivers
+              Choose your vehicle. Find the right part.
             </h1>
             <p className="mt-4 max-w-2xl text-base font-semibold leading-7 text-white/78 sm:mt-5 sm:text-lg sm:leading-8">
-              Find the right replacement parts with confidence. From premium wiper blades to essential maintenance components, NexAutoParts makes it easy to keep your vehicle performing at its best.
+              Start with make, model and year, then choose wipers, light bulbs, batteries, filters or suspension parts. Each category confirms fitment using its own verified data source.
             </p>
 
             <div className="mt-6 grid gap-2 sm:mt-8 sm:grid-cols-3 sm:gap-3">
-              <TrustPill icon={<Wrench className="h-4 w-4" />} text="Premium Quality" />
+              <TrustPill icon={<Wrench className="h-4 w-4" />} text="Category Fitment" />
               <TrustPill icon={<Truck className="h-4 w-4" />} text="Fast NZ Shipping" />
-              <TrustPill icon={<ShieldCheck className="h-4 w-4" />} text="Vehicle Fitment Support" />
+              <TrustPill icon={<ShieldCheck className="h-4 w-4" />} text="No Guesswork" />
             </div>
           </div>
 
           <div id="vehicle-finder" className="scroll-mt-36 self-center">
-            <div className="mb-3 rounded-2xl border border-white/18 bg-white/14 p-3 text-white shadow-lg backdrop-blur sm:p-4">
-              <p className="text-xs font-black uppercase tracking-[0.16em] text-signal">Limited launch offer</p>
-              <p className="mt-1 text-base font-black sm:text-lg">Save $20 on every front wiper blade pair</p>
-              <p className="mt-1 text-xs font-semibold text-white/76 sm:text-sm">$8 shipping waived NZ-wide during the first 3 months.</p>
-            </div>
-            <WiperFitmentFinder directToProduct />
+            <VehiclePartsFinder />
           </div>
         </div>
       </section>
 
-      <section className="border-b border-black/10 bg-white">
-        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 sm:py-5 lg:px-8">
-          <div className="grid gap-3 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
-            <div className="rounded-2xl border border-black/10 bg-[#F8FAFC] p-4 shadow-sm sm:p-5">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <p className="text-xs font-black uppercase tracking-[0.16em] text-signal sm:text-sm sm:tracking-[0.18em]">New categories now live</p>
-                  <p className="mt-1 text-base font-black text-ink sm:text-lg">Rear Wipers, Lighting Bundles, Batteries & Oil Filters</p>
-                </div>
-                <Link href="/shop" className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-ink px-4 text-sm font-black text-white transition hover:-translate-y-0.5 hover:bg-black">
-                  Explore More Parts
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              </div>
+      <section id="part-categories" className="scroll-mt-24 border-b border-black/10 bg-white">
+        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
+          <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-sm font-black uppercase tracking-[0.18em] text-signal">Shop by category</p>
+              <h2 className="mt-2 text-2xl font-black sm:text-4xl">One entrance. Five specialist fitment paths.</h2>
+              <p className="mt-2 max-w-3xl text-sm font-bold leading-6 text-steel">
+                Start from a product category or select your vehicle above. We only show a compatibility claim when that category's own data confirms it.
+              </p>
             </div>
-            <div className="flex flex-wrap gap-2">
-              <CategoryPill href="/products/premium-rear-wiper-blade" icon={<Wrench className="h-4 w-4" />} label="Rear Wipers" />
-              <CategoryPill href="/products/h11-headlight-license-plate-bulb-bundle" icon={<Sparkles className="h-4 w-4" />} label="Lighting Bundles" />
-              <CategoryPill href="/products/vehicle-fit-battery" icon={<Battery className="h-4 w-4" />} label="Batteries" />
-              <CategoryPill href="/products/vehicle-fit-oil-filter" icon={<ShoppingCart className="h-4 w-4" />} label="Oil Filters" />
-            </div>
+            <Link href="/shop" className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-black/10 bg-white px-4 text-sm font-black text-ink shadow-sm hover:border-ink">
+              Browse current products <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+            <PartCategoryCard href="/shop" icon={<CloudRainWind className="h-6 w-6" />} title="Wipers" description="Front pairs, rear blades and adapters" status="Finder live" live />
+            <PartCategoryCard href="/parts/bulbs" icon={<Lightbulb className="h-6 w-6" />} title="Light Bulbs" description="Headlight, fog, indicator and interior" status="Dedicated source" />
+            <PartCategoryCard href="/parts/batteries" icon={<BatteryCharging className="h-6 w-6" />} title="Batteries" description="Case size, terminal layout and CCA" status="Dedicated source" />
+            <PartCategoryCard href="/parts/filters" icon={<Filter className="h-6 w-6" />} title="Filters" description="Oil, air, cabin and fuel filters" status="Dedicated source" />
+            <PartCategoryCard href="/parts/suspension" icon={<Wrench className="h-6 w-6" />} title="Suspension" description="Shocks, struts, arms and bushes" status="Dedicated source" />
           </div>
         </div>
       </section>
@@ -328,6 +322,33 @@ function TrustPill({ icon, text }: { icon: React.ReactNode; text: string }) {
   );
 }
 
+function PartCategoryCard({
+  href,
+  icon,
+  title,
+  description,
+  status,
+  live = false
+}: {
+  href: string;
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  status: string;
+  live?: boolean;
+}) {
+  return (
+    <Link href={href as never} className="group flex min-h-[190px] flex-col rounded-2xl border border-black/10 bg-[#F8FAFC] p-5 transition hover:-translate-y-1 hover:border-signal hover:bg-white hover:shadow-panel">
+      <span className="grid h-11 w-11 place-items-center rounded-xl bg-white text-signal shadow-sm ring-1 ring-black/5 transition group-hover:bg-signal group-hover:text-white">
+        {icon}
+      </span>
+      <h3 className="mt-5 text-xl font-black text-ink">{title}</h3>
+      <p className="mt-2 flex-1 text-sm font-semibold leading-6 text-steel">{description}</p>
+      <span className={`mt-4 text-[11px] font-black uppercase tracking-[0.12em] ${live ? "text-emerald-700" : "text-steel"}`}>{status}</span>
+    </Link>
+  );
+}
+
 function PopularCard({ card }: { card: PopularCardData }) {
   return card.kind === "wiper" ? <PopularWiperCard wiperSet={card.wiperSet} /> : <PopularProductCard product={card.product} />;
 }
@@ -389,28 +410,6 @@ function PopularProductCard({ product }: { product: Product }) {
       badgeToneOverride={isBundle ? "bg-signal" : isOutOfStock ? "bg-zinc-700" : "bg-ink"}
       descriptionOverride={isOutOfStock ? "Vehicle-specific matching available via support." : strap}
     />
-  );
-}
-
-function CategoryPill({
-  href,
-  icon,
-  label
-}: {
-  href:
-    | "/shop"
-    | "/products/premium-rear-wiper-blade"
-    | "/products/h11-headlight-license-plate-bulb-bundle"
-    | "/products/vehicle-fit-battery"
-    | "/products/vehicle-fit-oil-filter";
-  icon: React.ReactNode;
-  label: string;
-}) {
-  return (
-    <Link href={href} className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-black/10 bg-white px-4 text-sm font-black text-ink shadow-sm transition hover:-translate-y-0.5 hover:border-ink hover:shadow-md">
-      <span className="text-signal">{icon}</span>
-      <span>{label}</span>
-    </Link>
   );
 }
 

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowRight, CarFront, Loader2, Search } from "lucide-react";
 
 type FinderOption = {
@@ -54,6 +54,7 @@ export function WiperFitmentFinder({
   description = "Select your make, model, year and body or chassis to find matching wipers.",
   directButtonLabel = "Find wipers for my car",
   footnote,
+  initialSelection,
   onVehicleSaved
 }: {
   compact?: boolean;
@@ -62,14 +63,16 @@ export function WiperFitmentFinder({
   description?: string;
   directButtonLabel?: string;
   footnote?: string;
+  initialSelection?: { makeId?: string; modelId?: string; year?: string };
   onVehicleSaved?: () => void;
 }) {
   const router = useRouter();
+  const prefillRef = useRef(initialSelection);
   const [makes, setMakes] = useState<FinderOption[]>([]);
   const [models, setModels] = useState<FinderModelOption[]>([]);
   const [years, setYears] = useState<number[]>([]);
   const [variants, setVariants] = useState<FinderVariantOption[]>([]);
-  const [makeId, setMakeId] = useState("");
+  const [makeId, setMakeId] = useState(initialSelection?.makeId ?? "");
   const [modelId, setModelId] = useState("");
   const [year, setYear] = useState("");
   const [variantKey, setVariantKey] = useState("");
@@ -144,7 +147,10 @@ export function WiperFitmentFinder({
     setFitments([]);
     fetchJson<{ models: FinderModelOption[] }>(`/api/fitment/wipers/models?makeId=${makeId}`)
       .then((data) => {
-        if (active) setModels(data.models);
+        if (!active) return;
+        setModels(data.models);
+        const initialModelId = prefillRef.current?.makeId === makeId ? prefillRef.current.modelId : undefined;
+        if (initialModelId && data.models.some((entry) => entry.id === initialModelId)) setModelId(initialModelId);
       })
       .catch((nextError) => {
         if (active) setError(nextError.message);
@@ -179,7 +185,11 @@ export function WiperFitmentFinder({
     setFitments([]);
     fetchJson<{ years: number[] }>(`/api/fitment/wipers/years?makeId=${makeId}&modelId=${modelId}`)
       .then((data) => {
-        if (active) setYears(data.years);
+        if (!active) return;
+        setYears(data.years);
+        const initialYear = prefillRef.current?.modelId === modelId ? prefillRef.current.year : undefined;
+        if (initialYear && data.years.includes(Number(initialYear))) setYear(initialYear);
+        prefillRef.current = undefined;
       })
       .catch((nextError) => {
         if (active) setError(nextError.message);
@@ -359,7 +369,7 @@ export function WiperFitmentFinder({
       </div>
 
       <div className={`mt-5 grid gap-3 sm:mt-6 sm:gap-4 ${compact ? "grid-cols-1" : "md:grid-cols-2 xl:grid-cols-[minmax(0,0.8fr)_minmax(0,1fr)_minmax(0,0.7fr)_minmax(0,1.8fr)]"}`}>
-        <SelectControl label="Make" value={makeId} disabled={busy && loading === "makes"} onChange={setMakeId}>
+        <SelectControl label="Make" value={makeId} disabled={busy && loading === "makes"} onChange={(value) => { prefillRef.current = undefined; setMakeId(value); }}>
           <option value="">Select make</option>
           {makes.map((entry) => (
             <option key={entry.id} value={entry.id}>
@@ -368,7 +378,7 @@ export function WiperFitmentFinder({
           ))}
         </SelectControl>
 
-        <SelectControl label="Model" value={modelId} disabled={!makeId || loading === "models"} onChange={setModelId}>
+        <SelectControl label="Model" value={modelId} disabled={!makeId || loading === "models"} onChange={(value) => { prefillRef.current = undefined; setModelId(value); }}>
           <option value="">Select model</option>
           {models.map((entry) => (
             <option key={entry.id} value={entry.id}>

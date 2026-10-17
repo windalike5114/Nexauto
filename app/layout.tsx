@@ -37,9 +37,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             <header className="sticky top-0 z-30 border-b border-black/10 bg-white/90 backdrop-blur">
               <div className="bg-ink text-white">
                 <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-3 py-2 text-xs font-black sm:px-6 lg:px-8">
-                  <p className="min-w-0 flex-1 leading-5 sm:text-left">Launch offer: $20 off wiper pairs + shipping waived NZ-wide.</p>
+                  <p className="min-w-0 flex-1 leading-5 sm:text-left">Vehicle-specific parts support with fast NZ-wide shipping.</p>
                   <Link href="/#vehicle-finder" className="inline-flex shrink-0 items-center justify-center rounded bg-signal px-2.5 py-1.5 text-[10px] uppercase tracking-[0.1em] text-white transition hover:-translate-y-0.5 hover:bg-red-700 sm:px-3 sm:text-[11px]">
-                    Find My Wipers
+                    Find Parts
                   </Link>
                 </div>
               </div>
@@ -63,11 +63,14 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                   />
                 </Link>
                 <div className="flex min-w-0 items-center gap-1 text-xs font-bold text-steel sm:gap-2 sm:text-sm sm:font-semibold">
-                  <Link className="rounded px-2 py-2 hover:bg-black/5 sm:px-3" href="/">
-                    Finder
+                  <Link className="rounded px-2 py-2 hover:bg-black/5 sm:px-3" href="/#vehicle-finder">
+                    Find Parts
+                  </Link>
+                  <Link className="hidden rounded px-2 py-2 hover:bg-black/5 md:inline-flex sm:px-3" href="/#part-categories">
+                    Categories
                   </Link>
                   <Link className="rounded px-2 py-2 hover:bg-black/5 sm:px-3" href="/shop">
-                    Shop
+                    Products
                   </Link>
                   <Link className="hidden rounded px-3 py-2 hover:bg-black/5 lg:inline-flex" href="/about">
                     About

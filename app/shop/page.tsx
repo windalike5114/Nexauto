@@ -26,6 +26,11 @@ type ShopSearchParams = {
   passenger?: string;
   show?: string;
   page?: string;
+  makeId?: string;
+  modelId?: string;
+  year?: string;
+  make?: string;
+  model?: string;
 };
 
 export default async function ShopPage({ searchParams }: { searchParams: Promise<ShopSearchParams> }) {
@@ -58,6 +63,7 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
       <div id="vehicle-finder" className="mb-7 scroll-mt-36 rounded-2xl bg-[#EEF5FB] p-2.5 shadow-panel ring-1 ring-black/5 sm:mb-10 sm:p-4">
         <WiperFitmentFinder
           directToProduct
+          initialSelection={{ makeId: params.makeId, modelId: params.modelId, year: params.year }}
           title="Find Wipers for Your Vehicle"
           description="Select your make, model, year and body or chassis to find matching wipers."
           directButtonLabel="Find Compatible Wipers"
