@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { BatteryCharging, CarFront, Filter, Lightbulb, Loader2, Pencil, Search, Wrench } from "lucide-react";
+import { saveVehicleContext } from "@/lib/vehicle-context";
 
 type FinderOption = { id: string; name: string };
 
@@ -106,10 +107,16 @@ export function VehiclePartsFinder() {
   const selectedModel = useMemo(() => models.find((entry) => entry.id === modelId)?.name ?? "", [modelId, models]);
   const vehicleReady = Boolean(makeId && modelId && year);
 
+  function confirmVehicle() {
+    if (!vehicleReady) return;
+    saveVehicleContext({ makeId, modelId, year, make: selectedMake, model: selectedModel });
+    setShowCategories(true);
+  }
+
   function openCategory(slug: (typeof categoryOptions)[number]["slug"]) {
     if (!vehicleReady) return;
     const context = { makeId, modelId, year, make: selectedMake, model: selectedModel };
-    window.localStorage.setItem("nexauto.vehicle-context.v1", JSON.stringify(context));
+    saveVehicleContext(context);
     const query = new URLSearchParams({ makeId, modelId, year, make: selectedMake, model: selectedModel });
     router.push(`/parts/${slug}?${query}#vehicle-finder` as never);
   }
@@ -150,7 +157,7 @@ export function VehiclePartsFinder() {
         </SelectControl>
         </div>
 
-        <button type="button" disabled={!vehicleReady || Boolean(loading)} onClick={() => setShowCategories(true)} className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-signal px-5 text-sm font-black text-white shadow-sm hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-zinc-300 lg:min-w-[150px]">
+        <button type="button" disabled={!vehicleReady || Boolean(loading)} onClick={confirmVehicle} className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-signal px-5 text-sm font-black text-white shadow-sm hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-zinc-300 lg:min-w-[150px]">
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
           Find Parts
         </button>

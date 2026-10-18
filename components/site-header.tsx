@@ -3,9 +3,15 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { CarFront, Search, UserRound } from "lucide-react";
+import { CarFront, Menu, Search, UserRound, X } from "lucide-react";
 import { CartLink } from "@/components/cart-link";
 import { blobMediaAssets } from "@/lib/blob-media-assets";
+import {
+  parseVehicleContext,
+  vehicleContextChangedEvent,
+  vehicleContextStorageKey,
+  type VehicleContext
+} from "@/lib/vehicle-context";
 
 const categoryLinks = [
   ["Wiper Blades", "/parts/wipers"],
@@ -18,22 +24,53 @@ const categoryLinks = [
 
 export function SiteHeader() {
   const headerRef = useRef<HTMLElement>(null);
+  const expandedHeightRef = useRef(0);
+  const fixedRef = useRef(false);
   const [headerHeight, setHeaderHeight] = useState(0);
   const [isFixed, setIsFixed] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [vehicle, setVehicle] = useState<VehicleContext | null>(null);
+
+  useEffect(() => {
+    const syncVehicle = () => setVehicle(parseVehicleContext(window.localStorage.getItem(vehicleContextStorageKey)));
+    const onStorage = (event: StorageEvent) => {
+      if (event.key === vehicleContextStorageKey) syncVehicle();
+    };
+
+    syncVehicle();
+    window.addEventListener("storage", onStorage);
+    window.addEventListener(vehicleContextChangedEvent, syncVehicle);
+    return () => {
+      window.removeEventListener("storage", onStorage);
+      window.removeEventListener(vehicleContextChangedEvent, syncVehicle);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMenuOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [menuOpen]);
 
   useEffect(() => {
     const header = headerRef.current;
     if (!header) return;
 
-    let measuredHeight = header.offsetHeight;
+    expandedHeightRef.current = header.offsetHeight;
     let frame = 0;
     const measure = () => {
-      measuredHeight = header.offsetHeight;
-      setHeaderHeight(measuredHeight);
+      if (fixedRef.current) return;
+      expandedHeightRef.current = header.offsetHeight;
+      setHeaderHeight(expandedHeightRef.current);
     };
     const update = () => {
       frame = 0;
-      setIsFixed(window.scrollY > measuredHeight);
+      const nextFixed = window.scrollY > expandedHeightRef.current;
+      fixedRef.current = nextFixed;
+      setIsFixed(nextFixed);
     };
     const onScroll = () => {
       if (!frame) frame = window.requestAnimationFrame(update);
@@ -51,24 +88,51 @@ export function SiteHeader() {
     };
   }, []);
 
+  const vehicleLabel = vehicle ? `${vehicle.year} ${vehicle.make} ${vehicle.model}` : "";
+
   return (
     <div style={isFixed ? { height: headerHeight } : undefined}>
     <header ref={headerRef} className={`${isFixed ? "header-return fixed inset-x-0 top-0" : "relative"} z-30 border-b border-black/10 bg-white/95 shadow-sm backdrop-blur`}>
-      <div className="bg-ink text-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-2 text-[11px] font-black sm:px-6 lg:px-8">
+      <div className={`${isFixed ? "hidden lg:block" : "block"} bg-ink text-white`}>
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-1.5 text-[10px] font-black sm:px-6 lg:px-8 lg:py-2 lg:text-[11px]">
           <Link href="/shipping" className="truncate hover:text-white/80">Fast NZ-wide dispatch from Auckland</Link>
           <Link href="/specials" className="shrink-0 uppercase tracking-[0.12em] text-white hover:text-signal">Weekly Deals · Shop Now</Link>
         </div>
       </div>
 
-      <div className="mx-auto max-w-7xl px-4 py-3 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-[1fr_auto] items-center gap-3 lg:grid-cols-[240px_minmax(280px,1fr)_auto]">
-          <Link href="/" className="flex items-center" aria-label="NexAutoParts home">
-            <Image src={blobMediaAssets.brand.circleIcon} alt="" width={42} height={42} className="h-10 w-10 rounded-full object-contain sm:hidden" priority />
-            <Image src={blobMediaAssets.brand.mainLogo} alt="NexAutoParts" width={240} height={48} className="hidden h-9 w-auto object-contain sm:block" priority />
+      <div className="relative mx-auto max-w-7xl px-4 py-2 sm:px-6 lg:px-8 lg:py-3">
+        <div className="flex h-10 items-center gap-2 lg:hidden">
+          <button
+            type="button"
+            aria-expanded={menuOpen}
+            aria-controls="mobile-site-menu"
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            onClick={() => setMenuOpen((open) => !open)}
+            className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-black/10 text-ink hover:bg-black/5"
+          >
+            {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
+
+          <Link href="/" className="flex min-w-0 items-center" aria-label="NexAutoParts home">
+            <Image src={blobMediaAssets.brand.mainLogo} alt="NexAutoParts" width={180} height={36} className="h-7 w-auto max-w-[138px] object-contain" priority />
           </Link>
 
-          <SearchForm className="hidden lg:flex" />
+          <div className="ml-auto"><CartLink /></div>
+        </div>
+
+        {menuOpen ? <nav id="mobile-site-menu" aria-label="Mobile menu" className="absolute left-4 right-4 top-[58px] z-50 grid gap-1 rounded-xl border border-black/10 bg-white p-2 shadow-panel lg:hidden">
+          <Link href="/#vehicle-finder" onClick={() => setMenuOpen(false)} className="flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm font-black hover:bg-[#F3F5F7]"><CarFront className="h-4 w-4 text-signal" /> My Vehicle</Link>
+          <Link href="/account" onClick={() => setMenuOpen(false)} className="flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm font-black hover:bg-[#F3F5F7]"><UserRound className="h-4 w-4" /> Account</Link>
+          <Link href="/contact" onClick={() => setMenuOpen(false)} className="flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm font-black hover:bg-[#F3F5F7]">Contact & Fitment Help</Link>
+          <Link href="/shipping" onClick={() => setMenuOpen(false)} className="flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm font-black hover:bg-[#F3F5F7]">Shipping Information</Link>
+        </nav> : null}
+
+        <div className="hidden grid-cols-[240px_minmax(280px,1fr)_auto] items-center gap-3 lg:grid">
+          <Link href="/" className="flex items-center" aria-label="NexAutoParts home">
+            <Image src={blobMediaAssets.brand.mainLogo} alt="NexAutoParts" width={240} height={48} className="h-9 w-auto object-contain" priority />
+          </Link>
+
+          <SearchForm className="flex" />
 
           <div className="flex items-center justify-end gap-1 text-xs font-black text-ink sm:gap-2 sm:text-sm">
             <Link href="/#vehicle-finder" className="inline-flex h-10 items-center gap-2 rounded-lg px-2 hover:bg-black/5 sm:px-3">
@@ -82,17 +146,22 @@ export function SiteHeader() {
             <CartLink />
           </div>
         </div>
-        <SearchForm className="mt-3 flex lg:hidden" />
+
+        {vehicle ? <div className="mt-2 flex h-9 items-center gap-2 rounded-lg border border-black/10 bg-[#F3F5F7] px-3 lg:hidden">
+          <CarFront className="h-4 w-4 shrink-0 text-signal" />
+          <span className="min-w-0 flex-1 truncate text-xs font-black text-ink">{vehicleLabel}</span>
+          <Link href="/#vehicle-finder" className="shrink-0 text-[11px] font-black uppercase tracking-[0.08em] text-signal hover:text-red-700">Change</Link>
+        </div> : <SearchForm className={`${isFixed ? "hidden" : "mt-2 flex"} lg:hidden`} compact />}
       </div>
 
       <nav className="border-t border-black/10 bg-[#F8FAFC]" aria-label="Product categories">
-        <div className="mx-auto flex max-w-7xl items-center gap-1 overflow-x-auto px-3 py-1.5 sm:px-5 lg:px-7">
+        <div className="mx-auto flex max-w-7xl items-center gap-0.5 overflow-x-auto px-2 py-0.5 sm:px-5 lg:gap-1 lg:px-7 lg:py-1.5">
           {categoryLinks.map(([label, href]) => (
-            <Link key={href} href={href} className="shrink-0 rounded-md px-3 py-2 text-xs font-black text-ink transition hover:bg-white hover:text-signal sm:text-sm">
+            <Link key={href} href={href} className="shrink-0 rounded-md px-2.5 py-1.5 text-[11px] font-black text-ink transition hover:bg-white hover:text-signal sm:text-sm lg:px-3 lg:py-2">
               {label}
             </Link>
           ))}
-          <Link href="/contact" className="ml-auto shrink-0 rounded-md px-3 py-2 text-xs font-black text-steel hover:bg-white hover:text-ink sm:text-sm">
+          <Link href="/contact" className="ml-auto shrink-0 rounded-md px-2.5 py-1.5 text-[11px] font-black text-steel hover:bg-white hover:text-ink sm:text-sm lg:px-3 lg:py-2">
             Contact
           </Link>
         </div>
@@ -102,9 +171,9 @@ export function SiteHeader() {
   );
 }
 
-function SearchForm({ className }: { className: string }) {
+function SearchForm({ className, compact = false }: { className: string; compact?: boolean }) {
   return (
-    <form action="/shop" className={`${className} h-11 min-w-0 items-center overflow-hidden rounded-lg border border-black/15 bg-white shadow-sm focus-within:border-ink`}>
+    <form action="/shop" className={`${className} ${compact ? "h-10" : "h-11"} min-w-0 items-center overflow-hidden rounded-lg border border-black/15 bg-white shadow-sm focus-within:border-ink`}>
       <Search className="ml-3 h-4 w-4 shrink-0 text-steel" />
       <input name="q" type="search" aria-label="Search products" placeholder="Search products, part names or SKUs" className="h-full min-w-0 flex-1 border-0 bg-transparent px-3 text-sm font-semibold text-ink outline-none" />
       <button type="submit" className="h-full shrink-0 bg-ink px-4 text-xs font-black uppercase tracking-[0.1em] text-white hover:bg-black">Search</button>
