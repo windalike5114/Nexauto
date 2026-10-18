@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, ArrowRight, Pause, Play } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 const slides = [
   {
@@ -47,7 +47,6 @@ export function HomeHeroCarousel() {
   const heroRef = useRef<HTMLElement>(null);
   const touchStartX = useRef<number | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [paused, setPaused] = useState(false);
   const [interacting, setInteracting] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
 
@@ -65,10 +64,10 @@ export function HomeHeroCarousel() {
   }, []);
 
   useEffect(() => {
-    if (paused || interacting || reducedMotion) return;
+    if (interacting || reducedMotion) return;
     const timer = window.setInterval(() => setActiveIndex((current) => (current + 1) % slides.length), slideIntervalMs);
     return () => window.clearInterval(timer);
-  }, [interacting, paused, reducedMotion]);
+  }, [interacting, reducedMotion]);
 
   useEffect(() => {
     if (reducedMotion) return;
@@ -144,20 +143,15 @@ export function HomeHeroCarousel() {
       </div>
 
       <div className="absolute inset-x-0 bottom-0">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 pb-5 sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-7xl items-center px-4 pb-5 sm:px-6 lg:px-8">
           <div className="flex items-center gap-2" role="group" aria-label="Choose hero slide">
             {slides.map((slide, index) => (
               <button key={slide.id} type="button" aria-pressed={activeIndex === index} aria-label={`Show slide ${index + 1}: ${slide.eyebrow}`} onClick={() => setActiveIndex(index)} className={`h-1.5 rounded-full transition-all ${activeIndex === index ? "w-10 bg-signal" : "w-5 bg-white/45 hover:bg-white/75"}`} />
             ))}
           </div>
-          <div className="flex items-center gap-2">
-            <button type="button" onClick={showPrevious} className="grid h-9 w-9 place-items-center rounded-full border border-white/25 bg-black/25 text-white backdrop-blur hover:bg-white/15" aria-label="Previous hero slide"><ArrowLeft className="h-4 w-4" /></button>
-            <button type="button" onClick={() => setPaused((current) => !current)} className="grid h-9 w-9 place-items-center rounded-full border border-white/25 bg-black/25 text-white backdrop-blur hover:bg-white/15" aria-label={paused ? "Resume hero slideshow" : "Pause hero slideshow"}>{paused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}</button>
-            <button type="button" onClick={showNext} className="grid h-9 w-9 place-items-center rounded-full border border-white/25 bg-black/25 text-white backdrop-blur hover:bg-white/15" aria-label="Next hero slide"><ArrowRight className="h-4 w-4" /></button>
-          </div>
         </div>
       </div>
-      <p className="sr-only" aria-live={paused ? "polite" : "off"}>Slide {activeIndex + 1} of {slides.length}: {activeSlide.eyebrow}</p>
+      <p className="sr-only" aria-live="off">Slide {activeIndex + 1} of {slides.length}: {activeSlide.eyebrow}</p>
     </section>
   );
 }
