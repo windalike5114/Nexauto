@@ -1,4 +1,4 @@
-import { Clock, Mail, MapPin, Phone } from "lucide-react";
+import { Clock, Mail, MapPin } from "lucide-react";
 import type { Metadata } from "next";
 import { ContactForm } from "@/components/forms/contact-form";
 
@@ -7,7 +7,10 @@ export const metadata: Metadata = {
   description: "Contact NexAutoParts for help with vehicle fitment, orders, shipping, returns, warranty claims, and auto parts support."
 };
 
-export default function ContactPage() {
+export default async function ContactPage({ searchParams }: { searchParams: Promise<{ category?: string; vehicle?: string; part?: string }> }) {
+  const query = await searchParams;
+  const requestedPart = query.part || query.category || "";
+  const vehicle = query.vehicle || "";
   return (
     <main className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8">
       <section>
@@ -18,13 +21,12 @@ export default function ContactPage() {
         </p>
         <div className="mt-8 grid gap-4">
           <ContactItem icon={<MapPin className="h-5 w-5" />} title="Location" text="Auckland, New Zealand" />
-          <ContactItem icon={<Phone className="h-5 w-5" />} title="Phone" text="09-000 0000" />
           <ContactItem icon={<Mail className="h-5 w-5" />} title="Email" text="support@nexautoparts.co.nz" />
           <ContactItem icon={<Clock className="h-5 w-5" />} title="Hours" text="Monday - Friday / 9:00 AM - 5:00 PM" />
         </div>
       </section>
 
-      <ContactForm sourcePage="Contact page" />
+      <ContactForm sourcePage="Contact page" defaultPartOrSku={requestedPart} defaultVehicle={vehicle} />
     </main>
   );
 }

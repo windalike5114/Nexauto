@@ -7,11 +7,11 @@ import { BatteryCharging, CarFront, Filter, Lightbulb, Loader2, Search, Wrench }
 type FinderOption = { id: string; name: string };
 
 const categoryOptions = [
-  { slug: "wipers", name: "Wipers", description: "Front and rear blades", icon: Search, live: true },
-  { slug: "bulbs", name: "Light Bulbs", description: "Headlight and exterior bulbs", icon: Lightbulb, live: false },
-  { slug: "batteries", name: "Batteries", description: "Size, terminals and CCA", icon: BatteryCharging, live: false },
-  { slug: "filters", name: "Filters", description: "Oil, air, cabin and fuel", icon: Filter, live: false },
-  { slug: "suspension", name: "Suspension", description: "Shocks, struts and arms", icon: Wrench, live: false }
+  { slug: "wipers", name: "Wiper Blades", description: "Front and rear blades", icon: Search },
+  { slug: "filters", name: "Oil Filters", description: "Engine-specific filters", icon: Filter },
+  { slug: "bulbs", name: "Light Bulbs", description: "Headlight and exterior", icon: Lightbulb },
+  { slug: "batteries", name: "Batteries", description: "Size, terminals and CCA", icon: BatteryCharging },
+  { slug: "suspension", name: "Control Arms", description: "Position-specific parts", icon: Wrench }
 ] as const;
 
 export function VehiclePartsFinder() {
@@ -22,6 +22,7 @@ export function VehiclePartsFinder() {
   const [makeId, setMakeId] = useState("");
   const [modelId, setModelId] = useState("");
   const [year, setYear] = useState("");
+  const [showCategories, setShowCategories] = useState(false);
   const [loading, setLoading] = useState("makes");
   const [error, setError] = useState("");
 
@@ -44,6 +45,7 @@ export function VehiclePartsFinder() {
 
   useEffect(() => {
     if (!makeId) {
+      setShowCategories(false);
       setModels([]);
       setModelId("");
       setYears([]);
@@ -53,6 +55,7 @@ export function VehiclePartsFinder() {
 
     let active = true;
     setLoading("models");
+    setShowCategories(false);
     setError("");
     setModelId("");
     setYears([]);
@@ -81,6 +84,7 @@ export function VehiclePartsFinder() {
 
     let active = true;
     setLoading("years");
+    setShowCategories(false);
     setError("");
     setYear("");
     fetchJson<{ years: number[] }>(`/api/vehicles/years?makeId=${makeId}&modelId=${modelId}`)
@@ -107,46 +111,47 @@ export function VehiclePartsFinder() {
     const context = { makeId, modelId, year, make: selectedMake, model: selectedModel };
     window.localStorage.setItem("nexauto.vehicle-context.v1", JSON.stringify(context));
     const query = new URLSearchParams({ makeId, modelId, year, make: selectedMake, model: selectedModel });
-    router.push((slug === "wipers" ? `/shop?${query}#vehicle-finder` : `/parts/${slug}?${query}`) as never);
+    router.push(`/parts/${slug}?${query}#vehicle-finder` as never);
   }
 
   return (
-    <section className="rounded-2xl border border-black/10 bg-white p-5 text-ink shadow-panel sm:p-7">
-      <div className="flex items-start justify-between gap-4">
+    <section className="rounded-2xl border border-black/10 bg-white p-4 text-ink shadow-panel sm:p-5">
+      <div className="grid gap-4 lg:grid-cols-[190px_1fr_auto] lg:items-end">
         <div>
           <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.15em] text-signal">
-            <CarFront className="h-4 w-4" /> Vehicle finder
+            <CarFront className="h-4 w-4" /> My Vehicle
           </div>
-          <h2 className="mt-2 text-2xl font-black leading-tight sm:text-3xl">What do you drive?</h2>
-          <p className="mt-2 text-sm font-bold leading-6 text-steel">Choose the vehicle once, then select the part category you need.</p>
+          <h2 className="mt-1 text-xl font-black leading-tight">Find compatible parts</h2>
         </div>
-        <div className="hidden h-11 w-11 shrink-0 place-items-center rounded-xl bg-ink text-white sm:grid">
-          {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Search className="h-5 w-5" />}
-        </div>
-      </div>
 
-      <div className="mt-5 grid gap-3 sm:grid-cols-3">
-        <SelectControl label="Make" value={makeId} disabled={loading === "makes"} onChange={setMakeId}>
+        <div className="grid gap-3 sm:grid-cols-3">
+        <SelectControl label="Make" value={makeId} disabled={loading === "makes"} onChange={(value) => { setShowCategories(false); setMakeId(value); }}>
           <option value="">Select make</option>
           {makes.map((entry) => <option key={entry.id} value={entry.id}>{entry.name}</option>)}
         </SelectControl>
-        <SelectControl label="Model" value={modelId} disabled={!makeId || loading === "models"} onChange={setModelId}>
+        <SelectControl label="Model" value={modelId} disabled={!makeId || loading === "models"} onChange={(value) => { setShowCategories(false); setModelId(value); }}>
           <option value="">Select model</option>
           {models.map((entry) => <option key={entry.id} value={entry.id}>{entry.name}</option>)}
         </SelectControl>
-        <SelectControl label="Year" value={year} disabled={!modelId || loading === "years"} onChange={setYear}>
+        <SelectControl label="Year" value={year} disabled={!modelId || loading === "years"} onChange={(value) => { setShowCategories(false); setYear(value); }}>
           <option value="">Select year</option>
           {years.map((entry) => <option key={entry} value={String(entry)}>{entry}</option>)}
         </SelectControl>
+        </div>
+
+        <button type="button" disabled={!vehicleReady || Boolean(loading)} onClick={() => setShowCategories(true)} className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-signal px-5 text-sm font-black text-white shadow-sm hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-zinc-300 lg:min-w-[150px]">
+          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+          Find Parts
+        </button>
       </div>
 
-      <div className="mt-5 border-t border-black/10 pt-5">
+      {showCategories && vehicleReady ? <div className="mt-4 border-t border-black/10 pt-4">
         <div className="flex flex-wrap items-end justify-between gap-2">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.14em] text-steel">Choose a part category</p>
-            <p className="mt-1 text-sm font-black">{vehicleReady ? `${year} ${selectedMake} ${selectedModel}` : "Select make, model and year first"}</p>
+            <p className="text-xs font-black uppercase tracking-[0.14em] text-emerald-700">Vehicle selected</p>
+            <p className="mt-1 text-sm font-black">{year} {selectedMake} {selectedModel}</p>
           </div>
-          <p className="text-xs font-bold text-steel">Each category can ask for more vehicle details.</p>
+          <p className="text-xs font-bold text-steel">Choose a category to continue.</p>
         </div>
         <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-5">
           {categoryOptions.map((category) => {
@@ -157,19 +162,16 @@ export function VehiclePartsFinder() {
                 type="button"
                 disabled={!vehicleReady}
                 onClick={() => openCategory(category.slug)}
-                className="group min-h-[104px] rounded-xl border border-black/10 bg-[#F8FAFC] p-3 text-left transition hover:-translate-y-0.5 hover:border-signal hover:bg-white hover:shadow-md disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-45"
+                className="group min-h-[86px] rounded-xl border border-black/10 bg-[#F8FAFC] p-3 text-left transition hover:-translate-y-0.5 hover:border-signal hover:bg-white hover:shadow-md"
               >
                 <Icon className="h-5 w-5 text-signal" />
                 <span className="mt-3 block text-sm font-black">{category.name}</span>
                 <span className="mt-1 block text-[11px] font-bold leading-4 text-steel">{category.description}</span>
-                <span className={`mt-2 block text-[10px] font-black uppercase tracking-[0.1em] ${category.live ? "text-emerald-700" : "text-steel"}`}>
-                  {category.live ? "Finder live" : "Own fitment source"}
-                </span>
               </button>
             );
           })}
         </div>
-      </div>
+      </div> : null}
 
       {error ? <div className="mt-4 rounded-lg border border-signal/25 bg-red-50 p-3 text-sm font-bold text-signal">{error}</div> : null}
     </section>

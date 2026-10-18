@@ -52,7 +52,7 @@ export default async function CheckoutSuccessPage({ searchParams }: { searchPara
           customerName={order?.customerName ?? checkoutSession?.customerName ?? ""}
           signedIn={signedIn}
         />
-        <Link href="/shop?category=wiper" className="mt-6 inline-flex rounded bg-ink px-5 py-3 font-black text-white">
+        <Link href="/shop" className="mt-6 inline-flex rounded bg-ink px-5 py-3 font-black text-white">
           Keep shopping
         </Link>
       </div>

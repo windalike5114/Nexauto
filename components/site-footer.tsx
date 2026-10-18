@@ -8,11 +8,12 @@ const footerGroups = [
     title: "Shop",
     links: [
       ["Shop All", "/shop"],
-      ["Wiper Blades", "/shop"],
-      ["Batteries", "/products/vehicle-fit-battery"],
-      ["Filters", "/products/vehicle-fit-oil-filter"],
-      ["Vehicle Finder", "/"],
-      ["New Arrivals", "/shop"]
+      ["Wiper Blades", "/parts/wipers"],
+      ["Oil Filters", "/parts/filters"],
+      ["Light Bulbs", "/parts/bulbs"],
+      ["Batteries", "/parts/batteries"],
+      ["Control Arms", "/parts/suspension"],
+      ["Specials", "/specials"]
     ]
   },
   {
@@ -24,6 +25,7 @@ const footerGroups = [
       ["Installation Guides", "/wiper-installation-guides"],
       ["FAQs", "/faq"],
       ["Contact Us", "/contact"],
+      ["Vehicle Finder", "/#vehicle-finder"],
       ["Track Your Order", "/account"]
     ]
   },

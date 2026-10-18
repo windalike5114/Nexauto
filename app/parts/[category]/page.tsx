@@ -1,107 +1,133 @@
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowRight, BatteryCharging, CheckCircle2, Filter, Lightbulb, Wrench } from "lucide-react";
+import { VehiclePartsFinder } from "@/components/vehicle-parts-finder";
+import { formatMoney } from "@/lib/catalog";
+import { productImage } from "@/lib/product-content";
+import { listProducts } from "@/lib/queries/catalog";
+import type { Product } from "@/lib/types";
 
 const categoryDefinitions = {
   bulbs: {
     name: "Light Bulbs",
-    description: "Headlight, fog, indicator and interior bulb fitment.",
-    fields: ["Body or chassis", "Lamp position", "Low or high beam"],
-    productHref: "/products/h11-headlight-license-plate-bulb-bundle",
-    productLabel: "Browse current lighting products",
+    description: "Shop current lighting products and confirm bulb type, position and pack quantity before ordering.",
+    fields: ["Body or chassis", "Lamp position", "Bulb type or existing part number"],
+    databaseCategory: "bulb",
+    image: "/products/halogen-bulb.png",
     icon: Lightbulb
   },
   batteries: {
     name: "Batteries",
-    description: "Vehicle batteries matched by physical size, terminals and electrical requirements.",
-    fields: ["Engine", "Start-stop system", "Terminal layout"],
-    productHref: "/products/vehicle-fit-battery",
-    productLabel: "View current battery product",
+    description: "Battery fitment depends on physical size, terminal layout and the vehicle's electrical requirements.",
+    fields: ["Engine", "Start-stop system", "Terminal layout and case size"],
+    databaseCategory: "battery",
+    image: "/products/vehicle-battery.png",
     icon: BatteryCharging
   },
   filters: {
-    name: "Filters",
-    description: "Oil, air, cabin and fuel filters matched to the correct vehicle application.",
-    fields: ["Engine code or capacity", "Fuel type", "Filter position"],
-    productHref: "/products/vehicle-fit-oil-filter",
-    productLabel: "View current filter product",
+    name: "Oil Filters",
+    description: "Oil filters are matched by engine application, filter construction and cross-reference part number.",
+    fields: ["Engine code or capacity", "Fuel type", "Existing filter or OE part number"],
+    databaseCategory: "filter",
+    image: "/products/vehicle-oil-filter.png",
     icon: Filter
   },
   suspension: {
-    name: "Suspension Parts",
-    description: "Shocks, struts, control arms and bushes matched by chassis and axle position.",
-    fields: ["Chassis", "Drivetrain", "Front or rear position"],
-    productHref: "/contact",
-    productLabel: "Request suspension fitment help",
+    name: "Control Arms",
+    description: "Control arms must be confirmed by chassis, drivetrain and exact installation position.",
+    fields: ["Chassis", "Front or rear / left or right", "Upper or lower position"],
+    databaseCategory: "suspension",
+    image: "/products/control-arm-v2.png",
     icon: Wrench
   }
 } as const;
 
 type CategoryKey = keyof typeof categoryDefinitions;
+type CategorySearchParams = { makeId?: string; modelId?: string; year?: string; make?: string; model?: string };
 
-export default async function PartCategoryPage({
-  params,
-  searchParams
-}: {
-  params: Promise<{ category: string }>;
-  searchParams: Promise<{ make?: string; model?: string; year?: string }>;
-}) {
-  const { category } = await params;
+export default async function PartCategoryPage({ params, searchParams }: { params: Promise<{ category: string }>; searchParams: Promise<CategorySearchParams> }) {
+  const [{ category }, vehicle] = await Promise.all([params, searchParams]);
   if (!(category in categoryDefinitions)) notFound();
   const definition = categoryDefinitions[category as CategoryKey];
-  const vehicle = await searchParams;
+  const products = await loadCategoryProducts(definition.databaseCategory);
+  const currentProducts = products.filter((product) => !["vehicle-fit-battery", "vehicle-fit-oil-filter"].includes(product.slug));
   const vehicleLabel = [vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(" ");
   const Icon = definition.icon;
+  const quoteHref = buildQuoteHref(definition.name, vehicleLabel);
 
   return (
     <main className="bg-[#F8FAFC]">
-      <section className="border-b border-black/10 bg-ink text-white">
-        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
-          <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.16em] text-signal">
-            <Icon className="h-4 w-4" /> Category-specific fitment
-          </div>
-          <h1 className="mt-3 text-3xl font-black sm:text-5xl">Find {definition.name.toLowerCase()} for your vehicle</h1>
-          <p className="mt-4 max-w-2xl text-base font-bold leading-7 text-white/72">{definition.description}</p>
+      <section className="relative isolate overflow-hidden bg-ink text-white">
+        <Image src={definition.image} alt={`${definition.name} category`} fill priority className="-z-20 object-cover object-center" sizes="100vw" />
+        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-black via-black/82 to-black/25" />
+        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
+          <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.16em] text-signal"><Icon className="h-4 w-4" /> Vehicle-specific parts</div>
+          <h1 className="mt-3 text-4xl font-black sm:text-5xl">{definition.name}</h1>
+          <p className="mt-4 max-w-2xl text-base font-bold leading-7 text-white/78">{definition.description}</p>
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-7xl gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:px-8 lg:py-12">
-        <div className="rounded-2xl border border-emerald-700/20 bg-emerald-50 p-5 shadow-sm sm:p-7">
-          <div className="flex items-start gap-3">
-            <CheckCircle2 className="mt-0.5 h-6 w-6 shrink-0 text-emerald-700" />
-            <div>
-              <p className="text-xs font-black uppercase tracking-[0.14em] text-emerald-700">Vehicle context received</p>
-              <h2 className="mt-2 text-2xl font-black text-ink">{vehicleLabel || "Choose your vehicle on the homepage"}</h2>
-              <p className="mt-2 text-sm font-bold leading-6 text-steel">
-                Make, model and year have carried across from the homepage. This category will use its own data source and matching rules.
-              </p>
+      <section id="vehicle-finder" className="scroll-mt-40 border-b border-black/10 bg-white">
+        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+          {vehicleLabel ? (
+            <div className="flex flex-col gap-4 rounded-xl border border-emerald-700/20 bg-emerald-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-start gap-3"><CheckCircle2 className="mt-0.5 h-5 w-5 text-emerald-700" /><div><p className="text-xs font-black uppercase tracking-[0.14em] text-emerald-700">Current vehicle</p><h2 className="mt-1 text-xl font-black">{vehicleLabel}</h2></div></div>
+              <a href="#change-vehicle" className="inline-flex h-10 items-center justify-center rounded-lg border border-emerald-700/20 bg-white px-4 text-sm font-black">Change vehicle</a>
             </div>
-          </div>
+          ) : null}
+          <details id="change-vehicle" open={!vehicleLabel} className="mt-4 rounded-xl border border-black/10 bg-[#EEF2F5] p-3">
+            <summary className="cursor-pointer px-2 py-2 text-sm font-black">{vehicleLabel ? "Choose a different vehicle" : "Choose your vehicle for fitment help"}</summary>
+            <div className="mt-2"><VehiclePartsFinder /></div>
+          </details>
         </div>
+      </section>
 
-        <aside className="rounded-2xl border border-black/10 bg-white p-5 shadow-sm sm:p-7">
-          <p className="text-xs font-black uppercase tracking-[0.14em] text-signal">Next confirmation</p>
-          <h2 className="mt-2 text-xl font-black">Additional information required</h2>
-          <ul className="mt-4 space-y-3">
-            {definition.fields.map((field) => (
-              <li key={field} className="flex items-center gap-3 text-sm font-bold text-ink">
-                <span className="h-2 w-2 rounded-full bg-signal" /> {field}
-              </li>
-            ))}
-          </ul>
-          <p className="mt-5 rounded-lg bg-zinc-100 p-3 text-xs font-bold leading-5 text-steel">
-            The dedicated {definition.name.toLowerCase()} database adapter is the next implementation step. No compatibility claim is shown until that source confirms a match.
-          </p>
-          <div className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
-            <Link href={definition.productHref} className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-ink px-4 text-sm font-black text-white hover:bg-black">
-              {definition.productLabel}<ArrowRight className="h-4 w-4" />
-            </Link>
-            <Link href="/#vehicle-finder" className="inline-flex h-11 items-center justify-center rounded-lg border border-black/10 bg-white px-4 text-sm font-black text-ink hover:border-ink">
-              Change vehicle
-            </Link>
+      <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
+        <div className="grid gap-8 lg:grid-cols-[1fr_300px]">
+          <div>
+            <div className="flex items-end justify-between gap-4"><div><p className="text-xs font-black uppercase tracking-[0.16em] text-signal">Current catalogue</p><h2 className="mt-2 text-3xl font-black">{definition.name} products</h2></div><span className="text-sm font-bold text-steel">{currentProducts.length} listing{currentProducts.length === 1 ? "" : "s"}</span></div>
+            {currentProducts.length ? (
+              <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{currentProducts.map((product) => <ProductCard key={product.id} product={product} />)}</div>
+            ) : (
+              <div className="mt-6 rounded-2xl border border-black/10 bg-white p-7 shadow-sm">
+                <p className="text-xs font-black uppercase tracking-[0.14em] text-signal">Request a quote</p>
+                <h3 className="mt-2 text-2xl font-black">No confirmed catalogue item is shown yet.</h3>
+                <p className="mt-3 max-w-2xl text-sm font-semibold leading-6 text-steel">We have removed generic placeholder products from this category. Send the vehicle and part details below so the team can confirm a real option rather than presenting an unverified fitment.</p>
+                <Link href={quoteHref as never} className="mt-5 inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-signal px-5 text-sm font-black text-white hover:bg-red-700">Request a Quote <ArrowRight className="h-4 w-4" /></Link>
+              </div>
+            )}
           </div>
-        </aside>
+
+          <aside className="h-fit rounded-2xl border border-black/10 bg-white p-5 shadow-sm lg:sticky lg:top-40">
+            <p className="text-xs font-black uppercase tracking-[0.14em] text-signal">Fitment checklist</p>
+            <h2 className="mt-2 text-xl font-black">What we may need</h2>
+            <ul className="mt-4 space-y-3">{definition.fields.map((field) => <li key={field} className="flex items-start gap-3 text-sm font-bold leading-6"><span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-signal" />{field}</li>)}</ul>
+            <p className="mt-5 rounded-lg bg-zinc-100 p-3 text-xs font-bold leading-5 text-steel">A compatibility message appears only after the category data and required vehicle details confirm a match.</p>
+            <Link href={quoteHref as never} className="mt-4 inline-flex h-11 w-full items-center justify-center rounded-lg bg-ink px-4 text-sm font-black text-white">Get fitment help</Link>
+          </aside>
+        </div>
       </section>
     </main>
+  );
+}
+
+async function loadCategoryProducts(category: string) {
+  try { return await listProducts(category); } catch { return [] as Product[]; }
+}
+
+function buildQuoteHref(category: string, vehicle: string) {
+  const query = new URLSearchParams({ category });
+  if (vehicle) query.set("vehicle", vehicle);
+  return `/contact?${query}`;
+}
+
+function ProductCard({ product }: { product: Product }) {
+  const image = productImage(product);
+  return (
+    <Link href={`/products/${product.slug}` as never} className="group overflow-hidden rounded-xl border border-black/10 bg-white shadow-sm hover:-translate-y-0.5 hover:shadow-panel">
+      <div className="relative aspect-[4/3] bg-zinc-100">{image ? <Image src={image} alt={product.name} fill className="object-contain p-4 transition group-hover:scale-[1.03]" sizes="(min-width: 1280px) 25vw, 50vw" /> : null}</div>
+      <div className="p-4"><h3 className="text-lg font-black">{product.name}</h3><p className="mt-2 line-clamp-2 text-sm font-semibold leading-6 text-steel">{product.description}</p><div className="mt-4 flex items-center justify-between"><span className="text-xl font-black">{formatMoney(product.price)}</span><span className="inline-flex items-center gap-2 text-sm font-black">View <ArrowRight className="h-4 w-4" /></span></div></div>
+    </Link>
   );
 }

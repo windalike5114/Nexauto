@@ -57,7 +57,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
             <p className="text-sm font-black uppercase tracking-[0.18em] text-signal">{category?.name ?? product.category}</p>
             <h1 className="mt-3 text-4xl font-black leading-tight sm:text-5xl">{product.name}</h1>
             <p className="mt-4 text-lg leading-8 text-steel">{product.description}</p>
-            <p className="mt-5 text-3xl font-black">{formatMoney(product.price)}</p>
+            <p className="mt-5 text-3xl font-black">{needsContactSupport ? "Fitment enquiry" : formatMoney(product.price)}</p>
           </div>
           {needsContactSupport ? (
             <section className="rounded-lg border border-signal/20 bg-[#F8FAFC] p-5">
@@ -66,15 +66,15 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
                 Contact us with your make, model, year, and engine details before ordering so we can confirm the correct part.
               </p>
               <Link
-                href="/contact"
+                href={`/contact?part=${encodeURIComponent(product.name)}`}
                 className="mt-4 inline-flex h-11 items-center justify-center rounded bg-ink px-4 text-sm font-black text-white transition hover:-translate-y-0.5 hover:bg-black"
               >
                 Contact Us
               </Link>
             </section>
           ) : null}
-          <ProductConfigurator product={product} attributes={attributes} variants={variants} />
-          {allVariantsOutOfStock ? (
+          {!needsContactSupport ? <ProductConfigurator product={product} attributes={attributes} variants={variants} /> : null}
+          {!needsContactSupport && allVariantsOutOfStock ? (
             <p className="rounded-lg border border-black/10 bg-zinc-50 px-4 py-3 text-sm font-bold text-steel">
               This product is currently out of stock.
             </p>

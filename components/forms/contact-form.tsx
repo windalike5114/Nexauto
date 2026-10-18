@@ -7,12 +7,13 @@ type ContactFormProps = {
   productName?: string;
   productSku?: string;
   defaultPartOrSku?: string;
+  defaultVehicle?: string;
 };
 
 const successMessage = "Thanks for getting in touch. We've received your enquiry and will respond as soon as possible.";
 const errorMessage = "We couldn't send your enquiry. Please try again or email support@nexautoparts.co.nz.";
 
-export function ContactForm({ sourcePage, productName, productSku, defaultPartOrSku = "" }: ContactFormProps) {
+export function ContactForm({ sourcePage, productName, productSku, defaultPartOrSku = "", defaultVehicle = "" }: ContactFormProps) {
   const [sourceUrl, setSourceUrl] = useState("https://nexautoparts.co.nz");
   const [partOrSku, setPartOrSku] = useState(defaultPartOrSku);
   const [submitting, setSubmitting] = useState(false);
@@ -33,6 +34,7 @@ export function ContactForm({ sourcePage, productName, productSku, defaultPartOr
     const name = String(formData.get("name") ?? "").trim();
     const email = String(formData.get("email") ?? "").trim();
     const message = String(formData.get("message") ?? "").trim();
+    const vehicle = String(formData.get("vehicle") ?? "").trim();
     const company = String(formData.get("company") ?? "");
 
     if (!name || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !message) {
@@ -49,7 +51,7 @@ export function ContactForm({ sourcePage, productName, productSku, defaultPartOr
           name,
           email,
           partOrSku,
-          message,
+          message: vehicle ? `Vehicle: ${vehicle}\n\n${message}` : message,
           company,
           sourcePage,
           sourceUrl,
@@ -112,6 +114,16 @@ export function ContactForm({ sourcePage, productName, productSku, defaultPartOr
             placeholder="Enter a part name or SKU, if applicable"
           />
         </FormField>
+        <FormField id="contact-vehicle" label="Vehicle details">
+          <input
+            id="contact-vehicle"
+            name="vehicle"
+            defaultValue={defaultVehicle}
+            maxLength={240}
+            className="mt-2 h-12 w-full rounded border border-black/10 px-3 text-base outline-none focus:border-ink"
+            placeholder="Year, make, model, engine or chassis"
+          />
+        </FormField>
         <FormField id="contact-message" label="How can we help?">
           <textarea
             id="contact-message"
@@ -122,6 +134,9 @@ export function ContactForm({ sourcePage, productName, productSku, defaultPartOr
             placeholder="Tell us how we can help"
           />
         </FormField>
+        <p className="rounded-lg bg-zinc-100 p-3 text-xs font-bold leading-5 text-steel">
+          Need to send photos? Submit this enquiry, then reply to the confirmation email with your product, connector or vehicle photos attached.
+        </p>
         {status ? (
           <div
             className={`rounded border p-3 text-sm font-bold ${

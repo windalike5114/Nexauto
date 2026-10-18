@@ -111,13 +111,13 @@ export default function CartPage() {
               );
             })}
             <section className="rounded-lg border border-black/10 bg-[#F8FAFC] p-5 shadow-sm">
-              <p className="text-xs font-black uppercase tracking-[0.14em] text-signal">Wiper fitment</p>
-              <h2 className="mt-2 text-2xl font-black text-ink">Find wipers for another vehicle</h2>
+              <p className="text-xs font-black uppercase tracking-[0.14em] text-signal">Vehicle finder</p>
+              <h2 className="mt-2 text-2xl font-black text-ink">Shop parts for another vehicle</h2>
               <p className="mt-2 text-sm font-bold leading-6 text-steel">
                 Use the vehicle finder to add another matched front pair without losing the current cart.
               </p>
-              <Link href="/shop#vehicle-finder" className="mt-4 inline-flex h-11 items-center justify-center rounded bg-ink px-4 text-sm font-black text-white hover:bg-black">
-                Go to Wiper fitment
+              <Link href="/#vehicle-finder" className="mt-4 inline-flex h-11 items-center justify-center rounded bg-ink px-4 text-sm font-black text-white hover:bg-black">
+                Go to vehicle finder
               </Link>
             </section>
           </div>

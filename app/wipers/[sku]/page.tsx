@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { CarFront, CheckCircle2, CircleHelp } from "lucide-react";
 import { WiperSetPurchase } from "@/components/wiper-set-purchase";
 import { WiperProductGallery } from "@/components/wiper-product-gallery";
+import { WiperFitmentFinder } from "@/components/wiper-fitment-finder";
 import { formatMoney } from "@/lib/catalog";
 import { blobMediaAssets } from "@/lib/blob-media-assets";
 import { wiperPairPricing } from "@/lib/pricing";
@@ -110,7 +111,9 @@ export default async function WiperSkuPage({
               <span className="text-3xl font-black sm:text-4xl">{formatMoney(wiperSet.price)}</span>
             </div>
             <div className="mt-4 grid grid-cols-2 gap-2 text-xs font-black text-ink sm:text-sm">
-              <span className="rounded border border-black/10 bg-white px-3 py-2">Fits your selected vehicle</span>
+              <span className={`rounded border px-3 py-2 ${vehicleContext ? "border-emerald-700/20 bg-emerald-50 text-emerald-800" : "border-amber-700/20 bg-amber-50 text-amber-900"}`}>
+                {vehicleContext ? `Fits your ${vehicleContext.year} ${vehicleContext.make} ${vehicleContext.model}` : "Check compatibility"}
+              </span>
               <span className="rounded border border-black/10 bg-white px-3 py-2">Front pair included</span>
               <span className="rounded border border-black/10 bg-white px-3 py-2">Free NZ shipping</span>
               <span className="rounded border border-black/10 bg-white px-3 py-2">12-Month Warranty</span>
@@ -135,7 +138,7 @@ export default async function WiperSkuPage({
               <div className="flex items-start gap-3">
                 <CircleHelp className="mt-0.5 h-5 w-5 shrink-0 text-signal" />
                 <div>
-                  <p className="text-sm font-black text-ink">Buying manually from the catalog</p>
+                  <p className="text-sm font-black text-ink">Compatibility not checked</p>
                   <p className="mt-1 text-sm font-bold leading-6 text-steel">
                     For the safest fitment, search your vehicle before ordering.
                   </p>
@@ -149,14 +152,13 @@ export default async function WiperSkuPage({
             <FitmentTile label="Passenger side" lengthIn={wiperSet.passengerLengthIn} />
           </div>
 
-          <div className="flex flex-col gap-3 rounded-lg border border-black/10 bg-[#F8FAFC] p-4 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm font-bold leading-6 text-steel">
-              Not sure whether these sizes fit your vehicle? Use our Vehicle Finder before ordering to confirm compatibility.
-            </p>
-            <Link href="/#vehicle-finder" className="inline-flex h-11 w-full shrink-0 items-center justify-center rounded bg-ink px-4 text-sm font-black text-white transition hover:-translate-y-0.5 hover:bg-black sm:w-auto">
-              Check My Vehicle
-            </Link>
-          </div>
+          {!vehicleContext ? (
+            <details className="rounded-lg border border-black/10 bg-[#F8FAFC] p-4">
+              <summary className="cursor-pointer text-sm font-black text-ink">Check compatibility for this vehicle</summary>
+              <p className="mt-2 text-sm font-bold leading-6 text-steel">Choose your vehicle here. A confirmed result will take you to the matching blade pair without returning to the homepage.</p>
+              <div className="mt-4"><WiperFitmentFinder compact directToProduct title="Check wiper compatibility" description="Select make, model, year and body or chassis to confirm the correct blade pair." /></div>
+            </details>
+          ) : null}
 
           <WiperSetPurchase wiperSet={wiperSet} rearAddon={rearAddon} vehicle={vehicle} vehicleContext={vehicleContext} />
         </section>
@@ -176,9 +178,11 @@ export default async function WiperSkuPage({
         <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
           <div className="mb-6 max-w-3xl">
             <p className="text-sm font-black uppercase tracking-[0.18em] text-signal">Adapter included</p>
-            <h2 className="mt-3 text-3xl font-black">Correct Adapter Included</h2>
+            <h2 className="mt-3 text-3xl font-black">{vehicleContext ? "Correct Adapter Included" : "Adapter Confirmed With Vehicle"}</h2>
             <p className="mt-4 text-sm font-bold leading-7 text-steel">
-              Your selected vehicle is matched with the appropriate wiper adapter. You do not need to identify or select the connector manually.
+              {vehicleContext
+                ? "Your selected vehicle is matched with the appropriate wiper adapter. You do not need to identify or select the connector manually."
+                : "Adapter styles vary by vehicle. Select your vehicle above before ordering so the appropriate connector can be confirmed."}
             </p>
           </div>
           <div className="flex gap-4 overflow-x-auto pb-2">
@@ -195,7 +199,9 @@ export default async function WiperSkuPage({
             ))}
           </div>
           <p className="mt-4 text-sm font-bold leading-7 text-steel">
-            Adapter styles shown are examples. The suitable configuration will be supplied for your selected vehicle.
+            {vehicleContext
+              ? "Adapter styles shown are examples. The suitable configuration will be supplied for your selected vehicle."
+              : "Adapter styles shown are examples. Compatibility has not been confirmed for a vehicle yet."}
           </p>
         </div>
       </section>
@@ -243,7 +249,7 @@ export default async function WiperSkuPage({
 
       <section className="border-t border-black/10 bg-[#F8FAFC]">
         <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-          <InfoTile title="Related products" text="Browse available front wiper blade pair combinations." href="/shop" />
+          <InfoTile title="Related products" text="Browse available front wiper blade pair combinations." href="/parts/wipers" />
         </div>
       </section>
     </main>
@@ -287,7 +293,7 @@ function FeatureCard({ title, text }: { title: string; text: string }) {
   );
 }
 
-function InfoTile({ title, text, href }: { title: string; text: string; href?: "/shop" }) {
+function InfoTile({ title, text, href }: { title: string; text: string; href?: "/parts/wipers" }) {
   const content = (
     <article className="h-full rounded-lg border border-black/10 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
       <h3 className="font-black">{title}</h3>
