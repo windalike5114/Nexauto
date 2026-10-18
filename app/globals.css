@@ -32,3 +32,45 @@ select,
 textarea {
   font: inherit;
 }
+
+.reveal-pending {
+  opacity: 0;
+  transform: translateY(18px);
+}
+
+.reveal-visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 450ms ease var(--reveal-delay, 0ms),
+    transform 450ms ease var(--reveal-delay, 0ms);
+}
+
+#vehicle-finder:has(.vehicle-selected) {
+  position: sticky;
+  top: 204px;
+  z-index: 20;
+}
+
+@media (min-width: 1024px) {
+  #vehicle-finder:has(.vehicle-selected) {
+    top: 149px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .reveal-pending,
+  .reveal-visible {
+    opacity: 1;
+    transform: none;
+  }
+}

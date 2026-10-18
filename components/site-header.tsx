@@ -10,7 +10,7 @@ const categoryLinks = [
   ["Light Bulbs", "/parts/bulbs"],
   ["Batteries", "/parts/batteries"],
   ["Control Arms", "/parts/suspension"],
-  ["Specials", "/specials"]
+  ["Weekly Deals", "/specials"]
 ] as const;
 
 export function SiteHeader() {
@@ -19,7 +19,7 @@ export function SiteHeader() {
       <div className="bg-ink text-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-2 text-[11px] font-black sm:px-6 lg:px-8">
           <Link href="/shipping" className="truncate hover:text-white/80">Fast NZ-wide dispatch from Auckland</Link>
-          <Link href="/specials" className="shrink-0 uppercase tracking-[0.12em] text-white hover:text-signal">View Specials</Link>
+          <Link href="/specials" className="shrink-0 uppercase tracking-[0.12em] text-white hover:text-signal">Weekly Deals · Shop Now</Link>
         </div>
       </div>
 

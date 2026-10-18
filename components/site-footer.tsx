@@ -13,7 +13,7 @@ const footerGroups = [
       ["Light Bulbs", "/parts/bulbs"],
       ["Batteries", "/parts/batteries"],
       ["Control Arms", "/parts/suspension"],
-      ["Specials", "/specials"]
+      ["Weekly Deals", "/specials"]
     ]
   },
   {
