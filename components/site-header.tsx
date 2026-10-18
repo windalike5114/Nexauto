@@ -1,5 +1,8 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 import { CarFront, Search, UserRound } from "lucide-react";
 import { CartLink } from "@/components/cart-link";
 import { blobMediaAssets } from "@/lib/blob-media-assets";
@@ -14,8 +17,43 @@ const categoryLinks = [
 ] as const;
 
 export function SiteHeader() {
+  const headerRef = useRef<HTMLElement>(null);
+  const [headerHeight, setHeaderHeight] = useState(0);
+  const [isFixed, setIsFixed] = useState(false);
+
+  useEffect(() => {
+    const header = headerRef.current;
+    if (!header) return;
+
+    let measuredHeight = header.offsetHeight;
+    let frame = 0;
+    const measure = () => {
+      measuredHeight = header.offsetHeight;
+      setHeaderHeight(measuredHeight);
+    };
+    const update = () => {
+      frame = 0;
+      setIsFixed(window.scrollY > measuredHeight);
+    };
+    const onScroll = () => {
+      if (!frame) frame = window.requestAnimationFrame(update);
+    };
+    const observer = new ResizeObserver(measure);
+    observer.observe(header);
+    measure();
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("scroll", onScroll);
+      if (frame) window.cancelAnimationFrame(frame);
+    };
+  }, []);
+
   return (
-    <header className="sticky top-0 z-30 border-b border-black/10 bg-white/95 shadow-sm backdrop-blur">
+    <div style={isFixed ? { height: headerHeight } : undefined}>
+    <header ref={headerRef} className={`${isFixed ? "header-return fixed inset-x-0 top-0" : "relative"} z-30 border-b border-black/10 bg-white/95 shadow-sm backdrop-blur`}>
       <div className="bg-ink text-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-2 text-[11px] font-black sm:px-6 lg:px-8">
           <Link href="/shipping" className="truncate hover:text-white/80">Fast NZ-wide dispatch from Auckland</Link>
@@ -60,6 +98,7 @@ export function SiteHeader() {
         </div>
       </nav>
     </header>
+    </div>
   );
 }
 

@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { ArrowRight, BatteryCharging, Eye, Gauge, Headphones, Mail, PackageCheck, SearchCheck, Truck, Wrench } from "lucide-react";
 import { HomeNewsletterSignup } from "@/components/home-newsletter-signup";
+import { HomeHeroCarousel } from "@/components/home-hero-carousel";
 import { HomeProductTabs, type ProductTabGroup, type StorefrontProductCard } from "@/components/home-product-tabs";
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { VehiclePartsFinder } from "@/components/vehicle-parts-finder";
@@ -52,21 +53,7 @@ export default async function HomePage() {
 
   return (
     <main className="bg-white">
-      <section className="relative isolate overflow-hidden bg-black text-white">
-        <Image src="/home/parts-hero-v2.png" alt="NexAutoParts wipers, oil filter, light bulbs, battery and control arm" fill priority className="-z-20 object-cover object-center" sizes="100vw" />
-        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-black via-black/88 to-black/10" />
-        <div className="mx-auto flex min-h-[430px] max-w-7xl items-center px-4 py-12 sm:min-h-[480px] sm:px-6 lg:px-8">
-          <div className="max-w-xl">
-            <p className="text-xs font-black uppercase tracking-[0.2em] text-signal sm:text-sm">Automotive parts for New Zealand</p>
-            <h1 className="mt-4 text-4xl font-black leading-[0.98] sm:text-6xl">Parts that fit.<br />Service you can trust.</h1>
-            <p className="mt-5 max-w-lg text-base font-semibold leading-7 text-white/78 sm:text-lg">Shop dependable replacement parts, or start with your vehicle and let each product category confirm the details it needs.</p>
-            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-              <Link href="/shop" className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-signal px-6 font-black text-white shadow-lg shadow-red-950/30 hover:bg-red-700">Shop Parts <ArrowRight className="h-4 w-4" /></Link>
-              <Link href="#vehicle-finder" className="inline-flex h-12 items-center justify-center rounded-lg border border-white/35 bg-white/10 px-6 font-black text-white backdrop-blur hover:bg-white/18">Find Parts for My Vehicle</Link>
-            </div>
-          </div>
-        </div>
-      </section>
+      <HomeHeroCarousel />
 
       <section id="vehicle-finder" className="scroll-mt-40 border-b border-black/10 bg-[#EEF2F5]">
         <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8"><VehiclePartsFinder /></div>
