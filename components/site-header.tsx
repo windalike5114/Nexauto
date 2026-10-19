@@ -88,7 +88,7 @@ export function SiteHeader() {
     };
   }, []);
 
-  const vehicleLabel = vehicle ? `${vehicle.year} ${vehicle.make} ${vehicle.model}` : "";
+  const vehicleLabel = vehicle ? [vehicle.year, vehicle.make, vehicle.model, vehicle.chassis].filter(Boolean).join(" ") : "";
 
   return (
     <div style={isFixed ? { height: headerHeight } : undefined}>

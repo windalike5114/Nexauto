@@ -6,6 +6,20 @@ import { BatteryCharging, CarFront, Filter, Lightbulb, Loader2, Pencil, Search, 
 import { saveVehicleContext } from "@/lib/vehicle-context";
 
 type FinderOption = { id: string; name: string };
+type VehicleApplicationOption = {
+  id: string;
+  generationId: string;
+  variantId: string;
+  chassisCodes: string[];
+  generationName: string;
+  bodyConfiguration: string;
+  bodyStyle: string;
+  engine: string;
+  yearStart: number;
+  yearEnd: number | null;
+};
+
+const vehicleCatalogApiVersion = "v3";
 
 const categoryOptions = [
   { slug: "wipers", name: "Wiper Blades", description: "Front and rear blades", icon: Search },
@@ -20,16 +34,20 @@ export function VehiclePartsFinder() {
   const [makes, setMakes] = useState<FinderOption[]>([]);
   const [models, setModels] = useState<FinderOption[]>([]);
   const [years, setYears] = useState<number[]>([]);
+  const [applications, setApplications] = useState<VehicleApplicationOption[]>([]);
   const [makeId, setMakeId] = useState("");
   const [modelId, setModelId] = useState("");
   const [year, setYear] = useState("");
+  const [generationId, setGenerationId] = useState("");
+  const [bodyConfiguration, setBodyConfiguration] = useState("");
+  const [applicationId, setApplicationId] = useState("");
   const [showCategories, setShowCategories] = useState(false);
   const [loading, setLoading] = useState("makes");
   const [error, setError] = useState("");
 
   useEffect(() => {
     let active = true;
-    fetchJson<{ makes: FinderOption[] }>("/api/vehicles/makes")
+    fetchJson<{ makes: FinderOption[] }>(`/api/vehicles/makes?catalog=${vehicleCatalogApiVersion}`)
       .then((data) => {
         if (active) setMakes(data.makes);
       })
@@ -51,6 +69,7 @@ export function VehiclePartsFinder() {
       setModelId("");
       setYears([]);
       setYear("");
+      resetApplicationSelection();
       return;
     }
 
@@ -61,7 +80,8 @@ export function VehiclePartsFinder() {
     setModelId("");
     setYears([]);
     setYear("");
-    fetchJson<{ models: FinderOption[] }>(`/api/vehicles/models?makeId=${makeId}`)
+    resetApplicationSelection();
+    fetchJson<{ models: FinderOption[] }>(`/api/vehicles/models?makeId=${makeId}&catalog=${vehicleCatalogApiVersion}`)
       .then((data) => {
         if (active) setModels(data.models);
       })
@@ -80,6 +100,7 @@ export function VehiclePartsFinder() {
     if (!makeId || !modelId) {
       setYears([]);
       setYear("");
+      resetApplicationSelection();
       return;
     }
 
@@ -88,7 +109,8 @@ export function VehiclePartsFinder() {
     setShowCategories(false);
     setError("");
     setYear("");
-    fetchJson<{ years: number[] }>(`/api/vehicles/years?makeId=${makeId}&modelId=${modelId}`)
+    resetApplicationSelection();
+    fetchJson<{ years: number[] }>(`/api/vehicles/years?makeId=${makeId}&modelId=${modelId}&catalog=${vehicleCatalogApiVersion}`)
       .then((data) => {
         if (active) setYears(data.years);
       })
@@ -103,22 +125,123 @@ export function VehiclePartsFinder() {
     };
   }, [makeId, modelId]);
 
+  useEffect(() => {
+    if (!makeId || !modelId || !year) {
+      resetApplicationSelection();
+      return;
+    }
+
+    let active = true;
+    setLoading("applications");
+    setShowCategories(false);
+    setError("");
+    resetApplicationSelection();
+    fetchJson<{ applications: VehicleApplicationOption[] }>(`/api/vehicles/applications?makeId=${makeId}&modelId=${modelId}&year=${year}&catalog=${vehicleCatalogApiVersion}`)
+      .then((data) => {
+        if (!active) return;
+        setApplications(data.applications);
+        const generationIds = [...new Set(data.applications.map((entry) => entry.generationId))];
+        setGenerationId(generationIds.length === 1 ? generationIds[0] : "");
+        if (data.applications.length === 0) setError("No published vehicle configuration was found for this year.");
+      })
+      .catch((nextError) => {
+        if (active) setError(nextError.message);
+      })
+      .finally(() => {
+        if (active) setLoading("");
+      });
+    return () => {
+      active = false;
+    };
+  }, [makeId, modelId, year]);
+
+  const chassisOptions = useMemo(() => {
+    const options = new Map<string, string>();
+    for (const application of applications) {
+      options.set(application.generationId, application.chassisCodes.join(" / ") || application.generationName);
+    }
+    return [...options].map(([id, name]) => ({ id, name })).sort((left, right) => left.name.localeCompare(right.name));
+  }, [applications]);
+
+  const bodyOptions = useMemo(() => {
+    const options = new Set(
+      applications
+        .filter((entry) => entry.generationId === generationId)
+        .map((entry) => entry.bodyConfiguration)
+    );
+    return [...options].sort((left, right) => left.localeCompare(right));
+  }, [applications, generationId]);
+
+  const engineOptions = useMemo(() => applications
+    .filter((entry) => entry.generationId === generationId && entry.bodyConfiguration === bodyConfiguration)
+    .sort((left, right) => left.engine.localeCompare(right.engine)), [applications, bodyConfiguration, generationId]);
+
+  useEffect(() => {
+    setShowCategories(false);
+    setApplicationId("");
+    setBodyConfiguration(bodyOptions.length === 1 ? bodyOptions[0] : "");
+  }, [bodyOptions]);
+
+  useEffect(() => {
+    setShowCategories(false);
+    setApplicationId(engineOptions.length === 1 ? engineOptions[0].id : "");
+  }, [engineOptions]);
+
   const selectedMake = useMemo(() => makes.find((entry) => entry.id === makeId)?.name ?? "", [makeId, makes]);
   const selectedModel = useMemo(() => models.find((entry) => entry.id === modelId)?.name ?? "", [modelId, models]);
-  const vehicleReady = Boolean(makeId && modelId && year);
+  const selectedApplication = useMemo(() => applications.find((entry) => entry.id === applicationId) ?? null, [applicationId, applications]);
+  const selectedChassis = selectedApplication?.chassisCodes.join(" / ") || selectedApplication?.generationName || "";
+  const vehicleReady = Boolean(makeId && modelId && year && selectedApplication);
 
   function confirmVehicle() {
-    if (!vehicleReady) return;
-    saveVehicleContext({ makeId, modelId, year, make: selectedMake, model: selectedModel });
+    const context = getSelectedVehicleContext();
+    if (!context) return;
+    saveVehicleContext(context);
     setShowCategories(true);
   }
 
   function openCategory(slug: (typeof categoryOptions)[number]["slug"]) {
-    if (!vehicleReady) return;
-    const context = { makeId, modelId, year, make: selectedMake, model: selectedModel };
+    const context = getSelectedVehicleContext();
+    if (!context) return;
     saveVehicleContext(context);
-    const query = new URLSearchParams({ makeId, modelId, year, make: selectedMake, model: selectedModel });
+    const query = new URLSearchParams({
+      makeId,
+      modelId,
+      year,
+      make: selectedMake,
+      model: selectedModel,
+      applicationId: context.applicationId,
+      generationId: context.generationId,
+      variantId: context.variantId,
+      chassis: context.chassis,
+      body: context.bodyConfiguration,
+      engine: context.engine
+    });
     router.push(`/parts/${slug}?${query}#vehicle-finder` as never);
+  }
+
+  function getSelectedVehicleContext() {
+    if (!selectedApplication) return null;
+    return {
+      makeId,
+      modelId,
+      year,
+      make: selectedMake,
+      model: selectedModel,
+      applicationId: selectedApplication.id,
+      generationId: selectedApplication.generationId,
+      variantId: selectedApplication.variantId,
+      chassis: selectedChassis,
+      bodyConfiguration: selectedApplication.bodyConfiguration,
+      engine: selectedApplication.engine
+    };
+  }
+
+  function resetApplicationSelection() {
+    setApplications([]);
+    setGenerationId("");
+    setBodyConfiguration("");
+    setApplicationId("");
   }
 
   return (
@@ -129,20 +252,25 @@ export function VehiclePartsFinder() {
             <span className="grid h-10 w-10 place-items-center rounded-lg bg-signal text-white"><CarFront className="h-5 w-5" /></span>
             <div>
               <p className="text-[11px] font-black uppercase tracking-[0.14em] text-emerald-700">Your selected vehicle</p>
-              <h2 className="mt-0.5 text-base font-black sm:text-lg">{year} {selectedMake} {selectedModel}</h2>
+              <h2 className="mt-0.5 text-base font-black sm:text-lg">{year} {selectedMake} {selectedModel} · {selectedChassis}</h2>
+              <p className="mt-1 text-xs font-bold text-steel">{selectedApplication?.bodyConfiguration} · {selectedApplication?.engine}</p>
             </div>
           </div>
           <button type="button" onClick={() => setShowCategories(false)} className="inline-flex h-10 items-center gap-2 rounded-lg border border-black/10 px-3 text-xs font-black hover:border-black/30 hover:bg-[#F8FAFC]"><Pencil className="h-3.5 w-3.5" /> Change vehicle</button>
         </div>
-      ) : <div className="grid gap-4 lg:grid-cols-[190px_1fr_auto] lg:items-end">
-        <div>
+      ) : <div>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div>
           <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.15em] text-signal">
             <CarFront className="h-4 w-4" /> My Vehicle
           </div>
           <h2 className="mt-1 text-xl font-black leading-tight">Find compatible parts</h2>
+          <p className="mt-1 text-[11px] font-bold text-steel">New NexAuto vehicle catalogue</p>
+          </div>
+          <p className="text-xs font-bold text-steel">Make → Model → Year → Chassis → Body / drivetrain → Engine</p>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-3">
+        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3 xl:grid-cols-6">
         <SelectControl label="Make" value={makeId} disabled={loading === "makes"} onChange={(value) => { setShowCategories(false); setMakeId(value); }}>
           <option value="">Select make</option>
           {makes.map((entry) => <option key={entry.id} value={entry.id}>{entry.name}</option>)}
@@ -155,9 +283,21 @@ export function VehiclePartsFinder() {
           <option value="">Select year</option>
           {years.map((entry) => <option key={entry} value={String(entry)}>{entry}</option>)}
         </SelectControl>
+        <SelectControl label="Chassis / code" value={generationId} disabled={!year || loading === "applications" || chassisOptions.length === 0} onChange={setGenerationId}>
+          <option value="">Select chassis</option>
+          {chassisOptions.map((entry) => <option key={entry.id} value={entry.id}>{entry.name}</option>)}
+        </SelectControl>
+        <SelectControl label="Body / drivetrain" value={bodyConfiguration} disabled={!generationId || bodyOptions.length === 0} onChange={setBodyConfiguration}>
+          <option value="">Select body / drivetrain</option>
+          {bodyOptions.map((entry) => <option key={entry} value={entry}>{entry}</option>)}
+        </SelectControl>
+        <SelectControl label="Engine" value={applicationId} disabled={!bodyConfiguration || engineOptions.length === 0} onChange={setApplicationId}>
+          <option value="">Select engine</option>
+          {engineOptions.map((entry) => <option key={entry.id} value={entry.id}>{entry.engine}</option>)}
+        </SelectControl>
         </div>
 
-        <button type="button" disabled={!vehicleReady || Boolean(loading)} onClick={confirmVehicle} className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-signal px-5 text-sm font-black text-white shadow-sm hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-zinc-300 lg:min-w-[150px]">
+        <button type="button" disabled={!vehicleReady || Boolean(loading)} onClick={confirmVehicle} className="mt-4 inline-flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-signal px-5 text-sm font-black text-white shadow-sm hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-zinc-300 sm:w-auto sm:min-w-[180px]">
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
           Find Parts
         </button>

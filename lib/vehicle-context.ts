@@ -1,4 +1,4 @@
-export const vehicleContextStorageKey = "nexauto.vehicle-context.v1";
+export const vehicleContextStorageKey = "nexauto.vehicle-context.v2";
 export const vehicleContextChangedEvent = "nexauto:vehicle-context-changed";
 
 export type VehicleContext = {
@@ -7,6 +7,12 @@ export type VehicleContext = {
   year: string;
   make: string;
   model: string;
+  applicationId?: string;
+  generationId?: string;
+  variantId?: string;
+  chassis?: string;
+  bodyConfiguration?: string;
+  engine?: string;
 };
 
 export function parseVehicleContext(value: string | null): VehicleContext | null {
@@ -20,7 +26,13 @@ export function parseVehicleContext(value: string | null): VehicleContext | null
       modelId: parsed.modelId,
       year: parsed.year,
       make: parsed.make,
-      model: parsed.model
+      model: parsed.model,
+      applicationId: parsed.applicationId,
+      generationId: parsed.generationId,
+      variantId: parsed.variantId,
+      chassis: parsed.chassis,
+      bodyConfiguration: parsed.bodyConfiguration,
+      engine: parsed.engine
     };
   } catch {
     return null;

@@ -36,7 +36,7 @@
     "test:wiper-source-matching": "node --test --test-isolation=none tests/wiper-source-normalization.test.mjs tests/vehicle-wiper-matcher.test.mjs",
     "test:wiper-finder": "node --import tsx --test tests/wiper-fitment-query.test.ts tests/fitment-api-security.test.ts tests/customer-vehicles.test.ts",
     "test:catalog-safety": "node --test --test-isolation=none tests/catalog-publication-safety.test.mjs",
-    "test:catalog-v3": "node --test --test-isolation=none tests/catalog-v3-normalization.test.mjs tests/catalog-v3-foundation.test.mjs",
+    "test:catalog-v3": "node --test --test-isolation=none tests/catalog-v3-normalization.test.mjs tests/catalog-v3-foundation.test.mjs tests/home-vehicle-finder-v3.test.mjs",
     "catalog-v3:report": "node scripts/catalog/prepare-clean-catalog-v3.mjs --report-only",
     "catalog-v3:import": "node scripts/catalog/prepare-clean-catalog-v3.mjs --apply",
     "catalog-v3:backup-customers": "node scripts/catalog/backup-production-customer-data.mjs",

@@ -6,6 +6,7 @@ import { VehiclePartsFinder } from "@/components/vehicle-parts-finder";
 import { formatMoney } from "@/lib/catalog";
 import { productImage } from "@/lib/product-content";
 import { listProducts } from "@/lib/queries/catalog";
+import { listProductsForVehicle } from "@/lib/queries/vehicle-product-fitment";
 import type { Product } from "@/lib/types";
 
 const categoryDefinitions = {
@@ -44,15 +45,30 @@ const categoryDefinitions = {
 } as const;
 
 type CategoryKey = keyof typeof categoryDefinitions;
-type CategorySearchParams = { makeId?: string; modelId?: string; year?: string; make?: string; model?: string };
+type CategorySearchParams = {
+  makeId?: string;
+  modelId?: string;
+  year?: string;
+  make?: string;
+  model?: string;
+  applicationId?: string;
+  generationId?: string;
+  variantId?: string;
+  chassis?: string;
+  body?: string;
+  engine?: string;
+};
 
 export default async function PartCategoryPage({ params, searchParams }: { params: Promise<{ category: string }>; searchParams: Promise<CategorySearchParams> }) {
   const [{ category }, vehicle] = await Promise.all([params, searchParams]);
   if (!(category in categoryDefinitions)) notFound();
   const definition = categoryDefinitions[category as CategoryKey];
-  const products = await loadCategoryProducts(definition.databaseCategory);
+  const vehicleSelection = parseVehicleSelection(vehicle);
+  const products = vehicleSelection
+    ? await loadVehicleProducts(definition.databaseCategory, vehicleSelection)
+    : await loadCategoryProducts(definition.databaseCategory);
   const currentProducts = products.filter((product) => !["vehicle-fit-battery", "vehicle-fit-oil-filter"].includes(product.slug));
-  const vehicleLabel = [vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(" ");
+  const vehicleLabel = [vehicle.year, vehicle.make, vehicle.model, vehicle.chassis].filter(Boolean).join(" ");
   const Icon = definition.icon;
   const quoteHref = buildQuoteHref(definition.name, vehicleLabel);
 
@@ -72,7 +88,7 @@ export default async function PartCategoryPage({ params, searchParams }: { param
         <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
           {vehicleLabel ? (
             <div className="flex flex-col gap-4 rounded-xl border border-emerald-700/20 bg-emerald-50 p-4 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-start gap-3"><CheckCircle2 className="mt-0.5 h-5 w-5 text-emerald-700" /><div><p className="text-xs font-black uppercase tracking-[0.14em] text-emerald-700">Current vehicle</p><h2 className="mt-1 text-xl font-black">{vehicleLabel}</h2></div></div>
+              <div className="flex items-start gap-3"><CheckCircle2 className="mt-0.5 h-5 w-5 text-emerald-700" /><div><p className="text-xs font-black uppercase tracking-[0.14em] text-emerald-700">Current vehicle</p><h2 className="mt-1 text-xl font-black">{vehicleLabel}</h2>{vehicle.body || vehicle.engine ? <p className="mt-1 text-xs font-bold text-steel">{[vehicle.body, vehicle.engine].filter(Boolean).join(" · ")}</p> : null}</div></div>
               <a href="#change-vehicle" className="inline-flex h-10 items-center justify-center rounded-lg border border-emerald-700/20 bg-white px-4 text-sm font-black">Change vehicle</a>
             </div>
           ) : null}
@@ -86,14 +102,14 @@ export default async function PartCategoryPage({ params, searchParams }: { param
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
         <div className="grid gap-8 lg:grid-cols-[1fr_300px]">
           <div>
-            <div className="flex items-end justify-between gap-4"><div><p className="text-xs font-black uppercase tracking-[0.16em] text-signal">Current catalogue</p><h2 className="mt-2 text-3xl font-black">{definition.name} products</h2></div><span className="text-sm font-bold text-steel">{currentProducts.length} listing{currentProducts.length === 1 ? "" : "s"}</span></div>
+            <div className="flex items-end justify-between gap-4"><div><p className="text-xs font-black uppercase tracking-[0.16em] text-signal">{vehicleSelection ? "Matches from the new vehicle catalogue" : "Current catalogue"}</p><h2 className="mt-2 text-3xl font-black">{vehicleSelection ? `Parts for ${vehicleLabel}` : `${definition.name} products`}</h2></div><span className="text-sm font-bold text-steel">{currentProducts.length} {vehicleSelection ? "compatible " : ""}listing{currentProducts.length === 1 ? "" : "s"}</span></div>
             {currentProducts.length ? (
               <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{currentProducts.map((product) => <ProductCard key={product.id} product={product} />)}</div>
             ) : (
               <div className="mt-6 rounded-2xl border border-black/10 bg-white p-7 shadow-sm">
-                <p className="text-xs font-black uppercase tracking-[0.14em] text-signal">Request a quote</p>
-                <h3 className="mt-2 text-2xl font-black">No confirmed catalogue item is shown yet.</h3>
-                <p className="mt-3 max-w-2xl text-sm font-semibold leading-6 text-steel">We have removed generic placeholder products from this category. Send the vehicle and part details below so the team can confirm a real option rather than presenting an unverified fitment.</p>
+                <p className="text-xs font-black uppercase tracking-[0.14em] text-signal">{vehicleSelection ? "No confirmed match" : "Request a quote"}</p>
+                <h3 className="mt-2 text-2xl font-black">{vehicleSelection ? `No ${definition.name.toLowerCase()} are currently linked to this vehicle.` : "No confirmed catalogue item is shown yet."}</h3>
+                <p className="mt-3 max-w-2xl text-sm font-semibold leading-6 text-steel">{vehicleSelection ? "The new vehicle catalogue returned no published fitment for this category. Send the engine, chassis or existing part number and we can review the missing mapping." : "We have removed generic placeholder products from this category. Send the vehicle and part details below so the team can confirm a real option rather than presenting an unverified fitment."}</p>
                 <Link href={quoteHref as never} className="mt-5 inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-signal px-5 text-sm font-black text-white hover:bg-red-700">Request a Quote <ArrowRight className="h-4 w-4" /></Link>
               </div>
             )}
@@ -114,6 +130,16 @@ export default async function PartCategoryPage({ params, searchParams }: { param
 
 async function loadCategoryProducts(category: string) {
   try { return await listProducts(category); } catch { return [] as Product[]; }
+}
+
+async function loadVehicleProducts(category: string, selection: { makeId: string; modelId: string; year: number; applicationId?: string }) {
+  try { return await listProductsForVehicle(category, selection); } catch { return [] as Product[]; }
+}
+
+function parseVehicleSelection(vehicle: CategorySearchParams) {
+  const year = Number(vehicle.year);
+  if (!vehicle.makeId || !vehicle.modelId || !Number.isInteger(year)) return null;
+  return { makeId: vehicle.makeId, modelId: vehicle.modelId, year, applicationId: vehicle.applicationId };
 }
 
 function buildQuoteHref(category: string, vehicle: string) {

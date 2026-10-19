@@ -2,6 +2,21 @@ import { createSupabaseServerClient } from "@/lib/supabase";
 
 export type VehicleCatalogOption = { id: string; name: string };
 
+export type VehicleCatalogApplicationOption = {
+  id: string;
+  generationId: string;
+  variantId: string;
+  chassisCodes: string[];
+  generationName: string;
+  bodyConfiguration: string;
+  bodyStyle: string;
+  engine: string;
+  yearStart: number;
+  yearEnd: number | null;
+};
+
+export const VEHICLE_CATALOG_V3_SOURCE_PATTERN = "NEXAUTO_V3:%";
+
 type VehicleMake = VehicleCatalogOption;
 type VehicleModel = VehicleCatalogOption & {
   make_id: string;
@@ -10,25 +25,51 @@ type VehicleModel = VehicleCatalogOption & {
 type VehicleGeneration = VehicleCatalogOption & {
   active: boolean;
   vehicle_models: VehicleModel | VehicleModel[] | null;
+  vehicle_chassis_assignments: Array<{
+    variant_id: string | null;
+    is_primary: boolean;
+    vehicle_chassis_codes: { code: string } | Array<{ code: string }> | null;
+  }>;
+};
+
+type VehicleVariant = VehicleCatalogOption & {
+  body_style: string;
+  engine_code: string | null;
+  active: boolean;
 };
 
 type VehicleApplicationRow = {
   id: string;
+  variant_id: string | null;
   year_start: number | null;
   year_end: number | null;
   vehicle_generations: VehicleGeneration | VehicleGeneration[] | null;
+  vehicle_variants: VehicleVariant | VehicleVariant[] | null;
 };
 
 const PRIORITY_NZ_MAKES = ["Toyota", "Ford", "Mazda", "Nissan", "Mitsubishi", "Honda", "Subaru", "Hyundai", "Kia", "Suzuki"];
 
 const VEHICLE_APPLICATION_SELECT = `
   id,
+  variant_id,
   year_start,
   year_end,
+  vehicle_variants!inner(
+    id,
+    name,
+    body_style,
+    engine_code,
+    active
+  ),
   vehicle_generations!inner(
     id,
     name,
     active,
+    vehicle_chassis_assignments(
+      variant_id,
+      is_primary,
+      vehicle_chassis_codes(code)
+    ),
     vehicle_models!inner(
       id,
       name,
@@ -92,18 +133,80 @@ export async function listVehicleCatalogYears(makeId: string, modelId: string) {
   return [...years].sort((left, right) => right - left);
 }
 
+export async function listVehicleCatalogApplicationIds(makeId: string, modelId: string, year: number) {
+  const applications = await listVehicleCatalogApplications(makeId, modelId, year);
+  return applications.map((application) => application.id);
+}
+
+export async function listVehicleCatalogApplications(makeId: string, modelId: string, year: number) {
+  if (!Number.isInteger(year) || year < 1886 || year > 2100) return [];
+
+  const rows = await loadPublishedVehicleApplications();
+  return rows
+    .filter((row) => {
+      const identity = getIdentity(row);
+      if (!identity || identity.make.id !== makeId || identity.model.id !== modelId || !row.year_start) return false;
+      return row.year_start <= year && (row.year_end === null || row.year_end >= year);
+    })
+    .map(mapApplicationOption)
+    .filter((option): option is VehicleCatalogApplicationOption => Boolean(option))
+    .sort(compareApplicationOptions);
+}
+
 async function loadPublishedVehicleApplications() {
   const supabase = getSupabaseOrThrow();
   const result = await selectAll(
     supabase
       .from("vehicle_fitment_applications")
       .select(VEHICLE_APPLICATION_SELECT)
+      .like("source_application_key", VEHICLE_CATALOG_V3_SOURCE_PATTERN)
       .eq("fitment_status", "published")
       .eq("active", true)
       .eq("vehicle_generations.active", true)
+      .eq("vehicle_variants.active", true)
   );
   if (result.error) throw result.error;
   return (result.data ?? []) as unknown as VehicleApplicationRow[];
+}
+
+function mapApplicationOption(row: VehicleApplicationRow): VehicleCatalogApplicationOption | null {
+  const generation = single(row.vehicle_generations);
+  const variant = single(row.vehicle_variants);
+  if (!generation || !variant || !row.year_start) return null;
+
+  const chassisCodes = generation.vehicle_chassis_assignments
+    .filter((assignment) => !assignment.variant_id || assignment.variant_id === variant.id)
+    .sort((left, right) => Number(right.is_primary) - Number(left.is_primary))
+    .map((assignment) => single(assignment.vehicle_chassis_codes)?.code?.trim() ?? "")
+    .filter(Boolean);
+  const engine = variant.engine_code?.trim() ?? "Engine not specified";
+  const engineSuffix = variant.engine_code ? ` · ${variant.engine_code}` : "";
+  const bodyConfiguration = engineSuffix && variant.name.endsWith(engineSuffix)
+    ? variant.name.slice(0, -engineSuffix.length).trim()
+    : variant.body_style;
+
+  return {
+    id: row.id,
+    generationId: generation.id,
+    variantId: variant.id,
+    chassisCodes: [...new Set(chassisCodes)],
+    generationName: generation.name,
+    bodyConfiguration,
+    bodyStyle: variant.body_style,
+    engine,
+    yearStart: row.year_start,
+    yearEnd: row.year_end
+  };
+}
+
+function compareApplicationOptions(left: VehicleCatalogApplicationOption, right: VehicleCatalogApplicationOption) {
+  return getChassisLabel(left).localeCompare(getChassisLabel(right))
+    || left.bodyConfiguration.localeCompare(right.bodyConfiguration)
+    || left.engine.localeCompare(right.engine);
+}
+
+function getChassisLabel(application: VehicleCatalogApplicationOption) {
+  return application.chassisCodes.join(" / ") || application.generationName;
 }
 
 function sortMakesForNz(makes: VehicleCatalogOption[]) {
