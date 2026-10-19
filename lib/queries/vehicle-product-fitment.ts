@@ -10,6 +10,13 @@ export async function listProductsForVehicle(
   categorySlug: string,
   selection: { makeId: string; modelId: string; year: number; applicationId?: string }
 ): Promise<Product[]> {
+  const products = await listAllProductsForVehicle(selection);
+  return products.filter((product) => product.category === categorySlug);
+}
+
+export async function listAllProductsForVehicle(
+  selection: { makeId: string; modelId: string; year: number; applicationId?: string }
+): Promise<Product[]> {
   const matchingApplicationIds = await listVehicleCatalogApplicationIds(selection.makeId, selection.modelId, selection.year);
   const applicationIds = selection.applicationId
     ? matchingApplicationIds.filter((id) => id === selection.applicationId)
@@ -37,6 +44,6 @@ export async function listProductsForVehicle(
   if (variantError) throw variantError;
 
   const productIds = new Set(((variantData ?? []) as VariantRow[]).map((row) => row.product_id));
-  const products = await listProducts(categorySlug);
+  const products = await listProducts();
   return products.filter((product) => productIds.has(product.id));
 }

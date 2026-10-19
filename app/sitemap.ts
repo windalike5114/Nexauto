@@ -7,11 +7,7 @@ const siteUrl = "https://nexautoparts.co.nz";
 const staticRoutes = [
   "",
   "/shop",
-  "/parts/wipers",
-  "/parts/filters",
-  "/parts/bulbs",
-  "/parts/batteries",
-  "/parts/suspension",
+  "/parts",
   "/specials",
   "/products/universal-wiper-blade",
   "/about",

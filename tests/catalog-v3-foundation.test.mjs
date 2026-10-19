@@ -4,7 +4,8 @@ import test from "node:test";
 
 const migration = readFileSync("supabase/migrations/20261021_catalog_v3_product_foundation.sql", "utf8");
 const importer = readFileSync("scripts/catalog/prepare-clean-catalog-v3.mjs", "utf8");
-const categoryPage = readFileSync("app/parts/[category]/page.tsx", "utf8");
+const partsPage = readFileSync("app/parts/page.tsx", "utf8");
+const compatiblePartCard = readFileSync("components/compatible-part-card.tsx", "utf8");
 
 test("catalog V3 stores supplier identifiers and cross references separately", () => {
   assert.match(migration, /create table if not exists public\.product_identifiers/);
@@ -35,5 +36,6 @@ test("all generated filter and battery products are preview-only", () => {
   assert.match(importer, /content_status: "generated"/);
   assert.match(importer, /commerce_status: "catalog_only"/);
   assert.match(importer, /checkout_enabled: false/);
-  assert.match(categoryPage, /product\.purchasable \? formatMoney\(product\.price\) : "Preview"/);
+  assert.match(partsPage, /CompatibleProductCard/);
+  assert.match(compatiblePartCard, /product\.purchasable \? formatMoney\(product\.price\) : "Preview"/);
 });

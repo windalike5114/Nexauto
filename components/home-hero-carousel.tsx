@@ -25,7 +25,7 @@ const slides = [
     image: "/home/vehicle-fitment.png",
     imageAlt: "A technician fitting a wiper blade with multiple adapters",
     parallax: { x: -0.28, y: 0.72 },
-    primary: { label: "Find My Wipers", href: "/parts/wipers" },
+    primary: { label: "Find My Wipers", href: "/parts?category=wipers" },
     secondary: { label: "Installation Guides", href: "/wiper-installation-guides" }
   },
   {

@@ -5,7 +5,7 @@ import test from "node:test";
 const vehicleCatalog = readFileSync("lib/queries/vehicle-catalog.ts", "utf8");
 const vehicleProductFitment = readFileSync("lib/queries/vehicle-product-fitment.ts", "utf8");
 const finder = readFileSync("components/vehicle-parts-finder.tsx", "utf8");
-const categoryPage = readFileSync("app/parts/[category]/page.tsx", "utf8");
+const partsPage = readFileSync("app/parts/page.tsx", "utf8");
 const applicationRoute = readFileSync("app/api/vehicles/applications/route.ts", "utf8");
 const vehicleContext = readFileSync("lib/vehicle-context.ts", "utf8");
 const serverVehicleContext = readFileSync("lib/server/vehicle-context.ts", "utf8");
@@ -22,7 +22,7 @@ test("selected vehicles filter products through published canonical fitments", (
   assert.match(vehicleProductFitment, /listVehicleCatalogApplicationIds/);
   assert.match(vehicleProductFitment, /\.from\("vehicle_product_fitments"\)/);
   assert.match(vehicleProductFitment, /\.eq\("fitment_status", "published"\)/);
-  assert.match(categoryPage, /listProductsForVehicle/);
+  assert.match(partsPage, /listAllProductsForVehicle/);
 });
 
 test("finder follows the latest vehicle backbone fields through an exact application id", () => {
@@ -33,15 +33,20 @@ test("finder follows the latest vehicle backbone fields through an exact applica
   assert.match(finder, /Chassis \/ code/);
   assert.match(finder, /Body \/ drivetrain/);
   assert.match(finder, /applicationId: selectedApplication\.id/);
+  assert.match(finder, /router\.push\(`\/parts\?\$\{query\}`/);
 });
 
 test("selected vehicle persists across product categories until the customer changes it", () => {
   assert.match(vehicleContext, /Max-Age=31536000/);
   assert.match(vehicleContext, /SameSite=Lax/);
   assert.match(serverVehicleContext, /await cookies\(\)/);
-  assert.match(categoryPage, /readStoredVehicleContext/);
-  assert.match(categoryPage, /parseVehicleSelection\(queryVehicle\) \? queryVehicle : toCategorySearchParams\(storedVehicle\)/);
-  assert.match(categoryPage, /VehicleContextSynchronizer/);
+  assert.match(partsPage, /readStoredVehicleContext/);
+  assert.match(partsPage, /parseVehicleSelection\(queryVehicle\) \? queryVehicle : toPartsSearchParams\(storedVehicle\)/);
+  assert.match(partsPage, /VehicleContextSynchronizer/);
+  assert.match(partsPage, /All Parts/);
+  assert.match(partsPage, /Wipers/);
+  assert.match(partsPage, /Batteries/);
+  assert.match(partsPage, /Filters/);
   assert.match(vehicleContextSynchronizer, /saveVehicleContext\(vehicle\)/);
   assert.match(layout, /<VehicleSelectionBar \/>/);
 });

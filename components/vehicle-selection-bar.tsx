@@ -45,7 +45,7 @@ export function VehicleSelectionBar() {
         <span className="min-w-0 flex-1 truncate text-xs font-black sm:text-sm">
           {title}{detail ? <span className="hidden font-bold text-steel md:inline"> · {detail}</span> : null}
         </span>
-        <Link href="/#vehicle-finder" className="shrink-0 text-[11px] font-black uppercase tracking-[0.08em] text-signal hover:text-red-700">
+        <Link href="/parts#change-vehicle" className="shrink-0 text-[11px] font-black uppercase tracking-[0.08em] text-signal hover:text-red-700">
           Change vehicle
         </Link>
       </div>

@@ -272,7 +272,7 @@ export default async function WiperSkuPage({
 
       <section className="border-t border-black/10 bg-[#F8FAFC]">
         <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-          <InfoTile title="Related products" text="Browse available front wiper blade pair combinations." href="/parts/wipers" />
+          <InfoTile title="Related products" text="Browse compatible front wiper blade pair combinations." href="/parts?category=wipers" />
         </div>
       </section>
     </main>
@@ -316,7 +316,7 @@ function FeatureCard({ title, text }: { title: string; text: string }) {
   );
 }
 
-function InfoTile({ title, text, href }: { title: string; text: string; href?: "/parts/wipers" }) {
+function InfoTile({ title, text, href }: { title: string; text: string; href?: "/parts?category=wipers" }) {
   const content = (
     <article className="h-full rounded-lg border border-black/10 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
       <h3 className="font-black">{title}</h3>

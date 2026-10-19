@@ -14,11 +14,11 @@ import {
 } from "@/lib/vehicle-context";
 
 const categoryLinks = [
-  ["Wiper Blades", "/parts/wipers"],
-  ["Oil Filters", "/parts/filters"],
-  ["Light Bulbs", "/parts/bulbs"],
-  ["Batteries", "/parts/batteries"],
-  ["Control Arms", "/parts/suspension"],
+  ["Wiper Blades", "/parts?category=wipers"],
+  ["Oil Filters", "/parts?category=filters"],
+  ["Light Bulbs", "/parts?category=bulbs"],
+  ["Batteries", "/parts?category=batteries"],
+  ["Control Arms", "/parts?category=suspension"],
   ["Weekly Deals", "/specials"]
 ] as const;
 
@@ -121,7 +121,7 @@ export function SiteHeader() {
         </div>
 
         {menuOpen ? <nav id="mobile-site-menu" aria-label="Mobile menu" className="absolute left-4 right-4 top-[58px] z-50 grid gap-1 rounded-xl border border-black/10 bg-white p-2 shadow-panel lg:hidden">
-          <Link href="/#vehicle-finder" onClick={() => setMenuOpen(false)} className="flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm font-black hover:bg-[#F3F5F7]"><CarFront className="h-4 w-4 text-signal" /> My Vehicle</Link>
+          <Link href="/parts#change-vehicle" onClick={() => setMenuOpen(false)} className="flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm font-black hover:bg-[#F3F5F7]"><CarFront className="h-4 w-4 text-signal" /> My Vehicle</Link>
           <Link href="/account" onClick={() => setMenuOpen(false)} className="flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm font-black hover:bg-[#F3F5F7]"><UserRound className="h-4 w-4" /> Account</Link>
           <Link href="/contact" onClick={() => setMenuOpen(false)} className="flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm font-black hover:bg-[#F3F5F7]">Contact & Fitment Help</Link>
           <Link href="/shipping" onClick={() => setMenuOpen(false)} className="flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm font-black hover:bg-[#F3F5F7]">Shipping Information</Link>
@@ -135,7 +135,7 @@ export function SiteHeader() {
           <SearchForm className="flex" />
 
           <div className="flex items-center justify-end gap-1 text-xs font-black text-ink sm:gap-2 sm:text-sm">
-            <Link href="/#vehicle-finder" className="inline-flex h-10 items-center gap-2 rounded-lg px-2 hover:bg-black/5 sm:px-3">
+            <Link href="/parts#change-vehicle" className="inline-flex h-10 items-center gap-2 rounded-lg px-2 hover:bg-black/5 sm:px-3">
               <CarFront className="h-4 w-4 text-signal" />
               <span className="hidden max-w-[220px] truncate sm:inline">{vehicle ? vehicleLabel : "My Vehicle"}</span>
             </Link>

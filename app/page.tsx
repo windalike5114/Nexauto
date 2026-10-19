@@ -23,19 +23,19 @@ export const metadata: Metadata = {
 };
 
 const categories = [
-  { title: "Wiper Blades", description: "Front pairs, rear blades and fitting support", href: "/parts/wipers", image: "/products/wiper-blade.png" },
-  { title: "Oil Filters", description: "Engine-specific filters and part-number matching", href: "/parts/filters", image: "/products/vehicle-oil-filter.png" },
-  { title: "Light Bulbs", description: "Headlight, fog and exterior replacement bulbs", href: "/parts/bulbs", image: "/products/halogen-bulb.png" },
-  { title: "Batteries", description: "Case size, terminal layout, Ah and CCA matching", href: "/parts/batteries", image: "/products/vehicle-battery.png" },
-  { title: "Control Arms", description: "Position-specific arms, ball joints and bushes", href: "/parts/suspension", image: "/products/control-arm-v2.png" },
+  { title: "Wiper Blades", description: "Front pairs, rear blades and fitting support", href: "/parts?category=wipers", image: "/products/wiper-blade.png" },
+  { title: "Oil Filters", description: "Engine-specific filters and part-number matching", href: "/parts?category=filters", image: "/products/vehicle-oil-filter.png" },
+  { title: "Light Bulbs", description: "Headlight, fog and exterior replacement bulbs", href: "/parts?category=bulbs", image: "/products/halogen-bulb.png" },
+  { title: "Batteries", description: "Case size, terminal layout, Ah and CCA matching", href: "/parts?category=batteries", image: "/products/vehicle-battery.png" },
+  { title: "Control Arms", description: "Position-specific arms, ball joints and bushes", href: "/parts?category=suspension", image: "/products/control-arm-v2.png" },
   { title: "Need Help Finding a Part?", description: "Send your vehicle and part details for confirmation", href: "/contact", image: "/home/parts-support-hero.png" }
 ] as const;
 
 const needs = [
-  { title: "Improve visibility", description: "Clearer wet-weather driving with correctly sized wipers.", href: "/parts/wipers", action: "Shop wipers", icon: Eye },
-  { title: "Routine engine service", description: "Start with the vehicle, then confirm the engine-specific filter.", href: "/parts/filters", action: "Find filters", icon: Gauge },
-  { title: "Starting problems", description: "Match case size, terminal layout, Ah and cold-cranking amps.", href: "/parts/batteries", action: "Check batteries", icon: BatteryCharging },
-  { title: "Suspension noise", description: "Identify the axle, side and exact control-arm position first.", href: "/parts/suspension", action: "Find suspension parts", icon: Wrench }
+  { title: "Improve visibility", description: "Clearer wet-weather driving with correctly sized wipers.", href: "/parts?category=wipers", action: "Shop wipers", icon: Eye },
+  { title: "Routine engine service", description: "Start with the vehicle, then confirm the engine-specific filter.", href: "/parts?category=filters", action: "Find filters", icon: Gauge },
+  { title: "Starting problems", description: "Match case size, terminal layout, Ah and cold-cranking amps.", href: "/parts?category=batteries", action: "Check batteries", icon: BatteryCharging },
+  { title: "Suspension noise", description: "Identify the axle, side and exact control-arm position first.", href: "/parts?category=suspension", action: "Find suspension parts", icon: Wrench }
 ] as const;
 
 const guides = [
@@ -82,7 +82,7 @@ export default async function HomePage() {
             </div>
           </ScrollReveal>
           <div className="mt-7 grid gap-4 lg:grid-cols-2">
-            {featuredWiper ? <ScrollReveal><DealBanner eyebrow="Wiper bundle offer" title={`Two front wiper pairs for ${formatMoney(wiperPairPricing.bundleTotals[2])}`} description={`Choose any two eligible front wiper pairs. Save ${formatMoney(wiperPairPricing.salePrice * 2 - wiperPairPricing.bundleTotals[2])} against two current single-pair prices.`} href="/parts/wipers" action="Choose my wipers" image={getWiperSetPreviewImage(featuredWiper)} /></ScrollReveal> : null}
+            {featuredWiper ? <ScrollReveal><DealBanner eyebrow="Wiper bundle offer" title={`Two front wiper pairs for ${formatMoney(wiperPairPricing.bundleTotals[2])}`} description={`Choose any two eligible front wiper pairs. Save ${formatMoney(wiperPairPricing.salePrice * 2 - wiperPairPricing.bundleTotals[2])} against two current single-pair prices.`} href="/parts?category=wipers" action="Choose my wipers" image={getWiperSetPreviewImage(featuredWiper)} /></ScrollReveal> : null}
             {bulbBundle ? <ScrollReveal delayMs={80}><DealBanner eyebrow="Bulb bundle offer" title={bulbBundle.name} description={`A current lighting bundle at ${formatMoney(bulbBundle.price)}. Product contents and specifications are shown on the detail page.`} href={`/products/${bulbBundle.slug}`} action="View bulb bundle" image={productImage(bulbBundle)} /></ScrollReveal> : null}
           </div>
         </div>
