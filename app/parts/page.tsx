@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, CarFront, CheckCircle2, SearchX, ShieldCheck, Truck } from "lucide-react";
-import { CompatibleProductCard, CompatibleWiperCard } from "@/components/compatible-part-card";
+import { CarFront } from "lucide-react";
+import { CompatiblePartsBrowser, type CompatiblePartsTab } from "@/components/compatible-parts-browser";
 import { VehicleContextSynchronizer } from "@/components/vehicle-context-synchronizer";
 import { VehiclePartsFinder } from "@/components/vehicle-parts-finder";
 import { listAllProductsForVehicle } from "@/lib/queries/vehicle-product-fitment";
@@ -10,6 +10,7 @@ import { findWiperLengthFitments, type WiperFitmentResult } from "@/lib/queries/
 import { readStoredVehicleContext } from "@/lib/server/vehicle-context";
 import type { Product, WiperSet } from "@/lib/types";
 import type { VehicleContext } from "@/lib/vehicle-context";
+import { findHighConfidenceWiperReview } from "@/lib/wiper-review-demo";
 
 export const dynamic = "force-dynamic";
 
@@ -18,16 +19,6 @@ export const metadata: Metadata = {
   description: "Select your vehicle once, then browse every confirmed compatible part by category."
 };
 
-const tabs = [
-  { key: "all", label: "All Parts" },
-  { key: "wipers", label: "Wipers" },
-  { key: "batteries", label: "Batteries" },
-  { key: "filters", label: "Filters" },
-  { key: "bulbs", label: "Bulbs" },
-  { key: "suspension", label: "Suspension" }
-] as const;
-
-type TabKey = (typeof tabs)[number]["key"];
 type PartsSearchParams = {
   category?: string;
   makeId?: string;
@@ -54,12 +45,9 @@ export default async function VehiclePartsPage({ searchParams }: { searchParams:
   const compatible = selection ? await loadCompatibleParts(selection) : emptyCompatibleParts();
   const products = compatible.products.filter((product) => !["vehicle-fit-battery", "vehicle-fit-oil-filter"].includes(product.slug));
   const activeTab = isTabKey(queryVehicle.category) ? queryVehicle.category : "all";
-  const counts = countByTab(products, compatible.wiperSet);
-  const visibleProducts = activeTab === "all" ? products : products.filter((product) => product.category === databaseCategory(activeTab));
-  const showWiper = Boolean(compatible.wiperSet && (activeTab === "all" || activeTab === "wipers"));
-  const visibleCount = visibleProducts.length + (showWiper ? 1 : 0);
   const vehicleLabel = [vehicle.year, vehicle.make, vehicle.model, vehicle.chassis].filter(Boolean).join(" ");
   const vehicleDetail = [vehicle.body, vehicle.engine].filter(Boolean).join(" · ");
+  const reviewDemo = compatible.wiperSet ? null : findHighConfidenceWiperReview(vehicle);
   const wiperHref = compatible.wiperSet && compatible.wiperFitment
     ? buildWiperHref(compatible.wiperSet, compatible.wiperFitment, vehicle)
     : "";
@@ -103,70 +91,27 @@ export default async function VehiclePartsPage({ searchParams }: { searchParams:
         </div>
       </section>
 
-      <section className="border-b border-black/10 bg-white" aria-label="Part category filters">
-        <div className="mx-auto max-w-7xl overflow-x-auto px-2 sm:px-6 lg:px-8">
-          <nav className="flex min-w-max items-end gap-1 pt-2">
-            {tabs.map((tab) => {
-              const active = tab.key === activeTab;
-              return (
-                <Link
-                  key={tab.key}
-                  href={buildPartsHref(vehicle, tab.key) as never}
-                  aria-current={active ? "page" : undefined}
-                  className={`border-b-4 px-4 py-3 text-sm font-black transition ${active ? "border-signal text-ink" : "border-transparent text-steel hover:border-black/15 hover:text-ink"}`}
-                >
-                  {tab.label} <span className={`ml-1 rounded-full px-2 py-0.5 text-[11px] ${active ? "bg-signal text-white" : "bg-zinc-100 text-steel"}`}>{counts[tab.key]}</span>
-                </Link>
-              );
-            })}
-          </nav>
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
-        {compatible.error ? <div className="mb-6 rounded-xl border border-signal/25 bg-red-50 p-4 text-sm font-bold text-signal">{compatible.error}</div> : null}
-
-        {selection ? (
-          <>
-            <div className="grid gap-2 rounded-xl border border-black/10 bg-white p-3 text-xs font-black shadow-sm min-[480px]:grid-cols-3 sm:text-sm">
-              <ServicePill icon={<CheckCircle2 className="h-4 w-4" />} label="Confirmed fitment only" />
-              <ServicePill icon={<Truck className="h-4 w-4" />} label="NZ-wide delivery" />
-              <ServicePill icon={<ShieldCheck className="h-4 w-4" />} label="Fitment support" />
-            </div>
-
-            <div className="mt-7 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <p className="text-xs font-black uppercase tracking-[0.16em] text-signal">{tabs.find((tab) => tab.key === activeTab)?.label}</p>
-                <h2 className="mt-2 text-2xl font-black sm:text-3xl">Compatible products</h2>
-              </div>
-              <p className="text-sm font-bold text-steel">{visibleCount} confirmed listing{visibleCount === 1 ? "" : "s"}</p>
-            </div>
-
-            {visibleCount ? (
-              <div className="mt-6 grid grid-cols-1 gap-4 min-[480px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {showWiper && compatible.wiperSet && compatible.wiperFitment ? (
-                  <CompatibleWiperCard wiperSet={compatible.wiperSet} href={wiperHref} rearLengthIn={compatible.wiperFitment.rearLengthIn} />
-                ) : null}
-                {visibleProducts.map((product) => <CompatibleProductCard key={product.id} product={product} />)}
-              </div>
-            ) : (
-              <div className="mt-6 rounded-2xl border border-black/10 bg-white p-7 shadow-sm">
-                <SearchX className="h-8 w-8 text-signal" />
-                <h3 className="mt-4 text-2xl font-black">No confirmed {activeTab === "all" ? "parts" : tabs.find((tab) => tab.key === activeTab)?.label.toLowerCase()} yet</h3>
-                <p className="mt-3 max-w-2xl text-sm font-semibold leading-6 text-steel">We will not show a generic product as compatible without a published fitment relationship. Send us the chassis, engine or existing part number and we can review the missing match.</p>
-                <Link href={buildHelpHref(vehicleLabel) as never} className="mt-5 inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-signal px-5 text-sm font-black text-white hover:bg-red-700">Request fitment help <ArrowRight className="h-4 w-4" /></Link>
-              </div>
-            )}
-          </>
-        ) : (
+      {selection ? (
+        <CompatiblePartsBrowser
+          products={products}
+          wiperSet={compatible.wiperSet}
+          wiperHref={wiperHref}
+          rearLengthIn={compatible.wiperFitment?.rearLengthIn ?? null}
+          reviewDemo={reviewDemo}
+          initialTab={activeTab}
+          vehicleLabel={vehicleLabel}
+          error={compatible.error}
+        />
+      ) : (
+        <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
           <div className="rounded-2xl border border-black/10 bg-white p-7 text-center shadow-sm">
             <CarFront className="mx-auto h-9 w-9 text-signal" />
             <h2 className="mt-4 text-2xl font-black">Choose a vehicle to see compatible products</h2>
             <p className="mx-auto mt-3 max-w-xl text-sm font-semibold leading-6 text-steel">Your selection will stay active while you switch between product categories.</p>
             <Link href="#change-vehicle" className="mt-5 inline-flex h-11 items-center justify-center rounded-lg bg-ink px-5 text-sm font-black text-white">Choose vehicle</Link>
           </div>
-        )}
-      </section>
+        </section>
+      )}
     </main>
   );
 }
@@ -234,45 +179,8 @@ function toExactVehicleContext(vehicle: PartsSearchParams): VehicleContext | nul
   };
 }
 
-function countByTab(products: Product[], wiperSet: WiperSet | null): Record<TabKey, number> {
-  const counts: Record<TabKey, number> = { all: wiperSet ? 1 : 0, wipers: wiperSet ? 1 : 0, batteries: 0, filters: 0, bulbs: 0, suspension: 0 };
-  for (const product of products) {
-    const tab = tabForDatabaseCategory(product.category);
-    if (tab) counts[tab] += 1;
-    counts.all += 1;
-  }
-  return counts;
-}
-
-function databaseCategory(tab: TabKey) {
-  if (tab === "batteries") return "battery";
-  if (tab === "filters") return "filter";
-  if (tab === "bulbs") return "bulb";
-  if (tab === "suspension") return "suspension";
-  return "";
-}
-
-function tabForDatabaseCategory(category: string): Exclude<TabKey, "all" | "wipers"> | null {
-  if (category === "battery") return "batteries";
-  if (category === "filter") return "filters";
-  if (category === "bulb") return "bulbs";
-  if (category === "suspension") return "suspension";
-  return null;
-}
-
-function isTabKey(value: string | undefined): value is TabKey {
-  return tabs.some((tab) => tab.key === value);
-}
-
-function buildPartsHref(vehicle: PartsSearchParams, category: TabKey) {
-  const query = new URLSearchParams();
-  for (const key of ["makeId", "modelId", "year", "make", "model", "applicationId", "generationId", "variantId", "chassis", "body", "engine"] as const) {
-    const value = vehicle[key];
-    if (value) query.set(key, value);
-  }
-  if (category !== "all") query.set("category", category);
-  const encoded = query.toString();
-  return encoded ? `/parts?${encoded}` : "/parts";
+function isTabKey(value: string | undefined): value is CompatiblePartsTab {
+  return ["all", "wipers", "batteries", "filters", "bulbs", "suspension"].includes(value ?? "");
 }
 
 function buildWiperHref(wiperSet: WiperSet, fitment: WiperFitmentResult, vehicle: PartsSearchParams) {
@@ -284,14 +192,4 @@ function buildWiperHref(wiperSet: WiperSet, fitment: WiperFitmentResult, vehicle
   const label = [vehicle.make, vehicle.model, vehicle.year].filter(Boolean).join(" ");
   if (label) query.set("vehicle", label);
   return `/wipers/${wiperSet.sku}?${query}`;
-}
-
-function buildHelpHref(vehicle: string) {
-  const query = new URLSearchParams({ category: "Vehicle parts" });
-  if (vehicle) query.set("vehicle", vehicle);
-  return `/contact?${query}`;
-}
-
-function ServicePill({ icon, label }: { icon: React.ReactNode; label: string }) {
-  return <div className="flex items-center gap-2 rounded-lg bg-[#F8FAFC] px-3 py-2.5 text-ink"><span className="text-signal">{icon}</span>{label}</div>;
 }

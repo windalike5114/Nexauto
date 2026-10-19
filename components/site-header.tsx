@@ -12,6 +12,7 @@ import {
   vehicleContextStorageKey,
   type VehicleContext
 } from "@/lib/vehicle-context";
+import { partsTabRequestedEvent } from "@/lib/parts-navigation";
 
 const categoryLinks = [
   ["Wiper Blades", "/parts?category=wipers"],
@@ -90,6 +91,13 @@ export function SiteHeader() {
 
   const vehicleLabel = vehicle ? [vehicle.year, vehicle.make, vehicle.model, vehicle.chassis].filter(Boolean).join(" ") : "";
 
+  function handleCategoryNavigation(event: React.MouseEvent<HTMLAnchorElement>, href: string) {
+    if (window.location.pathname !== "/parts" || !href.startsWith("/parts?category=")) return;
+    event.preventDefault();
+    const category = new URL(href, window.location.origin).searchParams.get("category");
+    window.dispatchEvent(new CustomEvent(partsTabRequestedEvent, { detail: category }));
+  }
+
   return (
     <div style={isFixed ? { height: headerHeight } : undefined}>
     <header ref={headerRef} className={`${isFixed ? "header-return fixed inset-x-0 top-0" : "relative"} z-30 border-b border-black/10 bg-white/95 shadow-sm backdrop-blur`}>
@@ -153,7 +161,7 @@ export function SiteHeader() {
       <nav className="border-t border-black/10 bg-[#F8FAFC]" aria-label="Product categories">
         <div className="mx-auto flex max-w-7xl items-center gap-0.5 overflow-x-auto px-2 py-0.5 sm:px-5 lg:gap-1 lg:px-7 lg:py-1.5">
           {categoryLinks.map(([label, href]) => (
-            <Link key={href} href={href} className="shrink-0 rounded-md px-2.5 py-1.5 text-[11px] font-black text-ink transition hover:bg-white hover:text-signal sm:text-sm lg:px-3 lg:py-2">
+            <Link key={href} href={href} onClick={(event) => handleCategoryNavigation(event, href)} className="shrink-0 rounded-md px-2.5 py-1.5 text-[11px] font-black text-ink transition hover:bg-white hover:text-signal sm:text-sm lg:px-3 lg:py-2">
               {label}
             </Link>
           ))}

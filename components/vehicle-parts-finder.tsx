@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { startTransition, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CarFront, Loader2, Search } from "lucide-react";
-import { saveVehicleContext } from "@/lib/vehicle-context";
+import { saveVehicleContext, type VehicleContext } from "@/lib/vehicle-context";
 
 type FinderOption = { id: string; name: string };
 type VehicleApplicationOption = {
@@ -20,6 +20,7 @@ type VehicleApplicationOption = {
 };
 
 const vehicleCatalogApiVersion = "v3";
+const vehicleRequestCache = new Map<string, Promise<unknown>>();
 
 export function VehiclePartsFinder() {
   const router = useRouter();
@@ -38,7 +39,7 @@ export function VehiclePartsFinder() {
 
   useEffect(() => {
     let active = true;
-    fetchJson<{ makes: FinderOption[] }>(`/api/vehicles/makes?catalog=${vehicleCatalogApiVersion}`)
+    fetchJsonCached<{ makes: FinderOption[] }>(`/api/vehicles/makes?catalog=${vehicleCatalogApiVersion}`)
       .then((data) => {
         if (active) setMakes(data.makes);
       })
@@ -70,7 +71,7 @@ export function VehiclePartsFinder() {
     setYears([]);
     setYear("");
     resetApplicationSelection();
-    fetchJson<{ models: FinderOption[] }>(`/api/vehicles/models?makeId=${makeId}&catalog=${vehicleCatalogApiVersion}`)
+    fetchJsonCached<{ models: FinderOption[] }>(`/api/vehicles/models?makeId=${makeId}&catalog=${vehicleCatalogApiVersion}`)
       .then((data) => {
         if (active) setModels(data.models);
       })
@@ -98,7 +99,7 @@ export function VehiclePartsFinder() {
     setError("");
     setYear("");
     resetApplicationSelection();
-    fetchJson<{ years: number[] }>(`/api/vehicles/years?makeId=${makeId}&modelId=${modelId}&catalog=${vehicleCatalogApiVersion}`)
+    fetchJsonCached<{ years: number[] }>(`/api/vehicles/years?makeId=${makeId}&modelId=${modelId}&catalog=${vehicleCatalogApiVersion}`)
       .then((data) => {
         if (active) setYears(data.years);
       })
@@ -123,7 +124,7 @@ export function VehiclePartsFinder() {
     setLoading("applications");
     setError("");
     resetApplicationSelection();
-    fetchJson<{ applications: VehicleApplicationOption[] }>(`/api/vehicles/applications?makeId=${makeId}&modelId=${modelId}&year=${year}&catalog=${vehicleCatalogApiVersion}`)
+    fetchJsonCached<{ applications: VehicleApplicationOption[] }>(`/api/vehicles/applications?makeId=${makeId}&modelId=${modelId}&year=${year}&catalog=${vehicleCatalogApiVersion}`)
       .then((data) => {
         if (!active) return;
         setApplications(data.applications);
@@ -177,25 +178,17 @@ export function VehiclePartsFinder() {
   const selectedApplication = useMemo(() => applications.find((entry) => entry.id === applicationId) ?? null, [applicationId, applications]);
   const selectedChassis = selectedApplication?.chassisCodes.join(" / ") || selectedApplication?.generationName || "";
   const vehicleReady = Boolean(makeId && modelId && year && selectedApplication);
+  const partsHref = useMemo(() => buildPartsHref(getSelectedVehicleContext()), [applicationId, makeId, modelId, selectedApplication, selectedChassis, selectedMake, selectedModel, year]);
+
+  useEffect(() => {
+    if (partsHref) router.prefetch(partsHref as never);
+  }, [partsHref, router]);
 
   function findParts() {
     const context = getSelectedVehicleContext();
     if (!context) return;
     saveVehicleContext(context);
-    const query = new URLSearchParams({
-      makeId,
-      modelId,
-      year,
-      make: selectedMake,
-      model: selectedModel,
-      applicationId: context.applicationId,
-      generationId: context.generationId,
-      variantId: context.variantId,
-      chassis: context.chassis,
-      body: context.bodyConfiguration,
-      engine: context.engine
-    });
-    router.push(`/parts?${query}` as never);
+    startTransition(() => router.push(partsHref as never));
   }
 
   function getSelectedVehicleContext() {
@@ -290,4 +283,34 @@ async function fetchJson<T>(url: string): Promise<T> {
   const data = await response.json();
   if (!response.ok) throw new Error(data.error ?? "Vehicle request failed.");
   return data as T;
+}
+
+function fetchJsonCached<T>(url: string): Promise<T> {
+  const cached = vehicleRequestCache.get(url) as Promise<T> | undefined;
+  if (cached) return cached;
+
+  const request = fetchJson<T>(url).catch((error) => {
+    vehicleRequestCache.delete(url);
+    throw error;
+  });
+  vehicleRequestCache.set(url, request);
+  return request;
+}
+
+function buildPartsHref(context: VehicleContext | null) {
+  if (!context) return "";
+  const query = new URLSearchParams({
+    makeId: context.makeId,
+    modelId: context.modelId,
+    year: context.year,
+    make: context.make,
+    model: context.model,
+    applicationId: context.applicationId ?? "",
+    generationId: context.generationId ?? "",
+    variantId: context.variantId ?? "",
+    chassis: context.chassis ?? "",
+    body: context.bodyConfiguration ?? "",
+    engine: context.engine ?? ""
+  });
+  return `/parts?${query}`;
 }

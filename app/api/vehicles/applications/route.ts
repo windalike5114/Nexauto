@@ -14,7 +14,7 @@ export async function GET(request: Request) {
   try {
     return NextResponse.json(
       { applications: await listVehicleCatalogApplications(makeId, modelId, year) },
-      { headers: { "Cache-Control": "public, s-maxage=300, stale-while-revalidate=3600" } }
+      { headers: { "Cache-Control": "public, max-age=120, s-maxage=900, stale-while-revalidate=3600" } }
     );
   } catch (error) {
     return NextResponse.json(

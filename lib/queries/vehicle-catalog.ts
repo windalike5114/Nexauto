@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase";
 
 export type VehicleCatalogOption = { id: string; name: string };
@@ -79,6 +80,22 @@ const VEHICLE_APPLICATION_SELECT = `
   )
 `;
 
+const VEHICLE_IDENTITY_SELECT = `
+  id,
+  year_start,
+  year_end,
+  vehicle_generations!inner(
+    id,
+    active,
+    vehicle_models!inner(
+      id,
+      name,
+      make_id,
+      vehicle_makes!inner(id,name)
+    )
+  )
+`;
+
 function getSupabaseOrThrow() {
   const supabase = createSupabaseServerClient();
   if (!supabase) throw new Error("Supabase is not configured for vehicle lookup.");
@@ -98,28 +115,28 @@ function getIdentity(row: VehicleApplicationRow) {
   return { application: row, generation, model, make };
 }
 
-export async function listVehicleCatalogMakes() {
-  const rows = await loadPublishedVehicleApplications();
+export const listVehicleCatalogMakes = unstable_cache(async () => {
+  const rows = await loadPublishedVehicleIdentities();
   const makes = new Map<string, VehicleCatalogOption>();
   for (const row of rows) {
     const identity = getIdentity(row);
     if (identity) makes.set(identity.make.id, { id: identity.make.id, name: identity.make.name });
   }
   return sortMakesForNz([...makes.values()]);
-}
+}, ["vehicle-catalog-v3-makes"], { revalidate: 3600, tags: ["vehicle-catalog-v3"] });
 
-export async function listVehicleCatalogModels(makeId: string) {
-  const rows = await loadPublishedVehicleApplications();
+export const listVehicleCatalogModels = unstable_cache(async (makeId: string) => {
+  const rows = await loadPublishedVehicleIdentities({ makeId });
   const models = new Map<string, VehicleCatalogOption>();
   for (const row of rows) {
     const identity = getIdentity(row);
     if (identity?.make.id === makeId) models.set(identity.model.id, { id: identity.model.id, name: identity.model.name });
   }
   return [...models.values()].sort((left, right) => left.name.localeCompare(right.name));
-}
+}, ["vehicle-catalog-v3-models"], { revalidate: 3600, tags: ["vehicle-catalog-v3"] });
 
-export async function listVehicleCatalogYears(makeId: string, modelId: string) {
-  const rows = await loadPublishedVehicleApplications();
+export const listVehicleCatalogYears = unstable_cache(async (makeId: string, modelId: string) => {
+  const rows = await loadPublishedVehicleIdentities({ makeId, modelId });
   const years = new Set<number>();
   const currentYear = new Date().getFullYear();
 
@@ -131,17 +148,17 @@ export async function listVehicleCatalogYears(makeId: string, modelId: string) {
   }
 
   return [...years].sort((left, right) => right - left);
-}
+}, ["vehicle-catalog-v3-years"], { revalidate: 3600, tags: ["vehicle-catalog-v3"] });
 
 export async function listVehicleCatalogApplicationIds(makeId: string, modelId: string, year: number) {
   const applications = await listVehicleCatalogApplications(makeId, modelId, year);
   return applications.map((application) => application.id);
 }
 
-export async function listVehicleCatalogApplications(makeId: string, modelId: string, year: number) {
+export const listVehicleCatalogApplications = unstable_cache(async (makeId: string, modelId: string, year: number) => {
   if (!Number.isInteger(year) || year < 1886 || year > 2100) return [];
 
-  const rows = await loadPublishedVehicleApplications();
+  const rows = await loadPublishedVehicleApplications({ makeId, modelId, year });
   return rows
     .filter((row) => {
       const identity = getIdentity(row);
@@ -151,22 +168,51 @@ export async function listVehicleCatalogApplications(makeId: string, modelId: st
     .map(mapApplicationOption)
     .filter((option): option is VehicleCatalogApplicationOption => Boolean(option))
     .sort(compareApplicationOptions);
-}
+}, ["vehicle-catalog-v3-applications"], { revalidate: 900, tags: ["vehicle-catalog-v3"] });
 
-async function loadPublishedVehicleApplications() {
+type VehicleQueryFilters = { makeId?: string; modelId?: string; year?: number };
+
+async function loadPublishedVehicleIdentities(filters: VehicleQueryFilters = {}) {
   const supabase = getSupabaseOrThrow();
-  const result = await selectAll(
-    supabase
-      .from("vehicle_fitment_applications")
-      .select(VEHICLE_APPLICATION_SELECT)
-      .like("source_application_key", VEHICLE_CATALOG_V3_SOURCE_PATTERN)
-      .eq("fitment_status", "published")
-      .eq("active", true)
-      .eq("vehicle_generations.active", true)
-      .eq("vehicle_variants.active", true)
-  );
+  let query = supabase
+    .from("vehicle_fitment_applications")
+    .select(VEHICLE_IDENTITY_SELECT)
+    .like("source_application_key", VEHICLE_CATALOG_V3_SOURCE_PATTERN)
+    .eq("fitment_status", "published")
+    .eq("active", true)
+    .eq("vehicle_generations.active", true);
+
+  query = applyIdentityFilters(query, filters);
+  const result = await selectAll(query);
   if (result.error) throw result.error;
   return (result.data ?? []) as unknown as VehicleApplicationRow[];
+}
+
+async function loadPublishedVehicleApplications(filters: VehicleQueryFilters = {}) {
+  const supabase = getSupabaseOrThrow();
+  let query = supabase
+    .from("vehicle_fitment_applications")
+    .select(VEHICLE_APPLICATION_SELECT)
+    .like("source_application_key", VEHICLE_CATALOG_V3_SOURCE_PATTERN)
+    .eq("fitment_status", "published")
+    .eq("active", true)
+    .eq("vehicle_generations.active", true)
+    .eq("vehicle_variants.active", true);
+
+  query = applyIdentityFilters(query, filters);
+  const result = await selectAll(query);
+  if (result.error) throw result.error;
+  return (result.data ?? []) as unknown as VehicleApplicationRow[];
+}
+
+function applyIdentityFilters<T extends { eq: (column: string, value: string | number) => T; lte: (column: string, value: number) => T; or: (filters: string) => T }>(query: T, filters: VehicleQueryFilters) {
+  if (filters.makeId) query = query.eq("vehicle_generations.vehicle_models.make_id", filters.makeId);
+  if (filters.modelId) query = query.eq("vehicle_generations.vehicle_models.id", filters.modelId);
+  if (filters.year) {
+    query = query.lte("year_start", filters.year);
+    query = query.or(`year_end.is.null,year_end.gte.${filters.year}`);
+  }
+  return query;
 }
 
 function mapApplicationOption(row: VehicleApplicationRow): VehicleCatalogApplicationOption | null {

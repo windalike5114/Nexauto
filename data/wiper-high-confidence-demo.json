@@ -1,0 +1,1631 @@
+[
+  {
+    "applicationKey": "NEXAUTO_V3:33",
+    "make": "Daihatsu",
+    "model": "YRV",
+    "chassisCodes": [
+      "M211"
+    ],
+    "body": "MPV AWD",
+    "engine": "1.3L K3-VE DOHC 16v Petrol 4cyl",
+    "yearStart": 2001,
+    "yearEnd": 2005,
+    "suggestedConfiguration": {
+      "driverLengthIn": 20,
+      "passengerLengthIn": 15,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "21/14/- (2000-2005) | 20/15/- (2001-2004)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:42",
+    "make": "Ford",
+    "model": "Escape",
+    "chassisCodes": [
+      "ZG"
+    ],
+    "body": "SUV AWD",
+    "engine": "2.0L T8MA,T8MB DOHC 16v Turbo Diesel Direct Inj. 4cyl",
+    "yearStart": 2016,
+    "yearEnd": 2020,
+    "suggestedConfiguration": {
+      "driverLengthIn": 28,
+      "passengerLengthIn": 28,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "28/28/- (2016-2020) | 24/20/- (2020-2024)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:61",
+    "make": "Ford",
+    "model": "Falcon",
+    "chassisCodes": [
+      "BF"
+    ],
+    "body": "Utility RWD",
+    "engine": "4.0L BARRA 245T DOHC 24v Turbo Petrol 6cyl",
+    "yearStart": 2005,
+    "yearEnd": 2008,
+    "suggestedConfiguration": {
+      "driverLengthIn": 22,
+      "passengerLengthIn": 22,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "22/22/- (2002-2005) | 22/22/- (2005-2008) | 22/20/- (2008-2014)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:84",
+    "make": "Ford",
+    "model": "Focus",
+    "chassisCodes": [
+      "DNW"
+    ],
+    "body": "Wagon FWD",
+    "engine": "2.0L ALDA DOHC 16v Petrol 4cyl",
+    "yearStart": 2002,
+    "yearEnd": 2003,
+    "suggestedConfiguration": {
+      "driverLengthIn": 22,
+      "passengerLengthIn": 19,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "22/19/- (2002-2005) | 26/19/- (2003-2007)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:85",
+    "make": "Ford",
+    "model": "Focus",
+    "chassisCodes": [
+      "LR"
+    ],
+    "body": "Sedan FWD",
+    "engine": "2.0L EDDB DOHC 16v Petrol 4cyl",
+    "yearStart": 2002,
+    "yearEnd": 2005,
+    "suggestedConfiguration": {
+      "driverLengthIn": 22,
+      "passengerLengthIn": 19,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "22/19/- (2002-2005) | 26/19/- (2003-2007) | 26/16/- (2005-2007) | 26/16/- (2005-2011) | 26/17/- (2005-2011)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:83",
+    "make": "Ford",
+    "model": "Focus",
+    "chassisCodes": [
+      "DB",
+      "DH",
+      "FCH"
+    ],
+    "body": "Sedan FWD",
+    "engine": "1.6L G8DA,G8DB,G8DE,G8DD,G8DF DOHC 16v Turbo Diesel Direct Inj. 4cyl",
+    "yearStart": 2011,
+    "yearEnd": 2011,
+    "suggestedConfiguration": {
+      "driverLengthIn": 28,
+      "passengerLengthIn": 28,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "26/16/- (2005-2011) | 26/17/- (2005-2011) | 26/16/- (2006-2011) | 28/28/- (2011-2012)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:89",
+    "make": "Ford",
+    "model": "Focus",
+    "chassisCodes": [
+      "LW"
+    ],
+    "body": "Sedan FWD",
+    "engine": "2.0L MGDA DOHC 16v Petrol Direct Inj. 4cyl",
+    "yearStart": 2011,
+    "yearEnd": 2014,
+    "suggestedConfiguration": {
+      "driverLengthIn": 28,
+      "passengerLengthIn": 28,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "26/16/- (2005-2011) | 26/17/- (2005-2011) | 26/16/- (2006-2011) | 28/28/- (2011-2012) | 28/28/- (2012-2015)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:90",
+    "make": "Ford",
+    "model": "Focus",
+    "chassisCodes": [
+      "LZ"
+    ],
+    "body": "Sedan FWD",
+    "engine": "1.5L M9DD DOHC 16v Turbo Petrol Direct Inj. 4cyl",
+    "yearStart": 2015,
+    "yearEnd": 2018,
+    "suggestedConfiguration": {
+      "driverLengthIn": 28,
+      "passengerLengthIn": 28,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "28/28/- (2012-2015) | 28/28/- (2015-2018) | 26/20/- (2018-2021) | 26/20/- (2018-2022) | 26/20/- (2018-2018)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:94",
+    "make": "Ford",
+    "model": "Kuga",
+    "chassisCodes": [
+      "DM2"
+    ],
+    "body": "SUV FWD",
+    "engine": "2.0L UKMA DOHC 16v Turbo Diesel Direct Inj. 4cyl",
+    "yearStart": 2013,
+    "yearEnd": 2019,
+    "suggestedConfiguration": {
+      "driverLengthIn": 28,
+      "passengerLengthIn": 28,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "24/16/- (2012-2013) | 28/28/- (2013-2016) | 28/28/- (2013-2019) | 24/20/- (2019-2019)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:96",
+    "make": "Ford",
+    "model": "Kuga",
+    "chassisCodes": [
+      "TF"
+    ],
+    "body": "SUV AWD",
+    "engine": "1.6L JTMA DOHC 16v Turbo Petrol Direct Inj. 4cyl",
+    "yearStart": 2013,
+    "yearEnd": 2013,
+    "suggestedConfiguration": {
+      "driverLengthIn": 28,
+      "passengerLengthIn": 28,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "24/16/- (2012-2013) | 28/28/- (2013-2016) | 28/28/- (2013-2019)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:108",
+    "make": "Ford",
+    "model": "Mondeo",
+    "chassisCodes": [
+      "MA",
+      "MB",
+      "MC"
+    ],
+    "body": "Hatchback FWD",
+    "engine": "2.3L SEBA DOHC 16v Petrol 4cyl",
+    "yearStart": 2007,
+    "yearEnd": 2008,
+    "suggestedConfiguration": {
+      "driverLengthIn": 26,
+      "passengerLengthIn": 19,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "22/20/- (2000-2007) | 20/20/- (2000-2007) | 26/19/- (2007-2012) | 26/19/- (2007-2014)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:118",
+    "make": "Ford",
+    "model": "Ranger",
+    "chassisCodes": [
+      "PX",
+      "PXII",
+      "PXIII"
+    ],
+    "body": "Utility RWD",
+    "engine": "3.2L P5-AT DOHC 20v Turbo Diesel Direct Inj. 5cyl",
+    "yearStart": 2011,
+    "yearEnd": 2014,
+    "suggestedConfiguration": {
+      "driverLengthIn": 24,
+      "passengerLengthIn": 16,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "18/18/- (2009-2011) | 24/16/- (2011-2015)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:144",
+    "make": "Holden",
+    "model": "Astra",
+    "chassisCodes": [
+      "TS"
+    ],
+    "body": "Hatchback FWD",
+    "engine": "1.8L Z 18 XE DOHC 16v Petrol 4cyl",
+    "yearStart": 2001,
+    "yearEnd": 2005,
+    "suggestedConfiguration": {
+      "driverLengthIn": 20,
+      "passengerLengthIn": 19,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "20/19/- (1998-2005) | 20/19/- (2000-2005) | 20/19/- (2001-2006) | 22/18/- (2004-2009) | 22/18/- (2005-2009)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:148",
+    "make": "Holden",
+    "model": "Astra",
+    "chassisCodes": [
+      "TS"
+    ],
+    "body": "Wagon FWD",
+    "engine": "1.8L X18XE Petrol",
+    "yearStart": 2005,
+    "yearEnd": 2005,
+    "suggestedConfiguration": {
+      "driverLengthIn": 22,
+      "passengerLengthIn": 18,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "20/19/- (1998-2005) | 20/19/- (2000-2005) | 20/19/- (2001-2006) | 22/18/- (2004-2009) | 22/18/- (2005-2009)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:138",
+    "make": "Holden",
+    "model": "Astra",
+    "chassisCodes": [
+      "AH"
+    ],
+    "body": "Coupe FWD",
+    "engine": "2.0L Z 20 LER DOHC 16v Turbo Petrol 4cyl",
+    "yearStart": 2006,
+    "yearEnd": 2010,
+    "suggestedConfiguration": {
+      "driverLengthIn": 22,
+      "passengerLengthIn": 18,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "20/19/- (2001-2006) | 22/18/- (2004-2009) | 22/18/- (2005-2009) | 22/18/- (2006-2009)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:143",
+    "make": "Holden",
+    "model": "Astra",
+    "chassisCodes": [
+      "PJ"
+    ],
+    "body": "Hatchback FWD",
+    "engine": "1.6L B 16 SHT Euro 5 DOHC 16v Turbo Petrol Direct Inj. 4cyl",
+    "yearStart": 2014,
+    "yearEnd": 2016,
+    "suggestedConfiguration": {
+      "driverLengthIn": 26,
+      "passengerLengthIn": 26,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "26/26/- (2014-2017) | 28/24/- (2016-2021)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:140",
+    "make": "Holden",
+    "model": "Astra",
+    "chassisCodes": [
+      "BL"
+    ],
+    "body": "Sedan FWD",
+    "engine": "1.4L B 14 XFT Euro 6 DOHC 16v Turbo Petrol Direct Inj. 4cyl",
+    "yearStart": 2017,
+    "yearEnd": 2018,
+    "suggestedConfiguration": {
+      "driverLengthIn": 26,
+      "passengerLengthIn": 26,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "26/26/- (2014-2017) | 28/24/- (2016-2021) | 26/26/- (2017-2018)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:153",
+    "make": "Holden",
+    "model": "Barina",
+    "chassisCodes": [
+      "TM"
+    ],
+    "body": "Sedan FWD",
+    "engine": "1.6L F16D4 DOHC 16v Petrol 4cyl",
+    "yearStart": 2012,
+    "yearEnd": 2016,
+    "suggestedConfiguration": {
+      "driverLengthIn": 26,
+      "passengerLengthIn": 15,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "22/15/- (2006-2012) | 21/15/- (2006-2012) | 26/15/- (2012-2016) | 26/15/- (2012-2018)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:161",
+    "make": "Holden",
+    "model": "Berlina",
+    "chassisCodes": [
+      "VZ"
+    ],
+    "body": "Wagon RWD",
+    "engine": "3.6L HB,LE0 DOHC 24v Petrol V6",
+    "yearStart": 2007,
+    "yearEnd": 2007,
+    "suggestedConfiguration": {
+      "driverLengthIn": 26,
+      "passengerLengthIn": 15,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "22/20/- (2002-2007) | 26/15/- (2007-2013)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:173",
+    "make": "Holden",
+    "model": "Colorado",
+    "chassisCodes": [
+      "TFR27"
+    ],
+    "body": "Utility RWD",
+    "engine": "3.6L LCA (H9) DOHC 24v Petrol V6",
+    "yearStart": 2008,
+    "yearEnd": 2012,
+    "suggestedConfiguration": {
+      "driverLengthIn": 22,
+      "passengerLengthIn": 19,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "22/19/- (2008-2011) | 22/17/- (2012-2020)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:178",
+    "make": "Holden",
+    "model": "Commodore",
+    "chassisCodes": [
+      "VE"
+    ],
+    "body": "Utility RWD",
+    "engine": "3.6L H7,LY7 DOHC 24v Petrol V6",
+    "yearStart": 2007,
+    "yearEnd": 2012,
+    "suggestedConfiguration": {
+      "driverLengthIn": 26,
+      "passengerLengthIn": 15,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "22/20/- (2002-2007) | 26/15/- (2007-2013) | 26/15/- (2008-2013)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:181",
+    "make": "Holden",
+    "model": "Commodore",
+    "chassisCodes": [
+      "VF"
+    ],
+    "body": "Utility RWD",
+    "engine": "3.6L LFX DOHC 24v Petrol Direct Inj. V6",
+    "yearStart": 2013,
+    "yearEnd": 2017,
+    "suggestedConfiguration": {
+      "driverLengthIn": 26,
+      "passengerLengthIn": 15,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "26/15/- (2007-2013) | 26/15/- (2008-2013) | 26/15/- (2013-2017) | 24/20/- (2017-2019) | 24/20/- (2017-2020)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:192",
+    "make": "Holden",
+    "model": "Cruze",
+    "chassisCodes": [
+      "JG"
+    ],
+    "body": "Sedan FWD",
+    "engine": "1.8L F18D DOHC 16v Petrol 4cyl",
+    "yearStart": 2009,
+    "yearEnd": 2011,
+    "suggestedConfiguration": {
+      "driverLengthIn": 24,
+      "passengerLengthIn": 18,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "24/18/- (2009-2011) | 24/17/- (2011-2016)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:198",
+    "make": "Holden",
+    "model": "Rodeo",
+    "chassisCodes": [
+      "TFR77"
+    ],
+    "body": "Cab Chassis RWD",
+    "engine": "3.0L 4JH1-TC OHV 8v Turbo Diesel Direct Inj. 4cyl",
+    "yearStart": 2003,
+    "yearEnd": 2003,
+    "suggestedConfiguration": {
+      "driverLengthIn": 22,
+      "passengerLengthIn": 19,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "18/18/- (1998-2003) | 22/19/- (2003-2008)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:205",
+    "make": "Honda",
+    "model": "Accord",
+    "chassisCodes": [
+      "CM2"
+    ],
+    "body": "Wagon FWD",
+    "engine": "2.4L K24A3 DOHC 16v Petrol 4cyl",
+    "yearStart": 2003,
+    "yearEnd": 2008,
+    "suggestedConfiguration": {
+      "driverLengthIn": 26,
+      "passengerLengthIn": 17,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "26/17/- (2003-2007) | 26/19/- (2008-2013)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:225",
+    "make": "Honda",
+    "model": "Civic",
+    "chassisCodes": [
+      "FA1",
+      "FD1",
+      "FD7"
+    ],
+    "body": "Sedan FWD",
+    "engine": "1.8L R18A1,R18A2 SOHC 16v Petrol 4cyl",
+    "yearStart": 2006,
+    "yearEnd": 2009,
+    "suggestedConfiguration": {
+      "driverLengthIn": 26,
+      "passengerLengthIn": 22,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "21/19/- (2001-2006) | 26/22/- (2006-2007) | 26/22/- (2007-2011) | 26/22/- (2008-2011) | 26/22/- (2009-2011)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:228",
+    "make": "Honda",
+    "model": "Civic",
+    "chassisCodes": [
+      "FC1"
+    ],
+    "body": "Sedan FWD",
+    "engine": "1.5L L15B7,L15BB DOHC 16v Turbo Petrol Direct Inj. 4cyl",
+    "yearStart": 2016,
+    "yearEnd": 2019,
+    "suggestedConfiguration": {
+      "driverLengthIn": 26,
+      "passengerLengthIn": 18,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "26/18/- (2012-2016) | 28/22/- (2012-2016) | 26/18/- (2016-2021) | 26/18/- (2017-2017) | 26/18/- (2017-2021)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:218",
+    "make": "Honda",
+    "model": "CR-V",
+    "chassisCodes": [
+      "RM3"
+    ],
+    "body": "SUV FWD",
+    "engine": "2.4L K24Z9 DOHC 16v Petrol 4cyl",
+    "yearStart": 2012,
+    "yearEnd": 2018,
+    "suggestedConfiguration": {
+      "driverLengthIn": 26,
+      "passengerLengthIn": 16,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "26/17/- (2007-2012) | 26/16/- (2012-2017) | 26/16/- (2017-2022)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:269",
+    "make": "Kia",
+    "model": "Sorento",
+    "chassisCodes": [
+      "UM"
+    ],
+    "body": "SUV AWD",
+    "engine": "2.2L D4HB DOHC 16v Turbo Diesel Direct Inj. 4cyl",
+    "yearStart": 2020,
+    "yearEnd": 2020,
+    "suggestedConfiguration": {
+      "driverLengthIn": 26,
+      "passengerLengthIn": 18,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "26/16/- (2015-2020) | 26/18/- (2020-2024)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:291",
+    "make": "Mazda",
+    "model": "2",
+    "chassisCodes": [
+      "DE3FS"
+    ],
+    "body": "Hatchback FWD",
+    "engine": "1.3L ZJ-VE Euro 4 DOHC 16v Petrol 4cyl",
+    "yearStart": 2007,
+    "yearEnd": 2009,
+    "suggestedConfiguration": {
+      "driverLengthIn": 24,
+      "passengerLengthIn": 14,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "24/16/- (2002-2007) | 24/14/- (2007-2014)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:297",
+    "make": "Mazda",
+    "model": "3",
+    "chassisCodes": [
+      "BK14"
+    ],
+    "body": "Hatchback FWD",
+    "engine": "2.0L RF8G,RF7J Euro 4 SOHC 16v Turbo Diesel Direct Inj. 4cyl",
+    "yearStart": 2009,
+    "yearEnd": 2009,
+    "suggestedConfiguration": {
+      "driverLengthIn": 24,
+      "passengerLengthIn": 19,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "21/19/- (2003-2009) | 24/19/- (2009-2013)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:299",
+    "make": "Mazda",
+    "model": "3",
+    "chassisCodes": [
+      "BL10"
+    ],
+    "body": "Hatchback FWD",
+    "engine": "2.2L R2AA DOHC 16v Turbo Diesel Direct Inj. 4cyl",
+    "yearStart": 2013,
+    "yearEnd": 2013,
+    "suggestedConfiguration": {
+      "driverLengthIn": 24,
+      "passengerLengthIn": 18,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "24/19/- (2009-2013) | 24/18/- (2013-2016)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:317",
+    "make": "Mazda",
+    "model": "6",
+    "chassisCodes": [
+      "GY10",
+      "GY3W"
+    ],
+    "body": "Wagon FWD",
+    "engine": "2.3L L3C1,L3-VE DOHC 16v Petrol 4cyl",
+    "yearStart": 2002,
+    "yearEnd": 2008,
+    "suggestedConfiguration": {
+      "driverLengthIn": 22,
+      "passengerLengthIn": 18,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "22/18/- (2002-2007) | 24/16/- (2008-2012)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:322",
+    "make": "Mazda",
+    "model": "BT-50",
+    "chassisCodes": [
+      "UNY0W3"
+    ],
+    "body": "Cab Chassis RWD",
+    "engine": "2.5L WLAT (16 V) DOHC 16v Turbo Diesel Direct Inj. 4cyl",
+    "yearStart": 2006,
+    "yearEnd": 2011,
+    "suggestedConfiguration": {
+      "driverLengthIn": 18,
+      "passengerLengthIn": 18,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "18/18/- (2006-2010) | 24/16/- (2011-2015)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:363",
+    "make": "Mitsubishi",
+    "model": "Lancer",
+    "chassisCodes": [
+      "CB2A",
+      "CK2A"
+    ],
+    "body": "Sedan FWD",
+    "engine": "1.5L 4G15 (SOHC 12V) SOHC 12v Petrol 4cyl",
+    "yearStart": 1996,
+    "yearEnd": 1999,
+    "suggestedConfiguration": {
+      "driverLengthIn": 21,
+      "passengerLengthIn": 19,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "20/18/- (1992-1996) | 21/19/- (1996-2003)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:367",
+    "make": "Mitsubishi",
+    "model": "Lancer",
+    "chassisCodes": [
+      "CK4A"
+    ],
+    "body": "Sedan FWD",
+    "engine": "1.6L 4G92 (SOHC 16V) SOHC 16v Petrol 4cyl",
+    "yearStart": 2002,
+    "yearEnd": 2002,
+    "suggestedConfiguration": {
+      "driverLengthIn": 24,
+      "passengerLengthIn": 18,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "21/19/- (1996-2003) | 24/18/- (2002-2007)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:369",
+    "make": "Mitsubishi",
+    "model": "Lancer",
+    "chassisCodes": [
+      "CS6A"
+    ],
+    "body": "Sedan FWD",
+    "engine": "2.0L 4G94 (SOHC 16V) SOHC 16v Petrol 4cyl",
+    "yearStart": 2002,
+    "yearEnd": 2006,
+    "suggestedConfiguration": {
+      "driverLengthIn": 24,
+      "passengerLengthIn": 18,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "21/19/- (1996-2003) | 24/18/- (2002-2007) | 24/18/- (2004-2008)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:370",
+    "make": "Mitsubishi",
+    "model": "Lancer",
+    "chassisCodes": [
+      "CS7A"
+    ],
+    "body": "Sedan FWD",
+    "engine": "2.4L 4G69 SOHC 16v Petrol 4cyl",
+    "yearStart": 2007,
+    "yearEnd": 2007,
+    "suggestedConfiguration": {
+      "driverLengthIn": 24,
+      "passengerLengthIn": 17,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "24/18/- (2002-2007) | 24/18/- (2004-2008) | 24/17/- (2007-2015)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:378",
+    "make": "Mitsubishi",
+    "model": "Lancer",
+    "chassisCodes": [
+      "CZ4A"
+    ],
+    "body": "Sedan AWD",
+    "engine": "2.0L 4B11-T/C (DOHC 16V) DOHC 16v Turbo Petrol 4cyl",
+    "yearStart": 2008,
+    "yearEnd": 2008,
+    "suggestedConfiguration": {
+      "driverLengthIn": 24,
+      "passengerLengthIn": 16,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "24/18/- (2004-2008) | 24/17/- (2007-2015) | 24/16/- (2008-2011)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:379",
+    "make": "Mitsubishi",
+    "model": "Magna",
+    "chassisCodes": [
+      "TF"
+    ],
+    "body": "Sedan FWD",
+    "engine": "3.0L 6G72 (SOHC 24V) SOHC 24v Petrol V6",
+    "yearStart": 1997,
+    "yearEnd": 1998,
+    "suggestedConfiguration": {
+      "driverLengthIn": 22,
+      "passengerLengthIn": 20,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "20/20/- (1992-1997) | 22/20/- (1996-2002) | 22/20/- (1997-2002)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:389",
+    "make": "Mitsubishi",
+    "model": "Outlander",
+    "chassisCodes": [
+      "CW6W"
+    ],
+    "body": "SUV AWD",
+    "engine": "3.0L 6B31 SOHC 24v Petrol V6",
+    "yearStart": 2006,
+    "yearEnd": 2011,
+    "suggestedConfiguration": {
+      "driverLengthIn": 24,
+      "passengerLengthIn": 20,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "22/19/- (2003-2006) | 24/20/- (2006-2012)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:391",
+    "make": "Mitsubishi",
+    "model": "Outlander",
+    "chassisCodes": [
+      "GF8W"
+    ],
+    "body": "SUV FWD",
+    "engine": "2.4L 4J12 SOHC 16v Petrol 4cyl",
+    "yearStart": 2012,
+    "yearEnd": 2021,
+    "suggestedConfiguration": {
+      "driverLengthIn": 26,
+      "passengerLengthIn": 18,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "24/20/- (2006-2012) | 26/18/- (2012-2020) | 26/18/- (2021-2024)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:399",
+    "make": "Mitsubishi",
+    "model": "Pajero",
+    "chassisCodes": [
+      "V25W",
+      "V45W"
+    ],
+    "body": "SUV AWD",
+    "engine": "3.5L 6G74 (SOHC 24V) SOHC 24v Petrol V6",
+    "yearStart": 2000,
+    "yearEnd": 2000,
+    "suggestedConfiguration": {
+      "driverLengthIn": 19,
+      "passengerLengthIn": 19,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "18/18/- (1996-2000) | 19/19/- (2000-2002)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:405",
+    "make": "Mitsubishi",
+    "model": "Pajero",
+    "chassisCodes": [
+      "V75W"
+    ],
+    "body": "SUV AWD",
+    "engine": "3.5L 6G74 Petrol",
+    "yearStart": 2000,
+    "yearEnd": 2004,
+    "suggestedConfiguration": {
+      "driverLengthIn": 19,
+      "passengerLengthIn": 19,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "18/18/- (1996-2000) | 19/19/- (2000-2002) | 19/19/- (2002-2006)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:406",
+    "make": "Mitsubishi",
+    "model": "Pajero",
+    "chassisCodes": [
+      "V87W",
+      "V97W"
+    ],
+    "body": "SUV AWD",
+    "engine": "3.8L 6G75 (SOHC 24V) SOHC 24v Petrol V6",
+    "yearStart": 2008,
+    "yearEnd": 2008,
+    "suggestedConfiguration": {
+      "driverLengthIn": 24,
+      "passengerLengthIn": 19,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "22/20/- (2006-2008) | 24/19/- (2008-2011)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:428",
+    "make": "Nissan",
+    "model": "Maxima",
+    "chassisCodes": [
+      "A33"
+    ],
+    "body": "Sedan FWD",
+    "engine": "3.0L VQ30DE DOHC 24v Petrol V6",
+    "yearStart": 2003,
+    "yearEnd": 2003,
+    "suggestedConfiguration": {
+      "driverLengthIn": 24,
+      "passengerLengthIn": 18,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "26/17/- (1999-2003) | 24/18/- (2003-2005)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:441",
+    "make": "Nissan",
+    "model": "Navara",
+    "chassisCodes": [
+      "PGRDFD21"
+    ],
+    "body": "Cab Chassis RWD",
+    "engine": "2.7L TD27 Diesel",
+    "yearStart": 1997,
+    "yearEnd": 1998,
+    "suggestedConfiguration": {
+      "driverLengthIn": 19,
+      "passengerLengthIn": 19,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "18/18/- (1992-1997) | 19/19/- (1997-2005)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:440",
+    "make": "Nissan",
+    "model": "Navara",
+    "chassisCodes": [
+      "D40"
+    ],
+    "body": "Utility RWD",
+    "engine": "4.0L VQ40 DOHC 24v Petrol V6",
+    "yearStart": 2005,
+    "yearEnd": 2006,
+    "suggestedConfiguration": {
+      "driverLengthIn": 24,
+      "passengerLengthIn": 19,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "19/19/- (1997-2005) | 24/19/- (2005-2015)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:444",
+    "make": "Nissan",
+    "model": "Pathfinder",
+    "chassisCodes": [
+      "R51"
+    ],
+    "body": "SUV AWD",
+    "engine": "2.5L YD25DDTi DOHC 16v Turbo Diesel Direct Inj. 4cyl",
+    "yearStart": 2005,
+    "yearEnd": 2013,
+    "suggestedConfiguration": {
+      "driverLengthIn": 24,
+      "passengerLengthIn": 19,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "20/20/- (1995-2005) | 24/19/- (2005-2013) | 26/17/- (2013-2020)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:454",
+    "make": "Nissan",
+    "model": "Patrol",
+    "chassisCodes": [
+      "Y62"
+    ],
+    "body": "SUV AWD",
+    "engine": "5.6L VK56VD DOHC 32v Petrol Direct Inj. V8",
+    "yearStart": 2012,
+    "yearEnd": 2023,
+    "suggestedConfiguration": {
+      "driverLengthIn": 20,
+      "passengerLengthIn": 19,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "20/19/- (2007-2012) | 20/19/- (2012-2016) | 22/20/- (2013-2015) | 22/20/- (2015-2017) | 22/20/- (2017-2022)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:467",
+    "make": "Nissan",
+    "model": "Pulsar",
+    "chassisCodes": [
+      "B13",
+      "N14"
+    ],
+    "body": "Sedan FWD",
+    "engine": "2.0L SR20DE DOHC 16v Petrol 4cyl",
+    "yearStart": 1995,
+    "yearEnd": 1995,
+    "suggestedConfiguration": {
+      "driverLengthIn": 20,
+      "passengerLengthIn": 18,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "20/20/- (1990-1995) | 20/18/- (1995-2000)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:474",
+    "make": "Nissan",
+    "model": "Pulsar",
+    "chassisCodes": [
+      "FN15"
+    ],
+    "body": "Wagon FWD",
+    "engine": "1.5L GA15DE Petrol",
+    "yearStart": 2000,
+    "yearEnd": 2000,
+    "suggestedConfiguration": {
+      "driverLengthIn": 22,
+      "passengerLengthIn": 15,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "20/18/- (1995-2000) | 22/15/- (2000-2005)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:476",
+    "make": "Nissan",
+    "model": "Pulsar",
+    "chassisCodes": [
+      "N16"
+    ],
+    "body": "Sedan FWD",
+    "engine": "1.6L QG16DE DOHC 16v Petrol 4cyl",
+    "yearStart": 2000,
+    "yearEnd": 2003,
+    "suggestedConfiguration": {
+      "driverLengthIn": 22,
+      "passengerLengthIn": 15,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "20/18/- (1995-2000) | 22/15/- (2000-2005) | 22/16/- (2001-2002) | 22/16/- (2002-2005)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:478",
+    "make": "Nissan",
+    "model": "Pulsar",
+    "chassisCodes": [
+      "TBAY11"
+    ],
+    "body": "Wagon FWD",
+    "engine": "1.5L QG15DE Petrol",
+    "yearStart": 2001,
+    "yearEnd": 2006,
+    "suggestedConfiguration": {
+      "driverLengthIn": 22,
+      "passengerLengthIn": 16,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "22/15/- (2000-2005) | 22/16/- (2001-2002) | 22/16/- (2002-2005)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:493",
+    "make": "Nissan",
+    "model": "X-TRAIL",
+    "chassisCodes": [
+      "T30"
+    ],
+    "body": "SUV AWD",
+    "engine": "2.0L SR20VET DOHC 16v Turbo Petrol 4cyl",
+    "yearStart": 2001,
+    "yearEnd": 2007,
+    "suggestedConfiguration": {
+      "driverLengthIn": 24,
+      "passengerLengthIn": 17,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "24/17/- (2001-2007) | 24/16/- (2007-2013)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:494",
+    "make": "Nissan",
+    "model": "X-TRAIL",
+    "chassisCodes": [
+      "T30"
+    ],
+    "body": "SUV FWD",
+    "engine": "2.0L QR20DE DOHC 16v Petrol 4cyl",
+    "yearStart": 2007,
+    "yearEnd": 2013,
+    "suggestedConfiguration": {
+      "driverLengthIn": 24,
+      "passengerLengthIn": 16,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "24/17/- (2001-2007) | 24/16/- (2007-2013)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:505",
+    "make": "Subaru",
+    "model": "Forester",
+    "chassisCodes": [
+      "SF"
+    ],
+    "body": "SUV AWD",
+    "engine": "2.0L EJ20 (Turbo) DOHC 16v Turbo Petrol Flat4",
+    "yearStart": 1997,
+    "yearEnd": 2002,
+    "suggestedConfiguration": {
+      "driverLengthIn": 21,
+      "passengerLengthIn": 19,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "21/19/- (1997-2002) | 22/19/- (2002-2008)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:508",
+    "make": "Subaru",
+    "model": "Forester",
+    "chassisCodes": [
+      "SG9"
+    ],
+    "body": "SUV AWD",
+    "engine": "2.5L EJ253 SOHC 16v Petrol Flat4",
+    "yearStart": 2008,
+    "yearEnd": 2008,
+    "suggestedConfiguration": {
+      "driverLengthIn": 24,
+      "passengerLengthIn": 18,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "22/19/- (2002-2008) | 24/18/- (2008-2012)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:518",
+    "make": "Subaru",
+    "model": "Impreza",
+    "chassisCodes": [
+      "GDA"
+    ],
+    "body": "Sedan AWD",
+    "engine": "2.0L EJ205 DOHC 16v Turbo Petrol Flat4",
+    "yearStart": 2000,
+    "yearEnd": 2000,
+    "suggestedConfiguration": {
+      "driverLengthIn": 22,
+      "passengerLengthIn": 17,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "20/18/- (1993-2000) | 22/17/- (2000-2004) | 22/17/- (2000-2007)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:520",
+    "make": "Subaru",
+    "model": "Impreza",
+    "chassisCodes": [
+      "GDA"
+    ],
+    "body": "Sedan AWD",
+    "engine": "2.0L EJ205 DOHC 16v Turbo Petrol Flat4",
+    "yearStart": 2007,
+    "yearEnd": 2007,
+    "suggestedConfiguration": {
+      "driverLengthIn": 24,
+      "passengerLengthIn": 16,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "22/17/- (2000-2007) | 22/17/- (2004-2007) | 24/16/- (2007-2011) | 24/16/- (2007-2013)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:528",
+    "make": "Subaru",
+    "model": "Impreza",
+    "chassisCodes": [
+      "GG2"
+    ],
+    "body": "Wagon FWD",
+    "engine": "1.5L EJ15 SOHC 16v Petrol Flat4",
+    "yearStart": 2007,
+    "yearEnd": 2007,
+    "suggestedConfiguration": {
+      "driverLengthIn": 24,
+      "passengerLengthIn": 16,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "22/17/- (2000-2007) | 22/17/- (2004-2007) | 24/16/- (2007-2011) | 24/16/- (2007-2013)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:540",
+    "make": "Subaru",
+    "model": "Legacy",
+    "chassisCodes": [
+      "BL5"
+    ],
+    "body": "Sedan AWD",
+    "engine": "2.0L EJ202 SOHC 16v Petrol Flat4",
+    "yearStart": 2003,
+    "yearEnd": 2005,
+    "suggestedConfiguration": {
+      "driverLengthIn": 24,
+      "passengerLengthIn": 18,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "22/20/- (1998-2004) | 24/18/- (2003-2009)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:559",
+    "make": "Subaru",
+    "model": "Outback",
+    "chassisCodes": [
+      "BPE"
+    ],
+    "body": "Wagon AWD",
+    "engine": "3.0L EZ30 DOHC 24v Petrol Flat6",
+    "yearStart": 2003,
+    "yearEnd": 2009,
+    "suggestedConfiguration": {
+      "driverLengthIn": 22,
+      "passengerLengthIn": 20,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "22/20/- (2003-2009) | 26/19/- (2009-2014)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:606",
+    "make": "Suzuki",
+    "model": "Swift",
+    "chassisCodes": [
+      "AZG416",
+      "AZH416",
+      "RS416",
+      "ZA32S",
+      "ZC32S"
+    ],
+    "body": "Hatchback FWD",
+    "engine": "1.6L M16A DOHC 16v Petrol 4cyl",
+    "yearStart": 2017,
+    "yearEnd": 2017,
+    "suggestedConfiguration": {
+      "driverLengthIn": 20,
+      "passengerLengthIn": 19,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "22/17/- (2011-2017) | 20/19/- (2017-2020)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:628",
+    "make": "Toyota",
+    "model": "Aurion",
+    "chassisCodes": [
+      "ACV40"
+    ],
+    "body": "Sedan FWD",
+    "engine": "2.4L 2AZ-FE DOHC 16v Petrol 4cyl",
+    "yearStart": 2006,
+    "yearEnd": 2009,
+    "suggestedConfiguration": {
+      "driverLengthIn": 24,
+      "passengerLengthIn": 20,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "22/20/- (1997-2006) | 24/20/- (2006-2012)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:629",
+    "make": "Toyota",
+    "model": "Aurion",
+    "chassisCodes": [
+      "GSV40",
+      "GSV50"
+    ],
+    "body": "Sedan FWD",
+    "engine": "3.5L 2GR-FE DOHC 24v Petrol V6",
+    "yearStart": 2006,
+    "yearEnd": 2017,
+    "suggestedConfiguration": {
+      "driverLengthIn": 24,
+      "passengerLengthIn": 20,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "22/20/- (1997-2006) | 24/20/- (2006-2012) | 26/18/- (2012-2017)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:650",
+    "make": "Toyota",
+    "model": "Caldina",
+    "chassisCodes": [
+      "ST215"
+    ],
+    "body": "Wagon AWD",
+    "engine": "2.0L 3S-GE Petrol",
+    "yearStart": 1997,
+    "yearEnd": 1997,
+    "suggestedConfiguration": {
+      "driverLengthIn": 24,
+      "passengerLengthIn": 16,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "21/18/- (1992-1997) | 24/16/- (1997-2002)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:654",
+    "make": "Toyota",
+    "model": "Camry",
+    "chassisCodes": [
+      "ACV30",
+      "ACV36",
+      "ACV30R",
+      "ACV40"
+    ],
+    "body": "Sedan FWD",
+    "engine": "2.4L 2AZ-FE DOHC 16v Petrol 4cyl",
+    "yearStart": 2002,
+    "yearEnd": 2008,
+    "suggestedConfiguration": {
+      "driverLengthIn": 22,
+      "passengerLengthIn": 20,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "22/20/- (1997-2002) | 22/20/- (2002-2006) | 24/20/- (2006-2011)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:656",
+    "make": "Toyota",
+    "model": "Camry",
+    "chassisCodes": [
+      "ASV50R",
+      "ASV70R"
+    ],
+    "body": "Sedan FWD",
+    "engine": "2.5L 2AR-FE DOHC 16v Petrol 4cyl",
+    "yearStart": 2011,
+    "yearEnd": 2021,
+    "suggestedConfiguration": {
+      "driverLengthIn": 26,
+      "passengerLengthIn": 18,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "24/20/- (2006-2011) | 26/18/- (2011-2017) | 26/18/- (2017-2023)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:668",
+    "make": "Toyota",
+    "model": "Corolla",
+    "chassisCodes": [
+      "CUR10R"
+    ],
+    "body": "MPV FWD",
+    "engine": "2.0L 1CD-FTV DOHC 16v Turbo Diesel Direct Inj. 4cyl",
+    "yearStart": 2007,
+    "yearEnd": 2009,
+    "suggestedConfiguration": {
+      "driverLengthIn": 26,
+      "passengerLengthIn": 16,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "24/18/- (2001-2007) | 26/16/- (2007-2012)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:672",
+    "make": "Toyota",
+    "model": "Corolla",
+    "chassisCodes": [
+      "ZWE211",
+      "ZWE219"
+    ],
+    "body": "Hatchback FWD",
+    "engine": "1.8L 2ZR-FXE DOHC 16v Petrol/Electric Hybrid 4cyl",
+    "yearStart": 2018,
+    "yearEnd": 2018,
+    "suggestedConfiguration": {
+      "driverLengthIn": 28,
+      "passengerLengthIn": 14,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "26/14/- (2012-2018) | 26/14/- (2012-2019) | 28/14/- (2018-2023)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:663",
+    "make": "Toyota",
+    "model": "Corolla",
+    "chassisCodes": [
+      "AE100G"
+    ],
+    "body": "Wagon FWD",
+    "engine": "1.5L 5A-FE DOHC 16v Petrol 4cyl",
+    "yearStart": 2019,
+    "yearEnd": 2019,
+    "suggestedConfiguration": {
+      "driverLengthIn": 28,
+      "passengerLengthIn": 14,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "26/14/- (2012-2019) | 28/14/- (2018-2023) | 28/14/- (2019-2023)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:690",
+    "make": "Toyota",
+    "model": "Hiace",
+    "chassisCodes": [
+      "GRH300",
+      "GRH320"
+    ],
+    "body": "Van RWD",
+    "engine": "3.5L 7GR-FKS DOHC 24v Petrol Direct Inj. V6",
+    "yearStart": 2019,
+    "yearEnd": 2023,
+    "suggestedConfiguration": {
+      "driverLengthIn": 24,
+      "passengerLengthIn": 20,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "22/21/- (2005-2019) | 22/22/- (2005-2020) | 24/20/- (2019-2023)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:698",
+    "make": "Toyota",
+    "model": "Hilux",
+    "chassisCodes": [
+      "GGN25"
+    ],
+    "body": "Utility AWD",
+    "engine": "4.0L 1GR-FE DOHC 24v Petrol V6",
+    "yearStart": 2005,
+    "yearEnd": 2014,
+    "suggestedConfiguration": {
+      "driverLengthIn": 21,
+      "passengerLengthIn": 19,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "17/17/- (1997-2005) | 21/19/- (2005-2015)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:697",
+    "make": "Toyota",
+    "model": "Hilux",
+    "chassisCodes": [
+      "GGN120R",
+      "GGN135R"
+    ],
+    "body": "Utility RWD",
+    "engine": "4.0L 1GR-FE DOHC 24v Petrol V6",
+    "yearStart": 2015,
+    "yearEnd": 2015,
+    "suggestedConfiguration": {
+      "driverLengthIn": 22,
+      "passengerLengthIn": 16,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "21/19/- (2005-2015) | 22/16/- (2015-2023)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:699",
+    "make": "Toyota",
+    "model": "Hilux",
+    "chassisCodes": [
+      "GUN125R"
+    ],
+    "body": "Utility AWD",
+    "engine": "2.4L 2GD-FTV DOHC 16v Turbo Diesel Direct Inj. 4cyl",
+    "yearStart": 2015,
+    "yearEnd": 2023,
+    "suggestedConfiguration": {
+      "driverLengthIn": 22,
+      "passengerLengthIn": 16,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "21/19/- (2005-2015) | 22/16/- (2015-2023)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:718",
+    "make": "Toyota",
+    "model": "Kluger",
+    "chassisCodes": [
+      "MCU21"
+    ],
+    "body": "SUV AWD",
+    "engine": "3.3L 3MZ-FE Petrol",
+    "yearStart": 2003,
+    "yearEnd": 2007,
+    "suggestedConfiguration": {
+      "driverLengthIn": 21,
+      "passengerLengthIn": 19,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "21/19/- (2003-2007) | 26/20/- (2007-2013)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:715",
+    "make": "Toyota",
+    "model": "Kluger",
+    "chassisCodes": [
+      "GSU45R"
+    ],
+    "body": "SUV AWD",
+    "engine": "3.5L 2GR-FE DOHC 24v Petrol V6",
+    "yearStart": 2007,
+    "yearEnd": 2014,
+    "suggestedConfiguration": {
+      "driverLengthIn": 26,
+      "passengerLengthIn": 20,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "21/19/- (2003-2007) | 26/20/- (2007-2013) | 26/20/- (2014-2020)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:731",
+    "make": "Toyota",
+    "model": "Land Cruiser Prado",
+    "chassisCodes": [
+      "RZJ120",
+      "RZJ125",
+      "RZJ90",
+      "RZJ95"
+    ],
+    "body": "SUV AWD",
+    "engine": "2.7L 3RZ-FE DOHC 16v Petrol 4cyl",
+    "yearStart": 1996,
+    "yearEnd": 2004,
+    "suggestedConfiguration": {
+      "driverLengthIn": 19,
+      "passengerLengthIn": 18,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "19/18/- (1996-2002) | 22/21/- (2003-2009)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  },
+  {
+    "applicationKey": "NEXAUTO_V3:739",
+    "make": "Toyota",
+    "model": "RAV4",
+    "chassisCodes": [
+      "ACA20",
+      "ACA21"
+    ],
+    "body": "SUV AWD",
+    "engine": "2.0L 1AZ-FSE DOHC 16v Petrol Direct Inj. 4cyl",
+    "yearStart": 2000,
+    "yearEnd": 2000,
+    "suggestedConfiguration": {
+      "driverLengthIn": 24,
+      "passengerLengthIn": 19,
+      "rearLengthIn": null
+    },
+    "candidateRanges": "20/18/- (1994-2000) | 24/19/- (2000-2005)",
+    "confidence": 0.8,
+    "reason": "generation_start_matches_wiper_range_start"
+  }
+]
