@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowRight, BatteryCharging, CheckCircle2, Filter, Lightbulb, Wrench } from "lucide-react";
 import { VehiclePartsFinder } from "@/components/vehicle-parts-finder";
+import { VehicleContextSynchronizer } from "@/components/vehicle-context-synchronizer";
 import { formatMoney } from "@/lib/catalog";
 import { productImage } from "@/lib/product-content";
 import { listProducts } from "@/lib/queries/catalog";
@@ -67,6 +68,7 @@ export default async function PartCategoryPage({ params, searchParams }: { param
   const definition = categoryDefinitions[category as CategoryKey];
   const vehicle = parseVehicleSelection(queryVehicle) ? queryVehicle : toCategorySearchParams(storedVehicle);
   const vehicleSelection = parseVehicleSelection(vehicle);
+  const synchronizedVehicle = toExactVehicleContext(vehicle);
   const products = vehicleSelection
     ? await loadVehicleProducts(definition.databaseCategory, vehicleSelection)
     : await loadCategoryProducts(definition.databaseCategory);
@@ -77,6 +79,7 @@ export default async function PartCategoryPage({ params, searchParams }: { param
 
   return (
     <main className="bg-[#F8FAFC]">
+      {synchronizedVehicle ? <VehicleContextSynchronizer vehicle={synchronizedVehicle} /> : null}
       <section className="relative isolate overflow-hidden bg-ink text-white">
         <Image src={definition.image} alt={`${definition.name} category`} fill priority className="-z-20 object-cover object-center" sizes="100vw" />
         <div className="absolute inset-0 -z-10 bg-gradient-to-r from-black via-black/82 to-black/25" />
@@ -158,6 +161,23 @@ function toCategorySearchParams(vehicle: VehicleContext | null): CategorySearchP
     variantId: vehicle.variantId,
     chassis: vehicle.chassis,
     body: vehicle.bodyConfiguration,
+    engine: vehicle.engine
+  };
+}
+
+function toExactVehicleContext(vehicle: CategorySearchParams): VehicleContext | null {
+  if (!vehicle.makeId || !vehicle.modelId || !vehicle.year || !vehicle.make || !vehicle.model || !vehicle.applicationId) return null;
+  return {
+    makeId: vehicle.makeId,
+    modelId: vehicle.modelId,
+    year: vehicle.year,
+    make: vehicle.make,
+    model: vehicle.model,
+    applicationId: vehicle.applicationId,
+    generationId: vehicle.generationId,
+    variantId: vehicle.variantId,
+    chassis: vehicle.chassis,
+    bodyConfiguration: vehicle.body,
     engine: vehicle.engine
   };
 }

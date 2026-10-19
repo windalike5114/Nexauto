@@ -9,6 +9,7 @@ const categoryPage = readFileSync("app/parts/[category]/page.tsx", "utf8");
 const applicationRoute = readFileSync("app/api/vehicles/applications/route.ts", "utf8");
 const vehicleContext = readFileSync("lib/vehicle-context.ts", "utf8");
 const serverVehicleContext = readFileSync("lib/server/vehicle-context.ts", "utf8");
+const vehicleContextSynchronizer = readFileSync("components/vehicle-context-synchronizer.tsx", "utf8");
 const layout = readFileSync("app/layout.tsx", "utf8");
 
 test("home vehicle finder reads only the new NexAuto V3 vehicle backbone", () => {
@@ -40,5 +41,7 @@ test("selected vehicle persists across product categories until the customer cha
   assert.match(serverVehicleContext, /await cookies\(\)/);
   assert.match(categoryPage, /readStoredVehicleContext/);
   assert.match(categoryPage, /parseVehicleSelection\(queryVehicle\) \? queryVehicle : toCategorySearchParams\(storedVehicle\)/);
+  assert.match(categoryPage, /VehicleContextSynchronizer/);
+  assert.match(vehicleContextSynchronizer, /saveVehicleContext\(vehicle\)/);
   assert.match(layout, /<VehicleSelectionBar \/>/);
 });
