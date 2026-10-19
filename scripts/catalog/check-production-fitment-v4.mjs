@@ -24,13 +24,20 @@ for (const row of productRows) counts[variantById.get(row.product_variant_id).pr
 const nkeApplication = applications.find((row) => sourceIdByApplication.get(row.id) === "670");
 const nkeBatteries = productRows.filter((row) => row.vehicle_application_id === nkeApplication.id && variantById.get(row.product_variant_id).products.category_slug === "battery");
 const nkeSkus = nkeBatteries.map((row) => variantById.get(row.product_variant_id).sku);
+const nkeFilterSkus = productRows.filter((row) => row.vehicle_application_id === nkeApplication.id && variantById.get(row.product_variant_id).products.category_slug === "filter").map((row) => variantById.get(row.product_variant_id).sku).sort();
+const zweApplication = applications.find((row) => sourceIdByApplication.get(row.id) === "672");
+const zweBatterySkus = productRows.filter((row) => row.vehicle_application_id === zweApplication.id && variantById.get(row.product_variant_id).products.category_slug === "battery").map((row) => variantById.get(row.product_variant_id).sku).sort();
+const zweFilterSkus = productRows.filter((row) => row.vehicle_application_id === zweApplication.id && variantById.get(row.product_variant_id).products.category_slug === "filter").map((row) => variantById.get(row.product_variant_id).sku).sort();
 const generatedVariants = variants.filter((row) => row.products.content_origin === "generated");
 const unsafeProducts = generatedVariants.filter((row) => row.products.checkout_enabled !== false || row.products.commerce_status !== "catalog_only");
 const staleV3 = productRows.filter((row) => !String(row.notes).startsWith("NEXAUTO_PRODUCT_MAPPING_V4"));
 
-const expected = { battery: 245, filter: 109, wiper: 382 };
+const expected = { battery: 833, filter: 282, wiper: 382 };
 if (JSON.stringify(counts) !== JSON.stringify(expected)) throw new Error(`Published count mismatch: ${JSON.stringify(counts)} expected ${JSON.stringify(expected)}`);
 if (nkeSkus.length !== 1 || nkeSkus[0] !== "BAT-S34B20R") throw new Error(`NKE165 mismatch: ${nkeSkus.join(",") || "none"}`);
+if (JSON.stringify(nkeFilterSkus) !== JSON.stringify(["TOPSTAR-J650B", "TOPSTAR-UJ1671B"])) throw new Error(`NKE165 filter mismatch: ${nkeFilterSkus.join(",") || "none"}`);
+if (JSON.stringify(zweBatterySkus) !== JSON.stringify(["BAT-LN1MF"])) throw new Error(`ZWE211/ZWE219 battery mismatch: ${zweBatterySkus.join(",") || "none"}`);
+if (JSON.stringify(zweFilterSkus) !== JSON.stringify(["TOPSTAR-J650B", "TOPSTAR-UJ1671B", "TOPSTAR-UJ2666L20"])) throw new Error(`ZWE211/ZWE219 filter mismatch: ${zweFilterSkus.join(",") || "none"}`);
 if (unsafeProducts.length) throw new Error(`${unsafeProducts.length} generated products unexpectedly allow commerce: ${unsafeProducts.map((row) => row.sku).join(", ")}.`);
 if (staleV3.length) throw new Error(`${staleV3.length} published V3 product mappings are not V4.`);
 
@@ -39,6 +46,9 @@ console.log(JSON.stringify({
   published_counts: counts,
   nke165_application_id: nkeApplication.id,
   nke165_battery_skus: nkeSkus,
+  nke165_filter_skus: nkeFilterSkus,
+  zwe211_219_battery_skus: zweBatterySkus,
+  zwe211_219_filter_skus: zweFilterSkus,
   stale_published_v3_links: staleV3.length,
   purchasable_generated_products: unsafeProducts.length
 }, null, 2));

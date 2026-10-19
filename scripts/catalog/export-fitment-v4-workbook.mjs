@@ -44,12 +44,12 @@ function writeSummary(sheet, data) {
   };
   sheet.getRange("A1:F1").format.rowHeight = 34;
   sheet.getRange("A2:F2").merge();
-  sheet.getRange("A2").values = [["仅使用新车型库。电池按车身/底盘，滤芯按发动机，雨刷按唯一尺寸证据；不确定记录不对外发布。"]];
+  sheet.getRange("A2").values = [["仅使用新车型库。电池按底盘代号，滤芯按发动机代号，雨刷按唯一尺寸证据；不确定记录不对外发布。"]];
   sheet.getRange("A2:F2").format = { fill: "#E2E8F0", font: { color: "#334155", italic: true }, wrapText: true };
   sheet.getRange("A4:F7").values = [
     ["产品线", "已发布关系", "覆盖车型", "待人工复核", "发布条件", "当前处理"],
-    ["battery", data.report.published_counts.battery ?? 0, data.report.published_vehicle_counts.battery ?? 0, data.report.review_counts.battery ?? 0, "精确底盘 + 精确车身", "可安全替换旧映射"],
-    ["filter", data.report.published_counts.filter ?? 0, data.report.published_vehicle_counts.filter ?? 0, data.report.review_counts.filter ?? 0, "精确发动机 + 底盘/车型", "可安全替换旧映射"],
+    ["battery", data.report.published_counts.battery ?? 0, data.report.published_vehicle_counts.battery ?? 0, data.report.review_counts.battery ?? 0, "精确底盘代号", "可安全替换旧映射"],
+    ["filter", data.report.published_counts.filter ?? 0, data.report.published_vehicle_counts.filter ?? 0, data.report.review_counts.filter ?? 0, "精确发动机代号", "可安全替换旧映射"],
     ["wiper", data.report.published_counts.wiper ?? 0, data.report.published_vehicle_counts.wiper ?? 0, data.report.review_counts.wiper ?? 0, "同车型年份仅有一个有效尺寸组合", "歧义记录进入复核"]
   ];
   styleTableBlock(sheet.getRange("A4:F7"));
@@ -61,7 +61,7 @@ function writeSummary(sheet, data) {
   sectionHeader(sheet.getRange("A10:F10"));
   sheet.getRange("A11:F12").values = [
     ["车型ID", "底盘", "产品", "结果数", "匹配规则", "结论"],
-    [nke.source_vehicle_id ?? "670", nke.chassis ?? "NKE165", nke.product ?? "S34B20R", data.report.nke165_check?.length ?? 0, nke.rule ?? "battery_exact_chassis_body", "仅保留 1 个适配电池"]
+    [nke.source_vehicle_id ?? "670", nke.chassis ?? "NKE165", nke.product ?? "S34B20R", data.report.nke165_check?.length ?? 0, nke.rule ?? "battery_exact_chassis", "仅保留 1 个适配电池"]
   ];
   styleTableBlock(sheet.getRange("A11:F12"));
   sheet.getRange("A12:F12").format.fill = "#DCFCE7";
@@ -137,10 +137,10 @@ function writeRules(sheet, ruleMap) {
   sheet.getRange("A1:E1").format = { fill: "#1E3A8A", font: { color: "#FFFFFF", bold: true, size: 16 } };
   sheet.getRange("A3:E7").values = [
     ["产品线", "自动发布硬条件", "冲突时", "缺字段时", "原因"],
-    ["电池", ruleMap.battery, "底盘、车身、燃油或驱动冲突即拒绝", "进入人工复核", "同一车型不同车身/动力可能使用不同电池"],
-    ["滤芯", ruleMap.filter, "发动机或来源底盘冲突即拒绝", "缺发动机进入人工复核", "滤芯首先由发动机决定"],
+    ["电池", ruleMap.battery, "底盘代号不同即拒绝", "缺底盘代号则不建立适配", "电池适配只使用精确底盘代号"],
+    ["滤芯", ruleMap.filter, "发动机代号不同即拒绝", "缺发动机代号则不建立适配", "滤芯适配只使用精确发动机代号"],
     ["雨刷", ruleMap.wiper, "同一窗口出现多个尺寸即不发布", "要求补车身或精确年份", "Sedan/Hatchback/Wagon 及改款可能不同"],
-    ["通用", "品牌一致且年份区间有交集；不使用旧 mapping_long 的宽泛前缀结果", "不做模糊继承", "只保留证据充分结果", "优先避免错误适配"]
+    ["通用", "品牌仅作为代号命名空间；不使用旧 mapping_long 的宽泛前缀结果", "不做模糊继承", "只保留精确技术键结果", "不同产品线使用不同适配键"]
   ];
   styleTableBlock(sheet.getRange("A3:E7"));
   sheet.tables.add("A3:E7", true, "RulesTable").style = "TableStyleMedium2";
@@ -149,7 +149,7 @@ function writeRules(sheet, ruleMap) {
   sectionHeader(sheet.getRange("A9:E9"));
   sheet.getRange("A10:E13").values = [
     ["优先级", "产品线", "需要补充", "建议格式", "完成后动作"],
-    [1, "电池", "精确底盘、车身、燃油/动力", "例：NKE165 | Sedan | Hybrid | FWD", "重新运行 V4 映射"],
+    [1, "电池", "精确底盘代号", "例：NKE165", "重新运行 V4 映射"],
     [2, "滤芯", "发动机代码", "例：1NZ-FXE（不要只写 1.5L）", "重新运行 V4 映射"],
     [3, "雨刷", "车身及改款分界年份", "例：Sedan | 2013–2017 | 26/14", "建立车身级雨刷证据"]
   ];

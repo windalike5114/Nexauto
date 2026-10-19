@@ -194,8 +194,8 @@ export function prepareMappings(paths) {
     mapping_version: 4,
     generated_at: new Date().toISOString(),
     rules: {
-      battery: "make + overlapping year + exact chassis + exact body; drivetrain/fuel/displacement reject conflicts",
-      filter: "make + overlapping year + exact engine + exact supplied chassis (or exact model when source chassis is absent)",
+      battery: "make namespace + exact chassis; body/model/year/engine are not battery fitment keys",
+      filter: "make namespace + exact engine; chassis/model/body/year are not filter fitment keys",
       wiper: "make + exact model + overlapping year; auto-publish only when all valid source evidence resolves to one approved configuration"
     },
     source_counts: { vehicles: vehicles.length, batteries: batteries.length, filters: filters.length, wipers: wipers.length },
@@ -510,7 +510,7 @@ function writeProductionBackup(productFitments, evidence, wiperFitments, url) {
 
 function combinedSourceHash(paths) {
   const hash = crypto.createHash("sha256");
-  hash.update("fitment-v4-matcher-2026-10-20");
+  hash.update("fitment-v4-matcher-2026-10-20-chassis-engine-keys");
   for (const [key, filePath] of Object.entries(paths)) {
     hash.update(key);
     hash.update(fs.readFileSync(filePath));

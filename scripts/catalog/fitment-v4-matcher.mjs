@@ -135,56 +135,25 @@ export function matchBatteryRow(vehicleInput, source) {
   const vehicle = prepareVehicleForMatching(vehicleInput);
   const reasons = [];
   if (vehicle.make_key !== normalKey(source.make)) return noMatch("make_mismatch");
-  if (!yearsOverlap(vehicle.year_start, vehicle.year_end, source.year_start, source.year_end)) return noMatch("year_mismatch");
 
   const sourceChassis = expandCodeField(source.chassis_code);
   const chassisMatch = intersects(vehicle.chassis_keys, sourceChassis);
-  const modelMatch = splitModelNames(source.model).includes(vehicle.model_key);
-  if (sourceChassis.length && !chassisMatch) return noMatch("chassis_mismatch");
-  if (!sourceChassis.length && !modelMatch) return noMatch("model_mismatch_without_chassis");
-  reasons.push(chassisMatch ? "exact_chassis" : "exact_model_no_source_chassis");
-
-  const sourceBody = inferBodyStyle(source.body);
-  if (["unknown", "other"].includes(sourceBody) || ["unknown", "other"].includes(vehicle.body_style)) {
-    return reviewMatch("body_evidence_missing", [...reasons, "body_required"]);
-  }
-  if (sourceBody !== vehicle.body_style) return noMatch("body_mismatch");
-  reasons.push("exact_body");
-
-  const compatibility = checkOptionalDimensions(vehicle, source);
-  if (compatibility.conflict) return noMatch(compatibility.conflict);
-  reasons.push(...compatibility.reasons);
-  if (!chassisMatch) return reviewMatch("battery_source_missing_chassis", reasons);
-  return publishMatch("battery_exact_chassis_body", reasons, 1);
+  if (!sourceChassis.length) return noMatch("source_chassis_missing");
+  if (!chassisMatch) return noMatch("chassis_mismatch");
+  reasons.push("exact_chassis");
+  return publishMatch("battery_exact_chassis", reasons, 1);
 }
 
 export function matchFilterRow(vehicleInput, source) {
   const vehicle = prepareVehicleForMatching(vehicleInput);
   const reasons = [];
   if (vehicle.make_key !== normalKey(source.make)) return noMatch("make_mismatch");
-  if (!yearsOverlap(vehicle.year_start, vehicle.year_end, source.year_start, source.year_end)) return noMatch("year_mismatch");
-
-  const sourceChassis = expandCodeField(source.chassis_codes || source.chassis_code);
-  const chassisMatch = intersects(vehicle.chassis_keys, sourceChassis);
-  const modelMatch = splitModelNames(source.model).includes(vehicle.model_key);
-  if (sourceChassis.length && !chassisMatch) return noMatch("chassis_mismatch");
-  if (!sourceChassis.length && !modelMatch) return noMatch("model_mismatch_without_chassis");
-  reasons.push(chassisMatch ? "exact_chassis" : "exact_model_no_source_chassis");
 
   const sourceEngines = extractEngineCodes(source.engine_code);
-  if (!sourceEngines.length || !vehicle.engine_keys.length) return reviewMatch("engine_evidence_missing", [...reasons, "engine_required"]);
+  if (!sourceEngines.length || !vehicle.engine_keys.length) return noMatch("engine_evidence_missing");
   if (!intersects(vehicle.engine_keys, sourceEngines)) return noMatch("engine_mismatch");
   reasons.push("exact_engine");
-
-  const sourceDrives = extractDrivetrains(source.drivetrain);
-  if (sourceDrives.length && vehicle.drivetrains.length && !intersects(vehicle.drivetrains, sourceDrives)) return noMatch("drivetrain_mismatch");
-  if (sourceDrives.length && vehicle.drivetrains.length) reasons.push("compatible_drivetrain");
-
-  const sourceDisplacements = extractDisplacements(source.engine_displacement);
-  if (sourceDisplacements.length && vehicle.displacements.length && !intersects(vehicle.displacements, sourceDisplacements)) return noMatch("displacement_mismatch");
-  if (sourceDisplacements.length && vehicle.displacements.length) reasons.push("compatible_displacement");
-
-  return publishMatch(sourceChassis.length ? "filter_exact_engine_chassis" : "filter_exact_engine_model", reasons, sourceChassis.length ? 1 : 0.98);
+  return publishMatch("filter_exact_engine", reasons, 1);
 }
 
 export function assessWiperRows(vehicleInput, sourceRows) {
@@ -227,22 +196,6 @@ export function validWiperRow(row) {
 export function wiperConfigurationKey(row) {
   const rear = row.rear_length_in === null || row.rear_length_in === undefined || row.rear_length_in === "" ? "-" : Number(row.rear_length_in);
   return `${Number(row.driver_length_in)}/${Number(row.passenger_length_in)}/${rear}`;
-}
-
-function checkOptionalDimensions(vehicle, source) {
-  const reasons = [];
-  const sourceDrives = extractDrivetrains(source.drivetrain);
-  if (sourceDrives.length && vehicle.drivetrains.length && !intersects(vehicle.drivetrains, sourceDrives)) return { conflict: "drivetrain_mismatch", reasons };
-  if (sourceDrives.length && vehicle.drivetrains.length) reasons.push("compatible_drivetrain");
-
-  const sourceFuels = extractFuelTypes(source.fuel);
-  if (sourceFuels.length && vehicle.fuels.length && !intersects(vehicle.fuels, sourceFuels)) return { conflict: "fuel_mismatch", reasons };
-  if (sourceFuels.length && vehicle.fuels.length) reasons.push("compatible_fuel");
-
-  const sourceDisplacements = extractDisplacements(source.engine);
-  if (sourceDisplacements.length && vehicle.displacements.length && !intersects(vehicle.displacements, sourceDisplacements)) return { conflict: "displacement_mismatch", reasons };
-  if (sourceDisplacements.length && vehicle.displacements.length) reasons.push("compatible_displacement");
-  return { conflict: null, reasons };
 }
 
 function intersects(left, right) {
