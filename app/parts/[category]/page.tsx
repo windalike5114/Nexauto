@@ -7,6 +7,8 @@ import { formatMoney } from "@/lib/catalog";
 import { productImage } from "@/lib/product-content";
 import { listProducts } from "@/lib/queries/catalog";
 import { listProductsForVehicle } from "@/lib/queries/vehicle-product-fitment";
+import { readStoredVehicleContext } from "@/lib/server/vehicle-context";
+import type { VehicleContext } from "@/lib/vehicle-context";
 import type { Product } from "@/lib/types";
 
 const categoryDefinitions = {
@@ -60,9 +62,10 @@ type CategorySearchParams = {
 };
 
 export default async function PartCategoryPage({ params, searchParams }: { params: Promise<{ category: string }>; searchParams: Promise<CategorySearchParams> }) {
-  const [{ category }, vehicle] = await Promise.all([params, searchParams]);
+  const [{ category }, queryVehicle, storedVehicle] = await Promise.all([params, searchParams, readStoredVehicleContext()]);
   if (!(category in categoryDefinitions)) notFound();
   const definition = categoryDefinitions[category as CategoryKey];
+  const vehicle = parseVehicleSelection(queryVehicle) ? queryVehicle : toCategorySearchParams(storedVehicle);
   const vehicleSelection = parseVehicleSelection(vehicle);
   const products = vehicleSelection
     ? await loadVehicleProducts(definition.databaseCategory, vehicleSelection)
@@ -140,6 +143,23 @@ function parseVehicleSelection(vehicle: CategorySearchParams) {
   const year = Number(vehicle.year);
   if (!vehicle.makeId || !vehicle.modelId || !Number.isInteger(year)) return null;
   return { makeId: vehicle.makeId, modelId: vehicle.modelId, year, applicationId: vehicle.applicationId };
+}
+
+function toCategorySearchParams(vehicle: VehicleContext | null): CategorySearchParams {
+  if (!vehicle) return {};
+  return {
+    makeId: vehicle.makeId,
+    modelId: vehicle.modelId,
+    year: vehicle.year,
+    make: vehicle.make,
+    model: vehicle.model,
+    applicationId: vehicle.applicationId,
+    generationId: vehicle.generationId,
+    variantId: vehicle.variantId,
+    chassis: vehicle.chassis,
+    body: vehicle.bodyConfiguration,
+    engine: vehicle.engine
+  };
 }
 
 function buildQuoteHref(category: string, vehicle: string) {

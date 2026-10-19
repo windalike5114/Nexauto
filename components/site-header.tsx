@@ -137,7 +137,7 @@ export function SiteHeader() {
           <div className="flex items-center justify-end gap-1 text-xs font-black text-ink sm:gap-2 sm:text-sm">
             <Link href="/#vehicle-finder" className="inline-flex h-10 items-center gap-2 rounded-lg px-2 hover:bg-black/5 sm:px-3">
               <CarFront className="h-4 w-4 text-signal" />
-              <span className="hidden sm:inline">My Vehicle</span>
+              <span className="hidden max-w-[220px] truncate sm:inline">{vehicle ? vehicleLabel : "My Vehicle"}</span>
             </Link>
             <Link href="/account" className="inline-flex h-10 items-center gap-2 rounded-lg px-2 hover:bg-black/5 sm:px-3">
               <UserRound className="h-4 w-4" />
@@ -147,11 +147,7 @@ export function SiteHeader() {
           </div>
         </div>
 
-        {vehicle ? <div className="mt-2 flex h-9 items-center gap-2 rounded-lg border border-black/10 bg-[#F3F5F7] px-3 lg:hidden">
-          <CarFront className="h-4 w-4 shrink-0 text-signal" />
-          <span className="min-w-0 flex-1 truncate text-xs font-black text-ink">{vehicleLabel}</span>
-          <Link href="/#vehicle-finder" className="shrink-0 text-[11px] font-black uppercase tracking-[0.08em] text-signal hover:text-red-700">Change</Link>
-        </div> : <SearchForm className={`${isFixed ? "hidden" : "mt-2 flex"} lg:hidden`} compact />}
+        {!vehicle ? <SearchForm className={`${isFixed ? "hidden" : "mt-2 flex"} lg:hidden`} compact /> : null}
       </div>
 
       <nav className="border-t border-black/10 bg-[#F8FAFC]" aria-label="Product categories">
