@@ -62,10 +62,10 @@ export default async function WiperSkuPage({
   if (!wiperSet) notFound();
 
   const vehicleContext =
-    query.applicationId && query.make && query.model && query.year
+    query.applicationId && query.applicationKind === "canonical" && query.make && query.model && query.year
       ? {
           applicationId: query.applicationId,
-          applicationKind: query.applicationKind === "canonical" ? "canonical" as const : "legacy" as const,
+          applicationKind: "canonical" as const,
           make: decodeURIComponent(query.make),
           model: decodeURIComponent(query.model),
           year: Number(query.year),
@@ -104,11 +104,19 @@ export default async function WiperSkuPage({
               Smooth, quiet and reliable wiping performance designed for everyday New Zealand driving.
             </p>
             <div className="mt-5 flex flex-wrap items-end gap-3">
-              <span className="text-lg font-black text-steel line-through sm:text-xl">
-                {formatMoney(wiperSet.compareAtPrice ?? wiperPairPricing.compareAtPrice)}
+              {wiperSet.purchasable ? (
+                <>
+                  <span className="text-lg font-black text-steel line-through sm:text-xl">
+                    {formatMoney(wiperSet.compareAtPrice ?? wiperPairPricing.compareAtPrice)}
+                  </span>
+                  <span className="rounded bg-signal px-3 py-1 text-xs font-black uppercase tracking-[0.14em] text-white">Sale</span>
+                </>
+              ) : (
+                <span className="rounded bg-amber-100 px-3 py-1 text-xs font-black uppercase tracking-[0.14em] text-amber-900">Coming soon</span>
+              )}
+              <span className="text-3xl font-black sm:text-4xl">
+                {wiperSet.purchasable ? formatMoney(wiperSet.price) : "Price pending"}
               </span>
-              <span className="rounded bg-signal px-3 py-1 text-xs font-black uppercase tracking-[0.14em] text-white">Sale</span>
-              <span className="text-3xl font-black sm:text-4xl">{formatMoney(wiperSet.price)}</span>
             </div>
             <div className="mt-4 grid grid-cols-2 gap-2 text-xs font-black text-ink sm:text-sm">
               <span className={`rounded border px-3 py-2 ${vehicleContext ? "border-emerald-700/20 bg-emerald-50 text-emerald-800" : "border-amber-700/20 bg-amber-50 text-amber-900"}`}>
@@ -160,7 +168,22 @@ export default async function WiperSkuPage({
             </details>
           ) : null}
 
-          <WiperSetPurchase wiperSet={wiperSet} rearAddon={rearAddon} vehicle={vehicle} vehicleContext={vehicleContext} />
+          {wiperSet.purchasable ? (
+            <WiperSetPurchase wiperSet={wiperSet} rearAddon={rearAddon} vehicle={vehicle} vehicleContext={vehicleContext} />
+          ) : (
+            <section className="rounded-lg border border-amber-300 bg-amber-50 p-5">
+              <p className="text-sm font-black text-ink">Catalogue preview — purchasing is disabled.</p>
+              <p className="mt-2 text-sm font-bold leading-6 text-steel">
+                This wiper set is being reviewed for fitment, pricing, and stock. It cannot be added to the cart or purchased yet.
+              </p>
+              <Link
+                href={`/contact?part=${encodeURIComponent(wiperSet.name)}`}
+                className="mt-4 inline-flex h-11 items-center justify-center rounded bg-ink px-4 text-sm font-black text-white transition hover:-translate-y-0.5 hover:bg-black"
+              >
+                Ask about this product
+              </Link>
+            </section>
+          )}
         </section>
       </section>
 

@@ -7,7 +7,7 @@ import type { Product } from "@/lib/types";
 
 export function ProductCard({ product, categoryName }: { product: Product; categoryName?: string }) {
   const image = productImage(product);
-  const promo = product.category === "wiper" ? "-15%" : product.category === "bulb" ? "Hot" : "";
+  const promo = !product.purchasable ? "Coming soon" : product.category === "wiper" ? "-15%" : product.category === "bulb" ? "Hot" : "";
   const compareAt = promo === "-15%" ? product.price / 0.85 : null;
 
   return (
@@ -47,8 +47,8 @@ export function ProductCard({ product, categoryName }: { product: Product; categ
         </div>
         <div className="flex items-center justify-between">
           <span className="flex flex-col">
-            <span className="text-lg font-black">{formatMoney(product.price)}</span>
-            {compareAt ? <span className="text-xs font-bold text-steel line-through">{formatMoney(compareAt)}</span> : null}
+            <span className="text-lg font-black">{product.purchasable ? formatMoney(product.price) : "Preview"}</span>
+            {compareAt && product.purchasable ? <span className="text-xs font-bold text-steel line-through">{formatMoney(compareAt)}</span> : null}
           </span>
           <Link
             href={`/products/${product.slug}`}

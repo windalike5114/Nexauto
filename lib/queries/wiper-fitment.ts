@@ -84,32 +84,6 @@ const CANONICAL_FITMENT_SELECT = `
   )
 `;
 
-type ApplicationMakeRow = {
-  vehicle_applications: { vehicle_makes: WiperFitmentMake | WiperFitmentMake[] | null } | null;
-};
-
-type ApplicationModelRow = {
-  model_id: string;
-  vehicle_models: WiperFitmentModel | WiperFitmentModel[] | null;
-};
-
-type ApplicationYearRow = { year_start: number | null; year_end: number | null };
-
-type ApplicationFitmentRow = {
-  id: string;
-  start_raw: string | null;
-  end_raw: string | null;
-  year_start: number | null;
-  year_end: number | null;
-  vehicle_makes: { name: string } | Array<{ name: string }> | null;
-  vehicle_models: { name: string } | Array<{ name: string }> | null;
-  wiper_length_fitments: Array<{
-    driver_length_in: string | number | null;
-    passenger_length_in: string | number | null;
-    rear_length_in: string | number | null;
-  }> | null;
-};
-
 type CanonicalModel = {
   id: string;
   name: string;
@@ -174,20 +148,10 @@ function single<T>(value: T | T[] | null | undefined) {
 
 export async function listWiperFitmentMakes() {
   const supabase = getSupabaseOrThrow();
-  const [legacy, canonical] = await Promise.all([
-    selectAll(
-      supabase.from("wiper_length_fitments").select("vehicle_applications(vehicle_makes(id,name))").order("created_at", { ascending: true })
-    ),
-    loadPublishedCanonicalFitments(supabase)
-  ]);
-  if (legacy.error) throw legacy.error;
+  const canonical = await loadPublishedCanonicalFitments(supabase);
   if (canonical.error) throw canonical.error;
 
   const makes = new Map<string, WiperFitmentMake>();
-  for (const row of (legacy.data ?? []) as unknown as ApplicationMakeRow[]) {
-    const make = single(row.vehicle_applications?.vehicle_makes);
-    if (make?.id) makes.set(make.id, { id: make.id, name: make.name });
-  }
   for (const row of canonical.data) {
     const identity = getCanonicalIdentity(row);
     if (identity) makes.set(identity.make.id, identity.make);
@@ -197,19 +161,13 @@ export async function listWiperFitmentMakes() {
 
 export async function listWiperFitmentModels(makeId: string) {
   const supabase = getSupabaseOrThrow();
-  const [legacy, canonical, masterCatalog] = await Promise.all([
-    supabase.from("vehicle_applications").select("model_id,vehicle_models(id,name)").eq("make_id", makeId).eq("active", true).order("model_id"),
+  const [canonical, masterCatalog] = await Promise.all([
     loadPublishedCanonicalFitments(supabase),
     loadMachterMasterModels(supabase, makeId)
   ]);
-  if (legacy.error) throw legacy.error;
   if (canonical.error) throw canonical.error;
 
   const models = new Map<string, WiperFitmentModel>();
-  for (const row of (legacy.data ?? []) as unknown as ApplicationModelRow[]) {
-    const model = single(row.vehicle_models);
-    if (model?.id) models.set(model.id, { id: model.id, name: model.name });
-  }
   for (const row of canonical.data) {
     const identity = getCanonicalIdentity(row);
     if (identity?.make.id === makeId) models.set(identity.model.id, identity.model);
@@ -222,20 +180,10 @@ export async function listWiperFitmentYears(makeId: string, modelId: string) {
   if (!group) return [];
 
   const supabase = getSupabaseOrThrow();
-  const [legacy, canonical] = await Promise.all([
-    supabase
-      .from("vehicle_applications")
-      .select("year_start,year_end")
-      .eq("make_id", makeId)
-      .in("model_id", group.modelIds)
-      .eq("active", true),
-    loadPublishedCanonicalFitments(supabase)
-  ]);
-  if (legacy.error) throw legacy.error;
+  const canonical = await loadPublishedCanonicalFitments(supabase);
   if (canonical.error) throw canonical.error;
 
   const years = new Set<number>();
-  for (const row of (legacy.data ?? []) as ApplicationYearRow[]) addYears(years, row.year_start, row.year_end, false);
   const modelIds = new Set(group.modelIds);
   for (const row of canonical.data) {
     const identity = getCanonicalIdentity(row);
@@ -272,57 +220,20 @@ async function loadWiperLengthFitments(
   if (!group) return { group: null, results: [] as WiperFitmentResult[] };
 
   const supabase = getSupabaseOrThrow();
-  const [legacy, canonical] = await Promise.all([
-    supabase
-      .from("vehicle_applications")
-      .select(`id,start_raw,end_raw,year_start,year_end,vehicle_makes(name),vehicle_models(name),wiper_length_fitments(driver_length_in,passenger_length_in,rear_length_in)`)
-      .eq("make_id", makeId)
-      .in("model_id", group.modelIds)
-      .lte("year_start", year)
-      .gte("year_end", year)
-      .eq("active", true)
-      .order("year_start", { ascending: false }),
-    loadPublishedCanonicalFitments(supabase)
-  ]);
-  if (legacy.error) throw legacy.error;
+  const canonical = await loadPublishedCanonicalFitments(supabase);
   if (canonical.error) throw canonical.error;
 
-  const legacyResults = ((legacy.data ?? []) as unknown as ApplicationFitmentRow[])
-    .map(mapLegacyFitmentRow)
-    .filter((entry): entry is WiperFitmentResult => Boolean(entry));
   const modelIds = new Set(group.modelIds);
   const canonicalResults = canonical.data
     .filter((row) => canonicalFitsVehicle(row, makeId, modelIds, year))
     .map(mapCanonicalFitmentRow)
     .filter((entry): entry is WiperFitmentResult => Boolean(entry));
 
-  const results = [...legacyResults, ...canonicalResults]
+  const results = canonicalResults
     .filter((entry) => !selection || (entry.applicationId === selection.applicationId && entry.applicationKind === selection.applicationKind))
     .sort((left, right) => compareFitments(left, right, group.name));
 
   return { group, results };
-}
-
-function mapLegacyFitmentRow(row: ApplicationFitmentRow): WiperFitmentResult | null {
-  const fitment = row.wiper_length_fitments?.[0];
-  if (!fitment) return null;
-  return {
-    applicationId: row.id,
-    applicationKind: "legacy",
-    make: single(row.vehicle_makes)?.name ?? "",
-    model: single(row.vehicle_models)?.name ?? "",
-    generationName: null,
-    chassisCodes: [],
-    variantName: null,
-    bodyStyle: null,
-    startRaw: row.start_raw,
-    endRaw: row.end_raw,
-    startYear: row.year_start,
-    endYear: row.year_end,
-    driverLengthIn: toNumber(fitment.driver_length_in),
-    passengerLengthIn: toNumber(fitment.passenger_length_in),
-    rearLengthIn: toNumber(fitment.rear_length_in)
-  };
 }
 
 export function mapCanonicalFitmentRow(row: CanonicalFitmentRow): WiperFitmentResult | null {

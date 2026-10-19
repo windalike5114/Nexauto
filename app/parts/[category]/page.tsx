@@ -127,7 +127,7 @@ function ProductCard({ product }: { product: Product }) {
   return (
     <Link href={`/products/${product.slug}` as never} className="group overflow-hidden rounded-xl border border-black/10 bg-white shadow-sm hover:-translate-y-0.5 hover:shadow-panel">
       <div className="relative aspect-[4/3] bg-zinc-100">{image ? <Image src={image} alt={product.name} fill className="object-contain p-4 transition group-hover:scale-[1.03]" sizes="(min-width: 1280px) 25vw, 50vw" /> : null}</div>
-      <div className="p-4"><h3 className="text-lg font-black">{product.name}</h3><p className="mt-2 line-clamp-2 text-sm font-semibold leading-6 text-steel">{product.description}</p><div className="mt-4 flex items-center justify-between"><span className="text-xl font-black">{formatMoney(product.price)}</span><span className="inline-flex items-center gap-2 text-sm font-black">View <ArrowRight className="h-4 w-4" /></span></div></div>
+      <div className="p-4"><h3 className="text-lg font-black">{product.name}</h3><p className="mt-2 line-clamp-2 text-sm font-semibold leading-6 text-steel">{product.description}</p><div className="mt-4 flex items-center justify-between"><span className="text-xl font-black">{product.purchasable ? formatMoney(product.price) : "Preview"}</span><span className="inline-flex items-center gap-2 text-sm font-black">View <ArrowRight className="h-4 w-4" /></span></div></div>
     </Link>
   );
 }

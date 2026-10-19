@@ -9,6 +9,10 @@ import type { CartItem } from "@/lib/types";
 export function createSupabaseCheckoutProductRepository(): CheckoutProductRepository {
   return {
     async loadTrustedCartItems(items) {
+      const testItems = items.filter((item) => item.productId === "test_product");
+      if (testItems.length && !isCheckoutTestProductEnabled()) {
+        throw new ProductUnavailableError("Checkout test products are disabled.");
+      }
       const standardItems = items.filter((item) => item.productId !== "wiper_set" && item.productId !== "wiper_rear_addon" && item.productId !== "test_product");
       const wiperSetItems = items.filter((item) => item.productId === "wiper_set");
       const rearAddonItems = items.filter((item) => item.productId === "wiper_rear_addon");
@@ -61,7 +65,7 @@ export function createSupabaseCheckoutProductRepository(): CheckoutProductReposi
 
           return {
             ...cartItem,
-            name: getProductName(variant.products) ?? cartItem.name,
+            name: variant.product_name || cartItem.name,
             sku: variant.sku,
             price: Number(variant.price),
             attributes: sanitizeAttributes(variant.attributes),
@@ -105,6 +109,10 @@ export function createSupabaseCheckoutProductRepository(): CheckoutProductReposi
   };
 }
 
+function isCheckoutTestProductEnabled() {
+  return process.env.NODE_ENV !== "production" && process.env.ENABLE_CHECKOUT_TEST_PRODUCT === "true";
+}
+
 async function validateVehicleApplicationReferences(items: CartItem[]) {
   const legacyIds = [
     ...new Set(
@@ -121,43 +129,29 @@ async function validateVehicleApplicationReferences(items: CartItem[]) {
     )
   ];
 
-  if (!legacyIds.length && !canonicalIds.length) return;
-  if ([...legacyIds, ...canonicalIds].some((id) => !isLooseUuid(id))) {
+  if (legacyIds.length) {
+    throw new ProductUnavailableError("Legacy vehicle fitment references are no longer accepted.");
+  }
+  if (!canonicalIds.length) return;
+  if (canonicalIds.some((id) => !isLooseUuid(id))) {
     throw new ProductUnavailableError("Vehicle fitment reference is invalid.");
   }
 
   const supabase = createSupabaseAdminClient();
   if (!supabase) throw new ProductUnavailableError("Vehicle fitment could not be verified.");
-  const [legacyResult, canonicalResult] = await Promise.all([
-    legacyIds.length
-      ? supabase.from("vehicle_applications").select("id").in("id", legacyIds).eq("active", true)
-      : Promise.resolve({ data: [], error: null }),
-    canonicalIds.length
-      ? supabase
-          .from("vehicle_fitment_applications")
-          .select("id,vehicle_wiper_fitments!inner(id,fitment_status,wiper_configurations!inner(configuration_status))")
-          .in("id", canonicalIds)
-          .eq("active", true)
-          .eq("fitment_status", "published")
-          .eq("vehicle_wiper_fitments.fitment_status", "published")
-          .eq("vehicle_wiper_fitments.wiper_configurations.configuration_status", "published")
-      : Promise.resolve({ data: [], error: null })
-  ]);
+  const canonicalResult = await supabase
+    .from("vehicle_fitment_applications")
+    .select("id,vehicle_wiper_fitments!inner(id,fitment_status,wiper_configurations!inner(configuration_status))")
+    .in("id", canonicalIds)
+    .eq("active", true)
+    .eq("fitment_status", "published")
+    .eq("vehicle_wiper_fitments.fitment_status", "published")
+    .eq("vehicle_wiper_fitments.wiper_configurations.configuration_status", "published");
 
-  if (legacyResult.error) throw legacyResult.error;
   if (canonicalResult.error) throw canonicalResult.error;
-  if ((legacyResult.data ?? []).length !== legacyIds.length || (canonicalResult.data ?? []).length !== canonicalIds.length) {
+  if ((canonicalResult.data ?? []).length !== canonicalIds.length) {
     throw new ProductUnavailableError("Vehicle fitment reference is no longer available.");
   }
-}
-
-function getProductName(value: unknown) {
-  if (!value) return null;
-  if (Array.isArray(value)) return getProductName(value[0]);
-  if (typeof value === "object" && "name" in value) {
-    return String((value as { name: string }).name);
-  }
-  return null;
 }
 
 function sanitizeAttributes(attributes: CartItem["attributes"] | unknown): CartItem["attributes"] {

@@ -96,6 +96,17 @@ test("all public fitment routes use the shared guard and hide database error mes
   assert.doesNotMatch(resultsRoute, /\.\.\.fitment,/);
 });
 
+test("public wiper lookup reads only the canonical vehicle catalogue", () => {
+  const querySource = readFileSync("lib/queries/wiper-fitment.ts", "utf8");
+  const resultsRoute = readFileSync("app/api/fitment/wipers/results/route.ts", "utf8");
+
+  assert.match(querySource, /\.from\("vehicle_wiper_fitments"\)/);
+  assert.doesNotMatch(querySource, /\.from\("vehicle_applications"\)/);
+  assert.doesNotMatch(querySource, /\.from\("wiper_length_fitments"\)/);
+  assert.match(resultsRoute, /applicationKind === "canonical"/);
+  assert.doesNotMatch(resultsRoute, /applicationKind === "legacy"/);
+});
+
 function legacyFitment(): WiperFitmentResult {
   return {
     applicationId: UUID,

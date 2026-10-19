@@ -36,9 +36,9 @@ export async function GET(request: Request) {
   }
 
   const hasSelection = rawApplicationId !== null || applicationKind !== null;
-  const hasValidSelection = applicationId && (applicationKind === "legacy" || applicationKind === "canonical");
+  const hasValidSelection = applicationId && applicationKind === "canonical";
   if (hasSelection && !hasValidSelection) {
-    return fitmentJson({ error: "applicationId and applicationKind must form a valid selection." }, guard, { status: 400 });
+    return fitmentJson({ error: "A canonical applicationId and applicationKind are required." }, guard, { status: 400 });
   }
 
   try {

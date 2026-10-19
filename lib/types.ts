@@ -11,6 +11,11 @@ export type Product = {
   videoUrl: string | null;
   images: string[];
   active: boolean;
+  visibilityStatus: "internal" | "public" | "archived";
+  contentStatus: "generated" | "review" | "approved" | "rejected";
+  commerceStatus: "catalog_only" | "enquiry" | "active" | "unavailable" | "discontinued";
+  checkoutEnabled: boolean;
+  purchasable: boolean;
 };
 
 export type ProductDetailSection = {
@@ -65,6 +70,9 @@ export type WiperSet = {
   price: number;
   compareAtPrice: number | null;
   active: boolean;
+  commerceStatus: "catalog_only" | "enquiry" | "active" | "unavailable" | "discontinued";
+  checkoutEnabled: boolean;
+  purchasable: boolean;
 };
 
 export type WiperRearAddon = {

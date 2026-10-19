@@ -9,6 +9,23 @@ create table if not exists categories (
   created_at timestamptz not null default now()
 );
 
+create table if not exists catalog_generation_batches (
+  id uuid primary key default gen_random_uuid(),
+  source_name text not null,
+  source_file text,
+  prompt_version text,
+  generator_name text,
+  status text not null default 'draft',
+  row_count integer not null default 0,
+  created_by uuid,
+  created_at timestamptz not null default now(),
+  completed_at timestamptz,
+  metadata jsonb not null default '{}'::jsonb,
+  constraint catalog_generation_batches_status_check check (status in ('draft', 'generating', 'review', 'completed', 'failed', 'cancelled')),
+  constraint catalog_generation_batches_row_count_check check (row_count >= 0),
+  constraint catalog_generation_batches_metadata_object_check check (jsonb_typeof(metadata) = 'object')
+);
+
 create table if not exists products (
   id uuid primary key default gen_random_uuid(),
   slug text not null unique,
@@ -20,12 +37,41 @@ create table if not exists products (
   video_url text,
   images text[] not null default '{}',
   active boolean not null default true,
+  visibility_status text not null default 'internal',
+  content_status text not null default 'generated',
+  commerce_status text not null default 'catalog_only',
+  checkout_enabled boolean not null default false,
+  content_origin text not null default 'generated',
+  generation_batch_id uuid references catalog_generation_batches(id) on delete set null,
+  content_generated_at timestamptz,
+  content_reviewed_at timestamptz,
+  content_reviewed_by uuid,
+  content_metadata jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+  updated_at timestamptz not null default now(),
+  constraint products_visibility_status_check check (visibility_status in ('internal', 'public', 'archived')),
+  constraint products_content_status_check check (content_status in ('generated', 'review', 'approved', 'rejected')),
+  constraint products_commerce_status_check check (commerce_status in ('catalog_only', 'enquiry', 'active', 'unavailable', 'discontinued')),
+  constraint products_content_origin_check check (content_origin in ('generated', 'supplier', 'imported', 'manual')),
+  constraint products_content_metadata_object_check check (jsonb_typeof(content_metadata) = 'object'),
+  constraint products_checkout_state_check check (
+    checkout_enabled = false
+    or (active = true and visibility_status = 'public' and content_status = 'approved' and commerce_status = 'active')
+  )
 );
 
 alter table products add column if not exists detail_sections jsonb not null default '[]'::jsonb;
 alter table products add column if not exists video_url text;
+alter table products add column if not exists visibility_status text not null default 'internal';
+alter table products add column if not exists content_status text not null default 'generated';
+alter table products add column if not exists commerce_status text not null default 'catalog_only';
+alter table products add column if not exists checkout_enabled boolean not null default false;
+alter table products add column if not exists content_origin text not null default 'generated';
+alter table products add column if not exists generation_batch_id uuid references catalog_generation_batches(id) on delete set null;
+alter table products add column if not exists content_generated_at timestamptz;
+alter table products add column if not exists content_reviewed_at timestamptz;
+alter table products add column if not exists content_reviewed_by uuid;
+alter table products add column if not exists content_metadata jsonb not null default '{}'::jsonb;
 
 create table if not exists product_attributes (
   product_id uuid primary key references products(id) on delete cascade,
@@ -46,6 +92,43 @@ create table if not exists product_variants (
   updated_at timestamptz not null default now(),
   constraint product_variants_attributes_is_object check (jsonb_typeof(attributes) = 'object')
 );
+
+create table if not exists product_identifiers (
+  id uuid primary key default gen_random_uuid(),
+  product_variant_id uuid not null references product_variants(id) on delete cascade,
+  identifier_type text not null check (identifier_type in ('supplier_sku', 'cross_reference', 'oe', 'alternate')),
+  identifier_value text not null check (btrim(identifier_value) <> ''),
+  normalized_value text not null check (btrim(normalized_value) <> ''),
+  data_source_id uuid,
+  is_primary boolean not null default false,
+  metadata jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now(),
+  unique (product_variant_id, identifier_type, normalized_value, data_source_id)
+);
+
+create table if not exists product_media (
+  id uuid primary key default gen_random_uuid(),
+  product_id uuid not null references products(id) on delete cascade,
+  media_type text not null default 'image',
+  url text not null,
+  alt_text text not null default '',
+  origin text not null default 'generated',
+  review_status text not null default 'generated',
+  generation_batch_id uuid references catalog_generation_batches(id) on delete set null,
+  is_primary boolean not null default false,
+  sort_order integer not null default 100,
+  metadata jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now(),
+  reviewed_at timestamptz,
+  reviewed_by uuid,
+  constraint product_media_type_check check (media_type in ('image', 'video', 'document')),
+  constraint product_media_origin_check check (origin in ('generated', 'supplier', 'imported', 'manual')),
+  constraint product_media_review_status_check check (review_status in ('generated', 'review', 'approved', 'rejected')),
+  constraint product_media_metadata_object_check check (jsonb_typeof(metadata) = 'object')
+);
+
+create unique index if not exists product_media_one_primary_uidx on product_media(product_id) where is_primary = true;
+create index if not exists product_media_product_sort_idx on product_media(product_id, sort_order, created_at);
 
 create index if not exists product_variants_product_id_idx on product_variants(product_id);
 create index if not exists product_variants_attributes_gin_idx on product_variants using gin(attributes);
@@ -291,9 +374,21 @@ create table if not exists wiper_sets (
   price numeric(10, 2) not null check (price >= 0),
   compare_at_price numeric(10, 2),
   active boolean not null default true,
+  visibility_status text not null default 'internal',
+  content_status text not null default 'generated',
+  commerce_status text not null default 'catalog_only',
+  checkout_enabled boolean not null default false,
+  generation_batch_id uuid references catalog_generation_batches(id) on delete set null,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
-  constraint wiper_sets_type_check check (set_type in ('front_pair', 'front_rear_set'))
+  constraint wiper_sets_type_check check (set_type in ('front_pair', 'front_rear_set')),
+  constraint wiper_sets_visibility_status_check check (visibility_status in ('internal', 'public', 'archived')),
+  constraint wiper_sets_content_status_check check (content_status in ('generated', 'review', 'approved', 'rejected')),
+  constraint wiper_sets_commerce_status_check check (commerce_status in ('catalog_only', 'enquiry', 'active', 'unavailable', 'discontinued')),
+  constraint wiper_sets_checkout_state_check check (
+    checkout_enabled = false
+    or (active = true and visibility_status = 'public' and content_status = 'approved' and commerce_status = 'active')
+  )
 );
 
 create table if not exists wiper_rear_addons (
@@ -303,8 +398,20 @@ create table if not exists wiper_rear_addons (
   rear_length_in numeric(4, 1) not null,
   price numeric(10, 2) not null check (price >= 0),
   active boolean not null default true,
+  visibility_status text not null default 'internal',
+  content_status text not null default 'generated',
+  commerce_status text not null default 'catalog_only',
+  checkout_enabled boolean not null default false,
+  generation_batch_id uuid references catalog_generation_batches(id) on delete set null,
   created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+  updated_at timestamptz not null default now(),
+  constraint wiper_rear_addons_visibility_status_check check (visibility_status in ('internal', 'public', 'archived')),
+  constraint wiper_rear_addons_content_status_check check (content_status in ('generated', 'review', 'approved', 'rejected')),
+  constraint wiper_rear_addons_commerce_status_check check (commerce_status in ('catalog_only', 'enquiry', 'active', 'unavailable', 'discontinued')),
+  constraint wiper_rear_addons_checkout_state_check check (
+    checkout_enabled = false
+    or (active = true and visibility_status = 'public' and content_status = 'approved' and commerce_status = 'active')
+  )
 );
 
 create table if not exists order_vehicle_snapshots (
@@ -533,9 +640,11 @@ create index if not exists contact_enquiries_status_idx
   on contact_enquiries(status, created_at desc);
 
 alter table categories enable row level security;
+alter table catalog_generation_batches enable row level security;
 alter table products enable row level security;
 alter table product_attributes enable row level security;
 alter table product_variants enable row level security;
+alter table product_media enable row level security;
 alter table orders enable row level security;
 alter table order_items enable row level security;
 alter table fitment_vehicles enable row level security;
@@ -599,12 +708,12 @@ create policy "Public can read wiper connector fitments"
 drop policy if exists "Public can read active wiper sets" on wiper_sets;
 create policy "Public can read active wiper sets"
   on wiper_sets for select
-  using (active = true);
+  using (active = true and visibility_status = 'public');
 
 drop policy if exists "Public can read active wiper rear addons" on wiper_rear_addons;
 create policy "Public can read active wiper rear addons"
   on wiper_rear_addons for select
-  using (active = true);
+  using (active = true and visibility_status = 'public');
 
 drop policy if exists "Public can read active categories" on categories;
 create policy "Public can read active categories"
@@ -614,7 +723,7 @@ create policy "Public can read active categories"
 drop policy if exists "Public can read active products" on products;
 create policy "Public can read active products"
   on products for select
-  using (active = true);
+  using (active = true and visibility_status = 'public');
 
 drop policy if exists "Public can read product attributes" on product_attributes;
 create policy "Public can read product attributes"
@@ -624,6 +733,7 @@ create policy "Public can read product attributes"
       select 1 from products
       where products.id = product_attributes.product_id
       and products.active = true
+      and products.visibility_status = 'public'
     )
   );
 
@@ -636,8 +746,46 @@ create policy "Public can read active variants"
       select 1 from products
       where products.id = product_variants.product_id
       and products.active = true
+      and products.visibility_status = 'public'
     )
   );
+
+drop policy if exists "Public can read published product media" on product_media;
+create policy "Public can read published product media"
+  on product_media for select
+  using (
+    review_status = 'approved'
+    and exists (
+      select 1 from products
+      where products.id = product_media.product_id
+      and products.active = true
+      and products.visibility_status = 'public'
+    )
+  );
+
+create or replace view checkout_eligible_product_variants
+with (security_invoker = true)
+as
+select
+  variants.id,
+  variants.product_id,
+  variants.sku,
+  variants.price,
+  variants.stock,
+  variants.attributes,
+  variants.active,
+  products.name as product_name,
+  products.category_slug
+from product_variants variants
+join products on products.id = variants.product_id
+where variants.active = true
+  and products.active = true
+  and products.visibility_status = 'public'
+  and products.content_status = 'approved'
+  and products.commerce_status = 'active'
+  and products.checkout_enabled = true;
+
+grant select on checkout_eligible_product_variants to anon, authenticated, service_role;
 
 create or replace function public.set_updated_at()
 returns trigger
@@ -1541,3 +1689,32 @@ on conflict (slug) do update set
   price = excluded.price,
   active = excluded.active,
   updated_at = now();
+
+-- The records seeded above are reviewed first-party catalogue records. Safe
+-- defaults remain in place for every later generated/imported record.
+update products
+set visibility_status = 'public',
+    content_status = 'approved',
+    commerce_status = 'active',
+    checkout_enabled = true,
+    content_origin = 'manual'
+where active = true and generation_batch_id is null;
+
+update products
+set commerce_status = 'enquiry',
+    checkout_enabled = false
+where slug in ('vehicle-fit-battery', 'vehicle-fit-oil-filter');
+
+update wiper_sets
+set visibility_status = 'public',
+    content_status = 'approved',
+    commerce_status = 'active',
+    checkout_enabled = true
+where active = true and generation_batch_id is null;
+
+update wiper_rear_addons
+set visibility_status = 'public',
+    content_status = 'approved',
+    commerce_status = 'active',
+    checkout_enabled = true
+where active = true and generation_batch_id is null;

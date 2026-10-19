@@ -13,6 +13,10 @@ type WiperSetRow = {
   price: string | number;
   compare_at_price: string | number | null;
   active: boolean;
+  visibility_status: "internal" | "public" | "archived";
+  content_status: "generated" | "review" | "approved" | "rejected";
+  commerce_status: "catalog_only" | "enquiry" | "active" | "unavailable" | "discontinued";
+  checkout_enabled: boolean;
 };
 
 type WiperRearAddonRow = {
@@ -52,11 +56,12 @@ export async function getWiperSetByLengths(driverLengthIn: number, passengerLeng
 
   const { data, error } = await supabase
     .from("wiper_sets")
-    .select("id,sku,slug,name,set_type,driver_length_in,passenger_length_in,rear_length_in,price,compare_at_price,active")
+    .select("id,sku,slug,name,set_type,driver_length_in,passenger_length_in,rear_length_in,price,compare_at_price,active,visibility_status,content_status,commerce_status,checkout_enabled")
     .eq("driver_length_in", longLength)
     .eq("passenger_length_in", shortLength)
     .eq("set_type", "front_pair")
     .eq("active", true)
+    .eq("visibility_status", "public")
     .single();
 
   if (error) {
@@ -72,10 +77,11 @@ export async function getWiperSetBySku(sku: string) {
   const supabase = getSupabaseOrThrow();
   const { data, error } = await supabase
     .from("wiper_sets")
-    .select("id,sku,slug,name,set_type,driver_length_in,passenger_length_in,rear_length_in,price,compare_at_price,active")
+    .select("id,sku,slug,name,set_type,driver_length_in,passenger_length_in,rear_length_in,price,compare_at_price,active,visibility_status,content_status,commerce_status,checkout_enabled")
     .eq("sku", sku.toUpperCase())
     .eq("set_type", "front_pair")
     .eq("active", true)
+    .eq("visibility_status", "public")
     .single();
 
   if (error) {
@@ -93,9 +99,13 @@ export async function getWiperSetsByIds(ids: string[]) {
   const supabase = getSupabaseOrThrow();
   const { data, error } = await supabase
     .from("wiper_sets")
-    .select("id,sku,slug,name,set_type,driver_length_in,passenger_length_in,rear_length_in,price,compare_at_price,active")
+    .select("id,sku,slug,name,set_type,driver_length_in,passenger_length_in,rear_length_in,price,compare_at_price,active,visibility_status,content_status,commerce_status,checkout_enabled")
     .in("id", ids)
-    .eq("active", true);
+    .eq("active", true)
+    .eq("visibility_status", "public")
+    .eq("content_status", "approved")
+    .eq("commerce_status", "active")
+    .eq("checkout_enabled", true);
 
   if (error) throw error;
   return (data as WiperSetRow[]).map(mapWiperSet).filter(isApprovedWiperSet);
@@ -110,6 +120,10 @@ export async function getWiperRearAddonByLength(rearLengthIn: number | null) {
     .select("id,slug,name,rear_length_in,price,active")
     .eq("rear_length_in", rearLengthIn)
     .eq("active", true)
+    .eq("visibility_status", "public")
+    .eq("content_status", "approved")
+    .eq("commerce_status", "active")
+    .eq("checkout_enabled", true)
     .single();
 
   if (error) {
@@ -130,6 +144,10 @@ export async function getWiperRearAddonById(id: string | null | undefined) {
     .select("id,slug,name,rear_length_in,price,active")
     .eq("id", id)
     .eq("active", true)
+    .eq("visibility_status", "public")
+    .eq("content_status", "approved")
+    .eq("commerce_status", "active")
+    .eq("checkout_enabled", true)
     .single();
 
   if (error) {
@@ -149,7 +167,11 @@ export async function getWiperRearAddonsByIds(ids: string[]) {
     .from("wiper_rear_addons")
     .select("id,slug,name,rear_length_in,price,active")
     .in("id", ids)
-    .eq("active", true);
+    .eq("active", true)
+    .eq("visibility_status", "public")
+    .eq("content_status", "approved")
+    .eq("commerce_status", "active")
+    .eq("checkout_enabled", true);
 
   if (error) throw error;
   return (data as WiperRearAddonRow[]).map(mapWiperRearAddon).filter((item) => APPROVED_REAR_WIPER_LENGTHS.has(item.rearLengthIn));
@@ -159,8 +181,9 @@ export async function listWiperSets() {
   const supabase = getSupabaseOrThrow();
   const { data, error } = await supabase
     .from("wiper_sets")
-    .select("id,sku,slug,name,set_type,driver_length_in,passenger_length_in,rear_length_in,price,compare_at_price,active")
+    .select("id,sku,slug,name,set_type,driver_length_in,passenger_length_in,rear_length_in,price,compare_at_price,active,visibility_status,content_status,commerce_status,checkout_enabled")
     .eq("active", true)
+    .eq("visibility_status", "public")
     .order("driver_length_in")
     .order("passenger_length_in");
 
@@ -178,6 +201,11 @@ function isApprovedWiperSet(wiperSet: WiperSet) {
 }
 
 function mapWiperSet(row: WiperSetRow): WiperSet {
+  const purchasable = row.active
+    && row.visibility_status === "public"
+    && row.content_status === "approved"
+    && row.commerce_status === "active"
+    && row.checkout_enabled;
   return {
     id: row.id,
     sku: row.sku,
@@ -189,7 +217,10 @@ function mapWiperSet(row: WiperSetRow): WiperSet {
     rearLengthIn: row.rear_length_in === null ? null : Number(row.rear_length_in),
     price: Number(row.price),
     compareAtPrice: row.compare_at_price === null ? null : Number(row.compare_at_price),
-    active: row.active
+    active: row.active,
+    commerceStatus: row.commerce_status,
+    checkoutEnabled: row.checkout_enabled,
+    purchasable
   };
 }
 

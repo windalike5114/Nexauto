@@ -12,6 +12,10 @@ type ProductRow = {
   video_url?: string | null;
   images: string[] | null;
   active: boolean;
+  visibility_status: "internal" | "public" | "archived";
+  content_status: "generated" | "review" | "approved" | "rejected";
+  commerce_status: "catalog_only" | "enquiry" | "active" | "unavailable" | "discontinued";
+  checkout_enabled: boolean;
 };
 
 type CategoryRow = {
@@ -32,7 +36,7 @@ type VariantRow = {
 
 export type ProductRelation = { name: string; category_slug?: string } | Array<{ name: string; category_slug?: string }> | null;
 export type AdminStockRow = VariantRow & { products: ProductRelation };
-export type CheckoutVariantRow = VariantRow & { products: ProductRelation };
+export type CheckoutVariantRow = VariantRow & { product_name: string; category_slug: string };
 
 function getSupabaseOrThrow() {
   const supabase = createSupabaseServerClient();
@@ -45,6 +49,11 @@ function getSupabaseOrThrow() {
 }
 
 function mapProduct(row: ProductRow): Product {
+  const purchasable = row.active
+    && row.visibility_status === "public"
+    && row.content_status === "approved"
+    && row.commerce_status === "active"
+    && row.checkout_enabled;
   return {
     id: row.id,
     slug: row.slug,
@@ -55,7 +64,12 @@ function mapProduct(row: ProductRow): Product {
     detailSections: parseDetailSections(row.detail_sections ?? null),
     videoUrl: row.video_url ?? null,
     images: row.images ?? [],
-    active: row.active
+    active: row.active,
+    visibilityStatus: row.visibility_status,
+    contentStatus: row.content_status,
+    commerceStatus: row.commerce_status,
+    checkoutEnabled: row.checkout_enabled,
+    purchasable
   };
 }
 
@@ -89,8 +103,8 @@ export async function listCategories() {
 
 export async function listProducts(categorySlug?: string) {
   const supabase = getSupabaseOrThrow();
-  const selectColumns = "id,slug,name,category_slug,price,description,detail_sections,video_url,images,active";
-  const fallbackSelectColumns = "id,slug,name,category_slug,price,description,images,active";
+  const selectColumns = "id,slug,name,category_slug,price,description,detail_sections,video_url,images,active,visibility_status,content_status,commerce_status,checkout_enabled";
+  const fallbackSelectColumns = "id,slug,name,category_slug,price,description,images,active,visibility_status,content_status,commerce_status,checkout_enabled";
   let query = buildProductsQuery(supabase, selectColumns, categorySlug);
 
   const result = await query;
@@ -111,9 +125,10 @@ export async function getProductBySlug(slug: string) {
   const supabase = getSupabaseOrThrow();
   const result = await supabase
     .from("products")
-    .select("id,slug,name,category_slug,price,description,detail_sections,video_url,images,active")
+    .select("id,slug,name,category_slug,price,description,detail_sections,video_url,images,active,visibility_status,content_status,commerce_status,checkout_enabled")
     .eq("slug", slug)
     .eq("active", true)
+    .eq("visibility_status", "public")
     .single();
   let data: unknown | null = result.data;
   let error = result.error;
@@ -121,9 +136,10 @@ export async function getProductBySlug(slug: string) {
   if (isMissingOptionalProductContentColumn(error)) {
     const fallback = await supabase
       .from("products")
-      .select("id,slug,name,category_slug,price,description,images,active")
+      .select("id,slug,name,category_slug,price,description,images,active,visibility_status,content_status,commerce_status,checkout_enabled")
       .eq("slug", slug)
       .eq("active", true)
+      .eq("visibility_status", "public")
       .single();
     data = fallback.data;
     error = fallback.error;
@@ -182,10 +198,9 @@ export async function getVariantsByIds(variantIds: string[]) {
 
   const supabase = getSupabaseOrThrow();
   const { data, error } = await supabase
-    .from("product_variants")
-    .select("id,product_id,sku,price,stock,attributes,active,products(name,category_slug)")
-    .in("id", variantIds)
-    .eq("active", true);
+    .from("checkout_eligible_product_variants")
+    .select("id,product_id,sku,price,stock,attributes,active,product_name,category_slug")
+    .in("id", variantIds);
 
   if (error) throw error;
   return data as unknown as CheckoutVariantRow[];
@@ -196,7 +211,12 @@ function buildProductsQuery(
   columns: string,
   categorySlug?: string
 ) {
-  let query = supabase.from("products").select(columns).eq("active", true).order("created_at", { ascending: false });
+  let query = supabase
+    .from("products")
+    .select(columns)
+    .eq("active", true)
+    .eq("visibility_status", "public")
+    .order("created_at", { ascending: false });
 
   if (categorySlug) {
     query = query.eq("category_slug", categorySlug);

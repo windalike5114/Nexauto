@@ -5,8 +5,8 @@ const mainWiperProductImage = blobMediaAssets.images.find((asset) => asset.name 
 
 export function productImage(product: Product) {
   if (product.slug === "premium-rear-wiper-blade") return "/products/rear-wiper-blade.png";
-  if (product.slug === "vehicle-fit-battery") return "/products/vehicle-battery.png";
-  if (product.slug === "vehicle-fit-oil-filter") return "/products/vehicle-oil-filter.png";
+  if (product.category === "battery") return product.images[0] ?? "/products/vehicle-battery.png";
+  if (product.category === "filter") return product.images[0] ?? "/products/vehicle-oil-filter.png";
   if (product.category === "wiper") return mainWiperProductImage;
   if (product.category === "bulb") return "/products/halogen-bulb.png";
   return product.images[0] ?? "";
@@ -99,35 +99,35 @@ export function productDetailContent(product: Product) {
     };
   }
 
-  if (product.slug === "vehicle-fit-battery") {
+  if (product.category === "battery") {
     return {
       kicker: "Vehicle-specific battery supply",
       intro:
-        "Battery fitment depends on the exact vehicle, engine bay layout, hold-down style, terminal orientation, and required cold-cranking performance. Contact us with your vehicle details so we can confirm the correct option.",
-      highlights: ["Vehicle-specific battery matching", "Contact before ordering", "Future stocked category"],
+        product.description,
+      highlights: ["Vehicle-specific matching", "Specification review required", "Purchasing disabled during review"],
       sections: databaseSections.length
         ? databaseSections
         : [
             {
               title: "Fitment confirmation required",
-              body: "Battery selection should be confirmed against the vehicle application before supply. This listing is provided so the category is visible while stocked options are being expanded."
+              body: "Battery selection must be confirmed against the vehicle application, case dimensions, terminal layout and electrical requirements before supply."
             }
           ]
     };
   }
 
-  if (product.slug === "vehicle-fit-oil-filter") {
+  if (product.category === "filter") {
     return {
       kicker: "Engine-specific filter matching",
       intro:
-        "Oil filter fitment depends on the exact engine and production application. Contact us with your vehicle details so we can confirm the correct oil filter before ordering.",
-      highlights: ["Engine-specific fitment", "Contact before ordering", "Future stocked category"],
+        product.description,
+      highlights: ["Engine-specific fitment", "Cross-reference support", "Purchasing disabled during review"],
       sections: databaseSections.length
         ? databaseSections
         : [
             {
               title: "Fitment confirmation required",
-              body: "Oil filters vary by engine code and production range. This listing keeps the category visible while the full fitment-backed range is being prepared."
+              body: "Oil filters vary by engine code and production range. Cross-reference numbers assist identification but do not replace vehicle fitment confirmation."
             }
           ]
     };

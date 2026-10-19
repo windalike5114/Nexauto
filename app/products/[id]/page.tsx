@@ -57,9 +57,24 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
             <p className="text-sm font-black uppercase tracking-[0.18em] text-signal">{category?.name ?? product.category}</p>
             <h1 className="mt-3 text-4xl font-black leading-tight sm:text-5xl">{product.name}</h1>
             <p className="mt-4 text-lg leading-8 text-steel">{product.description}</p>
-            <p className="mt-5 text-3xl font-black">{needsContactSupport ? "Fitment enquiry" : formatMoney(product.price)}</p>
+            <p className="mt-5 text-3xl font-black">
+              {!product.purchasable ? "Coming soon" : needsContactSupport ? "Fitment enquiry" : formatMoney(product.price)}
+            </p>
           </div>
-          {needsContactSupport ? (
+          {!product.purchasable ? (
+            <section className="rounded-lg border border-amber-300 bg-amber-50 p-5">
+              <p className="text-sm font-black text-ink">Catalogue preview — purchasing is disabled.</p>
+              <p className="mt-2 text-sm font-bold leading-6 text-steel">
+                This product page is being reviewed for specifications, fitment, pricing, and stock. It cannot be added to the cart or purchased yet.
+              </p>
+              <Link
+                href={`/contact?part=${encodeURIComponent(product.name)}`}
+                className="mt-4 inline-flex h-11 items-center justify-center rounded bg-ink px-4 text-sm font-black text-white transition hover:-translate-y-0.5 hover:bg-black"
+              >
+                Ask about this product
+              </Link>
+            </section>
+          ) : needsContactSupport ? (
             <section className="rounded-lg border border-signal/20 bg-[#F8FAFC] p-5">
               <p className="text-sm font-black text-ink">Vehicle-specific fitment requires confirmation.</p>
               <p className="mt-2 text-sm font-bold leading-6 text-steel">
@@ -73,8 +88,8 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
               </Link>
             </section>
           ) : null}
-          {!needsContactSupport ? <ProductConfigurator product={product} attributes={attributes} variants={variants} /> : null}
-          {!needsContactSupport && allVariantsOutOfStock ? (
+          {product.purchasable && !needsContactSupport ? <ProductConfigurator product={product} attributes={attributes} variants={variants} /> : null}
+          {product.purchasable && !needsContactSupport && allVariantsOutOfStock ? (
             <p className="rounded-lg border border-black/10 bg-zinc-50 px-4 py-3 text-sm font-bold text-steel">
               This product is currently out of stock.
             </p>
