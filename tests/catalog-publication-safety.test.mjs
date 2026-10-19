@@ -8,6 +8,8 @@ const checkoutRepository = readFileSync("lib/infrastructure/supabase/checkout-pr
 const productPage = readFileSync("app/products/[id]/page.tsx", "utf8");
 const wiperPage = readFileSync("app/wipers/[sku]/page.tsx", "utf8");
 const wiperQuery = readFileSync("lib/queries/wiper-commerce.ts", "utf8");
+const homePage = readFileSync("app/page.tsx", "utf8");
+const homeProductTabs = readFileSync("components/home-product-tabs.tsx", "utf8");
 
 test("generated catalogue records default to non-purchasable lifecycle states", () => {
   assert.match(migration, /visibility_status text not null default 'internal'/);
@@ -35,6 +37,8 @@ test("catalog-only pages render a preview instead of purchase controls", () => {
   assert.match(productPage, /Catalogue preview — purchasing is disabled/);
   assert.match(wiperPage, /wiperSet\.purchasable/);
   assert.match(wiperPage, /This wiper set is being reviewed/);
+  assert.match(homePage, /purchasable: item\.purchasable/);
+  assert.match(homeProductTabs, /purchasable \? formatMoney\(item\.price\) : "Preview"/);
 });
 
 test("wiper checkout requires approved active commerce state", () => {

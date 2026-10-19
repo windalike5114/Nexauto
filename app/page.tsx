@@ -177,5 +177,23 @@ function toWiperCard(item: WiperSet, badge?: string): StorefrontProductCard {
 }
 
 function toProductCard(item: Product, badge?: string): StorefrontProductCard {
-  return { id: item.id, href: `/products/${item.slug}`, image: productImage(item), eyebrow: item.category === "bulb" ? "Light Bulbs" : "Rear Wipers", title: item.name, price: item.price, badge };
+  return {
+    id: item.id,
+    href: `/products/${item.slug}`,
+    image: productImage(item),
+    eyebrow: getProductCategoryLabel(item.category),
+    title: item.name,
+    price: item.price,
+    purchasable: item.purchasable,
+    badge: badge ?? (item.purchasable ? undefined : "Coming soon")
+  };
+}
+
+function getProductCategoryLabel(category: string) {
+  if (category === "battery") return "Batteries";
+  if (category === "filter") return "Oil Filters";
+  if (category === "bulb") return "Light Bulbs";
+  if (category === "suspension") return "Suspension Parts";
+  if (category === "wiper") return "Rear Wipers";
+  return "Auto Parts";
 }

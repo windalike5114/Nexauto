@@ -13,6 +13,7 @@ export type StorefrontProductCard = {
   eyebrow: string;
   title: string;
   price: number;
+  purchasable?: boolean;
   compareAtPrice?: number | null;
   badge?: string;
 };
@@ -57,7 +58,8 @@ export function HomeProductTabs({ groups }: { groups: ProductTabGroup[] }) {
 }
 
 function ProductCard({ item }: { item: StorefrontProductCard }) {
-  const saving = item.compareAtPrice && item.compareAtPrice > item.price ? item.compareAtPrice - item.price : 0;
+  const purchasable = item.purchasable !== false;
+  const saving = purchasable && item.compareAtPrice && item.compareAtPrice > item.price ? item.compareAtPrice - item.price : 0;
   return (
     <Link href={item.href as never} className="group snap-start overflow-hidden rounded-xl border border-black/10 bg-white shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-panel">
       <div className="relative aspect-[4/3] bg-zinc-100">
@@ -69,8 +71,8 @@ function ProductCard({ item }: { item: StorefrontProductCard }) {
         <h3 className="mt-2 min-h-12 text-base font-black leading-6">{item.title}</h3>
         <div className="mt-3 flex items-end justify-between gap-3">
           <span>
-            <span className="text-lg font-black">{formatMoney(item.price)}</span>
-            {item.compareAtPrice && item.compareAtPrice > item.price ? <span className="ml-2 text-xs font-bold text-steel line-through">{formatMoney(item.compareAtPrice)}</span> : null}
+            <span className="text-lg font-black">{purchasable ? formatMoney(item.price) : "Preview"}</span>
+            {purchasable && item.compareAtPrice && item.compareAtPrice > item.price ? <span className="ml-2 text-xs font-bold text-steel line-through">{formatMoney(item.compareAtPrice)}</span> : null}
             {saving > 0 ? <span className="mt-1 block text-[11px] font-black text-emerald-700">Save {formatMoney(saving)}</span> : null}
           </span>
           <ArrowRight className="mb-1 h-4 w-4 shrink-0 transition group-hover:translate-x-1" />
