@@ -16,7 +16,8 @@ import {
   assessWiperRows,
   matchBatteryRow,
   matchFilterRow,
-  parseYearRange
+  parseYearRange,
+  wiperConfigurationKey
 } from "./fitment-v4-matcher.mjs";
 
 const DATA_DIR = "C:\\Users\\Sanli\\repco_nexauto\\clean\\data";
@@ -177,8 +178,16 @@ export function prepareMappings(paths) {
         configuration_key: (wiperDecision.configuration_keys ?? []).join(" | "),
         source_file: FILES.wipers,
         source_row_numbers: wiperDecision.candidates.map((row) => row.row_number),
-        match_reasons: ["body_or_exact_year_required"],
-        issue: wiperDecision.reason
+        match_reasons: ["chassis_or_generation_confirmation_required"],
+        issue: wiperDecision.reason,
+        required_discriminator: wiperDecision.required_discriminator,
+        suggested_configuration_key: wiperDecision.suggested_configuration_key ?? "",
+        suggestion_reason: wiperDecision.suggestion_reason ?? "",
+        suggestion_confidence: wiperDecision.suggestion_confidence ?? null,
+        candidate_ranges: [...new Set(wiperDecision.candidates.map((row) => {
+          const end = row.year_end ?? "ON";
+          return `${wiperConfigurationKey(row)} (${row.year_start ?? "?"}-${end})`;
+        }))].join(" | ")
       });
     }
   }
@@ -196,7 +205,7 @@ export function prepareMappings(paths) {
     rules: {
       battery: "make namespace + exact chassis; body/model/year/engine are not battery fitment keys",
       filter: "make namespace + exact engine; chassis/model/body/year are not filter fitment keys",
-      wiper: "make + exact model + overlapping year; auto-publish only when all valid source evidence resolves to one approved configuration"
+      wiper: "make + exact model + generation/chassis context; auto-publish only when all valid source evidence resolves to one approved configuration"
     },
     source_counts: { vehicles: vehicles.length, batteries: batteries.length, filters: filters.length, wipers: wipers.length },
     published_counts: countByCategory(published),

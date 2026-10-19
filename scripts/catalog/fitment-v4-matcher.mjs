@@ -172,7 +172,15 @@ export function assessWiperRows(vehicleInput, sourceRows) {
     byConfig.get(key).push(row);
   }
   if (byConfig.size !== 1) {
-    return { status: "review", reason: "multiple_wiper_configurations_body_or_year_required", candidates: valid, configuration_keys: [...byConfig.keys()] };
+    const suggestion = suggestWiperConfiguration(vehicle, byConfig);
+    return {
+      status: "review",
+      reason: "multiple_wiper_configurations_chassis_or_generation_required",
+      candidates: valid,
+      configuration_keys: [...byConfig.keys()],
+      required_discriminator: "chassis_or_generation",
+      ...suggestion
+    };
   }
   const [configurationKey, evidenceRows] = [...byConfig.entries()][0];
   return {
@@ -181,6 +189,35 @@ export function assessWiperRows(vehicleInput, sourceRows) {
     confidence: 0.95,
     configuration_key: configurationKey,
     evidence_rows: evidenceRows
+  };
+}
+
+export function suggestWiperConfiguration(vehicleInput, configurations) {
+  const vehicle = prepareVehicleForMatching(vehicleInput);
+  const vehicleStart = nullableYear(vehicle.year_start);
+  if (!vehicleStart || configurations.size < 2) return {};
+
+  const ranked = [...configurations.entries()].map(([configurationKey, rows]) => {
+    const sourceStarts = rows.map((row) => nullableYear(row.year_start)).filter((year) => year !== null);
+    const nearestStart = sourceStarts.length
+      ? sourceStarts.sort((left, right) => Math.abs(left - vehicleStart) - Math.abs(right - vehicleStart) || right - left)[0]
+      : null;
+    return {
+      configurationKey,
+      nearestStart,
+      distance: nearestStart === null ? Number.POSITIVE_INFINITY : Math.abs(nearestStart - vehicleStart)
+    };
+  }).sort((left, right) => left.distance - right.distance || (right.nearestStart ?? 0) - (left.nearestStart ?? 0));
+
+  const best = ranked[0];
+  const next = ranked[1];
+  if (!best || !Number.isFinite(best.distance) || (next && next.distance === best.distance)) return {};
+  return {
+    suggested_configuration_key: best.configurationKey,
+    suggestion_reason: best.distance === 0
+      ? "generation_start_matches_wiper_range_start"
+      : "nearest_generation_start_year",
+    suggestion_confidence: best.distance === 0 ? 0.8 : best.distance === 1 ? 0.7 : 0.6
   };
 }
 

@@ -90,6 +90,9 @@ test("wiper is published only when all overlapping evidence resolves to one conf
     { row_number: 2, make: "Toyota", model: "Corolla", year_start: 2018, year_end: 2023, driver_length_in: 28, passenger_length_in: 14, rear_length_in: null }
   ]);
   assert.equal(ambiguous.status, "review");
+  assert.equal(ambiguous.reason, "multiple_wiper_configurations_chassis_or_generation_required");
+  assert.equal(ambiguous.suggested_configuration_key, "26/14/-");
+  assert.equal(ambiguous.suggestion_reason, "nearest_generation_start_year");
 
   const unique = assessWiperRows({ ...nke165, year_end: 2017 }, [
     { row_number: 1, make: "Toyota", model: "Corolla", year_start: 2012, year_end: 2018, driver_length_in: 26, passenger_length_in: 14, rear_length_in: null },
@@ -97,4 +100,24 @@ test("wiper is published only when all overlapping evidence resolves to one conf
   ]);
   assert.equal(unique.status, "published");
   assert.equal(unique.configuration_key, "26/14/-");
+});
+
+test("wiper review suggests the configuration whose source range starts with the chassis generation", () => {
+  const vehicle = {
+    make: "Toyota",
+    model: "Corolla",
+    chassis_raw: "ZWE211,ZWE219",
+    body_raw: "Hatchback FWD",
+    engine_code: "2ZR-FXE",
+    year_start: 2018,
+    year_end: 2018
+  };
+  const result = assessWiperRows(vehicle, [
+    { row_number: 1, make: "Toyota", model: "Corolla", year_start: 2012, year_end: 2019, driver_length_in: 26, passenger_length_in: 14, rear_length_in: null },
+    { row_number: 2, make: "Toyota", model: "Corolla", year_start: 2018, year_end: 2023, driver_length_in: 28, passenger_length_in: 14, rear_length_in: null }
+  ]);
+  assert.equal(result.status, "review");
+  assert.equal(result.suggested_configuration_key, "28/14/-");
+  assert.equal(result.suggestion_reason, "generation_start_matches_wiper_range_start");
+  assert.equal(result.suggestion_confidence, 0.8);
 });
