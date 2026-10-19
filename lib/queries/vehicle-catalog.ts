@@ -2,6 +2,8 @@ import { unstable_cache } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase";
 
 export type VehicleCatalogOption = { id: string; name: string };
+export type VehicleCatalogIndexModel = VehicleCatalogOption & { years: number[] };
+export type VehicleCatalogIndexMake = VehicleCatalogOption & { models: VehicleCatalogIndexModel[] };
 
 export type VehicleCatalogApplicationOption = {
   id: string;
@@ -124,6 +126,35 @@ export const listVehicleCatalogMakes = unstable_cache(async () => {
   }
   return sortMakesForNz([...makes.values()]);
 }, ["vehicle-catalog-v3-makes"], { revalidate: 3600, tags: ["vehicle-catalog-v3"] });
+
+export const listVehicleCatalogIndex = unstable_cache(async (): Promise<VehicleCatalogIndexMake[]> => {
+  const rows = await loadPublishedVehicleIdentities();
+  const makes = new Map<string, { option: VehicleCatalogOption; models: Map<string, { option: VehicleCatalogOption; years: Set<number> }> }>();
+  const currentYear = new Date().getFullYear();
+
+  for (const row of rows) {
+    const identity = getIdentity(row);
+    if (!identity || !row.year_start) continue;
+    const make = makes.get(identity.make.id) ?? {
+      option: { id: identity.make.id, name: identity.make.name },
+      models: new Map()
+    };
+    const model = make.models.get(identity.model.id) ?? {
+      option: { id: identity.model.id, name: identity.model.name },
+      years: new Set<number>()
+    };
+    for (let year = row.year_start; year <= (row.year_end ?? currentYear); year += 1) model.years.add(year);
+    make.models.set(identity.model.id, model);
+    makes.set(identity.make.id, make);
+  }
+
+  return sortMakesForNz([...makes.values()].map(({ option, models }) => ({
+    ...option,
+    models: [...models.values()]
+      .map((model) => ({ ...model.option, years: [...model.years].sort((left, right) => right - left) }))
+      .sort((left, right) => left.name.localeCompare(right.name))
+  })));
+}, ["vehicle-catalog-v3-index"], { revalidate: 3600, tags: ["vehicle-catalog-v3"] });
 
 export const listVehicleCatalogModels = unstable_cache(async (makeId: string) => {
   const rows = await loadPublishedVehicleIdentities({ makeId });
@@ -255,7 +286,7 @@ function getChassisLabel(application: VehicleCatalogApplicationOption) {
   return application.chassisCodes.join(" / ") || application.generationName;
 }
 
-function sortMakesForNz(makes: VehicleCatalogOption[]) {
+function sortMakesForNz<T extends VehicleCatalogOption>(makes: T[]): T[] {
   const priority = new Map(PRIORITY_NZ_MAKES.map((name, index) => [name.toLowerCase(), index]));
   return [...makes].sort((left, right) => {
     const leftPriority = priority.get(left.name.toLowerCase());

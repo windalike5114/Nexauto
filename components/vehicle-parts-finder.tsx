@@ -6,6 +6,8 @@ import { CarFront, Loader2, Search } from "lucide-react";
 import { saveVehicleContext, type VehicleContext } from "@/lib/vehicle-context";
 
 type FinderOption = { id: string; name: string };
+type FinderModelOption = FinderOption & { years: number[] };
+type FinderMakeOption = FinderOption & { models: FinderModelOption[] };
 type VehicleApplicationOption = {
   id: string;
   generationId: string;
@@ -24,6 +26,7 @@ const vehicleRequestCache = new Map<string, Promise<unknown>>();
 
 export function VehiclePartsFinder() {
   const router = useRouter();
+  const [catalogMakes, setCatalogMakes] = useState<FinderMakeOption[]>([]);
   const [makes, setMakes] = useState<FinderOption[]>([]);
   const [models, setModels] = useState<FinderOption[]>([]);
   const [years, setYears] = useState<number[]>([]);
@@ -39,9 +42,11 @@ export function VehiclePartsFinder() {
 
   useEffect(() => {
     let active = true;
-    fetchJsonCached<{ makes: FinderOption[] }>(`/api/vehicles/makes?catalog=${vehicleCatalogApiVersion}`)
+    fetchJsonCached<{ makes: FinderMakeOption[] }>(`/api/vehicles/catalog?catalog=${vehicleCatalogApiVersion}`)
       .then((data) => {
-        if (active) setMakes(data.makes);
+        if (!active) return;
+        setCatalogMakes(data.makes);
+        setMakes(data.makes.map(({ id, name }) => ({ id, name })));
       })
       .catch((nextError) => {
         if (active) setError(nextError.message);
@@ -64,27 +69,13 @@ export function VehiclePartsFinder() {
       return;
     }
 
-    let active = true;
-    setLoading("models");
     setError("");
     setModelId("");
     setYears([]);
     setYear("");
     resetApplicationSelection();
-    fetchJsonCached<{ models: FinderOption[] }>(`/api/vehicles/models?makeId=${makeId}&catalog=${vehicleCatalogApiVersion}`)
-      .then((data) => {
-        if (active) setModels(data.models);
-      })
-      .catch((nextError) => {
-        if (active) setError(nextError.message);
-      })
-      .finally(() => {
-        if (active) setLoading("");
-      });
-    return () => {
-      active = false;
-    };
-  }, [makeId]);
+    setModels(catalogMakes.find((entry) => entry.id === makeId)?.models.map(({ id, name }) => ({ id, name })) ?? []);
+  }, [catalogMakes, makeId]);
 
   useEffect(() => {
     if (!makeId || !modelId) {
@@ -94,25 +85,12 @@ export function VehiclePartsFinder() {
       return;
     }
 
-    let active = true;
-    setLoading("years");
     setError("");
     setYear("");
     resetApplicationSelection();
-    fetchJsonCached<{ years: number[] }>(`/api/vehicles/years?makeId=${makeId}&modelId=${modelId}&catalog=${vehicleCatalogApiVersion}`)
-      .then((data) => {
-        if (active) setYears(data.years);
-      })
-      .catch((nextError) => {
-        if (active) setError(nextError.message);
-      })
-      .finally(() => {
-        if (active) setLoading("");
-      });
-    return () => {
-      active = false;
-    };
-  }, [makeId, modelId]);
+    const make = catalogMakes.find((entry) => entry.id === makeId);
+    setYears(make?.models.find((entry) => entry.id === modelId)?.years ?? []);
+  }, [catalogMakes, makeId, modelId]);
 
   useEffect(() => {
     if (!makeId || !modelId || !year) {

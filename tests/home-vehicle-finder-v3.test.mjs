@@ -8,6 +8,7 @@ const finder = readFileSync("components/vehicle-parts-finder.tsx", "utf8");
 const partsPage = readFileSync("app/parts/page.tsx", "utf8");
 const partsBrowser = readFileSync("components/compatible-parts-browser.tsx", "utf8");
 const applicationRoute = readFileSync("app/api/vehicles/applications/route.ts", "utf8");
+const catalogRoute = readFileSync("app/api/vehicles/catalog/route.ts", "utf8");
 const vehicleContext = readFileSync("lib/vehicle-context.ts", "utf8");
 const serverVehicleContext = readFileSync("lib/server/vehicle-context.ts", "utf8");
 const vehicleContextSynchronizer = readFileSync("components/vehicle-context-synchronizer.tsx", "utf8");
@@ -59,10 +60,15 @@ test("selected vehicle persists across product categories until the customer cha
 
 test("vehicle catalogue endpoints filter in the database and reuse catalogue reads", () => {
   assert.match(vehicleCatalog, /unstable_cache/);
+  assert.match(vehicleCatalog, /listVehicleCatalogIndex/);
   assert.match(vehicleCatalog, /vehicle_generations\.vehicle_models\.make_id/);
   assert.match(vehicleCatalog, /vehicle_generations\.vehicle_models\.id/);
   assert.match(vehicleCatalog, /year_end\.is\.null,year_end\.gte/);
   assert.match(finder, /vehicleRequestCache/);
+  assert.match(finder, /\/api\/vehicles\/catalog/);
+  assert.doesNotMatch(finder, /\/api\/vehicles\/models/);
+  assert.doesNotMatch(finder, /\/api\/vehicles\/years/);
+  assert.match(catalogRoute, /listVehicleCatalogIndex/);
   assert.match(finder, /router\.prefetch/);
 });
 
