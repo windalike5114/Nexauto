@@ -1,20 +1,17 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { ArrowRight, Search, SlidersHorizontal } from "lucide-react";
 import { formatMoney } from "@/lib/catalog";
 import { productImage } from "@/lib/product-content";
 import { listProducts } from "@/lib/queries/catalog";
 import { listWiperSets } from "@/lib/queries/wiper-commerce";
+import { buildShopPageHref, getShopPaginationPages, paginateShopItems, parseShopPage, type ShopPageQuery } from "@/lib/shop-pagination";
 import type { Product, WiperSet } from "@/lib/types";
 import { getWiperSetPreviewImage } from "@/lib/wiper-product-images";
 
 export const dynamic = "force-dynamic";
-
-export const metadata: Metadata = {
-  title: "Shop All Auto Parts",
-  description: "Browse current NexAutoParts products across wiper blades, light bulbs, filters, batteries and suspension parts."
-};
 
 const filters = [
   ["All Products", "all"],
@@ -25,15 +22,35 @@ const filters = [
   ["Control Arms", "suspension"]
 ] as const;
 
-type ShopParams = { q?: string; category?: string };
+type ShopParams = { q?: string; category?: string; page?: string };
 type CatalogItem = { id: string; kind: "wiper"; item: WiperSet } | { id: string; kind: "product"; item: Product };
+
+export async function generateMetadata({ searchParams }: { searchParams: Promise<ShopParams> }): Promise<Metadata> {
+  const params = await searchParams;
+  const page = parseShopPage(params.page) ?? 1;
+  const category = normalizeCategory(params.category);
+  const canonical = `https://nexautoparts.co.nz${buildShopPageHref({ category }, page)}`;
+
+  return {
+    title: page > 1 ? `Shop All Auto Parts - Page ${page}` : "Shop All Auto Parts",
+    description: "Browse current NexAutoParts products across wiper blades, light bulbs, filters, batteries and suspension parts.",
+    alternates: { canonical },
+    robots: params.q ? { index: false, follow: true } : { index: true, follow: true }
+  };
+}
 
 export default async function ShopPage({ searchParams }: { searchParams: Promise<ShopParams> }) {
   const params = await searchParams;
-  const category = filters.some(([, value]) => value === params.category) ? params.category ?? "all" : "all";
+  const requestedPage = parseShopPage(params.page);
+  if (requestedPage === null) notFound();
+
+  const category = normalizeCategory(params.category);
   const query = params.q?.trim().toLowerCase() ?? "";
   const { wiperSets, products, error } = await loadCatalog();
   const items = buildCatalogItems(wiperSets, products, category, query);
+  const pagination = paginateShopItems(items, requestedPage);
+  if (requestedPage > pagination.totalPages) notFound();
+  const paginationQuery = { category, q: params.q?.trim() };
 
   return (
     <main className="bg-[#F8FAFC]">
@@ -62,14 +79,23 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
 
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2"><SlidersHorizontal className="h-5 w-5 text-signal" /><h2 className="text-xl font-black">{filters.find(([, value]) => value === category)?.[0]}</h2></div>
-          <p className="text-sm font-bold text-steel">{items.length} current listing{items.length === 1 ? "" : "s"}</p>
+          <p className="text-sm font-bold text-steel">
+            {pagination.totalItems > 0
+              ? `Showing ${pagination.startIndex + 1}-${pagination.startIndex + pagination.items.length} of ${pagination.totalItems}`
+              : "0 current listings"}
+          </p>
         </div>
 
         {error ? <p className="rounded-xl border border-signal/20 bg-white p-5 font-bold text-signal">{error}</p> : null}
         {items.length ? (
-          <div className="grid grid-cols-2 gap-x-2 gap-y-4 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4">
-            {items.map((item) => <CatalogCard key={`${item.kind}-${item.id}`} item={item} />)}
-          </div>
+          <>
+            <div className="grid grid-cols-2 gap-x-2 gap-y-4 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4">
+              {pagination.items.map((item) => <CatalogCard key={`${item.kind}-${item.id}`} item={item} />)}
+            </div>
+            {pagination.totalPages > 1 ? (
+              <ShopPagination currentPage={requestedPage} totalPages={pagination.totalPages} query={paginationQuery} />
+            ) : null}
+          </>
         ) : (
           <section className="rounded-2xl border border-black/10 bg-white p-7 shadow-sm sm:p-10">
             <p className="text-xs font-black uppercase tracking-[0.16em] text-signal">Fitment help available</p>
@@ -84,6 +110,10 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
       </div>
     </main>
   );
+}
+
+function normalizeCategory(value: string | undefined) {
+  return filters.some(([, filterValue]) => filterValue === value) ? value ?? "all" : "all";
 }
 
 async function loadCatalog() {
@@ -116,6 +146,66 @@ function buildCatalogItems(wiperSets: WiperSet[], products: Product[], category:
 
 function matchesQuery(value: string, query: string) {
   return !query || value.toLowerCase().includes(query);
+}
+
+function ShopPagination({ currentPage, totalPages, query }: { currentPage: number; totalPages: number; query: ShopPageQuery }) {
+  const pages = getShopPaginationPages(currentPage, totalPages);
+
+  return (
+    <nav className="mt-8 flex flex-wrap items-center justify-center gap-2" aria-label="Product pagination">
+      <PaginationLink
+        href={buildShopPageHref(query, currentPage - 1)}
+        disabled={currentPage === 1}
+        label="Previous"
+        rel="prev"
+      />
+      {pages.map((page, index) => (
+        <span key={page} className="contents">
+          {index > 0 && page - pages[index - 1] > 1 ? <span className="px-1 text-steel" aria-hidden>…</span> : null}
+          <PaginationLink
+            href={buildShopPageHref(query, page)}
+            active={page === currentPage}
+            label={String(page)}
+            ariaLabel={`Page ${page}`}
+          />
+        </span>
+      ))}
+      <PaginationLink
+        href={buildShopPageHref(query, currentPage + 1)}
+        disabled={currentPage === totalPages}
+        label="Next"
+        rel="next"
+      />
+    </nav>
+  );
+}
+
+function PaginationLink({
+  href,
+  label,
+  active = false,
+  disabled = false,
+  rel,
+  ariaLabel
+}: {
+  href: string;
+  label: string;
+  active?: boolean;
+  disabled?: boolean;
+  rel?: "prev" | "next";
+  ariaLabel?: string;
+}) {
+  const className = `inline-flex h-10 min-w-10 items-center justify-center rounded-lg border px-3 text-sm font-black ${
+    active
+      ? "border-ink bg-ink text-white"
+      : disabled
+        ? "cursor-not-allowed border-black/5 bg-white text-steel/40"
+        : "border-black/10 bg-white text-ink hover:border-ink"
+  }`;
+
+  if (disabled) return <span className={className} aria-disabled="true">{label}</span>;
+
+  return <Link href={href as never} className={className} rel={rel} aria-label={ariaLabel} aria-current={active ? "page" : undefined}>{label}</Link>;
 }
 
 function CatalogCard({ item }: { item: CatalogItem }) {
