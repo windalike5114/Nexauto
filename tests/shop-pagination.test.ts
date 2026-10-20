@@ -70,3 +70,11 @@ test("robots policy keeps search indexing available while declining known data-h
   assert.match(source, /\/shop\?\*q=\*/);
   assert.doesNotMatch(source, /userAgent:\s*"Googlebot"/);
 });
+
+test("brake pad category remains visible in the main storefront navigation", () => {
+  for (const file of ["app/page.tsx", "components/site-header.tsx", "components/site-footer.tsx"]) {
+    const source = readFileSync(file, "utf8");
+    assert.match(source, /Brake Pads/, `${file} must retain the Brake Pads entry`);
+    assert.match(source, /category=brakes/, `${file} must link to the Brake Pads category`);
+  }
+});
