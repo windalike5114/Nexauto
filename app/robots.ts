@@ -6,11 +6,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/admin", "/api", "/checkout/success", "/checkout/cancel", "/shop?*q=*"]
-      },
-      {
-        userAgent: ["GPTBot", "CCBot", "ClaudeBot", "anthropic-ai", "Google-Extended", "Bytespider", "PerplexityBot"],
-        disallow: "/"
+        disallow: ["/admin", "/api", "/checkout/success", "/checkout/cancel"]
       }
     ],
     sitemap: "https://nexautoparts.co.nz/sitemap.xml",

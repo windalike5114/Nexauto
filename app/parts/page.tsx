@@ -180,7 +180,7 @@ function toExactVehicleContext(vehicle: PartsSearchParams): VehicleContext | nul
 }
 
 function isTabKey(value: string | undefined): value is CompatiblePartsTab {
-  return ["all", "wipers", "batteries", "filters", "brakes", "bulbs", "suspension"].includes(value ?? "");
+  return ["all", "wipers", "batteries", "filters", "bulbs", "suspension"].includes(value ?? "");
 }
 
 function buildWiperHref(wiperSet: WiperSet, fitment: WiperFitmentResult, vehicle: PartsSearchParams) {

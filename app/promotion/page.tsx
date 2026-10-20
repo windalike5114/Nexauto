@@ -28,7 +28,7 @@ export default async function PromotionPage() {
             <h2 className="mt-2 text-3xl font-black">Current offers</h2>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-x-2 gap-y-4 sm:gap-5 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
           {products.map((product) => (
             <ProductCard key={product.id} product={product} categoryName={categoryNameBySlug.get(product.category)} />
           ))}

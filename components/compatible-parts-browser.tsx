@@ -13,7 +13,6 @@ const tabs = [
   { key: "wipers", label: "Wipers" },
   { key: "batteries", label: "Batteries" },
   { key: "filters", label: "Filters" },
-  { key: "brakes", label: "Brake Pads" },
   { key: "bulbs", label: "Bulbs" },
   { key: "suspension", label: "Suspension" }
 ] as const;
@@ -128,7 +127,7 @@ export function CompatiblePartsBrowser({ products, wiperSet, wiperHref, rearLeng
 }
 
 function countByTab(products: Product[], wiperSet: WiperSet | null): Record<CompatiblePartsTab, number> {
-  const counts: Record<CompatiblePartsTab, number> = { all: wiperSet ? 1 : 0, wipers: wiperSet ? 1 : 0, batteries: 0, filters: 0, brakes: 0, bulbs: 0, suspension: 0 };
+  const counts: Record<CompatiblePartsTab, number> = { all: wiperSet ? 1 : 0, wipers: wiperSet ? 1 : 0, batteries: 0, filters: 0, bulbs: 0, suspension: 0 };
   for (const product of products) {
     const tab = tabForDatabaseCategory(product.category);
     if (tab) counts[tab] += 1;
@@ -140,7 +139,6 @@ function countByTab(products: Product[], wiperSet: WiperSet | null): Record<Comp
 function databaseCategory(tab: CompatiblePartsTab) {
   if (tab === "batteries") return "battery";
   if (tab === "filters") return "filter";
-  if (tab === "brakes") return "brake-pad";
   if (tab === "bulbs") return "bulb";
   if (tab === "suspension") return "suspension";
   return "";
@@ -149,7 +147,6 @@ function databaseCategory(tab: CompatiblePartsTab) {
 function tabForDatabaseCategory(category: string): Exclude<CompatiblePartsTab, "all" | "wipers"> | null {
   if (category === "battery") return "batteries";
   if (category === "filter") return "filters";
-  if (category === "brake-pad") return "brakes";
   if (category === "bulb") return "bulbs";
   if (category === "suspension") return "suspension";
   return null;

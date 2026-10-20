@@ -5,7 +5,6 @@ const mainWiperProductImage = blobMediaAssets.images.find((asset) => asset.name 
 
 export function productImage(product: Product) {
   if (product.slug === "premium-rear-wiper-blade") return "/products/rear-wiper-blade.png";
-  if (product.category === "brake-pad") return product.images[0] ?? "";
   if (product.category === "battery") return product.images[0] ?? "/products/vehicle-battery.png";
   if (product.category === "filter") return product.images[0] ?? "/products/vehicle-oil-filter.png";
   if (product.category === "wiper") return mainWiperProductImage;
@@ -129,22 +128,6 @@ export function productDetailContent(product: Product) {
             {
               title: "Fitment confirmation required",
               body: "Oil filters vary by engine code and production range. Cross-reference numbers assist identification but do not replace vehicle fitment confirmation."
-            }
-          ]
-    };
-  }
-
-  if (product.category === "brake-pad") {
-    return {
-      kicker: "Vehicle-specific braking components",
-      intro: product.description,
-      highlights: ["Axle-specific matching", "Chassis and brake-system review", "Fitment confirmation required"],
-      sections: databaseSections.length
-        ? databaseSections
-        : [
-            {
-              title: "Fitment confirmation required",
-              body: "Brake pad shape and specification can vary by axle, chassis, production range and fitted brake system. Confirm the vehicle and existing part details before supply."
             }
           ]
     };
