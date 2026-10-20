@@ -67,7 +67,7 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
 
         {error ? <p className="rounded-xl border border-signal/20 bg-white p-5 font-bold text-signal">{error}</p> : null}
         {items.length ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid grid-cols-2 gap-x-2 gap-y-4 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4">
             {items.map((item) => <CatalogCard key={`${item.kind}-${item.id}`} item={item} />)}
           </div>
         ) : (
@@ -125,9 +125,18 @@ function CatalogCard({ item }: { item: CatalogItem }) {
   const name = isWiper ? `Front Wiper Pair ${item.item.driverLengthIn}\" + ${item.item.passengerLengthIn}\"` : item.item.name;
   const eyebrow = isWiper ? `SKU ${item.item.sku}` : item.item.category === "bulb" ? "Light Bulbs" : "Rear Wipers";
   return (
-    <Link href={href as never} className="group overflow-hidden rounded-xl border border-black/10 bg-white shadow-sm hover:-translate-y-0.5 hover:shadow-panel">
-      <div className="relative aspect-[4/3] bg-zinc-100"><Image src={image} alt={name} fill className="object-contain p-4 transition group-hover:scale-[1.03]" sizes="(min-width: 1280px) 25vw, (min-width: 640px) 50vw, 100vw" /></div>
-      <div className="p-4"><p className="text-[11px] font-black uppercase tracking-[0.14em] text-signal">{eyebrow}</p><h3 className="mt-2 min-h-12 text-base font-black leading-6">{name}</h3><div className="mt-4 flex items-center justify-between"><span className="text-xl font-black">{formatMoney(item.item.price)}</span><span className="inline-flex items-center gap-2 text-sm font-black">View <ArrowRight className="h-4 w-4" /></span></div></div>
+    <Link href={href as never} className="group min-w-0 overflow-hidden rounded-lg border border-black/10 bg-white shadow-sm hover:-translate-y-0.5 hover:shadow-panel sm:rounded-xl">
+      <div className="relative aspect-square bg-zinc-100 sm:aspect-[4/3]">
+        <Image src={image} alt={name} fill className="object-contain p-2 transition group-hover:scale-[1.03] sm:p-4" sizes="(min-width: 1280px) 25vw, (min-width: 640px) 50vw, 50vw" />
+      </div>
+      <div className="p-2.5 sm:p-4">
+        <p className="truncate text-[9px] font-black uppercase tracking-[0.1em] text-signal sm:text-[11px] sm:tracking-[0.14em]">{eyebrow}</p>
+        <h3 title={name} className="mt-1 line-clamp-2 min-h-8 text-[13px] font-black leading-4 sm:mt-2 sm:min-h-12 sm:text-base sm:leading-6">{name}</h3>
+        <div className="mt-2 flex items-center justify-between gap-2 sm:mt-4">
+          <span className="text-base font-black sm:text-xl">{formatMoney(item.item.price)}</span>
+          <span className="hidden items-center gap-2 text-sm font-black sm:inline-flex">View <ArrowRight className="h-4 w-4" /></span>
+        </div>
+      </div>
     </Link>
   );
 }
