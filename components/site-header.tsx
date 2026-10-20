@@ -17,6 +17,7 @@ import { partsTabRequestedEvent } from "@/lib/parts-navigation";
 const categoryLinks = [
   ["Wiper Blades", "/parts?category=wipers"],
   ["Oil Filters", "/parts?category=filters"],
+  ["Brake Pads", "/parts?category=brakes"],
   ["Light Bulbs", "/parts?category=bulbs"],
   ["Batteries", "/parts?category=batteries"],
   ["Control Arms", "/parts?category=suspension"],

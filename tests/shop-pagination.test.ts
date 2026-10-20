@@ -4,6 +4,7 @@ import test from "node:test";
 import { NextRequest } from "next/server";
 import { guardShopPageRequest } from "../lib/application/catalog/shop-request-guard";
 import { FixedWindowRateLimiter } from "../lib/application/fitment/request-rate-limit";
+import { getProductCategoryDefinition, getProductCategoryLabel, productCategoryDefinitions } from "../lib/product-categories";
 import {
   buildShopPageHref,
   getShopPaginationPages,
@@ -30,6 +31,21 @@ test("shop pagination returns twelve products and stable navigation URLs", () =>
   assert.equal(buildShopPageHref({ category: "wipers", q: "front pair" }, 2), "/shop?category=wipers&q=front+pair&page=2");
   assert.equal(buildShopPageHref({ category: "all" }, 1), "/shop");
   assert.deepEqual(getShopPaginationPages(5, 10), [1, 4, 5, 6, 10]);
+});
+
+test("catalog category mapping exposes current product families including brake pads", () => {
+  assert.deepEqual(productCategoryDefinitions.map((category) => category.key), [
+    "wipers",
+    "filters",
+    "brakes",
+    "bulbs",
+    "batteries",
+    "suspension"
+  ]);
+  assert.equal(getProductCategoryDefinition("filters")?.databaseSlug, "filter");
+  assert.equal(getProductCategoryDefinition("batteries")?.databaseSlug, "battery");
+  assert.equal(getProductCategoryDefinition("brakes")?.databaseSlug, "brake-pad");
+  assert.equal(getProductCategoryLabel("brake-pad"), "Brake Pads");
 });
 
 test("shop request guard rate limits repeated listing requests by client IP", () => {

@@ -1,13 +1,14 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { ArrowRight, BatteryCharging, Eye, Gauge, Headphones, Mail, PackageCheck, SearchCheck, Truck, Wrench } from "lucide-react";
+import { ArrowRight, BatteryCharging, Disc3, Eye, Gauge, Headphones, Mail, PackageCheck, SearchCheck, Truck, Wrench } from "lucide-react";
 import { HomeNewsletterSignup } from "@/components/home-newsletter-signup";
 import { HomeHeroCarousel } from "@/components/home-hero-carousel";
 import { HomeProductTabs, type ProductTabGroup, type StorefrontProductCard } from "@/components/home-product-tabs";
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { VehiclePartsFinder } from "@/components/vehicle-parts-finder";
 import { formatMoney } from "@/lib/catalog";
+import { getProductCategoryLabel } from "@/lib/product-categories";
 import { productImage } from "@/lib/product-content";
 import { wiperPairPricing } from "@/lib/pricing";
 import { listProducts } from "@/lib/queries/catalog";
@@ -19,12 +20,13 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Auto Parts for New Zealand Drivers",
-  description: "Shop wiper blades, oil filters, light bulbs, batteries and control arms with vehicle fitment support from NexAutoParts."
+  description: "Shop wiper blades, brake pads, oil filters, light bulbs, batteries and control arms with vehicle fitment support from NexAutoParts."
 };
 
 const categories = [
   { title: "Wiper Blades", description: "Front pairs, rear blades and fitting support", href: "/parts?category=wipers", image: "/products/wiper-blade.png" },
   { title: "Oil Filters", description: "Engine-specific filters and part-number matching", href: "/parts?category=filters", image: "/products/vehicle-oil-filter.png" },
+  { title: "Brake Pads", description: "Axle, chassis and brake-system specific matching", href: "/parts?category=brakes", image: "" },
   { title: "Light Bulbs", description: "Headlight, fog and exterior replacement bulbs", href: "/parts?category=bulbs", image: "/products/halogen-bulb.png" },
   { title: "Batteries", description: "Case size, terminal layout, Ah and CCA matching", href: "/parts?category=batteries", image: "/products/vehicle-battery.png" },
   { title: "Control Arms", description: "Position-specific arms, ball joints and bushes", href: "/parts?category=suspension", image: "/products/control-arm-v2.png" },
@@ -35,6 +37,7 @@ const needs = [
   { title: "Improve visibility", description: "Clearer wet-weather driving with correctly sized wipers.", href: "/parts?category=wipers", action: "Shop wipers", icon: Eye },
   { title: "Routine engine service", description: "Start with the vehicle, then confirm the engine-specific filter.", href: "/parts?category=filters", action: "Find filters", icon: Gauge },
   { title: "Starting problems", description: "Match case size, terminal layout, Ah and cold-cranking amps.", href: "/parts?category=batteries", action: "Check batteries", icon: BatteryCharging },
+  { title: "Brake maintenance", description: "Confirm axle, chassis and fitted brake system before choosing pads.", href: "/parts?category=brakes", action: "Check brake pads", icon: Disc3 },
   { title: "Suspension noise", description: "Identify the axle, side and exact control-arm position first.", href: "/parts?category=suspension", action: "Find suspension parts", icon: Wrench }
 ] as const;
 
@@ -130,9 +133,8 @@ export default async function HomePage() {
     </main>
   );
 }
-
 function CategoryCard({ title, description, href, image }: { title: string; description: string; href: string; image: string }) {
-  return <Link href={href as never} className="group relative isolate block min-h-[260px] overflow-hidden rounded-2xl bg-ink shadow-sm"><Image src={image} alt={`${title} category`} fill className="-z-20 object-cover transition duration-500 group-hover:scale-[1.03]" sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" /><div className="absolute inset-0 -z-10 bg-gradient-to-t from-black via-black/35 to-transparent" /><div className="flex min-h-[260px] flex-col justify-end p-5 text-white sm:p-6"><h3 className="text-2xl font-black">{title}</h3><p className="mt-2 max-w-sm text-sm font-semibold leading-6 text-white/75">{description}</p><span className="mt-4 inline-flex items-center gap-2 text-sm font-black">Explore <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" /></span></div></Link>;
+  return <Link href={href as never} className="group relative isolate block min-h-[260px] overflow-hidden rounded-2xl bg-ink shadow-sm">{image ? <Image src={image} alt={`${title} category`} fill className="-z-20 object-cover transition duration-500 group-hover:scale-[1.03]" sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" /> : <div className="absolute inset-0 -z-20 grid place-items-center bg-gradient-to-br from-zinc-700 via-zinc-900 to-black"><Disc3 className="h-28 w-28 text-white/25 transition duration-500 group-hover:rotate-6 group-hover:scale-110" /></div>}<div className="absolute inset-0 -z-10 bg-gradient-to-t from-black via-black/35 to-transparent" /><div className="flex min-h-[260px] flex-col justify-end p-5 text-white sm:p-6"><h3 className="text-2xl font-black">{title}</h3><p className="mt-2 max-w-sm text-sm font-semibold leading-6 text-white/75">{description}</p><span className="mt-4 inline-flex items-center gap-2 text-sm font-black">Explore <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" /></span></div></Link>;
 }
 
 function DealBanner({ eyebrow, title, description, href, action, image }: { eyebrow: string; title: string; description: string; href: string; action: string; image: string }) {
@@ -187,13 +189,4 @@ function toProductCard(item: Product, badge?: string): StorefrontProductCard {
     purchasable: item.purchasable,
     badge: badge ?? (item.purchasable ? undefined : "Coming soon")
   };
-}
-
-function getProductCategoryLabel(category: string) {
-  if (category === "battery") return "Batteries";
-  if (category === "filter") return "Oil Filters";
-  if (category === "bulb") return "Light Bulbs";
-  if (category === "suspension") return "Suspension Parts";
-  if (category === "wiper") return "Rear Wipers";
-  return "Auto Parts";
 }

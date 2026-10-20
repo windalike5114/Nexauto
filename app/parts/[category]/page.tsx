@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 const supportedCategories: Record<string, string> = {
   batteries: "batteries",
   filters: "filters",
+  brakes: "brakes",
   bulbs: "bulbs",
   suspension: "suspension"
 };
