@@ -6,6 +6,7 @@ import { formatMoney } from "@/lib/catalog";
 import { productHref, productImage } from "@/lib/product-content";
 import { listProducts } from "@/lib/queries/catalog";
 import { listBrakePadCatalogProducts } from "@/lib/queries/brake-pad-catalog";
+import { listOilFilterCatalogProducts } from "@/lib/queries/oil-filter-catalog";
 import { listWiperSets } from "@/lib/queries/wiper-commerce";
 import type { Product, WiperSet } from "@/lib/types";
 import { getWiperSetPreviewImage } from "@/lib/wiper-product-images";
@@ -130,9 +131,8 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
 async function loadCatalog() {
   try {
     const [wiperSets, databaseProducts] = await Promise.all([listWiperSets(), listProducts()]);
-    const brakePads = listBrakePadCatalogProducts();
-    const databaseSkus = new Set(databaseProducts.map((product) => product.slug));
-    const products = [...databaseProducts, ...brakePads.filter((product) => !databaseSkus.has(product.slug))];
+    const databaseCatalog = databaseProducts.filter((product) => !["filter", "brake-pad"].includes(product.category));
+    const products = [...databaseCatalog, ...listBrakePadCatalogProducts(), ...listOilFilterCatalogProducts()];
     return { wiperSets, products, error: "" };
   } catch (error) {
     return { wiperSets: [] as WiperSet[], products: [] as Product[], error: error instanceof Error ? error.message : "Could not load products." };

@@ -96,7 +96,7 @@ export async function BrakePadProductView({ detail }: { detail: BrakePadDetail }
           </div>
 
           <div className="divide-y divide-black/10 overflow-hidden rounded-lg border border-black/10 bg-white">
-            <AccordionItem title="Product Details" open>
+            <AccordionItem title="Product Specifications" open>
               <p className="mb-5">{detail.packDescription}. Confirm the pad shape, dimensions and brake system before installation.</p>
               <DimensionsTable detail={detail} />
               <FitmentTable fitments={detail.fitments} />
@@ -105,7 +105,7 @@ export async function BrakePadProductView({ detail }: { detail: BrakePadDetail }
             {detail.fitments.length > 0 ? (
               <AccordionItem title="Vehicle Compatibility" open={Boolean(vehicle)}>
                 <p>
-                  The application rows shown in Product Details are informational only and are not used to decide Fits / Not fit.
+                  The application rows shown in Product Specifications are informational only and are not used to decide Fits / Not fit.
                   {vehicle ? ` Compatibility for ${vehicleLabel}${vehicleDetail ? ` · ${vehicleDetail}` : ""} will be checked against the separate vehicle-fitment table.` : " Select a vehicle to prepare a compatibility check against the separate vehicle-fitment table."}
                 </p>
               </AccordionItem>

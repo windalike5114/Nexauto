@@ -6,7 +6,6 @@ const mainWiperProductImage = blobMediaAssets.images.find((asset) => asset.name 
 export function productImage(product: Product) {
   if (product.slug === "premium-rear-wiper-blade") return "/products/rear-wiper-blade.png";
   if (product.category === "battery") return product.images[0] ?? "/products/vehicle-battery.png";
-  if (product.slug === "topstar-oil-filter-j-415") return "/products/oil-filters/cartridge-filter-with-seals.png";
   if (product.category === "filter") return product.images[0] ?? "/products/vehicle-oil-filter.png";
   if (product.category === "brake-pad") return product.images[0] ?? "/products/brake-pads/ceramic-brake-pad-set.png";
   if (product.category === "wiper") return mainWiperProductImage;
@@ -20,6 +19,8 @@ export function productHref(product: Product) {
     return `/brake-pads/${encodeURIComponent(sku)}`;
   }
   if (product.category === "filter") {
+    const sku = product.slug.replace(/^oil-filter-/i, "").toUpperCase();
+    if (sku !== product.slug.toUpperCase()) return `/oil-filters/${encodeURIComponent(sku)}`;
     const partNumber = product.name.replace(/^TopStar Oil Filter\s+/i, "").trim();
     if (partNumber && partNumber !== product.name) return `/oil-filters/${encodeURIComponent(partNumber)}`;
   }

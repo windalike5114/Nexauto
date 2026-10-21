@@ -14,8 +14,8 @@ export function OilFilterPurchase({ detail }: { detail: OilFilterDetail }) {
   function addToCart() {
     if (!available) return;
     addItem({
-      productId: detail.product.id,
-      variantId: detail.variant.id,
+      productId: "oil_filter",
+      variantId: detail.partNumber,
       sku: detail.variant.sku,
       name: detail.title,
       category: detail.product.category,

@@ -34,7 +34,7 @@ export function OilFilterProductGallery({ items, illustrative }: { items: Galler
         </span>
       </div>
 
-      <div className={`grid gap-2 sm:gap-3 ${items.length === 3 ? "grid-cols-3" : "grid-cols-2"}`}>
+      {items.length > 1 ? <div className={`grid gap-2 sm:gap-3 ${items.length === 3 ? "grid-cols-3" : "grid-cols-2"}`}>
         {items.map((item, index) => (
           <button
             key={item.src}
@@ -51,7 +51,7 @@ export function OilFilterProductGallery({ items, illustrative }: { items: Galler
             </span>
           </button>
         ))}
-      </div>
+      </div> : null}
     </div>
   );
 }

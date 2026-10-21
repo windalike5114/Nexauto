@@ -41,6 +41,7 @@
     "catalog-v3:import": "node scripts/catalog/prepare-clean-catalog-v3.mjs --apply",
     "catalog-v3:backup-customers": "node scripts/catalog/backup-production-customer-data.mjs",
     "catalog-v3:check": "node scripts/catalog/check-production-catalog-v3.mjs",
+    "oil-filter-catalog:import": "node scripts/catalog/import-oil-filter-pages.mjs",
     "fitment-v4:report": "node scripts/catalog/rebuild-fitments-v4.mjs --report-only",
     "fitment-v4:apply": "node scripts/catalog/rebuild-fitments-v4.mjs --apply",
     "fitment-v4:check": "node scripts/catalog/check-production-fitment-v4.mjs",

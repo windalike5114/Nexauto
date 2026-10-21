@@ -12,7 +12,7 @@ export async function generateMetadata({ params }: { params: Promise<{ sku: stri
 
   return {
     title: detail.title,
-    description: `${detail.title} specifications, cross-reference information and vehicle fitment support for New Zealand drivers.`,
+    description: `${detail.title}. Dimensions, model coverage and vehicle fitment support for New Zealand drivers.`,
     alternates: { canonical: `/oil-filters/${encodeURIComponent(detail.partNumber)}` }
   };
 }

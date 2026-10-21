@@ -51,7 +51,10 @@ export default async function VehiclePartsPage({ searchParams }: { searchParams:
 
   const synchronizedVehicle = toExactVehicleContext(vehicle);
   const compatible = selection ? await loadCompatibleParts(selection) : emptyCompatibleParts();
-  const products = compatible.products.filter((product) => !["vehicle-fit-battery", "vehicle-fit-oil-filter"].includes(product.slug));
+  const products = compatible.products.filter((product) =>
+    !["vehicle-fit-battery", "vehicle-fit-oil-filter"].includes(product.slug)
+    && !["filter", "brake-pad"].includes(product.category)
+  );
   const vehicleLabel = [vehicle.year, vehicle.make, vehicle.model, vehicle.chassis].filter(Boolean).join(" ");
   const vehicleDetail = [vehicle.body, vehicle.engine].filter(Boolean).join(" · ");
   const reviewDemo = compatible.wiperSet ? null : findHighConfidenceWiperReview(vehicle);

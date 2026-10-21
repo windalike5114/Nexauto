@@ -10,72 +10,43 @@ export type OilFilterSpecRow = {
 export type OilFilterDetail = {
   product: Product;
   variant: ProductVariant;
-  brand: string;
   partNumber: string;
+  supplierRef: string;
   title: string;
   construction: OilFilterConstruction;
-  verificationStatus: "generated" | "review" | "verified" | "rejected";
+  brands: string;
+  mostlyFor: string;
   heightMm?: number;
-  outsideDiameterMm?: number;
-  insideDiameterTopMm?: number;
-  insideDiameterBottomMm?: number;
+  outsideDiameter?: string;
+  insideDiameter?: string;
   threadSize?: string;
-  sealRingDimensions: string[];
-  packQuantity: number;
+  sealRingSize?: string;
   specifications: OilFilterSpecRow[];
   imageUrl: string;
-  dimensionImageUrl?: string;
-  packagingImageUrl?: string;
   imageIsIllustrative: boolean;
 };
 
 type FilterSpecInput = {
-  brand: string;
-  partNumber: string;
   construction: OilFilterConstruction;
-  verificationStatus: OilFilterDetail["verificationStatus"];
   heightMm?: number;
-  outsideDiameterMm?: number;
-  insideDiameterTopMm?: number;
-  insideDiameterBottomMm?: number;
+  outsideDiameter?: string;
+  insideDiameter?: string;
   threadSize?: string;
-  sealRingDimensions?: string[];
-  packQuantity?: number;
+  sealRingSize?: string;
 };
 
 export function buildOilFilterSpecifications(input: FilterSpecInput): OilFilterSpecRow[] {
+  const threadSize = input.sealRingSize ? undefined : input.threadSize;
   return [
-    { label: "Part Number", value: input.partNumber },
     { label: "Filter Type", value: input.construction },
     input.heightMm ? { label: "Height", value: `${formatDimension(input.heightMm)} mm` } : null,
-    input.outsideDiameterMm ? { label: "Outside Diameter", value: `${formatDimension(input.outsideDiameterMm)} mm` } : null,
-    input.insideDiameterTopMm || input.insideDiameterBottomMm
-      ? {
-          label: "Inside Diameter",
-          value: formatInsideDiameters(input.insideDiameterTopMm, input.insideDiameterBottomMm)
-        }
-      : null,
-    input.threadSize ? { label: "Thread", value: input.threadSize } : null,
-    input.sealRingDimensions?.length
-      ? { label: "Seal Ring Dimensions", value: input.sealRingDimensions.join(", ") }
-      : null,
-    { label: "Pack Quantity", value: `${input.packQuantity ?? 1} filter` },
-    { label: "Specification Status", value: titleCase(input.verificationStatus) }
+    input.outsideDiameter ? { label: "Outside Diameter", value: `${input.outsideDiameter} mm` } : null,
+    input.insideDiameter ? { label: "Inside Diameter", value: `${input.insideDiameter} mm` } : null,
+    threadSize ? { label: "Thread Size", value: threadSize } : null,
+    input.sealRingSize ? { label: "Seal Ring Size", value: input.sealRingSize } : null
   ].filter((row): row is OilFilterSpecRow => Boolean(row));
 }
 
 export function formatDimension(value: number) {
   return Number.isInteger(value) ? String(value) : value.toFixed(1);
-}
-
-function formatInsideDiameters(top?: number, bottom?: number) {
-  if (top && bottom) return `${formatDimension(top)} / ${formatDimension(bottom)} mm`;
-  return `${formatDimension(top ?? bottom ?? 0)} mm`;
-}
-
-function titleCase(value: string) {
-  return value
-    .split("_")
-    .map((part) => `${part.charAt(0).toUpperCase()}${part.slice(1)}`)
-    .join(" ");
 }

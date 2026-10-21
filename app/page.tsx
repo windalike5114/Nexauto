@@ -11,6 +11,7 @@ import { formatMoney } from "@/lib/catalog";
 import { productHref, productImage } from "@/lib/product-content";
 import { wiperPairPricing } from "@/lib/pricing";
 import { listProducts } from "@/lib/queries/catalog";
+import { listOilFilterCatalogProducts } from "@/lib/queries/oil-filter-catalog";
 import { listWiperSets } from "@/lib/queries/wiper-commerce";
 import type { Product, WiperSet } from "@/lib/types";
 import { getWiperSetPreviewImage } from "@/lib/wiper-product-images";
@@ -145,7 +146,11 @@ function TrustCard({ icon, title, text }: { icon: React.ReactNode; title: string
 
 async function loadHomeData() {
   try {
-    const [wiperSets, products] = await Promise.all([listWiperSets(), listProducts()]);
+    const [wiperSets, databaseProducts] = await Promise.all([listWiperSets(), listProducts()]);
+    const products = [
+      ...databaseProducts.filter((product) => product.category !== "filter"),
+      ...listOilFilterCatalogProducts()
+    ];
     return { wiperSets, products };
   } catch {
     return { wiperSets: [] as WiperSet[], products: [] as Product[] };

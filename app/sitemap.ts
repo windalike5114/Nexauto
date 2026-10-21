@@ -1,8 +1,7 @@
 import type { MetadataRoute } from "next";
 import { blogArticles } from "@/lib/blog";
-import { productHref } from "@/lib/product-content";
-import { listProducts } from "@/lib/queries/catalog";
 import { listBrakePadCatalogSkus } from "@/lib/queries/brake-pad-catalog";
+import { listOilFilterCatalogSkus } from "@/lib/queries/oil-filter-catalog";
 import { listWiperSets } from "@/lib/queries/wiper-commerce";
 
 const siteUrl = "https://nexautoparts.co.nz";
@@ -55,15 +54,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     dynamicEntries.push(...wiperEntries);
   } catch {}
 
-  try {
-    const oilFilters = await listProducts("filter");
-    dynamicEntries.push(...oilFilters.map((product) => ({
-      url: `${siteUrl}${productHref(product)}`,
-      lastModified: now,
-      changeFrequency: "weekly" as const,
-      priority: 0.7
-    })));
-  } catch {}
+  dynamicEntries.push(...listOilFilterCatalogSkus().map((sku) => ({
+    url: `${siteUrl}/oil-filters/${encodeURIComponent(sku)}`,
+    lastModified: now,
+    changeFrequency: "weekly" as const,
+    priority: 0.7
+  })));
 
   dynamicEntries.push(...listBrakePadCatalogSkus().map((sku) => ({
     url: `${siteUrl}/brake-pads/${encodeURIComponent(sku)}`,

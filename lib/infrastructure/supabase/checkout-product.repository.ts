@@ -1,5 +1,6 @@
 import { getVariantsByIds } from "@/lib/queries/catalog";
 import { getBrakePadBySlugOrPartNumber } from "@/lib/queries/brake-pad-catalog";
+import { getOilFilterBySlugOrPartNumber } from "@/lib/queries/oil-filter-catalog";
 import { getWiperRearAddonsByIds, getWiperSetsByIds } from "@/lib/queries/wiper-commerce";
 import type { CheckoutProductRepository, TrustedCartItem } from "@/lib/application/checkout/create-checkout-session";
 import { ProductUnavailableError } from "@/lib/application/checkout/checkout.errors";
@@ -14,20 +15,23 @@ export function createSupabaseCheckoutProductRepository(): CheckoutProductReposi
       if (testItems.length && !isCheckoutTestProductEnabled()) {
         throw new ProductUnavailableError("Checkout test products are disabled.");
       }
-      const standardItems = items.filter((item) => item.productId !== "wiper_set" && item.productId !== "wiper_rear_addon" && item.productId !== "brake_pad" && item.productId !== "test_product");
+      const standardItems = items.filter((item) => item.productId !== "wiper_set" && item.productId !== "wiper_rear_addon" && item.productId !== "brake_pad" && item.productId !== "oil_filter" && item.productId !== "test_product");
       const wiperSetItems = items.filter((item) => item.productId === "wiper_set");
       const rearAddonItems = items.filter((item) => item.productId === "wiper_rear_addon");
       const brakePadItems = items.filter((item) => item.productId === "brake_pad");
+      const oilFilterItems = items.filter((item) => item.productId === "oil_filter");
       await validateVehicleApplicationReferences(items);
       const requestedVariantIds = [...new Set(standardItems.map((item) => item.variantId))];
       const requestedWiperSetIds = [...new Set(wiperSetItems.map((item) => item.variantId))];
       const requestedRearAddonIds = [...new Set(rearAddonItems.map((item) => item.variantId))];
       const requestedBrakePadSkus = [...new Set(brakePadItems.map((item) => item.variantId))];
-      const [dbVariants, dbWiperSets, dbRearAddons, brakePads] = await Promise.all([
+      const requestedOilFilterSkus = [...new Set(oilFilterItems.map((item) => item.variantId))];
+      const [dbVariants, dbWiperSets, dbRearAddons, brakePads, oilFilters] = await Promise.all([
         getVariantsByIds(requestedVariantIds),
         getWiperSetsByIds(requestedWiperSetIds),
         getWiperRearAddonsByIds(requestedRearAddonIds),
-        Promise.all(requestedBrakePadSkus.map((sku) => getBrakePadBySlugOrPartNumber(sku)))
+        Promise.all(requestedBrakePadSkus.map((sku) => getBrakePadBySlugOrPartNumber(sku))),
+        Promise.all(requestedOilFilterSkus.map((sku) => getOilFilterBySlugOrPartNumber(sku)))
       ]);
 
       if (dbVariants.length !== requestedVariantIds.length) {
@@ -40,17 +44,22 @@ export function createSupabaseCheckoutProductRepository(): CheckoutProductReposi
       if (brakePads.some((brakePad) => !brakePad)) {
         throw new ProductUnavailableError("One or more brake pad items are no longer available.");
       }
+      if (oilFilters.some((oilFilter) => !oilFilter)) {
+        throw new ProductUnavailableError("One or more oil filter items are no longer available.");
+      }
 
       const variantsById = new Map(dbVariants.map((variant) => [variant.id, variant]));
       const wiperSetsById = new Map(dbWiperSets.map((wiperSet) => [wiperSet.id, wiperSet]));
       const rearAddonsById = new Map(dbRearAddons.map((rearAddon) => [rearAddon.id, rearAddon]));
       const brakePadsBySku = new Map(brakePads.flatMap((brakePad) => brakePad ? [[brakePad.partNumber, brakePad] as const] : []));
+      const oilFiltersBySku = new Map(oilFilters.flatMap((oilFilter) => oilFilter ? [[oilFilter.partNumber, oilFilter] as const] : []));
 
       return items.map((cartItem): TrustedCartItem => {
         const variant = variantsById.get(cartItem.variantId);
         const wiperSet = wiperSetsById.get(cartItem.variantId);
         const rearAddon = rearAddonsById.get(cartItem.variantId);
         const brakePad = brakePadsBySku.get(cartItem.variantId);
+        const oilFilter = oilFiltersBySku.get(cartItem.variantId);
 
         if (cartItem.productId === "test_product") {
           return {
@@ -81,6 +90,27 @@ export function createSupabaseCheckoutProductRepository(): CheckoutProductReposi
               length_mm: brakePad.lengthMm ?? "",
               width_mm: brakePad.widthMm ?? "",
               thickness_mm: brakePad.thicknessMm ?? ""
+            }
+          };
+        }
+
+        if (cartItem.productId === "oil_filter") {
+          if (!oilFilter) throw new ProductUnavailableError(`Cart item missing for oil filter ${cartItem.variantId}`);
+
+          return {
+            ...cartItem,
+            name: oilFilter.title,
+            sku: oilFilter.partNumber,
+            price: Number(oilFilter.variant.price),
+            bundleEligible: false,
+            attributes: {
+              supplier_ref: oilFilter.supplierRef,
+              filter_type: oilFilter.construction,
+              height_mm: oilFilter.heightMm ?? "",
+              outside_diameter_mm: oilFilter.outsideDiameter ?? "",
+              inside_diameter: oilFilter.insideDiameter ?? "",
+              thread_size: oilFilter.threadSize ?? "",
+              seal_ring_size: oilFilter.sealRingSize ?? ""
             }
           };
         }
