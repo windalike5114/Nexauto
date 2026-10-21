@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { buildOilFilterReviewGroups, prepareFitmentV6 } from "../scripts/catalog/deploy-fitment-v6.mjs";
+import { buildBrakePadReviewGroups, buildOilFilterReviewGroups, prepareFitmentV6 } from "../scripts/catalog/deploy-fitment-v6.mjs";
 import { applyVehicleCatalogSafety } from "../scripts/catalog/vehicle-catalog-safety.mjs";
 
 test("fitment V6 package is internally consistent", () => {
@@ -8,7 +8,7 @@ test("fitment V6 package is internally consistent", () => {
   assert.equal(prepared.report.source_links.brake_pad, 25_761);
   assert.equal(prepared.report.source_links.oil_filter, 20_036);
   assert.equal(prepared.report.source_links.wiper, 22_584);
-  assert.deepEqual(prepared.report.product_fitment_status, { published: 8_020, review: 37_777 });
+  assert.deepEqual(prepared.report.product_fitment_status, { published: 6_469, review: 39_328 });
   assert.equal(prepared.report.wiper_configurations, 86);
   assert.equal(prepared.report.unsupported_wiper_links, 842);
   assert.equal(prepared.report.catalogue_products.brake_pad, 211);
@@ -65,6 +65,17 @@ test("verified DB2357 conflict is quarantined only for Nissan X-Trail", () => {
   assert.equal(qashqai.some((row) => row.fitment_status === "published"), true);
 });
 
+test("brake-pad review queue contains only unresolved multiple-candidate groups", () => {
+  const prepared = prepareFitmentV6();
+  const reviews = buildBrakePadReviewGroups(prepared.productFitments, prepared.brakeCatalog);
+
+  assert.equal(reviews.length, 634);
+  assert.equal(reviews.filter((row) => row.severity === "error").length, 359);
+  assert.equal(reviews.filter((row) => row.severity === "warning").length, 275);
+  assert.equal(reviews.reduce((sum, row) => sum + row.payload.application_count, 0), 5_622);
+  assert.equal(reviews.every((row) => row.payload.applications.every((application) => application.candidates.length > 1)), true);
+});
+
 test("known vehicle year correction removes invalid years without deleting the application", () => {
   const data = {
     applications: [{ application_id: "ap_c7c7e5588c7ca43555c0", year_from: 2012, year_to: 2026, review_status: "unreviewed" }],
@@ -94,14 +105,27 @@ test("ASV70R publishes only the uniquely confirmed current-generation brake pads
   });
 });
 
-test("published brake pads require a high-confidence series match and a unique best candidate", () => {
+test("published brake pads are either a single source candidate or an official verified exception", () => {
   const prepared = prepareFitmentV6();
   const publishedBrakePads = prepared.productFitments.filter((row) =>
     row.product_type === "brake_pad" && row.fitment_status === "published"
   );
+  const rowsByApplicationPosition = new Map();
+  for (const row of prepared.productFitments.filter((entry) => entry.product_type === "brake_pad")) {
+    const key = `${row.application_id}:${row.position}`;
+    const group = rowsByApplicationPosition.get(key) ?? [];
+    group.push(row);
+    rowsByApplicationPosition.set(key, group);
+  }
 
   assert.ok(publishedBrakePads.length > 0);
-  assert.equal(publishedBrakePads.every((row) => row.match_confidence === "high"), true);
-  assert.equal(publishedBrakePads.every((row) => row.review_status === "auto_accepted"), true);
-  assert.equal(publishedBrakePads.every((row) => !row.series_name || row.matched_on.split("+").includes("series")), true);
+  assert.equal(publishedBrakePads.length, 5_224);
+  assert.equal(publishedBrakePads.every((row) => {
+    if (row.fitment_status_reason === "verified_official_reference") return true;
+    const group = rowsByApplicationPosition.get(`${row.application_id}:${row.position}`);
+    return new Set(group.map((entry) => entry.sku)).size === 1
+      && row.match_confidence === "high"
+      && row.review_status === "auto_accepted"
+      && (!row.series_name || row.matched_on.split("+").includes("series"));
+  }), true);
 });

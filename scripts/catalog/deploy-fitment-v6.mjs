@@ -20,6 +20,86 @@ const PACKAGE_FILES = [
   "README.md"
 ];
 
+export const VERIFIED_BRAKE_PAD_RULES = [
+  {
+    rule_id: "bendix_camry_v70_front_db2449",
+    sku: "NBP1289",
+    supplier_ref: "DB2449",
+    make: "TOYOTA",
+    model: "CAMRY",
+    series: ["ASV70R"],
+    position: "front",
+    source_url: "https://assets.bendix.com.au/bendix-anz/news/pdfs/Bendix-Brake-Pads-Vehicle-Applications-May-2019-Prj-07306.pdf",
+    verification_note: "Bendix V70 application lists DB2449 on the front axle."
+  },
+  {
+    rule_id: "bendix_camry_v70_rear_db2469",
+    sku: "NBP1290",
+    supplier_ref: "DB2469",
+    make: "TOYOTA",
+    model: "CAMRY",
+    series: ["ASV70R"],
+    position: "rear",
+    source_url: "https://assets.bendix.com.au/bendix-anz/news/pdfs/Bendix-Brake-Pads-Vehicle-Applications-May-2019-Prj-07306.pdf",
+    verification_note: "Bendix V70 application lists DB2469 on the rear axle."
+  },
+  {
+    rule_id: "bendix_ranger_px_front_db2074",
+    sku: "NBP1241",
+    supplier_ref: "DB2074",
+    make: "FORD",
+    model: "RANGER",
+    series: ["PX", "PXII", "PXIII"],
+    position: "front",
+    source_url: "https://www.bendix.com.au/catalogue/ford-australia/ranger/ranger-platform-chassis-px/32-tddi-4x4-px-pxii-pxiii?id=12136&tab=Passenger",
+    verification_note: "Bendix lists DB2074 for Ranger PX, PXII and PXIII front axle."
+  },
+  {
+    rule_id: "bendix_cx5_kf4wl_front_db2226",
+    sku: "NBP1262",
+    supplier_ref: "DB2226",
+    make: "MAZDA",
+    model: "CX-5",
+    series: ["KF4WL"],
+    position: "front",
+    source_url: "https://www.bendix.com.au/catalogue/mazda/cx-5/cx-5-kf/25-awd-kf4wl",
+    verification_note: "Bendix lists DB2226 for CX-5 KF4WL front axle."
+  },
+  {
+    rule_id: "bendix_cx5_kf4w2_front_db1916",
+    sku: "NBP1223",
+    supplier_ref: "DB1916",
+    make: "MAZDA",
+    model: "CX-5",
+    series: ["KF4W2"],
+    position: "front",
+    source_url: "https://www.bendix.com.au/catalogue/mazda/cx-5/cx-5-kf/22-skyativ-d-awd-kf4w2?id=131479&tab=Passenger",
+    verification_note: "Bendix lists DB1916 for right-hand-drive CX-5 KF4W2 front axle."
+  },
+  {
+    rule_id: "bendix_cx5_kf_rear_db2414",
+    sku: "NBP1284",
+    supplier_ref: "DB2414",
+    make: "MAZDA",
+    model: "CX-5",
+    series: ["KF4WL", "KF4W2"],
+    position: "rear",
+    source_url: "https://www.bendix.com.au/catalogue/mazda/cx-5/cx-5-kf/25-awd-kf4wl",
+    verification_note: "Bendix lists DB2414 for CX-5 KF rear axle."
+  },
+  {
+    rule_id: "bendix_forester_sk9_front_db2480",
+    sku: "NBP1291",
+    supplier_ref: "DB2480",
+    make: "SUBARU",
+    model: "FORESTER",
+    series: ["SK9"],
+    position: "front",
+    source_url: "https://assets.bendix.com.au/bendix-anz/downloads/Bendix-New-Releases-Vehicle-Applications-May-2023-PRJ-08340.pdf",
+    verification_note: "Bendix lists DB2480 for Forester SK9 front axle."
+  }
+];
+
 export function prepareFitmentV6(packageDir = DEFAULT_PACKAGE_DIR) {
   const brake = readCsv(path.join(packageDir, "brakepad_product_application_test.csv"));
   const oil = readCsv(path.join(packageDir, "oilfilter_product_application_test.csv"));
@@ -180,8 +260,9 @@ async function applyDeployment(db, prepared, inspection) {
   }
   await replaceUnsupportedReviewQueue(db, unsupported);
   const oilFilterReviewGroups = await replaceOilFilterReviewQueue(db, prepared);
+  const brakePadReviewGroups = await replaceBrakePadReviewQueue(db, prepared);
 
-  const verification = await verifyDeployment(db, productPayload, wiperPayload, unsupported, oilFilterReviewGroups);
+  const verification = await verifyDeployment(db, productPayload, wiperPayload, unsupported, oilFilterReviewGroups, brakePadReviewGroups);
   return { backup_dir: backupDir, verification };
 }
 
@@ -294,6 +375,79 @@ async function replaceOilFilterReviewQueue(db, prepared) {
   return reviewGroups;
 }
 
+async function replaceBrakePadReviewQueue(db, prepared) {
+  const { error: dismissError } = await db.from("fitment_review_queue")
+    .update({ review_status: "dismissed", resolution_notes: `Superseded by ${SOURCE_CODE}`, reviewed_at: new Date().toISOString() })
+    .like("issue_type", "fitment_v6_brake_%")
+    .in("review_status", ["open", "in_progress"]);
+  if (dismissError) throw dismissError;
+
+  const reviewGroups = buildBrakePadReviewGroups(prepared.productFitments, prepared.brakeCatalog);
+  await insertRows(db, "fitment_review_queue", reviewGroups);
+  return reviewGroups;
+}
+
+export function buildBrakePadReviewGroups(productFitments, brakeCatalog) {
+  const brakeRows = productFitments.filter((row) => row.product_type === "brake_pad");
+  const supplierRefBySku = new Map(brakeCatalog.map((row) => [row.sku, row.supplierRef]));
+  const applicationPositionGroups = [...groupBy(brakeRows, (row) => `${row.application_id}:${row.position}`).values()]
+    .filter((rows) => new Set(rows.map((row) => row.sku)).size > 1)
+    .filter((rows) => !rows.some((row) => verifiedBrakePadRule(row)));
+
+  const clusters = groupBy(applicationPositionGroups, (rows) => {
+    const skus = uniqueSorted(rows.map((row) => row.sku));
+    return `${rows[0].make_name}:${rows[0].model_name}:${rows[0].position}:${skus.join("|")}`;
+  });
+
+  return [...clusters.values()].map((cluster) => {
+    const rows = cluster.flat();
+    const skus = uniqueSorted(rows.map((row) => row.sku));
+    const applications = cluster.map((applicationRows) => compactBrakeReviewApplication(applicationRows, supplierRefBySku));
+    const previouslyPublished = cluster.some((applicationRows) => wouldPreviouslyPublishBrakePadGroup(applicationRows));
+    return {
+      issue_type: "fitment_v6_brake_multiple_candidates",
+      severity: previouslyPublished ? "error" : "warning",
+      review_status: "open",
+      summary: `${applications.length} ${rows[0].make_name} ${rows[0].model_name} ${rows[0].position} applications share brake-pad candidates ${skus.join(", ")}`,
+      payload: {
+        source: SOURCE_CODE,
+        review_kind: "multiple_candidates",
+        priority: previouslyPublished ? "high" : "standard",
+        make: rows[0].make_name,
+        model: rows[0].model_name,
+        position: rows[0].position,
+        skus,
+        supplier_refs: skus.map((sku) => supplierRefBySku.get(sku) || ""),
+        application_count: applications.length,
+        applications
+      }
+    };
+  });
+}
+
+function compactBrakeReviewApplication(rows, supplierRefBySku) {
+  const row = rows[0];
+  return {
+    application_id: row.application_id,
+    make: row.make_name,
+    model: row.model_name,
+    series: row.series_name,
+    engine: row.engine_name,
+    variant: row.variant_name,
+    years: `${row.application_year_from}-${row.application_year_to}`,
+    candidates: rows.map((entry) => ({
+      sku: entry.sku,
+      supplier_ref: supplierRefBySku.get(entry.sku) || "",
+      score: Number(entry.match_score),
+      confidence: entry.match_confidence,
+      method: entry.match_method,
+      matched_on: entry.matched_on,
+      source_fitment_id: entry.source_fitment_id,
+      source_row: Number(entry.source_row)
+    }))
+  };
+}
+
 export function buildOilFilterReviewGroups(productFitments, oilCatalog) {
   const oilRows = productFitments.filter((row) => row.product_type === "oil_filter");
   const previouslyPublished = oilRows.filter(wasPreviouslyPublishedOilFilter);
@@ -401,7 +555,7 @@ function wasPreviouslyPublishedOilFilter(row) {
   return row.match_confidence === "high" && row.review_status === "auto_accepted";
 }
 
-async function verifyDeployment(db, productPayload, wiperPayload, unsupported, oilFilterReviewGroups) {
+async function verifyDeployment(db, productPayload, wiperPayload, unsupported, oilFilterReviewGroups, brakePadReviewGroups) {
   const productTotal = await filteredCount(db, "vehicle_catalog_product_fitments", "source", SOURCE_CODE);
   const wiperTotal = await exactCount(db, "vehicle_catalog_wiper_fitments");
   if (productTotal !== productPayload.length) throw new Error(`Product fitment count mismatch: ${productTotal}/${productPayload.length}`);
@@ -410,6 +564,10 @@ async function verifyDeployment(db, productPayload, wiperPayload, unsupported, o
   const oilReviewCount = await filteredLikePairCount(db, "fitment_review_queue", "issue_type", "fitment_v6_oil_%", "review_status", "open");
   if (oilReviewCount !== oilFilterReviewGroups.length) {
     throw new Error(`Oil-filter review queue count mismatch: ${oilReviewCount}/${oilFilterReviewGroups.length}`);
+  }
+  const brakeReviewCount = await filteredLikePairCount(db, "fitment_review_queue", "issue_type", "fitment_v6_brake_%", "review_status", "open");
+  if (brakeReviewCount !== brakePadReviewGroups.length) {
+    throw new Error(`Brake-pad review queue count mismatch: ${brakeReviewCount}/${brakePadReviewGroups.length}`);
   }
   return {
     product_fitments: productTotal,
@@ -420,6 +578,7 @@ async function verifyDeployment(db, productPayload, wiperPayload, unsupported, o
     wiper_review: await filteredCount(db, "vehicle_catalog_wiper_fitments", "fitment_status", "review"),
     unsupported_wiper_review_queue: unsupported.length,
     oil_filter_review_groups: oilReviewCount,
+    brake_pad_review_groups: brakeReviewCount,
     vehicle_year_caps: vehicleYearCaps
   };
 }
@@ -504,27 +663,34 @@ function productNotes(row) {
 export function classifyBrakePadFitments(rows) {
   const candidatesByApplicationPosition = groupBy(rows, (row) => `${row.application_id}:${row.position}`);
   const publishedKeys = new Set();
+  const multipleCandidateKeys = new Set();
+  const officiallyResolvedKeys = new Set();
 
-  for (const group of candidatesByApplicationPosition.values()) {
+  for (const [groupKey, group] of candidatesByApplicationPosition.entries()) {
+    const distinctSkus = new Set(group.map((row) => row.sku));
+    if (distinctSkus.size > 1) multipleCandidateKeys.add(groupKey);
+    const verified = group.filter((row) => verifiedBrakePadRule(row));
+    if (verified.length) {
+      officiallyResolvedKeys.add(groupKey);
+      for (const row of verified) publishedKeys.add(brakePadFitmentKey(row));
+      continue;
+    }
+    if (distinctSkus.size > 1) continue;
+
     const eligible = group.filter(isConfirmedBrakePadCandidate);
     if (!eligible.length) continue;
-
-    const highestScore = Math.max(...eligible.map((row) => Number(row.match_score)));
-    const best = eligible.filter((row) => Number(row.match_score) === highestScore);
-    const bestSkus = new Set(best.map((row) => row.sku));
-
-    // More than one pad shape at the same best score means the source does not
-    // contain enough brake-system detail to call either one a confirmed match.
-    if (bestSkus.size !== 1) continue;
-    for (const row of best) publishedKeys.add(brakePadFitmentKey(row));
+    for (const row of eligible) publishedKeys.add(brakePadFitmentKey(row));
   }
 
   return rows.map((row) => {
+    const groupKey = `${row.application_id}:${row.position}`;
     const published = publishedKeys.has(brakePadFitmentKey(row));
     return {
       ...row,
       fitment_status: published ? "published" : "review",
-      fitment_status_reason: published ? "confirmed_unique_best_series_match" : brakePadReviewReason(row)
+      fitment_status_reason: published
+        ? (verifiedBrakePadRule(row) ? "verified_official_reference" : "confirmed_single_candidate_series_match")
+        : brakePadReviewReason(row, multipleCandidateKeys.has(groupKey), officiallyResolvedKeys.has(groupKey))
     };
   });
 }
@@ -537,13 +703,33 @@ function isConfirmedBrakePadCandidate(row) {
     && (!row.series_name || matchedOnIncludes(row, "series"));
 }
 
-function brakePadReviewReason(row) {
+function brakePadReviewReason(row, multipleCandidates = false, officiallyResolved = false) {
   if (isQuarantinedBrakePadFitment(row)) return "verified_reference_conflict";
+  if (officiallyResolved) return "verified_reference_conflict";
+  if (multipleCandidates) return "multiple_candidates_manual_verification_required";
   if (row.match_confidence !== "high") return "confidence_review_required";
   if (row.review_status !== "auto_accepted") return "source_review_required";
   if (String(row.position_conflict) !== "0") return "position_conflict";
   if (row.series_name && !matchedOnIncludes(row, "series")) return "series_not_confirmed";
   return "ambiguous_best_candidate";
+}
+
+function verifiedBrakePadRule(row) {
+  return VERIFIED_BRAKE_PAD_RULES.find((rule) =>
+    row.sku === rule.sku
+    && row.make_name === rule.make
+    && row.model_name === rule.model
+    && row.position === rule.position
+    && rule.series.includes(row.series_name)
+  );
+}
+
+function wouldPreviouslyPublishBrakePadGroup(group) {
+  const eligible = group.filter(isConfirmedBrakePadCandidate);
+  if (!eligible.length) return false;
+  const highestScore = Math.max(...eligible.map((row) => Number(row.match_score)));
+  const best = eligible.filter((row) => Number(row.match_score) === highestScore);
+  return new Set(best.map((row) => row.sku)).size === 1;
 }
 
 function isQuarantinedBrakePadFitment(row) {
