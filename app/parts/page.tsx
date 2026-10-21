@@ -55,8 +55,8 @@ export default async function VehiclePartsPage({ searchParams }: { searchParams:
     !["vehicle-fit-battery", "vehicle-fit-oil-filter"].includes(product.slug)
     && !["filter", "brake-pad"].includes(product.category)
   );
-  const vehicleLabel = [vehicle.year, vehicle.make, vehicle.model, vehicle.chassis].filter(Boolean).join(" ");
-  const vehicleDetail = [vehicle.body, vehicle.engine].filter(Boolean).join(" · ");
+  const vehicleLabel = [vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(" ");
+  const vehicleDetail = [vehicle.chassis, vehicle.body, vehicle.engine].filter(Boolean).join(" · ");
   const reviewDemo = compatible.wiperSet ? null : findHighConfidenceWiperReview(vehicle);
   const wiperHref = compatible.wiperSet && compatible.wiperFitment
     ? buildWiperHref(compatible.wiperSet, compatible.wiperFitment, vehicle)
@@ -67,40 +67,37 @@ export default async function VehiclePartsPage({ searchParams }: { searchParams:
       {synchronizedVehicle ? <VehicleContextSynchronizer vehicle={synchronizedVehicle} /> : null}
 
       <section className="bg-ink text-white">
-        <div className="mx-auto max-w-7xl px-4 py-9 sm:px-6 sm:py-12 lg:px-8">
-          <p className="text-xs font-black uppercase tracking-[0.18em] text-signal">Vehicle fitment</p>
-          <h1 className="mt-2 max-w-3xl text-3xl font-black leading-tight sm:text-4xl lg:text-5xl">
-            {vehicleLabel ? `Parts for ${vehicleLabel}` : "Find parts that fit your vehicle"}
-          </h1>
-          <p className="mt-3 max-w-3xl text-sm font-semibold leading-6 text-white/70 sm:text-base">
-            Select your vehicle once. Browse every confirmed match, then use the main category navigation to narrow the results.
-          </p>
-        </div>
-      </section>
-
-      <section id="change-vehicle" className="scroll-mt-40 border-b border-black/10 bg-white">
-        <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
-          {vehicleLabel ? (
-            <div className="rounded-xl border border-emerald-700/20 bg-emerald-50 p-4">
-              <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="mx-auto grid max-w-7xl gap-6 px-4 py-8 sm:px-6 sm:py-10 lg:grid-cols-[1.08fr_0.92fr] lg:items-center lg:px-8">
+          <div className="min-w-0">
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-signal">Vehicle fitment</p>
+            <h1 className="mt-2 max-w-3xl text-3xl font-black leading-[1.08] sm:text-4xl lg:text-5xl">
+              {vehicleLabel ? `Parts for ${vehicleLabel}` : "Find parts that fit your vehicle"}
+            </h1>
+            {vehicle.chassis ? <p className="mt-3 max-w-3xl text-sm font-bold leading-6 text-white/65 sm:text-base">Chassis: {vehicle.chassis}</p> : null}
+          </div>
+          <div id="change-vehicle" className="scroll-mt-40">
+            {vehicleLabel ? (
+              <div className="rounded-xl border border-emerald-700/20 bg-emerald-50 p-4 text-ink shadow-sm sm:p-5">
                 <div className="flex min-w-0 items-start gap-3">
                   <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-emerald-700 text-white"><CarFront className="h-5 w-5" /></span>
-                  <div className="min-w-0">
-                    <p className="text-[11px] font-black uppercase tracking-[0.14em] text-emerald-700">Selected vehicle</p>
-                    <h2 className="mt-1 text-lg font-black sm:text-xl">{vehicleLabel}</h2>
-                    {vehicleDetail ? <p className="mt-1 text-xs font-bold leading-5 text-steel sm:text-sm">{vehicleDetail}</p> : null}
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[10px] font-black uppercase tracking-[0.14em] text-emerald-700">Selected vehicle</p>
+                    <h2 className="mt-1 text-base font-black leading-6 sm:text-lg">{vehicleLabel}</h2>
+                    {vehicleDetail ? <p className="mt-1 text-xs font-semibold leading-5 text-steel">{vehicleDetail}</p> : null}
                   </div>
                 </div>
-                <ClearVehicleButton href={shopHrefForTab(activeTab)} />
+                <div className="mt-4 flex flex-col gap-2 border-t border-emerald-700/15 pt-4 sm:flex-row sm:items-center sm:justify-between">
+                  <details className="group min-w-0 flex-1">
+                    <summary className="inline-flex h-10 cursor-pointer list-none items-center justify-center rounded-lg border border-emerald-700/20 bg-white px-4 text-sm font-black marker:hidden hover:border-emerald-700/50">Change vehicle</summary>
+                    <div className="mt-4 text-left"><VehiclePartsFinder compact /></div>
+                  </details>
+                  <ClearVehicleButton href={shopHrefForTab(activeTab)} />
+                </div>
               </div>
-              <details className="group mt-4 border-t border-emerald-700/15 pt-4">
-                <summary className="inline-flex h-10 cursor-pointer list-none items-center justify-center rounded-lg border border-emerald-700/20 bg-white px-4 text-sm font-black marker:hidden hover:border-emerald-700/50">Change vehicle</summary>
-                <div className="mt-4 text-left"><VehiclePartsFinder /></div>
-              </details>
-            </div>
-          ) : (
-            <VehiclePartsFinder />
-          )}
+            ) : (
+              <VehiclePartsFinder />
+            )}
+          </div>
         </div>
       </section>
 

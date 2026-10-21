@@ -90,7 +90,7 @@ export function SiteHeader() {
     };
   }, []);
 
-  const vehicleLabel = vehicle ? [vehicle.year, vehicle.make, vehicle.model, vehicle.chassis].filter(Boolean).join(" ") : "";
+  const vehicleLabel = vehicle ? [vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(" ") : "";
 
   function handleCategoryNavigation(event: React.MouseEvent<HTMLAnchorElement>, href: string) {
     if (selectVehicleCategory(href)) event.preventDefault();

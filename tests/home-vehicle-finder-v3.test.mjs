@@ -67,6 +67,13 @@ test("selected vehicle persists across product categories until the customer cha
   assert.match(layout, /<VehicleSelectionBar \/>/);
 });
 
+test("selected vehicle details use the compact catalogue hero layout", () => {
+  assert.match(partsPage, /lg:grid-cols-\[1\.08fr_0\.92fr\]/);
+  assert.match(partsPage, /Chassis: \{vehicle\.chassis\}/);
+  assert.match(partsPage, /id="change-vehicle"/);
+  assert.doesNotMatch(partsPage, /Select your vehicle once\. Browse every confirmed match/);
+});
+
 test("vehicle catalogue endpoints filter in the database and reuse catalogue reads", () => {
   assert.match(vehicleCatalog, /unstable_cache/);
   assert.match(vehicleCatalog, /listVehicleCatalogIndex/);
