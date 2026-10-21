@@ -23,19 +23,12 @@ export function createSupabaseAccountVehicleRepository(): CustomerVehicleReposit
   return {
     async save(context, input) {
       const isCatalogApplication = isVehicleCatalogApplicationId(input.applicationId);
-      const rpc = isCatalogApplication
-        ? "save_customer_vehicle_v5"
-        : input.applicationKind === "canonical"
-          ? "save_customer_vehicle_v2"
-          : "save_customer_vehicle";
-      const applicationParameter = isCatalogApplication
-        ? { p_vehicle_catalog_application_id: input.applicationId }
-        : input.applicationKind === "canonical"
-          ? { p_vehicle_fitment_application_id: input.applicationId }
-          : { p_vehicle_application_id: input.applicationId };
-      const { data, error } = await getAdmin().rpc(rpc, {
+      if (!isCatalogApplication) {
+        throw new CustomerVehicleError("CUSTOMER_VEHICLE_NOT_FOUND", "Vehicle is no longer available in the current catalogue.");
+      }
+      const { data, error } = await getAdmin().rpc("save_customer_vehicle_v5", {
         p_auth_user_id: context.authUserId,
-        ...applicationParameter,
+        p_vehicle_catalog_application_id: input.applicationId,
         p_year: input.year,
         p_label: input.label,
         p_source: input.source,

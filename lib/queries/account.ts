@@ -396,7 +396,7 @@ export async function saveCustomerVehicle(user: User, vehicle: CustomerVehicleIn
   const email = profile.email.toLowerCase();
 
   const isCatalogApplication = isVehicleCatalogApplicationId(vehicle.applicationId);
-  const isCanonical = vehicle.applicationKind === "canonical";
+  if (!isCatalogApplication) throw new Error("Legacy vehicle applications are no longer accepted.");
   const { data, error } = await supabase
     .from("customer_vehicles")
     .upsert(
@@ -404,16 +404,16 @@ export async function saveCustomerVehicle(user: User, vehicle: CustomerVehicleIn
         customer_profile_id: profile.id,
         auth_user_id: user.id,
         email,
-        vehicle_application_id: isCanonical ? null : vehicle.applicationId,
-        vehicle_fitment_application_id: isCanonical && !isCatalogApplication ? vehicle.applicationId : null,
-        vehicle_catalog_application_id: isCatalogApplication ? vehicle.applicationId : null,
+        vehicle_application_id: null,
+        vehicle_fitment_application_id: null,
+        vehicle_catalog_application_id: vehicle.applicationId,
         make_snapshot: vehicle.make,
         model_snapshot: vehicle.model,
         year: vehicle.year,
         source: "fitment_lookup",
         last_used_at: new Date().toISOString()
       },
-      { onConflict: isCatalogApplication ? "email,vehicle_catalog_application_id,year" : isCanonical ? "email,vehicle_fitment_application_id,year" : "email,vehicle_application_id,year" }
+      { onConflict: "email,vehicle_catalog_application_id,year" }
     )
     .select("id,vehicle_application_id,vehicle_fitment_application_id,vehicle_catalog_application_id,make_snapshot,model_snapshot,year,source,last_used_at")
     .single();
@@ -446,7 +446,7 @@ export async function saveCustomerVehicleByEmail(emailInput: string, vehicle: Cu
   const email = profile.email.toLowerCase();
 
   const isCatalogApplication = isVehicleCatalogApplicationId(vehicle.applicationId);
-  const isCanonical = vehicle.applicationKind === "canonical";
+  if (!isCatalogApplication) return { profile, vehicle: null };
   const { data, error } = await supabase
     .from("customer_vehicles")
     .upsert(
@@ -454,16 +454,16 @@ export async function saveCustomerVehicleByEmail(emailInput: string, vehicle: Cu
         customer_profile_id: profile.id,
         auth_user_id: profile.authUserId,
         email,
-        vehicle_application_id: isCanonical ? null : vehicle.applicationId,
-        vehicle_fitment_application_id: isCanonical && !isCatalogApplication ? vehicle.applicationId : null,
-        vehicle_catalog_application_id: isCatalogApplication ? vehicle.applicationId : null,
+        vehicle_application_id: null,
+        vehicle_fitment_application_id: null,
+        vehicle_catalog_application_id: vehicle.applicationId,
         make_snapshot: vehicle.make,
         model_snapshot: vehicle.model,
         year: vehicle.year,
         source: "checkout",
         last_used_at: new Date().toISOString()
       },
-      { onConflict: isCatalogApplication ? "email,vehicle_catalog_application_id,year" : isCanonical ? "email,vehicle_fitment_application_id,year" : "email,vehicle_application_id,year" }
+      { onConflict: "email,vehicle_catalog_application_id,year" }
     )
     .select("id,vehicle_application_id,vehicle_fitment_application_id,vehicle_catalog_application_id,make_snapshot,model_snapshot,year,source,last_used_at")
     .single();
