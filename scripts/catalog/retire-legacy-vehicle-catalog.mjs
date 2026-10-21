@@ -73,8 +73,7 @@ if (!apply) {
 }
 
 for (const [table, primaryKey] of legacyTables) {
-  const { error } = await db.from(table).delete().not(primaryKey, "is", null);
-  if (error) throw new Error(`Could not clear ${table}: ${error.message}`);
+  await deleteInBatches(db, table, primaryKey);
   process.stdout.write(`Cleared ${table}\n`);
 }
 
@@ -120,6 +119,25 @@ async function selectAll(client, table, primaryKey, size = 1000) {
     if (error) throw new Error(`Could not back up ${table}: ${error.message}`);
     rows.push(...(data ?? []));
     if (!data || data.length < size) return rows;
+  }
+}
+
+async function deleteInBatches(client, table, primaryKey, size = 200) {
+  let deleted = 0;
+  for (;;) {
+    const { data, error: selectError } = await client
+      .from(table)
+      .select(primaryKey)
+      .order(primaryKey, { ascending: true })
+      .limit(size);
+    if (selectError) throw new Error(`Could not read ${table} for cleanup: ${selectError.message}`);
+    if (!data?.length) return;
+
+    const ids = data.map((row) => row[primaryKey]);
+    const { error: deleteError } = await client.from(table).delete().in(primaryKey, ids);
+    if (deleteError) throw new Error(`Could not clear ${table}: ${deleteError.message}`);
+    deleted += ids.length;
+    if (deleted % 2000 === 0) process.stdout.write(`Clearing ${table}: ${deleted}\n`);
   }
 }
 
