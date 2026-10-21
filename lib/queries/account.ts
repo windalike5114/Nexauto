@@ -3,6 +3,7 @@ import { getOrderNumberFromSnapshot } from "@/lib/order-number";
 import { normalizeClaimEmail } from "@/lib/domain/account/order-claim.schema";
 import type { OrderOwnershipSource } from "@/lib/domain/account/order-claim.types";
 import { createSupabaseAdminClient } from "@/lib/supabase";
+import { isVehicleCatalogApplicationId } from "@/lib/domain/shared/vehicle-catalog-id";
 
 export type CustomerVehicleInput = {
   applicationId: string;
@@ -56,6 +57,7 @@ type CustomerVehicleRow = {
   id: string;
   vehicle_application_id: string | null;
   vehicle_fitment_application_id: string | null;
+  vehicle_catalog_application_id: string | null;
   label?: string | null;
   make_snapshot: string;
   model_snapshot: string;
@@ -154,7 +156,7 @@ export async function listCustomerVehicles(profileId: string) {
   const supabase = getAdminOrThrow();
   const { data, error } = await supabase
     .from("customer_vehicles")
-    .select("id,vehicle_application_id,vehicle_fitment_application_id,label,make_snapshot,model_snapshot,year,source,is_default,last_used_at")
+    .select("id,vehicle_application_id,vehicle_fitment_application_id,vehicle_catalog_application_id,label,make_snapshot,model_snapshot,year,source,is_default,last_used_at")
     .eq("customer_profile_id", profileId)
     .order("is_default", { ascending: false })
     .order("last_used_at", { ascending: false });
@@ -393,6 +395,7 @@ export async function saveCustomerVehicle(user: User, vehicle: CustomerVehicleIn
   const supabase = getAdminOrThrow();
   const email = profile.email.toLowerCase();
 
+  const isCatalogApplication = isVehicleCatalogApplicationId(vehicle.applicationId);
   const isCanonical = vehicle.applicationKind === "canonical";
   const { data, error } = await supabase
     .from("customer_vehicles")
@@ -402,16 +405,17 @@ export async function saveCustomerVehicle(user: User, vehicle: CustomerVehicleIn
         auth_user_id: user.id,
         email,
         vehicle_application_id: isCanonical ? null : vehicle.applicationId,
-        vehicle_fitment_application_id: isCanonical ? vehicle.applicationId : null,
+        vehicle_fitment_application_id: isCanonical && !isCatalogApplication ? vehicle.applicationId : null,
+        vehicle_catalog_application_id: isCatalogApplication ? vehicle.applicationId : null,
         make_snapshot: vehicle.make,
         model_snapshot: vehicle.model,
         year: vehicle.year,
         source: "fitment_lookup",
         last_used_at: new Date().toISOString()
       },
-      { onConflict: isCanonical ? "email,vehicle_fitment_application_id,year" : "email,vehicle_application_id,year" }
+      { onConflict: isCatalogApplication ? "email,vehicle_catalog_application_id,year" : isCanonical ? "email,vehicle_fitment_application_id,year" : "email,vehicle_application_id,year" }
     )
-    .select("id,vehicle_application_id,vehicle_fitment_application_id,make_snapshot,model_snapshot,year,source,last_used_at")
+    .select("id,vehicle_application_id,vehicle_fitment_application_id,vehicle_catalog_application_id,make_snapshot,model_snapshot,year,source,last_used_at")
     .single();
 
   if (error) throw error;
@@ -441,6 +445,7 @@ export async function saveCustomerVehicleByEmail(emailInput: string, vehicle: Cu
   const supabase = getAdminOrThrow();
   const email = profile.email.toLowerCase();
 
+  const isCatalogApplication = isVehicleCatalogApplicationId(vehicle.applicationId);
   const isCanonical = vehicle.applicationKind === "canonical";
   const { data, error } = await supabase
     .from("customer_vehicles")
@@ -450,16 +455,17 @@ export async function saveCustomerVehicleByEmail(emailInput: string, vehicle: Cu
         auth_user_id: profile.authUserId,
         email,
         vehicle_application_id: isCanonical ? null : vehicle.applicationId,
-        vehicle_fitment_application_id: isCanonical ? vehicle.applicationId : null,
+        vehicle_fitment_application_id: isCanonical && !isCatalogApplication ? vehicle.applicationId : null,
+        vehicle_catalog_application_id: isCatalogApplication ? vehicle.applicationId : null,
         make_snapshot: vehicle.make,
         model_snapshot: vehicle.model,
         year: vehicle.year,
         source: "checkout",
         last_used_at: new Date().toISOString()
       },
-      { onConflict: isCanonical ? "email,vehicle_fitment_application_id,year" : "email,vehicle_application_id,year" }
+      { onConflict: isCatalogApplication ? "email,vehicle_catalog_application_id,year" : isCanonical ? "email,vehicle_fitment_application_id,year" : "email,vehicle_application_id,year" }
     )
-    .select("id,vehicle_application_id,vehicle_fitment_application_id,make_snapshot,model_snapshot,year,source,last_used_at")
+    .select("id,vehicle_application_id,vehicle_fitment_application_id,vehicle_catalog_application_id,make_snapshot,model_snapshot,year,source,last_used_at")
     .single();
 
   if (error) throw error;
@@ -482,7 +488,7 @@ function mapProfile(row: CustomerProfileRow): CustomerProfile {
 function mapVehicle(row: CustomerVehicleRow): CustomerVehicle {
   return {
     id: row.id,
-    applicationId: row.vehicle_fitment_application_id ?? row.vehicle_application_id,
+    applicationId: row.vehicle_catalog_application_id ?? row.vehicle_fitment_application_id ?? row.vehicle_application_id,
     label: row.label ?? null,
     make: row.make_snapshot,
     model: row.model_snapshot,

@@ -7,6 +7,7 @@ import type {
 } from "@/lib/application/orders/finalise-paid-order";
 import type { OrderFinalisationRepository } from "@/lib/application/webhooks/process-stripe-event";
 import { isLooseUuid } from "@/lib/domain/shared/uuid";
+import { isVehicleCatalogApplicationId } from "@/lib/domain/shared/vehicle-catalog-id";
 import { allocateOrderNumber } from "@/lib/order-number";
 import { createSupabaseAdminClient } from "@/lib/supabase";
 
@@ -167,6 +168,7 @@ async function upsertOrderItems(supabase: ReturnType<typeof getAdmin>, orderId: 
     source_line_key: sourceLineKeys[index],
     vehicle_application_id: getVehicleApplicationId(item),
     vehicle_fitment_application_id: getVehicleFitmentApplicationId(item),
+    vehicle_catalog_application_id: getVehicleCatalogApplicationId(item),
     wiper_set_id: item.product_id === "wiper_set" && isLooseUuid(item.variant_id) ? item.variant_id : null,
     vehicle_snapshot: item.vehicle_snapshot ?? buildVehicleSnapshot(item),
     product_snapshot: item.product_snapshot ?? buildProductSnapshot(item)
@@ -196,6 +198,7 @@ async function insertVehicleSnapshotIfNeeded(supabase: ReturnType<typeof getAdmi
     order_id: orderId,
     vehicle_application_id: vehicle.k !== "canonical" && typeof vehicle.a === "string" && isLooseUuid(vehicle.a) ? vehicle.a : null,
     vehicle_fitment_application_id: vehicle.k === "canonical" && typeof vehicle.a === "string" && isLooseUuid(vehicle.a) ? vehicle.a : null,
+    vehicle_catalog_application_id: vehicle.k === "canonical" && isVehicleCatalogApplicationId(vehicle.a) ? vehicle.a : null,
     make_snapshot: String(vehicle.make),
     model_snapshot: String(vehicle.model),
     year: Number(vehicle.year)
@@ -226,6 +229,7 @@ async function insertFulfilmentIfNeeded(
         order_item_id: orderItem?.id ?? null,
         vehicle_application_id: getVehicleApplicationId(item),
         vehicle_fitment_application_id: getVehicleFitmentApplicationId(item),
+        vehicle_catalog_application_id: getVehicleCatalogApplicationId(item),
         wiper_set_id: isLooseUuid(item.variant_id) ? item.variant_id : null,
         driver_length_in: parseLength(item.attributes.driver_length),
         passenger_length_in: parseLength(item.attributes.passenger_length),
@@ -286,10 +290,16 @@ function getVehicleFitmentApplicationId(item: PendingOrderSnapshotItem) {
   return typeof value === "string" && isLooseUuid(value) ? value : null;
 }
 
+function getVehicleCatalogApplicationId(item: PendingOrderSnapshotItem) {
+  const value = item.vehicle_catalog_application_id ?? item.vehicle_fitment_application_id ?? item.attributes.vehicle_fitment_application_id;
+  return isVehicleCatalogApplicationId(value) ? value : null;
+}
+
 function buildVehicleSnapshot(item: PendingOrderSnapshotItem) {
   return {
     vehicle_application_id: getVehicleApplicationId(item),
     vehicle_fitment_application_id: getVehicleFitmentApplicationId(item),
+    vehicle_catalog_application_id: getVehicleCatalogApplicationId(item),
     make: item.attributes.vehicle_make ?? null,
     model: item.attributes.vehicle_model ?? null,
     year: item.attributes.vehicle_year ?? null,

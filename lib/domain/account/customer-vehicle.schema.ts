@@ -1,11 +1,12 @@
 import { z } from "zod";
 import { CustomerVehicleError } from "@/lib/domain/account/customer-vehicle.errors";
+import { isSupportedVehicleApplicationId } from "@/lib/domain/shared/vehicle-catalog-id";
 
 const forbiddenOwnershipFields = ["customerProfileId", "customer_profile_id", "authUserId", "auth_user_id", "userId", "email"];
 
 const BaseVehicleSchema = z
   .object({
-    applicationId: z.string().uuid("Vehicle application id is invalid."),
+    applicationId: z.string().trim().refine(isSupportedVehicleApplicationId, "Vehicle application id is invalid."),
     applicationKind: z.enum(["legacy", "canonical"]).default("legacy"),
     year: z.coerce.number().int().min(1900).max(2100),
     label: z.string().trim().max(80).nullable().optional(),

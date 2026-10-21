@@ -6,6 +6,7 @@ import type { CheckoutProductRepository, TrustedCartItem } from "@/lib/applicati
 import { ProductUnavailableError } from "@/lib/application/checkout/checkout.errors";
 import { createSupabaseAdminClient } from "@/lib/supabase";
 import { isLooseUuid } from "@/lib/domain/shared/uuid";
+import { isVehicleCatalogApplicationId } from "@/lib/domain/shared/vehicle-catalog-id";
 import type { CartItem } from "@/lib/types";
 
 export function createSupabaseCheckoutProductRepository(): CheckoutProductRepository {
@@ -191,20 +192,18 @@ async function validateVehicleApplicationReferences(items: CartItem[]) {
     throw new ProductUnavailableError("Legacy vehicle fitment references are no longer accepted.");
   }
   if (!canonicalIds.length) return;
-  if (canonicalIds.some((id) => !isLooseUuid(id))) {
+  if (canonicalIds.some((id) => !isVehicleCatalogApplicationId(id))) {
     throw new ProductUnavailableError("Vehicle fitment reference is invalid.");
   }
 
   const supabase = createSupabaseAdminClient();
   if (!supabase) throw new ProductUnavailableError("Vehicle fitment could not be verified.");
   const canonicalResult = await supabase
-    .from("vehicle_fitment_applications")
-    .select("id,vehicle_wiper_fitments!inner(id,fitment_status,wiper_configurations!inner(configuration_status))")
-    .in("id", canonicalIds)
-    .eq("active", true)
-    .eq("fitment_status", "published")
-    .eq("vehicle_wiper_fitments.fitment_status", "published")
-    .eq("vehicle_wiper_fitments.wiper_configurations.configuration_status", "published");
+    .from("vehicle_catalog_applications")
+    .select("application_id,vehicle_catalog_wiper_fitments!inner(application_id,fitment_status,wiper_configurations!inner(configuration_status))")
+    .in("application_id", canonicalIds)
+    .eq("vehicle_catalog_wiper_fitments.fitment_status", "published")
+    .eq("vehicle_catalog_wiper_fitments.wiper_configurations.configuration_status", "published");
 
   if (canonicalResult.error) throw canonicalResult.error;
   if ((canonicalResult.data ?? []).length !== canonicalIds.length) {

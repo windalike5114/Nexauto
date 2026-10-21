@@ -1,6 +1,7 @@
 import { createSupabaseAdminClient } from "@/lib/supabase";
 import type { CheckoutOrderRepository, PendingCheckoutOrderInput } from "@/lib/application/checkout/create-checkout-session";
 import { isLooseUuid } from "@/lib/domain/shared/uuid";
+import { isVehicleCatalogApplicationId } from "@/lib/domain/shared/vehicle-catalog-id";
 
 export function createSupabaseCheckoutOrderRepository(): CheckoutOrderRepository {
   return {
@@ -86,6 +87,7 @@ export function createSupabaseCheckoutOrderRepository(): CheckoutOrderRepository
           source_line_key: sourceLineKey,
           vehicle_application_id: getVehicleApplicationId(item.attributes),
           vehicle_fitment_application_id: getVehicleFitmentApplicationId(item.attributes),
+          vehicle_catalog_application_id: getVehicleCatalogApplicationId(item.attributes),
           wiper_set_id: item.productId === "wiper_set" && isLooseUuid(item.id) ? item.id : null,
           vehicle_snapshot: buildVehicleSnapshot(item.attributes),
           product_snapshot: buildProductSnapshot(item)
@@ -100,6 +102,7 @@ export function createSupabaseCheckoutOrderRepository(): CheckoutOrderRepository
           order_id: orderId,
           vehicle_application_id: input.vehicle.k !== "canonical" && isLooseUuid(String(input.vehicle.a)) ? input.vehicle.a : null,
           vehicle_fitment_application_id: input.vehicle.k === "canonical" && isLooseUuid(String(input.vehicle.a)) ? input.vehicle.a : null,
+          vehicle_catalog_application_id: input.vehicle.k === "canonical" && isVehicleCatalogApplicationId(String(input.vehicle.a)) ? input.vehicle.a : null,
           make_snapshot: String(input.vehicle.make),
           model_snapshot: String(input.vehicle.model),
           year: Number(input.vehicle.year)
@@ -159,6 +162,7 @@ function buildItemsSnapshot(input: PendingCheckoutOrderInput) {
     product_snapshot: buildProductSnapshot(item),
     vehicle_application_id: getVehicleApplicationId(item.attributes),
     vehicle_fitment_application_id: getVehicleFitmentApplicationId(item.attributes),
+    vehicle_catalog_application_id: getVehicleCatalogApplicationId(item.attributes),
     wiper_set_id: item.productId === "wiper_set" && isLooseUuid(item.id) ? item.id : null,
     vehicle_snapshot: buildVehicleSnapshot(item.attributes),
     attributes: {
@@ -203,10 +207,16 @@ function getVehicleFitmentApplicationId(attributes: PendingCheckoutOrderInput["i
   return typeof value === "string" && isLooseUuid(value) ? value : null;
 }
 
+function getVehicleCatalogApplicationId(attributes: PendingCheckoutOrderInput["items"][number]["attributes"]) {
+  const value = attributes.vehicle_fitment_application_id;
+  return isVehicleCatalogApplicationId(value) ? value : null;
+}
+
 function buildVehicleSnapshot(attributes: PendingCheckoutOrderInput["items"][number]["attributes"]) {
   return {
     vehicle_application_id: getVehicleApplicationId(attributes),
     vehicle_fitment_application_id: getVehicleFitmentApplicationId(attributes),
+    vehicle_catalog_application_id: getVehicleCatalogApplicationId(attributes),
     make: attributes.vehicle_make ?? null,
     model: attributes.vehicle_model ?? null,
     year: attributes.vehicle_year ?? null,

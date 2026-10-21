@@ -3,11 +3,13 @@ import type { CustomerVehicleInput, CustomerVehiclePatch } from "@/lib/domain/ac
 import type { CustomerVehicle, CustomerVehicleMutationContext } from "@/lib/domain/account/customer-vehicle.types";
 import type { CustomerVehicleRepository } from "@/lib/application/account/customer-vehicle-repository";
 import { createSupabaseAdminClient } from "@/lib/supabase";
+import { isVehicleCatalogApplicationId } from "@/lib/domain/shared/vehicle-catalog-id";
 
 type VehicleRow = {
   id: string;
   vehicle_application_id: string | null;
   vehicle_fitment_application_id: string | null;
+  vehicle_catalog_application_id: string | null;
   label: string | null;
   make_snapshot: string;
   model_snapshot: string;
@@ -20,10 +22,17 @@ type VehicleRow = {
 export function createSupabaseAccountVehicleRepository(): CustomerVehicleRepository {
   return {
     async save(context, input) {
-      const rpc = input.applicationKind === "canonical" ? "save_customer_vehicle_v2" : "save_customer_vehicle";
-      const applicationParameter = input.applicationKind === "canonical"
-        ? { p_vehicle_fitment_application_id: input.applicationId }
-        : { p_vehicle_application_id: input.applicationId };
+      const isCatalogApplication = isVehicleCatalogApplicationId(input.applicationId);
+      const rpc = isCatalogApplication
+        ? "save_customer_vehicle_v5"
+        : input.applicationKind === "canonical"
+          ? "save_customer_vehicle_v2"
+          : "save_customer_vehicle";
+      const applicationParameter = isCatalogApplication
+        ? { p_vehicle_catalog_application_id: input.applicationId }
+        : input.applicationKind === "canonical"
+          ? { p_vehicle_fitment_application_id: input.applicationId }
+          : { p_vehicle_application_id: input.applicationId };
       const { data, error } = await getAdmin().rpc(rpc, {
         p_auth_user_id: context.authUserId,
         ...applicationParameter,
@@ -76,7 +85,7 @@ export function createSupabaseAccountVehicleRepository(): CustomerVehicleReposit
 function mapVehicle(row: VehicleRow): CustomerVehicle {
   return {
     id: row.id,
-    applicationId: row.vehicle_fitment_application_id ?? row.vehicle_application_id,
+    applicationId: row.vehicle_catalog_application_id ?? row.vehicle_fitment_application_id ?? row.vehicle_application_id,
     label: row.label,
     make: row.make_snapshot,
     model: row.model_snapshot,

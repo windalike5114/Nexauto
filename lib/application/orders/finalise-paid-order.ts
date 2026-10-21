@@ -15,6 +15,7 @@ export type PendingOrderSnapshotItem = {
   source_line_key?: string;
   vehicle_application_id?: string | null;
   vehicle_fitment_application_id?: string | null;
+  vehicle_catalog_application_id?: string | null;
   wiper_set_id?: string | null;
   vehicle_snapshot?: Record<string, unknown>;
   product_snapshot?: Record<string, unknown>;

@@ -148,6 +148,27 @@ test("invalid vehicle application UUID is rejected", () => {
   assert.equal(result.ok, false);
 });
 
+test("V5 vehicle application id is accepted as canonical checkout context", () => {
+  const result = validateCheckoutRequest({
+    ...validPayload,
+    items: [
+      {
+        ...validPayload.items[0],
+        attributes: {
+          ...validPayload.items[0].attributes,
+          vehicle_application_id: "",
+          vehicle_fitment_application_id: "ap_e0f4189fddaaa3a57bea"
+        }
+      }
+    ]
+  });
+
+  assert.equal(result.ok, true);
+  if (!result.ok) return;
+  assert.equal(result.data.cart.items[0].vehicle?.applicationId, "ap_e0f4189fddaaa3a57bea");
+  assert.equal(result.data.cart.items[0].vehicle?.applicationKind, "canonical");
+});
+
 test("blank vehicle application UUID is treated as absent", () => {
   const result = validateCheckoutRequest({
     ...validPayload,

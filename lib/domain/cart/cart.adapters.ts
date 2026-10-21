@@ -1,6 +1,6 @@
 import { z } from "zod";
 import type { CartItem as LegacyCartItem } from "@/lib/types";
-import { isLooseUuid } from "@/lib/domain/shared/uuid";
+import { isSupportedVehicleApplicationId } from "@/lib/domain/shared/vehicle-catalog-id";
 import { AttributeRecordSchema, AttributeValueSchema, CartItemSchema, CartVehicleContextSchema } from "./cart.schema";
 import type { Cart, CartItem } from "./cart.types";
 import { CheckoutShippingAddressSchema } from "@/lib/domain/checkout/shipping-address";
@@ -97,7 +97,7 @@ function extractVehicleContext(attributes: z.infer<typeof AttributeRecordSchema>
     return label ? CartVehicleContextSchema.parse({ label }) : undefined;
   }
 
-  if (applicationId && !isLooseUuid(applicationId)) {
+  if (applicationId && !isSupportedVehicleApplicationId(applicationId)) {
     throw new Error("Vehicle application id is invalid.");
   }
 

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { isLooseUuid, looseUuidPattern } from "@/lib/domain/shared/uuid";
+import { isVehicleCatalogApplicationId } from "@/lib/domain/shared/vehicle-catalog-id";
 
 export const LooseUuidSchema = z
   .string()
@@ -25,7 +26,7 @@ export type NormalizedVehicleContext = {
 export function normalizeVehicleContext(input: Record<string, unknown> | null | undefined): NormalizedVehicleContext | null {
   if (!input) return null;
 
-  const canonicalApplicationId = normalizeOptionalUuid(input.vehicle_fitment_application_id);
+  const canonicalApplicationId = normalizeOptionalApplicationId(input.vehicle_fitment_application_id);
   const legacyApplicationId = normalizeOptionalUuid(input.applicationId ?? input.vehicle_application_id);
   const applicationId = canonicalApplicationId ?? legacyApplicationId;
   const applicationKind = canonicalApplicationId ? "canonical" : applicationId ? "legacy" : null;
@@ -82,6 +83,12 @@ function normalizeOptionalUuid(value: unknown) {
   const stringValue = cleanString(value);
   if (!stringValue) return null;
   return isLooseUuid(stringValue) ? stringValue : null;
+}
+
+function normalizeOptionalApplicationId(value: unknown) {
+  const stringValue = cleanString(value);
+  if (!stringValue) return null;
+  return isLooseUuid(stringValue) || isVehicleCatalogApplicationId(stringValue) ? stringValue : null;
 }
 
 function cleanString(value: unknown) {

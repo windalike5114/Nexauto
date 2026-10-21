@@ -46,6 +46,7 @@
     "vehicle-library:cleanup-old": "node scripts/catalog/replace-vehicle-library.mjs --cleanup-old",
     "vehicle-library-v5:report": "node scripts/catalog/import-vehicle-library-v5.mjs --report-only",
     "vehicle-library-v5:import": "node scripts/catalog/import-vehicle-library-v5.mjs --apply",
+    "vehicle-library-v5:retire-legacy": "node scripts/catalog/retire-legacy-vehicle-catalog.mjs",
     "test:vehicle-library-v5": "node --test --test-isolation=none tests/vehicle-catalog-v5.test.mjs",
     "wiper-fitment-v5:report": "node scripts/catalog/rebuild-wiper-fitments-v5.mjs --report-only",
     "wiper-fitment-v5:apply": "node scripts/catalog/rebuild-wiper-fitments-v5.mjs --apply",

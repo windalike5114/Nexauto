@@ -36,6 +36,16 @@ test("canonical saved vehicle input preserves application kind", () => {
   assert.equal(parsed.applicationKind, "canonical");
 });
 
+test("V5 saved vehicle input accepts normalized application ids", () => {
+  const parsed = parseCustomerVehicleInput({
+    applicationId: "ap_e0f4189fddaaa3a57bea",
+    applicationKind: "canonical",
+    year: 2013
+  });
+  assert.equal(parsed.applicationId, "ap_e0f4189fddaaa3a57bea");
+  assert.equal(parsed.applicationKind, "canonical");
+});
+
 test("saved vehicle input rejects browser ownership fields", () => {
   assert.throws(
     () =>
@@ -120,6 +130,14 @@ test("customer vehicle migration contains RPC/RLS/default hardening", () => {
   assert.match(rlsSql, /alter table public\.customer_vehicles enable row level security/i);
   assert.match(rlsSql, /revoke all on table public\.customer_vehicles from anon/i);
   assert.match(rlsSql, /to authenticated/i);
+});
+
+test("V5 customer vehicle migration stores text application ids", () => {
+  const sql = fs.readFileSync(path.join(process.cwd(), "supabase/migrations/20261025_vehicle_catalog_v5_commerce_bridge.sql"), "utf8");
+  assert.match(sql, /vehicle_catalog_application_id text/i);
+  assert.match(sql, /save_customer_vehicle_v5/i);
+  assert.match(sql, /vehicle_catalog_application_years/i);
+  assert.match(sql, /references public\.vehicle_catalog_applications\(application_id\)/i);
 });
 
 function vehicleInput(applicationId: string, year: number): CustomerVehicleInput {
