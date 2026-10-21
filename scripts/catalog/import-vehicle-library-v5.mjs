@@ -4,6 +4,7 @@ import path from "node:path";
 import process from "node:process";
 import { createClient } from "@supabase/supabase-js";
 import XLSX from "xlsx";
+import { applyVehicleCatalogSafety } from "./vehicle-catalog-safety.mjs";
 
 const DEFAULT_PACKAGE_DIR = "C:\\Users\\Sanli\\Documents\\Codex\\2026-10-21\\referenced-chatgpt-conversation-this-is-an\\outputs\\NexAutoParts_车型库数据包\\nexautoparts_vehicle_database";
 const RELEASE_ID = "nexauto-vehicle-catalog-v5";
@@ -39,6 +40,7 @@ export function prepareVehicleLibraryV5(packageDir) {
     if (!fs.existsSync(filePath)) throw new Error(`Missing package file: ${file}`);
     data[key] = readCsv(filePath).map(normalizeRow);
   }
+  const safetyCorrections = applyVehicleCatalogSafety(data);
   validatePackage(data);
   const sourceReport = JSON.parse(fs.readFileSync(path.join(packageDir, "processing_report.json"), "utf8"));
   const report = {
@@ -46,7 +48,8 @@ export function prepareVehicleLibraryV5(packageDir) {
     counts: Object.fromEntries(Object.entries(data).map(([key, rows]) => [key, rows.length])),
     expected_counts: sourceReport.output_counts ?? {},
     earliest_year: data.applicationYears.reduce((minimum, row) => Math.min(minimum, row.model_year), 2100),
-    latest_year: data.applicationYears.reduce((maximum, row) => Math.max(maximum, row.model_year), 1886)
+    latest_year: data.applicationYears.reduce((maximum, row) => Math.max(maximum, row.model_year), 1886),
+    safety_corrections: safetyCorrections
   };
   return { data, report };
 }

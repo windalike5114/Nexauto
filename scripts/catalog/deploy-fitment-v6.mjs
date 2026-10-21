@@ -5,6 +5,7 @@ import process from "node:process";
 import { fileURLToPath } from "node:url";
 import { createClient } from "@supabase/supabase-js";
 import XLSX from "xlsx";
+import { VEHICLE_APPLICATION_YEAR_CAPS } from "./vehicle-catalog-safety.mjs";
 
 const SOURCE_CODE = "NEXAUTO_FITMENT_V6_2026_10_22";
 const EXPECTED_VEHICLE_RELEASE_HASH = "ea51cdaebe629afa9edf096bbcd0de18dbdc1e919d2a9051ec96c34421812e46";
@@ -47,14 +48,7 @@ export function prepareFitmentV6(packageDir = DEFAULT_PACKAGE_DIR) {
 
   const productFitments = [
     ...classifyBrakePadFitments(brake),
-    ...oil.map((row) => {
-      const published = row.match_confidence === "high" && row.review_status === "auto_accepted";
-      return {
-        ...row,
-        fitment_status: published ? "published" : "review",
-        fitment_status_reason: published ? "confirmed_high_confidence" : "source_review_required"
-      };
-    })
+    ...classifyOilFilterFitments(oil)
   ];
   const wiperRows = wiper.map((row) => ({
     ...row,
@@ -125,6 +119,7 @@ async function inspectProduction(db, prepared) {
 
 async function applyDeployment(db, prepared, inspection) {
   const backupDir = await writeProductionBackup(db);
+  await applyVehicleApplicationYearCaps(db);
   const variantBySku = await upsertCatalogues(db, prepared);
 
   const { error: clearProductError } = await db.from("vehicle_catalog_product_fitments").delete().eq("source", SOURCE_CODE);
@@ -184,8 +179,9 @@ async function applyDeployment(db, prepared, inspection) {
     if (error) throw error;
   }
   await replaceUnsupportedReviewQueue(db, unsupported);
+  const oilFilterReviewGroups = await replaceOilFilterReviewQueue(db, prepared);
 
-  const verification = await verifyDeployment(db, productPayload, wiperPayload, unsupported);
+  const verification = await verifyDeployment(db, productPayload, wiperPayload, unsupported, oilFilterReviewGroups);
   return { backup_dir: backupDir, verification };
 }
 
@@ -286,11 +282,135 @@ async function replaceUnsupportedReviewQueue(db, rows) {
   await insertRows(db, "fitment_review_queue", compact);
 }
 
-async function verifyDeployment(db, productPayload, wiperPayload, unsupported) {
+async function replaceOilFilterReviewQueue(db, prepared) {
+  const { error: dismissError } = await db.from("fitment_review_queue")
+    .update({ review_status: "dismissed", resolution_notes: `Superseded by ${SOURCE_CODE}`, reviewed_at: new Date().toISOString() })
+    .like("issue_type", "fitment_v6_oil_%")
+    .in("review_status", ["open", "in_progress"]);
+  if (dismissError) throw dismissError;
+
+  const reviewGroups = buildOilFilterReviewGroups(prepared.productFitments, prepared.oilCatalog);
+  await insertRows(db, "fitment_review_queue", reviewGroups);
+  return reviewGroups;
+}
+
+export function buildOilFilterReviewGroups(productFitments, oilCatalog) {
+  const oilRows = productFitments.filter((row) => row.product_type === "oil_filter");
+  const previouslyPublished = oilRows.filter(wasPreviouslyPublishedOilFilter);
+  const downgraded = previouslyPublished.filter((row) => row.fitment_status === "review");
+  const applicationGroups = groupBy(previouslyPublished, (row) => row.application_id);
+  const candidateCounts = new Map(
+    [...applicationGroups].map(([applicationId, rows]) => [applicationId, new Set(rows.map((row) => row.sku)).size])
+  );
+  const filterTypeBySku = new Map(oilCatalog.map((row) => [row.sku, row.category]));
+
+  const conflictApplications = [...applicationGroups.entries()]
+    .filter(([, rows]) => new Set(rows.map((row) => row.sku)).size > 1)
+    .map(([applicationId, rows]) => ({ applicationId, rows }));
+  const conflictClusters = groupBy(conflictApplications, ({ rows }) => {
+    const engines = uniqueSorted(rows.map((row) => row.matched_engine_codes).filter(Boolean));
+    const skus = uniqueSorted(rows.map((row) => row.sku));
+    return `${engines.join("|")}::${skus.join("|")}`;
+  });
+
+  const reviews = [];
+  for (const cluster of conflictClusters.values()) {
+    const rows = cluster.flatMap((entry) => entry.rows);
+    const skus = uniqueSorted(rows.map((row) => row.sku));
+    const filterTypes = uniqueSorted(skus.map((sku) => filterTypeBySku.get(sku)).filter(Boolean));
+    const mixedConstruction = filterTypes.length > 1;
+    const applications = cluster.map((entry) => compactOilReviewApplication(entry.applicationId, entry.rows));
+    reviews.push({
+      issue_type: mixedConstruction ? "fitment_v6_oil_mixed_filter_type" : "fitment_v6_oil_candidate_conflict",
+      severity: mixedConstruction ? "error" : "warning",
+      review_status: "open",
+      summary: `${applications.length} vehicle applications share conflicting oil-filter candidates: ${skus.join(", ")}`,
+      payload: {
+        source: SOURCE_CODE,
+        review_kind: "candidate_conflict",
+        engine_codes: uniqueSorted(rows.map((row) => row.matched_engine_codes).filter(Boolean)),
+        skus,
+        filter_types: filterTypes,
+        application_count: applications.length,
+        applications
+      }
+    });
+  }
+
+  const engineOnlySingleRows = downgraded.filter((row) =>
+    row.match_method === "engine_code_global" && candidateCounts.get(row.application_id) === 1
+  );
+  const engineOnlyClusters = groupBy(engineOnlySingleRows, (row) => `${row.matched_engine_codes}:${row.sku}`);
+  for (const rows of engineOnlyClusters.values()) {
+    const applications = rows.map((row) => compactOilReviewApplication(row.application_id, [row]));
+    reviews.push({
+      issue_type: "fitment_v6_oil_engine_only_cluster",
+      severity: "warning",
+      review_status: "open",
+      summary: `${applications.length} applications inherit ${rows[0].sku} from engine code ${rows[0].matched_engine_codes || "unknown"}`,
+      payload: {
+        source: SOURCE_CODE,
+        review_kind: "engine_only_cluster",
+        engine_codes: uniqueSorted(rows.map((row) => row.matched_engine_codes).filter(Boolean)),
+        skus: [rows[0].sku],
+        application_count: applications.length,
+        applications
+      }
+    });
+  }
+
+  const residualRows = downgraded.filter((row) =>
+    candidateCounts.get(row.application_id) === 1 && row.match_method !== "engine_code_global"
+  );
+  const residualClusters = groupBy(residualRows, (row) => `${row.source_fitment_id}:${row.sku}`);
+  for (const rows of residualClusters.values()) {
+    const applications = rows.map((row) => compactOilReviewApplication(row.application_id, [row]));
+    reviews.push({
+      issue_type: "fitment_v6_oil_source_scope_review",
+      severity: "warning",
+      review_status: "open",
+      summary: `${applications.length} applications for ${rows[0].sku} need series or source-scope confirmation`,
+      payload: {
+        source: SOURCE_CODE,
+        review_kind: "source_scope_review",
+        source_fitment_id: rows[0].source_fitment_id,
+        skus: [rows[0].sku],
+        application_count: applications.length,
+        applications
+      }
+    });
+  }
+
+  return reviews;
+}
+
+function compactOilReviewApplication(applicationId, rows) {
+  const row = rows[0];
+  return {
+    application_id: applicationId,
+    make: row.make_name,
+    model: row.model_name,
+    series: row.series_name,
+    engine: row.engine_name,
+    years: `${row.application_year_from}-${row.application_year_to}`,
+    skus: uniqueSorted(rows.map((entry) => entry.sku))
+  };
+}
+
+function wasPreviouslyPublishedOilFilter(row) {
+  return row.match_confidence === "high" && row.review_status === "auto_accepted";
+}
+
+async function verifyDeployment(db, productPayload, wiperPayload, unsupported, oilFilterReviewGroups) {
   const productTotal = await filteredCount(db, "vehicle_catalog_product_fitments", "source", SOURCE_CODE);
   const wiperTotal = await exactCount(db, "vehicle_catalog_wiper_fitments");
   if (productTotal !== productPayload.length) throw new Error(`Product fitment count mismatch: ${productTotal}/${productPayload.length}`);
   if (wiperTotal !== wiperPayload.length) throw new Error(`Wiper fitment count mismatch: ${wiperTotal}/${wiperPayload.length}`);
+  const vehicleYearCaps = await verifyVehicleApplicationYearCaps(db);
+  const oilReviewCount = await filteredLikePairCount(db, "fitment_review_queue", "issue_type", "fitment_v6_oil_%", "review_status", "open");
+  if (oilReviewCount !== oilFilterReviewGroups.length) {
+    throw new Error(`Oil-filter review queue count mismatch: ${oilReviewCount}/${oilFilterReviewGroups.length}`);
+  }
   return {
     product_fitments: productTotal,
     product_published: await filteredPairCount(db, "vehicle_catalog_product_fitments", "source", SOURCE_CODE, "fitment_status", "published"),
@@ -298,7 +418,9 @@ async function verifyDeployment(db, productPayload, wiperPayload, unsupported) {
     wiper_fitments: wiperTotal,
     wiper_published: await filteredCount(db, "vehicle_catalog_wiper_fitments", "fitment_status", "published"),
     wiper_review: await filteredCount(db, "vehicle_catalog_wiper_fitments", "fitment_status", "review"),
-    unsupported_wiper_review_queue: unsupported.length
+    unsupported_wiper_review_queue: unsupported.length,
+    oil_filter_review_groups: oilReviewCount,
+    vehicle_year_caps: vehicleYearCaps
   };
 }
 
@@ -314,8 +436,54 @@ async function writeProductionBackup(db) {
     fs.writeFileSync(path.join(directory, `${table}.json`), content);
     manifest.tables[table] = { rows: rows.length, sha256: crypto.createHash("sha256").update(content).digest("hex") };
   }
+  const applicationIds = VEHICLE_APPLICATION_YEAR_CAPS.map((policy) => policy.applicationId);
+  const applicationRows = await selectAll(db.from("vehicle_catalog_applications").select("*").in("application_id", applicationIds));
+  const applicationYears = await selectAll(db.from("vehicle_catalog_application_years").select("*").in("application_id", applicationIds));
+  for (const [name, rows] of [["vehicle_catalog_applications_safety", applicationRows], ["vehicle_catalog_application_years_safety", applicationYears]]) {
+    const content = JSON.stringify(rows, null, 2);
+    fs.writeFileSync(path.join(directory, `${name}.json`), content);
+    manifest.tables[name] = { rows: rows.length, sha256: crypto.createHash("sha256").update(content).digest("hex") };
+  }
   fs.writeFileSync(path.join(directory, "manifest.json"), JSON.stringify(manifest, null, 2));
   return directory;
+}
+
+async function applyVehicleApplicationYearCaps(db) {
+  for (const policy of VEHICLE_APPLICATION_YEAR_CAPS) {
+    const { error: applicationError } = await db.from("vehicle_catalog_applications")
+      .update({ year_to: policy.yearTo, review_status: "approved" })
+      .eq("application_id", policy.applicationId)
+      .gt("year_to", policy.yearTo);
+    if (applicationError) throw applicationError;
+    const { error: yearError } = await db.from("vehicle_catalog_application_years")
+      .delete()
+      .eq("application_id", policy.applicationId)
+      .gt("model_year", policy.yearTo);
+    if (yearError) throw yearError;
+  }
+}
+
+async function verifyVehicleApplicationYearCaps(db) {
+  const results = [];
+  for (const policy of VEHICLE_APPLICATION_YEAR_CAPS) {
+    const { data: applications, error: applicationError } = await db.from("vehicle_catalog_applications")
+      .select("application_id,year_to,review_status")
+      .eq("application_id", policy.applicationId)
+      .limit(1);
+    if (applicationError) throw applicationError;
+    const application = applications?.[0];
+    if (!application || Number(application.year_to) !== policy.yearTo) {
+      throw new Error(`Vehicle year cap was not applied for ${policy.applicationId}.`);
+    }
+    const { count, error: yearError } = await db.from("vehicle_catalog_application_years")
+      .select("*", { count: "exact", head: true })
+      .eq("application_id", policy.applicationId)
+      .gt("model_year", policy.yearTo);
+    if (yearError) throw yearError;
+    if ((count ?? 0) !== 0) throw new Error(`Invalid model years remain for ${policy.applicationId}.`);
+    results.push({ application_id: policy.applicationId, year_to: policy.yearTo, review_status: application.review_status });
+  }
+  return results;
 }
 
 function productNotes(row) {
@@ -362,18 +530,73 @@ export function classifyBrakePadFitments(rows) {
 }
 
 function isConfirmedBrakePadCandidate(row) {
-  return row.match_confidence === "high"
+  return !isQuarantinedBrakePadFitment(row)
+    && row.match_confidence === "high"
     && row.review_status === "auto_accepted"
     && String(row.position_conflict) === "0"
     && (!row.series_name || matchedOnIncludes(row, "series"));
 }
 
 function brakePadReviewReason(row) {
+  if (isQuarantinedBrakePadFitment(row)) return "verified_reference_conflict";
   if (row.match_confidence !== "high") return "confidence_review_required";
   if (row.review_status !== "auto_accepted") return "source_review_required";
   if (String(row.position_conflict) !== "0") return "position_conflict";
   if (row.series_name && !matchedOnIncludes(row, "series")) return "series_not_confirmed";
   return "ambiguous_best_candidate";
+}
+
+function isQuarantinedBrakePadFitment(row) {
+  return row.sku === "NBP1279"
+    && row.make_name === "NISSAN"
+    && row.model_name === "X-TRAIL";
+}
+
+export function classifyOilFilterFitments(rows) {
+  const candidatesByApplicationPosition = groupBy(rows, (row) => `${row.application_id}:${row.position}`);
+  const publishedKeys = new Set();
+
+  for (const group of candidatesByApplicationPosition.values()) {
+    const eligible = group.filter(isConfirmedOilFilterCandidate);
+    if (!eligible.length) continue;
+    const highestScore = Math.max(...eligible.map((row) => Number(row.match_score)));
+    const best = eligible.filter((row) => Number(row.match_score) === highestScore);
+    if (new Set(best.map((row) => row.sku)).size !== 1) continue;
+    for (const row of best) publishedKeys.add(oilFilterFitmentKey(row));
+  }
+
+  return rows.map((row) => {
+    const published = publishedKeys.has(oilFilterFitmentKey(row));
+    return {
+      ...row,
+      fitment_status: published ? "published" : "review",
+      fitment_status_reason: published ? "confirmed_unique_exact_series_match" : oilFilterReviewReason(row)
+    };
+  });
+}
+
+function isConfirmedOilFilterCandidate(row) {
+  return row.match_confidence === "high"
+    && row.review_status === "auto_accepted"
+    && String(row.position_conflict) === "0"
+    && ["exact", "cleaned_exact"].includes(row.match_method)
+    && Number(row.sku_candidates_for_application) === 1
+    && (!row.series_name || matchedOnIncludes(row, "series"));
+}
+
+function oilFilterReviewReason(row) {
+  if (row.match_method === "engine_code_global") return "engine_only_not_confirmed";
+  if (row.match_confidence !== "high") return "confidence_review_required";
+  if (row.review_status !== "auto_accepted") return "source_review_required";
+  if (String(row.position_conflict) !== "0") return "position_conflict";
+  if (!["exact", "cleaned_exact"].includes(row.match_method)) return "match_method_not_confirmed";
+  if (Number(row.sku_candidates_for_application) !== 1) return "ambiguous_filter_candidate";
+  if (row.series_name && !matchedOnIncludes(row, "series")) return "series_not_confirmed";
+  return "ambiguous_best_candidate";
+}
+
+function oilFilterFitmentKey(row) {
+  return `${row.sku}:${row.application_id}:${row.position}`;
 }
 
 function matchedOnIncludes(row, discriminator) {
@@ -444,6 +667,9 @@ function groupBy(rows, keyFn) {
   }
   return result;
 }
+function uniqueSorted(values) {
+  return [...new Set(values)].sort();
+}
 function chunks(rows, size = 500) {
   const result = [];
   for (let index = 0; index < rows.length; index += size) result.push(rows.slice(index, index + size));
@@ -480,6 +706,12 @@ async function filteredCount(db, table, column, value) {
 async function filteredPairCount(db, table, firstColumn, firstValue, secondColumn, secondValue) {
   const { count, error } = await db.from(table).select("*", { count: "exact", head: true })
     .eq(firstColumn, firstValue).eq(secondColumn, secondValue);
+  if (error) throw error;
+  return count ?? 0;
+}
+async function filteredLikePairCount(db, table, firstColumn, firstValue, secondColumn, secondValue) {
+  const { count, error } = await db.from(table).select("*", { count: "exact", head: true })
+    .like(firstColumn, firstValue).eq(secondColumn, secondValue);
   if (error) throw error;
   return count ?? 0;
 }
