@@ -5,14 +5,14 @@
 Customer-facing front wiper pair SKUs use:
 
 ```txt
-WPFP{LONG}{SHORT}
+WPFP{SHORT}{LONG}
 ```
 
 Rules:
 
 - `WP` = wiper.
 - `FP` = front pair.
-- Longer blade length is first when the two sides differ.
+- Smaller blade length is first when the two sides differ, for example `18 + 26 -> WPFP1826`.
 - If both front blades are the same length, the length is repeated, for example `18 + 18 -> WPFP1818`.
 - Unit is inch.
 - Rear blade is not included.

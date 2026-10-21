@@ -55,7 +55,6 @@ export default async function VehiclePartsPage({ searchParams }: { searchParams:
   const compatible = selection ? await loadCompatibleParts(selection) : emptyCompatibleParts();
   const products = compatible.products.filter((product) =>
     !["vehicle-fit-battery", "vehicle-fit-oil-filter"].includes(product.slug)
-    && !["filter", "brake-pad"].includes(product.category)
   );
   const vehicleLabel = [vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(" ");
   const vehicleDetail = [vehicle.chassis, vehicle.body, vehicle.engine].filter(Boolean).join(" · ");

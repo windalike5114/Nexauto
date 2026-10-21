@@ -28,7 +28,7 @@ type WiperRearAddonRow = {
   active: boolean;
 };
 
-const APPROVED_FRONT_WIPER_LENGTHS = new Set([14, 15, 16, 17, 18, 19, 20, 21, 22, 24, 26, 28, 30]);
+const APPROVED_FRONT_WIPER_LENGTHS = new Set([12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 26, 27, 28, 30]);
 const APPROVED_REAR_WIPER_LENGTHS = new Set([8, 10, 11, 12, 13, 14, 15, 16]);
 
 function getSupabaseOrThrow() {
@@ -42,10 +42,10 @@ function getSupabaseOrThrow() {
 }
 
 export function buildWiperFrontPairSku(driverLengthIn: number, passengerLengthIn: number) {
-  const longLength = Math.max(driverLengthIn, passengerLengthIn);
   const shortLength = Math.min(driverLengthIn, passengerLengthIn);
+  const longLength = Math.max(driverLengthIn, passengerLengthIn);
 
-  return `WPFP${formatSkuLength(longLength)}${formatSkuLength(shortLength)}`;
+  return `WPFP${formatSkuLength(shortLength)}${formatSkuLength(longLength)}`;
 }
 
 export async function getWiperSetByLengths(driverLengthIn: number, passengerLengthIn: number) {
@@ -74,11 +74,14 @@ export async function getWiperSetByLengths(driverLengthIn: number, passengerLeng
 }
 
 export async function getWiperSetBySku(sku: string) {
+  const lengths = parseWiperFrontPairSku(sku);
+  if (!lengths) return null;
   const supabase = getSupabaseOrThrow();
   const { data, error } = await supabase
     .from("wiper_sets")
     .select("id,sku,slug,name,set_type,driver_length_in,passenger_length_in,rear_length_in,price,compare_at_price,active,visibility_status,content_status,commerce_status,checkout_enabled")
-    .eq("sku", sku.toUpperCase())
+    .eq("driver_length_in", lengths.longLength)
+    .eq("passenger_length_in", lengths.shortLength)
     .eq("set_type", "front_pair")
     .eq("active", true)
     .eq("visibility_status", "public")
@@ -208,7 +211,7 @@ function mapWiperSet(row: WiperSetRow): WiperSet {
     && row.checkout_enabled;
   return {
     id: row.id,
-    sku: row.sku,
+    sku: buildWiperFrontPairSku(Number(row.driver_length_in), Number(row.passenger_length_in)),
     slug: row.slug,
     name: row.name,
     setType: row.set_type,
@@ -222,6 +225,15 @@ function mapWiperSet(row: WiperSetRow): WiperSet {
     checkoutEnabled: row.checkout_enabled,
     purchasable
   };
+}
+
+function parseWiperFrontPairSku(value: string) {
+  const match = value.toUpperCase().match(/^WPFP(\d{2})(\d{2})$/);
+  if (!match) return null;
+  const first = Number(match[1]);
+  const second = Number(match[2]);
+  if (!isApprovedFrontPair(first, second)) return null;
+  return { shortLength: Math.min(first, second), longLength: Math.max(first, second) };
 }
 
 function mapWiperRearAddon(row: WiperRearAddonRow): WiperRearAddon {

@@ -172,7 +172,7 @@ function buildProductGroups(wiperSets: WiperSet[], products: Product[]): Product
 }
 
 function preferredWipers(wiperSets: WiperSet[], limit: number) {
-  const preferredSkus = ["WPFP2418", "WPFP2216", "WPFP2616", "WPFP2420", "WPFP2618", "WPFP2220"];
+  const preferredSkus = ["WPFP1824", "WPFP1622", "WPFP1626", "WPFP2024", "WPFP1826", "WPFP2022"];
   const preferred = preferredSkus.map((sku) => wiperSets.find((item) => item.sku === sku)).filter((item): item is WiperSet => Boolean(item));
   return [...preferred, ...wiperSets.filter((item) => !preferredSkus.includes(item.sku))].slice(0, limit);
 }

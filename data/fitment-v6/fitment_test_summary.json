@@ -1,0 +1,137 @@
+{
+  "generated_at": "2026-10-22",
+  "vehicle_database_applications": 38583,
+  "products": {
+    "brake_pad_catalog_skus": 211,
+    "oil_filter_catalog_skus": 125,
+    "wiper_catalog_supplied": false,
+    "wiper_generated_size_skus": 101
+  },
+  "source_fitment": {
+    "brake_pad_rows": 26059,
+    "brake_pad_position_records": 50377,
+    "oil_filter_rows": 3739,
+    "oil_filter_detail_segments": 3467,
+    "oil_filter_segments_after_excluding_unknown_brands": 2334,
+    "wiper_rows": 2766
+  },
+  "matching": {
+    "brake_pad_catalog_linked_source_records": 17746,
+    "brake_pad_vehicle_matched_source_records": 13363,
+    "brake_pad_unique_product_applications": 25761,
+    "brake_pad_skus_with_vehicle_match": 209,
+    "brake_pad_applications_covered": 12012,
+    "brake_pad_confidence": {
+      "high": 12398,
+      "medium": 9363,
+      "low": 4000
+    },
+    "oil_filter_catalog_linked_segments": 3188,
+    "oil_filter_catalog_linked_in_db_segments": 2196,
+    "oil_filter_engine_code_global_segments": 523,
+    "oil_filter_vehicle_matched_segments": 2155,
+    "oil_filter_unique_product_applications": 20036,
+    "oil_filter_skus_with_vehicle_match": 92,
+    "oil_filter_applications_covered": 12607,
+    "oil_filter_confidence": {
+      "high": 8664,
+      "medium": 2710,
+      "low": 8662
+    },
+    "wiper_vehicle_matched_source_rows": 1441,
+    "wiper_unique_spec_applications": 22584,
+    "wiper_specs": 101,
+    "wiper_applications_covered": 14101,
+    "wiper_confidence": {
+      "high": 8219,
+      "medium": 12601,
+      "low": 1764
+    },
+    "wiper_applications_with_multiple_specs": 5452
+  },
+  "issues": {
+    "total": 39845,
+    "by_product_and_code": [
+      {
+        "product_type": "brake_pad",
+        "issue_code": "no_catalog_product",
+        "count": 32631
+      },
+      {
+        "product_type": "brake_pad",
+        "issue_code": "make_not_in_vehicle_db",
+        "count": 2864
+      },
+      {
+        "product_type": "wiper",
+        "issue_code": "make_not_in_vehicle_db",
+        "count": 1107
+      },
+      {
+        "product_type": "brake_pad",
+        "issue_code": "model_not_matched",
+        "count": 1072
+      },
+      {
+        "product_type": "oil_filter",
+        "issue_code": "make_not_in_vehicle_db",
+        "count": 992
+      },
+      {
+        "product_type": "brake_pad",
+        "issue_code": "year_no_overlap",
+        "count": 447
+      },
+      {
+        "product_type": "oil_filter",
+        "issue_code": "no_catalog_product",
+        "count": 279
+      },
+      {
+        "product_type": "brake_pad",
+        "issue_code": "position_conflict",
+        "count": 194
+      },
+      {
+        "product_type": "wiper",
+        "issue_code": "model_not_matched",
+        "count": 143
+      },
+      {
+        "product_type": "wiper",
+        "issue_code": "missing_pair_size",
+        "count": 47
+      },
+      {
+        "product_type": "oil_filter",
+        "issue_code": "year_no_overlap",
+        "count": 29
+      },
+      {
+        "product_type": "wiper",
+        "issue_code": "year_no_overlap",
+        "count": 28
+      },
+      {
+        "product_type": "oil_filter",
+        "issue_code": "model_not_matched",
+        "count": 7
+      },
+      {
+        "product_type": "oil_filter",
+        "issue_code": "missing_model",
+        "count": 5
+      }
+    ]
+  },
+  "validation": {
+    "sqlite_integrity": "ok",
+    "foreign_key_check_rows": 0,
+    "orphan_product_links": 0,
+    "orphan_vehicle_product_links": 0,
+    "orphan_vehicle_wiper_links": 0,
+    "duplicate_brake_keys": 0,
+    "duplicate_oil_keys": 0,
+    "duplicate_wiper_keys": 0
+  }
+}
