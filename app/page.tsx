@@ -8,7 +8,7 @@ import { HomeProductTabs, type ProductTabGroup, type StorefrontProductCard } fro
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { VehiclePartsFinder } from "@/components/vehicle-parts-finder";
 import { formatMoney } from "@/lib/catalog";
-import { productImage } from "@/lib/product-content";
+import { productHref, productImage } from "@/lib/product-content";
 import { wiperPairPricing } from "@/lib/pricing";
 import { listProducts } from "@/lib/queries/catalog";
 import { listWiperSets } from "@/lib/queries/wiper-commerce";
@@ -179,7 +179,7 @@ function toWiperCard(item: WiperSet, badge?: string): StorefrontProductCard {
 function toProductCard(item: Product, badge?: string): StorefrontProductCard {
   return {
     id: item.id,
-    href: `/products/${item.slug}`,
+    href: productHref(item),
     image: productImage(item),
     eyebrow: getProductCategoryLabel(item.category),
     title: item.name,

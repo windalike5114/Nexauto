@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { CarFront } from "lucide-react";
+import { ClearVehicleButton } from "@/components/clear-vehicle-button";
 import { CompatiblePartsBrowser, type CompatiblePartsTab } from "@/components/compatible-parts-browser";
 import { VehicleContextSynchronizer } from "@/components/vehicle-context-synchronizer";
 import { VehiclePartsFinder } from "@/components/vehicle-parts-finder";
@@ -41,10 +43,15 @@ export default async function VehiclePartsPage({ searchParams }: { searchParams:
   const [queryVehicle, storedVehicle] = await Promise.all([searchParams, readStoredVehicleContext()]);
   const vehicle = parseVehicleSelection(queryVehicle) ? queryVehicle : toPartsSearchParams(storedVehicle);
   const selection = parseVehicleSelection(vehicle);
+  const activeTab = isTabKey(queryVehicle.category) ? queryVehicle.category : "all";
+
+  if (!selection && isTabKey(queryVehicle.category)) {
+    redirect(shopHrefForTab(activeTab) as never);
+  }
+
   const synchronizedVehicle = toExactVehicleContext(vehicle);
   const compatible = selection ? await loadCompatibleParts(selection) : emptyCompatibleParts();
   const products = compatible.products.filter((product) => !["vehicle-fit-battery", "vehicle-fit-oil-filter"].includes(product.slug));
-  const activeTab = isTabKey(queryVehicle.category) ? queryVehicle.category : "all";
   const vehicleLabel = [vehicle.year, vehicle.make, vehicle.model, vehicle.chassis].filter(Boolean).join(" ");
   const vehicleDetail = [vehicle.body, vehicle.engine].filter(Boolean).join(" · ");
   const reviewDemo = compatible.wiperSet ? null : findHighConfidenceWiperReview(vehicle);
@@ -72,13 +79,16 @@ export default async function VehiclePartsPage({ searchParams }: { searchParams:
         <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
           {vehicleLabel ? (
             <div className="rounded-xl border border-emerald-700/20 bg-emerald-50 p-4">
-              <div className="flex min-w-0 items-start gap-3">
-                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-emerald-700 text-white"><CarFront className="h-5 w-5" /></span>
-                <div className="min-w-0">
-                  <p className="text-[11px] font-black uppercase tracking-[0.14em] text-emerald-700">Selected vehicle</p>
-                  <h2 className="mt-1 text-lg font-black sm:text-xl">{vehicleLabel}</h2>
-                  {vehicleDetail ? <p className="mt-1 text-xs font-bold leading-5 text-steel sm:text-sm">{vehicleDetail}</p> : null}
+              <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div className="flex min-w-0 items-start gap-3">
+                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-emerald-700 text-white"><CarFront className="h-5 w-5" /></span>
+                  <div className="min-w-0">
+                    <p className="text-[11px] font-black uppercase tracking-[0.14em] text-emerald-700">Selected vehicle</p>
+                    <h2 className="mt-1 text-lg font-black sm:text-xl">{vehicleLabel}</h2>
+                    {vehicleDetail ? <p className="mt-1 text-xs font-bold leading-5 text-steel sm:text-sm">{vehicleDetail}</p> : null}
+                  </div>
                 </div>
+                <ClearVehicleButton href={shopHrefForTab(activeTab)} />
               </div>
               <details className="group mt-4 border-t border-emerald-700/15 pt-4">
                 <summary className="inline-flex h-10 cursor-pointer list-none items-center justify-center rounded-lg border border-emerald-700/20 bg-white px-4 text-sm font-black marker:hidden hover:border-emerald-700/50">Change vehicle</summary>
@@ -180,7 +190,11 @@ function toExactVehicleContext(vehicle: PartsSearchParams): VehicleContext | nul
 }
 
 function isTabKey(value: string | undefined): value is CompatiblePartsTab {
-  return ["all", "wipers", "batteries", "filters", "bulbs", "suspension"].includes(value ?? "");
+  return ["all", "wipers", "batteries", "filters", "brakes", "bulbs", "suspension"].includes(value ?? "");
+}
+
+function shopHrefForTab(tab: CompatiblePartsTab) {
+  return tab === "all" ? "/shop" : `/shop?category=${tab}`;
 }
 
 function buildWiperHref(wiperSet: WiperSet, fitment: WiperFitmentResult, vehicle: PartsSearchParams) {

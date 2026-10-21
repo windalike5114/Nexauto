@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { CheckCircle2, FlaskConical, LockKeyhole } from "lucide-react";
 import { formatMoney } from "@/lib/catalog";
-import { productImage } from "@/lib/product-content";
+import { productHref, productImage } from "@/lib/product-content";
 import { wiperPairPricing } from "@/lib/pricing";
 import type { Product, WiperSet } from "@/lib/types";
 import { getWiperSetPreviewImage } from "@/lib/wiper-product-images";
@@ -11,6 +11,7 @@ import type { WiperReviewDemo } from "@/lib/wiper-review-demo";
 const categoryNames: Record<string, string> = {
   battery: "Battery",
   filter: "Filter",
+  "brake-pad": "Brake Pad",
   bulb: "Light Bulb",
   suspension: "Suspension",
   wiper: "Wiper"
@@ -22,7 +23,7 @@ export function CompatibleProductCard({ product }: { product: Product }) {
 
   return (
     <Link
-      href={`/products/${product.slug}` as never}
+      href={productHref(product) as never}
       className="group block overflow-hidden rounded-[14px] border border-black/10 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-panel focus:outline-none focus:ring-2 focus:ring-signal focus:ring-offset-2"
       aria-label={`View ${product.name}`}
     >

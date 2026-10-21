@@ -55,3 +55,9 @@ export function persistVehicleContextCookie(context: VehicleContext) {
   document.cookie = `${vehicleContextCookieKey}=${encodeURIComponent(JSON.stringify(context))}; Max-Age=31536000; Path=/; SameSite=Lax`;
 }
 
+export function clearVehicleContext() {
+  window.localStorage.removeItem(vehicleContextStorageKey);
+  document.cookie = `${vehicleContextCookieKey}=; Max-Age=0; Path=/; SameSite=Lax`;
+  window.dispatchEvent(new CustomEvent(vehicleContextChangedEvent, { detail: null }));
+}
+

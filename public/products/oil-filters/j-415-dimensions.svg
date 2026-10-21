@@ -1,0 +1,30 @@
+<svg width="1200" height="900" viewBox="0 0 1200 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="900" rx="28" fill="#F8FAFC"/>
+  <rect x="384" y="153" width="332" height="594" rx="38" fill="#EBCB82" stroke="#1B1F24" stroke-width="10"/>
+  <path d="M414 171V729M448 160V740M482 160V740M516 160V740M550 160V740M584 160V740M618 160V740M652 160V740M686 171V729" stroke="#A56D24" stroke-width="8" opacity=".55"/>
+  <rect x="368" y="127" width="364" height="72" rx="32" fill="#1B1F24"/>
+  <rect x="368" y="701" width="364" height="72" rx="32" fill="#1B1F24"/>
+  <ellipse cx="550" cy="163" rx="73" ry="26" fill="#F8FAFC" stroke="#1B1F24" stroke-width="10"/>
+  <path d="M272 127H322M272 773H322M296 145V755" stroke="#D9232E" stroke-width="5"/>
+  <path d="M296 127L282 155H310L296 127ZM296 773L282 745H310L296 773Z" fill="#D9232E"/>
+  <rect x="83" y="411" width="223" height="79" rx="14" fill="white" stroke="#DDE1E6" stroke-width="3"/>
+  <text x="194" y="443" text-anchor="middle" fill="#667085" font-family="Arial, sans-serif" font-size="22" font-weight="700">HEIGHT</text>
+  <text x="194" y="473" text-anchor="middle" fill="#1B1F24" font-family="Arial, sans-serif" font-size="30" font-weight="800">154 mm</text>
+  <path d="M368 820H732" stroke="#D9232E" stroke-width="5"/>
+  <path d="M368 820L396 806V834L368 820ZM732 820L704 806V834L732 820Z" fill="#D9232E"/>
+  <rect x="435" y="792" width="230" height="79" rx="14" fill="white" stroke="#DDE1E6" stroke-width="3"/>
+  <text x="550" y="824" text-anchor="middle" fill="#667085" font-family="Arial, sans-serif" font-size="22" font-weight="700">OUTSIDE Ø</text>
+  <text x="550" y="854" text-anchor="middle" fill="#1B1F24" font-family="Arial, sans-serif" font-size="30" font-weight="800">46 mm</text>
+  <path d="M477 88H623" stroke="#D9232E" stroke-width="5"/>
+  <path d="M477 88L505 74V102L477 88ZM623 88L595 74V102L623 88Z" fill="#D9232E"/>
+  <rect x="750" y="68" width="326" height="105" rx="14" fill="white" stroke="#DDE1E6" stroke-width="3"/>
+  <text x="913" y="105" text-anchor="middle" fill="#667085" font-family="Arial, sans-serif" font-size="22" font-weight="700">INSIDE Ø</text>
+  <text x="913" y="145" text-anchor="middle" fill="#1B1F24" font-family="Arial, sans-serif" font-size="30" font-weight="800">21 / 21 mm</text>
+  <circle cx="864" cy="355" r="89" stroke="#1B1F24" stroke-width="14"/>
+  <circle cx="1035" cy="423" r="49" stroke="#1B1F24" stroke-width="12"/>
+  <circle cx="933" cy="535" r="31" stroke="#1B1F24" stroke-width="10"/>
+  <rect x="787" y="598" width="328" height="150" rx="14" fill="white" stroke="#DDE1E6" stroke-width="3"/>
+  <text x="951" y="636" text-anchor="middle" fill="#667085" font-family="Arial, sans-serif" font-size="22" font-weight="700">SEAL RINGS</text>
+  <text x="951" y="676" text-anchor="middle" fill="#1B1F24" font-family="Arial, sans-serif" font-size="25" font-weight="800">52 × 3.5 mm</text>
+  <text x="951" y="708" text-anchor="middle" fill="#1B1F24" font-family="Arial, sans-serif" font-size="25" font-weight="800">14 × 3.5 · 7.5 × 3.5 mm</text>
+</svg>

@@ -15,8 +15,10 @@ import {
 import { partsTabRequestedEvent } from "@/lib/parts-navigation";
 
 const categoryLinks = [
+  ["Shop All", "/shop"],
   ["Wiper Blades", "/parts?category=wipers"],
   ["Oil Filters", "/parts?category=filters"],
+  ["Brake Pads", "/parts?category=brakes"],
   ["Light Bulbs", "/parts?category=bulbs"],
   ["Batteries", "/parts?category=batteries"],
   ["Control Arms", "/parts?category=suspension"],
@@ -92,7 +94,7 @@ export function SiteHeader() {
   const vehicleLabel = vehicle ? [vehicle.year, vehicle.make, vehicle.model, vehicle.chassis].filter(Boolean).join(" ") : "";
 
   function handleCategoryNavigation(event: React.MouseEvent<HTMLAnchorElement>, href: string) {
-    if (window.location.pathname !== "/parts" || !href.startsWith("/parts?category=")) return;
+    if (!vehicle || window.location.pathname !== "/parts" || !href.startsWith("/parts?category=")) return;
     event.preventDefault();
     const category = new URL(href, window.location.origin).searchParams.get("category");
     window.dispatchEvent(new CustomEvent(partsTabRequestedEvent, { detail: category }));

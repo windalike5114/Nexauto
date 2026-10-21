@@ -1,0 +1,14 @@
+<svg width="1200" height="900" viewBox="0 0 1200 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="900" rx="28" fill="#F8FAFC"/>
+  <path d="M327 230L596 104L883 229L607 370L327 230Z" fill="#333A43"/>
+  <path d="M327 230L607 370V745L327 594V230Z" fill="#1B1F24"/>
+  <path d="M607 370L883 229V610L607 745V370Z" fill="#2A3037"/>
+  <path d="M342 281L593 407V510L342 383V281Z" fill="#D9232E"/>
+  <text x="467" y="346" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="34" font-weight="800" letter-spacing="3">OIL FILTER</text>
+  <text x="467" y="463" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="28" font-weight="800">1 FILTER</text>
+  <path d="M671 434H820M671 478H820M671 522H775" stroke="#E7E9EC" stroke-width="12" stroke-linecap="round" opacity=".75"/>
+  <circle cx="744" cy="643" r="51" stroke="#D9232E" stroke-width="12"/>
+  <circle cx="744" cy="643" r="19" stroke="#D9232E" stroke-width="9"/>
+  <rect x="222" y="787" width="756" height="71" rx="14" fill="white" stroke="#DDE1E6" stroke-width="3"/>
+  <text x="600" y="832" text-anchor="middle" fill="#667085" font-family="Arial, sans-serif" font-size="25" font-weight="700">Packaging shown for layout reference only</text>
+</svg>

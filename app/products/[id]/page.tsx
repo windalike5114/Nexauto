@@ -4,9 +4,13 @@ import { ShieldCheck, Truck, Wrench } from "lucide-react";
 import { notFound } from "next/navigation";
 import { ProductConfigurator } from "@/components/product-configurator";
 import { WiperFitmentFinder } from "@/components/wiper-fitment-finder";
+import { BrakePadProductView } from "@/components/brake-pad-product-view";
+import { OilFilterProductView } from "@/components/oil-filter-product-view";
 import { formatMoney } from "@/lib/catalog";
 import { productDetailContent, productImage } from "@/lib/product-content";
 import { getProductAttributes, getProductBySlug, listCategories, listProductVariants } from "@/lib/queries/catalog";
+import { getBrakePadDetail } from "@/lib/queries/brake-pad-catalog";
+import { getOilFilterDetail } from "@/lib/queries/oil-filter-catalog";
 
 export const dynamic = "force-dynamic";
 
@@ -15,6 +19,18 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
   const product = await getProductBySlug(id);
 
   if (!product) notFound();
+
+  if (product.category === "filter") {
+    const detail = await getOilFilterDetail(product);
+    if (!detail) notFound();
+    return <OilFilterProductView detail={detail} />;
+  }
+
+  if (product.category === "brake-pad") {
+    const detail = await getBrakePadDetail(product);
+    if (!detail) notFound();
+    return <BrakePadProductView detail={detail} />;
+  }
 
   const [attributes, variants, categories] = await Promise.all([
     getProductAttributes(product.id),

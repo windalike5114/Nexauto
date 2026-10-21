@@ -4,6 +4,10 @@ export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
       {
+        userAgent: ["GPTBot", "ChatGPT-User", "CCBot", "ClaudeBot", "Claude-Web", "Bytespider", "Amazonbot", "PerplexityBot"],
+        disallow: "/"
+      },
+      {
         userAgent: "*",
         allow: "/",
         disallow: ["/admin", "/api", "/checkout/success", "/checkout/cancel"]

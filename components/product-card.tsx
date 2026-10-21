@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Heart } from "lucide-react";
 import { formatMoney } from "@/lib/catalog";
-import { productImage } from "@/lib/product-content";
+import { productHref, productImage } from "@/lib/product-content";
 import type { Product } from "@/lib/types";
 
 export function ProductCard({ product, categoryName }: { product: Product; categoryName?: string }) {
@@ -51,7 +51,7 @@ export function ProductCard({ product, categoryName }: { product: Product; categ
             {compareAt && product.purchasable ? <span className="text-xs font-bold text-steel line-through">{formatMoney(compareAt)}</span> : null}
           </span>
           <Link
-            href={`/products/${product.slug}`}
+            href={productHref(product) as never}
             className="inline-flex h-10 w-10 items-center justify-center rounded bg-ink text-white hover:bg-black"
             aria-label={`View ${product.name}`}
           >

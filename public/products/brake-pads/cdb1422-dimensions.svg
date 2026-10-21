@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" role="img" aria-labelledby="title desc">
+  <title id="title">CDB1422 brake pad dimensions</title>
+  <desc id="desc">Supplier-listed length 116.5 millimetres, width 51.3 millimetres and thickness 16.5 millimetres.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="5" refY="5" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#de1f26"/>
+    </marker>
+    <linearGradient id="pad" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#343b43"/>
+      <stop offset="1" stop-color="#171b20"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="900" fill="#fff"/>
+  <text x="76" y="82" fill="#1b1f24" font-family="Arial, sans-serif" font-size="30" font-weight="800">CDB1422 · SUPPLIER-LISTED DIMENSIONS</text>
+  <text x="76" y="120" fill="#66717f" font-family="Arial, sans-serif" font-size="18" font-weight="600">Confirm pad shape and brake system before ordering</text>
+
+  <g transform="translate(128 230)">
+    <path d="M75 90 Q95 30 170 25 L630 25 Q710 32 738 92 L760 255 Q765 300 718 314 L98 314 Q50 300 55 254 Z" fill="#11161b"/>
+    <path d="M112 103 Q132 62 185 58 L614 58 Q665 61 694 105 L711 251 Q714 268 690 274 L121 274 Q94 270 98 246 Z" fill="url(#pad)" stroke="#5b6671" stroke-width="4"/>
+    <path d="M390 62 V272" stroke="#0b0d10" stroke-width="14"/>
+    <circle cx="71" cy="184" r="18" fill="#fff" stroke="#11161b" stroke-width="12"/>
+    <circle cx="744" cy="184" r="18" fill="#fff" stroke="#11161b" stroke-width="12"/>
+
+    <line x1="75" y1="390" x2="738" y2="390" stroke="#de1f26" stroke-width="4" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+    <line x1="75" y1="330" x2="75" y2="410" stroke="#de1f26" stroke-width="3"/>
+    <line x1="738" y1="330" x2="738" y2="410" stroke="#de1f26" stroke-width="3"/>
+    <text x="406" y="445" text-anchor="middle" fill="#1b1f24" font-family="Arial, sans-serif" font-size="28" font-weight="800">LENGTH · 116.5 mm</text>
+
+    <line x1="835" y1="58" x2="835" y2="274" stroke="#de1f26" stroke-width="4" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+    <line x1="760" y1="58" x2="855" y2="58" stroke="#de1f26" stroke-width="3"/>
+    <line x1="760" y1="274" x2="855" y2="274" stroke="#de1f26" stroke-width="3"/>
+    <text x="878" y="155" fill="#1b1f24" font-family="Arial, sans-serif" font-size="25" font-weight="800">WIDTH</text>
+    <text x="878" y="190" fill="#1b1f24" font-family="Arial, sans-serif" font-size="25" font-weight="800">51.3 mm</text>
+  </g>
+
+  <g transform="translate(280 730)">
+    <rect x="0" y="0" width="360" height="42" rx="8" fill="#171b20"/>
+    <rect x="0" y="42" width="360" height="62" rx="8" fill="#5d646c"/>
+    <line x1="430" y1="0" x2="430" y2="104" stroke="#de1f26" stroke-width="4" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+    <line x1="372" y1="0" x2="450" y2="0" stroke="#de1f26" stroke-width="3"/>
+    <line x1="372" y1="104" x2="450" y2="104" stroke="#de1f26" stroke-width="3"/>
+    <text x="478" y="64" fill="#1b1f24" font-family="Arial, sans-serif" font-size="27" font-weight="800">THICKNESS · 16.5 mm</text>
+  </g>
+</svg>
