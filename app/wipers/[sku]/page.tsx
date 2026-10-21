@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { CarFront, CheckCircle2, CircleHelp } from "lucide-react";
+import { CheckCircle2, CircleHelp } from "lucide-react";
 import { WiperSetPurchase } from "@/components/wiper-set-purchase";
 import { WiperProductGallery } from "@/components/wiper-product-gallery";
 import { WiperFitmentFinder } from "@/components/wiper-fitment-finder";
@@ -88,22 +88,19 @@ export default async function WiperSkuPage({
 
   return (
     <main>
-      <section className="mx-auto grid max-w-7xl gap-6 px-4 py-7 sm:px-6 sm:py-10 lg:grid-cols-[1.15fr_0.85fr] lg:gap-8 lg:px-8">
+      <section className="mx-auto grid max-w-7xl gap-5 px-4 py-5 sm:px-6 sm:py-6 lg:grid-cols-[1.15fr_0.85fr] lg:gap-8 lg:px-8">
         <div className="space-y-4 lg:sticky lg:top-28 lg:self-start">
           <WiperProductGallery images={galleryImages} />
         </div>
 
-        <section className="space-y-6">
+        <section className="space-y-4">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.16em] text-signal sm:text-sm sm:tracking-[0.18em]">Wipers</p>
             <h1 className="mt-2 text-3xl font-black leading-tight sm:mt-3 sm:text-5xl">Premium Front Windscreen Wiper Blade Pair</h1>
             <p className="mt-2 text-xl font-black text-ink sm:text-2xl">
               {wiperSet.driverLengthIn}" + {wiperSet.passengerLengthIn}"
             </p>
-            <p className="mt-3 text-base font-semibold leading-7 text-steel sm:mt-4 sm:text-lg sm:leading-8">
-              Smooth, quiet and reliable wiping performance designed for everyday New Zealand driving.
-            </p>
-            <div className="mt-5 flex flex-wrap items-end gap-3">
+            <div className="mt-4 flex flex-wrap items-end gap-3">
               {wiperSet.purchasable ? (
                 <>
                   <span className="text-lg font-black text-steel line-through sm:text-xl">
@@ -118,55 +115,18 @@ export default async function WiperSkuPage({
                 {wiperSet.purchasable ? formatMoney(wiperSet.price) : "Price pending"}
               </span>
             </div>
-            <div className="mt-4 grid grid-cols-2 gap-2 text-xs font-black text-ink sm:text-sm">
-              <span className={`rounded border px-3 py-2 ${vehicleContext ? "border-emerald-700/20 bg-emerald-50 text-emerald-800" : "border-amber-700/20 bg-amber-50 text-amber-900"}`}>
-                {vehicleContext ? `Fits your ${vehicleContext.year} ${vehicleContext.make} ${vehicleContext.model}` : "Check compatibility"}
-              </span>
-              <span className="rounded border border-black/10 bg-white px-3 py-2">Front pair included</span>
-              <span className="rounded border border-black/10 bg-white px-3 py-2">Free NZ shipping</span>
-              <span className="rounded border border-black/10 bg-white px-3 py-2">12-Month Warranty</span>
-              <span className="rounded border border-black/10 bg-white px-3 py-2">Ships from Auckland</span>
+          </div>
+
+          <section className={`rounded-lg border p-3 ${vehicleContext ? "border-emerald-700/20 bg-emerald-50" : "border-amber-700/20 bg-amber-50"}`}>
+            <div className="flex items-center gap-3">
+              {vehicleContext ? <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-700" /> : <CircleHelp className="h-5 w-5 shrink-0 text-amber-700" />}
+              <p className="min-w-0 flex-1 text-sm font-bold leading-5 text-steel">
+                <span className="font-black text-ink">{vehicleContext ? "Fits selected vehicle" : "Compatibility not checked"}</span>
+                {vehicle ? ` · ${vehicle}` : " · Select your vehicle for the safest fitment."}
+              </p>
+              <Link href="/parts#change-vehicle" className="shrink-0 text-xs font-black text-signal hover:underline">{vehicle ? "Change" : "Select"}</Link>
             </div>
-          </div>
-
-          {vehicle ? (
-            <section className="rounded-lg border border-black/10 bg-zinc-50 p-4 sm:p-5">
-              <div className="flex items-start gap-3">
-                <div className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-signal text-white">
-                  <CarFront className="h-5 w-5" />
-                </div>
-                <div>
-                  <p className="text-xs font-black uppercase tracking-[0.14em] text-signal">Selected vehicle</p>
-                  <h2 className="mt-1 text-xl font-black leading-tight sm:text-2xl">{vehicle}</h2>
-                </div>
-              </div>
-            </section>
-          ) : (
-            <section className="rounded-lg border border-black/10 bg-zinc-50 p-4 sm:p-5">
-              <div className="flex items-start gap-3">
-                <CircleHelp className="mt-0.5 h-5 w-5 shrink-0 text-signal" />
-                <div>
-                  <p className="text-sm font-black text-ink">Compatibility not checked</p>
-                  <p className="mt-1 text-sm font-bold leading-6 text-steel">
-                    For the safest fitment, search your vehicle before ordering.
-                  </p>
-                </div>
-              </div>
-            </section>
-          )}
-
-          <div className="grid grid-cols-2 gap-3">
-            <FitmentTile label="Driver side" lengthIn={wiperSet.driverLengthIn} />
-            <FitmentTile label="Passenger side" lengthIn={wiperSet.passengerLengthIn} />
-          </div>
-
-          {!vehicleContext ? (
-            <details className="rounded-lg border border-black/10 bg-[#F8FAFC] p-4">
-              <summary className="cursor-pointer text-sm font-black text-ink">Check compatibility for this vehicle</summary>
-              <p className="mt-2 text-sm font-bold leading-6 text-steel">Choose your vehicle here. A confirmed result will take you to the matching blade pair without returning to the homepage.</p>
-              <div className="mt-4"><WiperFitmentFinder compact directToProduct title="Check wiper compatibility" description="Select make, model, year and body or chassis to confirm the correct blade pair." /></div>
-            </details>
-          ) : null}
+          </section>
 
           {wiperSet.purchasable ? (
             <WiperSetPurchase wiperSet={wiperSet} rearAddon={rearAddon} vehicle={vehicle} vehicleContext={vehicleContext} />
@@ -184,7 +144,29 @@ export default async function WiperSkuPage({
               </Link>
             </section>
           )}
+
+          {!vehicleContext ? (
+            <details className="rounded-lg border border-black/10 bg-[#F8FAFC] p-3">
+              <summary className="cursor-pointer text-sm font-black text-ink">Check compatibility</summary>
+              <div className="mt-4"><WiperFitmentFinder compact directToProduct title="Check wiper compatibility" description="Select make, model, year and body or chassis to confirm the correct blade pair." /></div>
+            </details>
+          ) : null}
         </section>
+      </section>
+
+      <section className="border-t border-black/10 bg-white">
+        <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+          <div className="mb-4">
+            <p className="text-sm font-black uppercase tracking-[0.18em] text-signal">Product information</p>
+            <h2 className="mt-1 text-2xl font-black sm:text-3xl">Product Specifications</h2>
+          </div>
+          <dl className="overflow-hidden rounded-lg border border-black/10 text-sm font-bold">
+            <SpecificationRow label="Driver side" value={`${wiperSet.driverLengthIn}\" / ${toMillimetres(wiperSet.driverLengthIn)} mm`} />
+            <SpecificationRow label="Passenger side" value={`${wiperSet.passengerLengthIn}\" / ${toMillimetres(wiperSet.passengerLengthIn)} mm`} />
+            <SpecificationRow label="Pack" value="1 driver-side blade + 1 passenger-side blade" />
+            <SpecificationRow label="SKU" value={wiperSet.sku} />
+          </dl>
+        </div>
       </section>
 
       <section className="border-t border-black/10 bg-[#F8FAFC]">
@@ -249,9 +231,6 @@ export default async function WiperSkuPage({
       <section className="border-t border-black/10 bg-white">
         <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
           <div className="mt-6 divide-y divide-black/10 overflow-hidden rounded-lg border border-black/10 bg-white">
-            <AccordionItem title="Product Details">
-              Includes one driver-side blade and one passenger-side blade. The listed sizes are {wiperSet.driverLengthIn}" / {toMillimetres(wiperSet.driverLengthIn)} mm and {wiperSet.passengerLengthIn}" / {toMillimetres(wiperSet.passengerLengthIn)} mm.
-            </AccordionItem>
             <AccordionItem title="Installation">
               Most installations require no specialist tools. Use the Installation Guide Centre to match your adapter style and follow the fitting steps.
             </AccordionItem>
@@ -293,13 +272,11 @@ function getWiperSetTitle(wiperSet: { driverLengthIn: number; passengerLengthIn:
   return `Premium Front Windscreen Wiper Blade Pair - ${wiperSet.driverLengthIn}" + ${wiperSet.passengerLengthIn}"`;
 }
 
-function FitmentTile({ label, lengthIn }: { label: string; lengthIn: number }) {
+function SpecificationRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-black/10 bg-white p-4 shadow-sm">
-      <p className="text-xs font-black uppercase tracking-[0.14em] text-steel">{label}</p>
-      <p className="mt-2 text-xl font-black text-ink">
-        {lengthIn}" <span className="text-sm font-bold text-steel">/ approximately {toMillimetres(lengthIn)} mm</span>
-      </p>
+    <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] gap-4 border-b border-black/10 px-4 py-3 last:border-b-0 odd:bg-zinc-50">
+      <dt className="font-black text-ink">{label}</dt>
+      <dd className="text-right text-steel">{value}</dd>
     </div>
   );
 }

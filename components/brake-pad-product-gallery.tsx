@@ -15,7 +15,7 @@ export function BrakePadProductGallery({ items, illustrative }: { items: Gallery
 
   return (
     <div className="space-y-3 sm:space-y-4">
-      <div className="group relative aspect-[4/3] overflow-hidden rounded-lg border border-black/10 bg-white shadow-panel sm:aspect-[16/11]">
+      <div className="group relative aspect-[4/3] overflow-hidden rounded-lg border border-black/10 bg-white shadow-panel sm:aspect-[16/11] lg:aspect-auto lg:h-[400px]">
         <Image
           src={activeItem.src}
           alt={activeItem.alt}

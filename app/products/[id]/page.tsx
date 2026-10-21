@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ShieldCheck, Truck, Wrench } from "lucide-react";
-import { notFound, permanentRedirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { ProductConfigurator } from "@/components/product-configurator";
 import { WiperFitmentFinder } from "@/components/wiper-fitment-finder";
 import { BrakePadProductView } from "@/components/brake-pad-product-view";
@@ -9,7 +8,6 @@ import { formatMoney } from "@/lib/catalog";
 import { productDetailContent, productImage } from "@/lib/product-content";
 import { getProductAttributes, getProductBySlug, listCategories, listProductVariants } from "@/lib/queries/catalog";
 import { getBrakePadDetail } from "@/lib/queries/brake-pad-catalog";
-import { getOilFilterDetail } from "@/lib/queries/oil-filter-catalog";
 
 export const dynamic = "force-dynamic";
 
@@ -20,9 +18,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
   if (!product) notFound();
 
   if (product.category === "filter") {
-    const detail = await getOilFilterDetail(product);
-    if (!detail) notFound();
-    permanentRedirect(`/oil-filters/${encodeURIComponent(detail.partNumber)}` as never);
+    notFound();
   }
 
   if (product.category === "brake-pad") {
@@ -44,9 +40,9 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
 
   return (
     <main>
-      <section className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[0.95fr_1.05fr] lg:px-8">
-        <div className="space-y-4 lg:sticky lg:top-28 lg:self-start">
-          <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-zinc-200">
+      <section className="mx-auto grid max-w-7xl gap-6 px-4 py-5 sm:px-6 sm:py-6 lg:grid-cols-[0.95fr_1.05fr] lg:px-8">
+        <div className="lg:sticky lg:top-28 lg:self-start">
+          <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-zinc-200 lg:aspect-auto lg:h-[400px]">
             {image ? (
               <Image
                 src={image}
@@ -60,19 +56,13 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
               <div className="grid h-full place-items-center font-black text-steel">No image</div>
             )}
           </div>
-          <div className="grid grid-cols-3 gap-3">
-            <MediaTile icon={<Truck className="h-4 w-4" />} text="Dispatch" />
-            <MediaTile icon={<ShieldCheck className="h-4 w-4" />} text="Secure pay" />
-            <MediaTile icon={<Wrench className="h-4 w-4" />} text="SKU fit" />
-          </div>
         </div>
 
-        <section className="space-y-6">
+        <section className="space-y-4">
           <div>
             <p className="text-sm font-black uppercase tracking-[0.18em] text-signal">{category?.name ?? product.category}</p>
             <h1 className="mt-3 text-4xl font-black leading-tight sm:text-5xl">{product.name}</h1>
-            <p className="mt-4 text-lg leading-8 text-steel">{product.description}</p>
-            <p className="mt-5 text-3xl font-black">
+            <p className="mt-4 text-3xl font-black">
               {!product.purchasable ? "Coming soon" : needsContactSupport ? "Fitment enquiry" : formatMoney(product.price)}
             </p>
           </div>
@@ -109,23 +99,23 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
               This product is currently out of stock.
             </p>
           ) : null}
-          {product.category === "wiper" ? <WiperFitmentFinder compact /> : null}
         </section>
       </section>
 
       <section className="border-t border-black/10 bg-white">
-        <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 lg:grid-cols-[0.85fr_1.15fr] lg:px-8">
+        <div className="mx-auto grid max-w-7xl gap-6 px-4 py-6 sm:px-6 sm:py-8 lg:grid-cols-[0.85fr_1.15fr] lg:px-8">
           <div>
             <p className="text-sm font-black uppercase tracking-[0.18em] text-signal">{content.kicker}</p>
-            <h2 className="mt-3 text-3xl font-black">Product details</h2>
-            <p className="mt-4 leading-8 text-steel">{content.intro}</p>
-            <div className="mt-6 flex flex-wrap gap-2">
+            <h2 className="mt-1 text-2xl font-black sm:text-3xl">Product Specifications</h2>
+            <p className="mt-3 leading-7 text-steel">{content.intro}</p>
+            <div className="mt-4 flex flex-wrap gap-2">
               {content.highlights.map((item) => (
                 <span key={item} className="rounded bg-zinc-100 px-3 py-2 text-sm font-bold text-steel">
                   {item}
                 </span>
               ))}
             </div>
+            {product.category === "wiper" ? <div className="mt-4"><WiperFitmentFinder compact /></div> : null}
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
@@ -139,14 +129,5 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
         </div>
       </section>
     </main>
-  );
-}
-
-function MediaTile({ icon, text }: { icon: React.ReactNode; text: string }) {
-  return (
-    <div className="flex min-h-16 flex-col items-center justify-center gap-1 rounded border border-black/10 bg-white text-sm font-black text-steel">
-      {icon}
-      <span>{text}</span>
-    </div>
   );
 }

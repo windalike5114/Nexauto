@@ -21,8 +21,6 @@ export function productHref(product: Product) {
   if (product.category === "filter") {
     const sku = product.slug.replace(/^oil-filter-/i, "").toUpperCase();
     if (sku !== product.slug.toUpperCase()) return `/oil-filters/${encodeURIComponent(sku)}`;
-    const partNumber = product.name.replace(/^TopStar Oil Filter\s+/i, "").trim();
-    if (partNumber && partNumber !== product.name) return `/oil-filters/${encodeURIComponent(partNumber)}`;
   }
   return `/products/${product.slug}`;
 }

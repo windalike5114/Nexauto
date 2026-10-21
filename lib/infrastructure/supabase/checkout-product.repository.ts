@@ -1,6 +1,6 @@
 import { getVariantsByIds } from "@/lib/queries/catalog";
 import { getBrakePadBySlugOrPartNumber } from "@/lib/queries/brake-pad-catalog";
-import { getOilFilterBySlugOrPartNumber } from "@/lib/queries/oil-filter-catalog";
+import { getOilFilterBySku } from "@/lib/queries/oil-filter-catalog";
 import { getWiperRearAddonsByIds, getWiperSetsByIds } from "@/lib/queries/wiper-commerce";
 import type { CheckoutProductRepository, TrustedCartItem } from "@/lib/application/checkout/create-checkout-session";
 import { ProductUnavailableError } from "@/lib/application/checkout/checkout.errors";
@@ -31,7 +31,7 @@ export function createSupabaseCheckoutProductRepository(): CheckoutProductReposi
         getWiperSetsByIds(requestedWiperSetIds),
         getWiperRearAddonsByIds(requestedRearAddonIds),
         Promise.all(requestedBrakePadSkus.map((sku) => getBrakePadBySlugOrPartNumber(sku))),
-        Promise.all(requestedOilFilterSkus.map((sku) => getOilFilterBySlugOrPartNumber(sku)))
+        Promise.all(requestedOilFilterSkus.map((sku) => getOilFilterBySku(sku)))
       ]);
 
       if (dbVariants.length !== requestedVariantIds.length) {

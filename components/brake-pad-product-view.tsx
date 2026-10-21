@@ -17,12 +17,6 @@ export async function BrakePadProductView({ detail }: { detail: BrakePadDetail }
   // will become the sole source for Fits / Not fit decisions once supplied.
   const vehicleFitmentStatus = vehicle ? "unavailable" : "not-selected";
   const displayTitle = splitBrakePadDisplayTitle(detail.title);
-  const keySpecs = [
-    { label: "Length", value: `${formatBrakePadDimension(detail.lengthMm ?? 0)} mm` },
-    { label: "Width", value: `${formatBrakePadDimension(detail.widthMm ?? 0)} mm` },
-    { label: "Thickness", value: `${formatBrakePadDimension(detail.thicknessMm ?? 0)} mm` },
-    { label: "Pack", value: detail.packDescription }
-  ];
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -43,7 +37,7 @@ export async function BrakePadProductView({ detail }: { detail: BrakePadDetail }
     <main>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
 
-      <section className="mx-auto grid max-w-7xl gap-6 px-4 py-7 sm:px-6 sm:py-8 lg:grid-cols-[1.05fr_0.95fr] lg:gap-8 lg:px-8">
+      <section className="mx-auto grid max-w-7xl gap-5 px-4 py-5 sm:px-6 sm:py-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-8 lg:px-8">
         <div className="space-y-4 lg:sticky lg:top-28 lg:self-start">
           <BrakePadProductGallery
             items={[{ src: detail.imageUrl, alt: `${detail.title} product view`, label: "Product photo" }]}
@@ -51,7 +45,7 @@ export async function BrakePadProductView({ detail }: { detail: BrakePadDetail }
           />
         </div>
 
-        <section className="space-y-4 sm:space-y-5">
+        <section className="space-y-4">
           <header>
             <p className="text-xs font-black uppercase tracking-[0.16em] text-signal sm:text-sm sm:tracking-[0.18em]">Brake Pads</p>
             <h1 className="mt-2 text-2xl font-black leading-tight text-ink sm:mt-3 sm:text-4xl">{displayTitle.title}</h1>
@@ -62,20 +56,11 @@ export async function BrakePadProductView({ detail }: { detail: BrakePadDetail }
               <p>SKU: {detail.partNumber}</p>
               <p className="text-xs">Supplier ref: {detail.supplierRef}</p>
             </div>
-            <div className="mt-5">
+            <div className="mt-4">
               <p className="text-3xl font-black sm:text-4xl">{formatMoney(detail.variant.price)}</p>
               <p className="mt-1 text-xs font-bold text-steel">GST incl. · Price shown for one listed set</p>
             </div>
           </header>
-
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {keySpecs.map((spec) => (
-              <div key={spec.label} className="rounded-lg border border-black/10 bg-white p-3 shadow-sm sm:p-4">
-                <p className="text-[10px] font-black uppercase tracking-[0.13em] text-steel sm:text-xs">{spec.label}</p>
-                <p className="mt-1.5 text-sm font-black text-ink sm:text-base">{spec.value}</p>
-              </div>
-            ))}
-          </div>
 
           <BrakePadPurchase
             detail={detail}
@@ -86,17 +71,17 @@ export async function BrakePadProductView({ detail }: { detail: BrakePadDetail }
       </section>
 
       <section className="border-t border-black/10 bg-white">
-        <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
-          <div className="mb-7">
+        <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+          <div className="mb-4">
             <p className="text-sm font-black uppercase tracking-[0.18em] text-signal">Product description</p>
-            <h2 className="mt-2 text-3xl font-black">Details for {detail.partNumber}</h2>
-            <p className="mt-3 text-sm font-bold leading-7 text-steel">
+            <h2 className="mt-1 text-2xl font-black sm:text-3xl">Product Specifications</h2>
+            <p className="mt-2 text-sm font-bold leading-6 text-steel">
               Dimensions are generated from the uploaded brake-pad catalogue. Vehicle fitment remains blank where no detailed records were supplied.
             </p>
           </div>
 
           <div className="divide-y divide-black/10 overflow-hidden rounded-lg border border-black/10 bg-white">
-            <AccordionItem title="Product Specifications" open>
+            <AccordionItem title={`Dimensions and fitment · ${detail.partNumber}`} open>
               <p className="mb-5">{detail.packDescription}. Confirm the pad shape, dimensions and brake system before installation.</p>
               <DimensionsTable detail={detail} />
               <FitmentTable fitments={detail.fitments} />

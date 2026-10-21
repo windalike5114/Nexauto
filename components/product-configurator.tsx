@@ -48,11 +48,11 @@ export function ProductConfigurator({
   }
 
   return (
-    <div className="space-y-6 rounded-lg border border-black/10 bg-white p-5 shadow-panel">
+    <div className="space-y-4 rounded-lg border border-black/10 bg-white p-4 shadow-panel">
       {Object.entries(attributes).map(([key, values]) => (
         <div key={key}>
           <label className="text-sm font-black text-ink">{formatAttributeName(key)}</label>
-          <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
             {values.map((value) => {
               const active = String(selected[key]) === String(value);
               return (
@@ -74,7 +74,7 @@ export function ProductConfigurator({
         </div>
       ))}
 
-      <div className="rounded bg-zinc-50 p-4">
+      <div className="rounded bg-zinc-50 p-3">
         <div className="flex items-center justify-between gap-4">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.16em] text-steel">Selected SKU</p>

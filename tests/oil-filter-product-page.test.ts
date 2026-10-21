@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { buildOilFilterSpecifications } from "../lib/oil-filter";
+import { buildOilFilterSpecifications, isCanonicalOilFilterSku } from "../lib/oil-filter";
 
 test("cartridge filters render uploaded dimensions and seals", () => {
   const rows = buildOilFilterSpecifications({
@@ -40,4 +40,12 @@ test("missing filter fields are omitted instead of rendered as N/A", () => {
 
   assert.deepEqual(rows, [{ label: "Filter Type", value: "Cartridge" }]);
   assert.equal(rows.some((row) => row.value === "N/A"), false);
+});
+
+test("only the new NOF SKU format is accepted as a product route", () => {
+  assert.equal(isCanonicalOilFilterSku("NOF1748"), true);
+  assert.equal(isCanonicalOilFilterSku("J-415"), false);
+  assert.equal(isCanonicalOilFilterSku("R2703P"), false);
+  assert.equal(isCanonicalOilFilterSku("TOPSTAR-J415"), false);
+  assert.equal(isCanonicalOilFilterSku("nof1748"), false);
 });

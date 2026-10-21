@@ -30,7 +30,7 @@ export function WiperProductGallery({ images }: { images: GalleryImage[] }) {
   return (
     <div className="space-y-3 sm:space-y-4">
       <div
-        className="group relative aspect-[4/3] overflow-hidden rounded-lg border border-black/10 bg-white shadow-panel sm:aspect-[16/11]"
+        className="group relative aspect-[4/3] overflow-hidden rounded-lg border border-black/10 bg-white shadow-panel sm:aspect-[16/11] lg:aspect-auto lg:h-[360px]"
         onTouchStart={(event) => setTouchStartX(event.touches[0]?.clientX ?? null)}
         onTouchEnd={(event) => handleTouchEnd(event.changedTouches[0]?.clientX ?? 0)}
       >

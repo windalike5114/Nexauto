@@ -50,3 +50,7 @@ export function buildOilFilterSpecifications(input: FilterSpecInput): OilFilterS
 export function formatDimension(value: number) {
   return Number.isInteger(value) ? String(value) : value.toFixed(1);
 }
+
+export function isCanonicalOilFilterSku(value: string) {
+  return /^NOF\d{4}$/.test(value);
+}

@@ -3,6 +3,7 @@ import "server-only";
 import oilFilterCatalogJson from "@/data/oil-filters/catalog.json";
 import {
   buildOilFilterSpecifications,
+  isCanonicalOilFilterSku,
   type OilFilterConstruction,
   type OilFilterDetail
 } from "@/lib/oil-filter";
@@ -26,25 +27,15 @@ type OilFilterCatalogRow = {
 };
 
 const oilFilterCatalog = oilFilterCatalogJson as OilFilterCatalogRow[];
-const catalogueByReference = buildCatalogueIndex(oilFilterCatalog);
+const catalogueBySku = new Map(oilFilterCatalog.map((row) => [row.sku, row]));
 const catalogueProducts = oilFilterCatalog.map(createProduct);
 
-export async function getOilFilterBySlugOrPartNumber(value: string): Promise<OilFilterDetail | null> {
-  const decoded = decodeURIComponent(value).trim().replace(/^oil-filter-/i, "");
-  const row = catalogueByReference.get(normalizeKey(decoded));
+export async function getOilFilterBySku(value: string): Promise<OilFilterDetail | null> {
+  const decoded = decodeURIComponent(value).trim();
+  if (!isCanonicalOilFilterSku(decoded)) return null;
+  const row = catalogueBySku.get(decoded);
   return row ? createDetail(row) : null;
 }
-
-export async function getOilFilterDetail(product: Product): Promise<OilFilterDetail | null> {
-  const skuFromSlug = product.slug.replace(/^oil-filter-/i, "");
-  const direct = catalogueByReference.get(normalizeKey(skuFromSlug));
-  if (direct) return createDetail(direct);
-
-  const legacyReference = product.slug.replace(/^topstar-oil-filter-/i, "");
-  const legacy = catalogueByReference.get(normalizeKey(legacyReference));
-  return legacy ? createDetail(legacy) : null;
-}
-
 export function listOilFilterCatalogProducts() {
   return catalogueProducts;
 }
@@ -84,7 +75,6 @@ function createDetail(row: OilFilterCatalogRow): OilFilterDetail {
     imageIsIllustrative: false
   };
 }
-
 function createProduct(row: OilFilterCatalogRow): Product {
   return {
     id: `oil-filter-${row.sku.toLowerCase()}`,
@@ -123,20 +113,4 @@ function createVariant(row: OilFilterCatalogRow, productId: string): ProductVari
     },
     active: true
   };
-}
-
-function buildCatalogueIndex(rows: OilFilterCatalogRow[]) {
-  const index = new Map<string, OilFilterCatalogRow>();
-  for (const row of rows) {
-    const references = [row.sku, row.topstarRef, row.supplierRef, ...row.supplierRef.split("/")];
-    for (const reference of references) {
-      const key = normalizeKey(reference);
-      if (key && !index.has(key)) index.set(key, row);
-    }
-  }
-  return index;
-}
-
-function normalizeKey(value: string) {
-  return value.toUpperCase().replace(/[^A-Z0-9]/g, "");
 }
