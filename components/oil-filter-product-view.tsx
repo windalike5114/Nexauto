@@ -1,15 +1,30 @@
 import Link from "next/link";
-import { AlertTriangle, CircleHelp } from "lucide-react";
+import { AlertTriangle, CheckCircle2, CircleHelp } from "lucide-react";
 import { OilFilterProductGallery } from "@/components/oil-filter-product-gallery";
 import { OilFilterPurchase } from "@/components/oil-filter-purchase";
 import { formatMoney } from "@/lib/catalog";
 import type { OilFilterDetail } from "@/lib/oil-filter";
+import { getProductFitmentStatusForVehicle, type ProductVehicleFitmentStatus } from "@/lib/queries/vehicle-product-fitment";
 import { readStoredVehicleContext } from "@/lib/server/vehicle-context";
 
 export async function OilFilterProductView({ detail }: { detail: OilFilterDetail }) {
   const vehicle = await readStoredVehicleContext();
   const vehicleLabel = vehicle ? [vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(" ") : "";
   const vehicleDetail = vehicle ? [vehicle.chassis, vehicle.bodyConfiguration, vehicle.engine].filter(Boolean).join(" · ") : "";
+  let vehicleFitmentStatus: ProductVehicleFitmentStatus | "not-selected" = "not-selected";
+  if (vehicle) {
+    try {
+      vehicleFitmentStatus = await getProductFitmentStatusForVehicle(detail.partNumber, {
+        makeId: vehicle.makeId,
+        modelId: vehicle.modelId,
+        year: Number(vehicle.year),
+        applicationId: vehicle.applicationId,
+        applicationIds: vehicle.applicationIds
+      });
+    } catch {
+      vehicleFitmentStatus = "unavailable";
+    }
+  }
   const titleParts = splitOilFilterTitle(detail.title);
   const jsonLd = {
     "@context": "https://schema.org",
@@ -58,7 +73,7 @@ export async function OilFilterProductView({ detail }: { detail: OilFilterDetail
             </div>
           </header>
 
-          <CompatibilityPanel selected={Boolean(vehicle)} vehicleLabel={vehicleLabel} vehicleDetail={vehicleDetail} />
+          <CompatibilityPanel status={vehicleFitmentStatus} vehicleLabel={vehicleLabel} vehicleDetail={vehicleDetail} />
 
           <OilFilterPurchase detail={detail} />
         </section>
@@ -91,14 +106,11 @@ export async function OilFilterProductView({ detail }: { detail: OilFilterDetail
             </AccordionItem>
 
             <AccordionItem title="Vehicle Compatibility" open={Boolean(vehicle)}>
-              {vehicle ? (
-                <p>
-                  A separate verified fitment record is not yet published for {vehicleLabel}{vehicleDetail ? ` · ${vehicleDetail}` : ""}.
-                  The model list above is for product identification and does not decide Fits / Not fit.
-                </p>
-              ) : (
-                <p>Select your vehicle to use the dedicated fitment catalogue when a verified application record is available.</p>
-              )}
+              <VehicleCompatibilityCopy
+                status={vehicleFitmentStatus}
+                vehicleLabel={vehicleLabel}
+                vehicleDetail={vehicleDetail}
+              />
             </AccordionItem>
 
             <AccordionItem title="Installation Notes">
@@ -117,24 +129,47 @@ export async function OilFilterProductView({ detail }: { detail: OilFilterDetail
   );
 }
 
-function CompatibilityPanel({ selected, vehicleLabel, vehicleDetail }: { selected: boolean; vehicleLabel: string; vehicleDetail: string }) {
-  const visual = selected
+function CompatibilityPanel({ status, vehicleLabel, vehicleDetail }: {
+  status: ProductVehicleFitmentStatus | "not-selected";
+  vehicleLabel: string;
+  vehicleDetail: string;
+}) {
+  const selected = status !== "not-selected";
+  const visual = status === "fits"
     ? {
-        icon: <AlertTriangle className="h-5 w-5" />,
-        panel: "border-amber-700/20 bg-amber-50",
-        iconBox: "bg-amber-600 text-white",
-        eyebrow: "text-amber-800",
-        title: "Fitment confirmation required",
-        body: `Selected: ${vehicleLabel}${vehicleDetail ? ` · ${vehicleDetail}` : ""}`
+        icon: <CheckCircle2 className="h-5 w-5" />,
+        panel: "border-emerald-700/20 bg-emerald-50",
+        iconBox: "bg-emerald-700 text-white",
+        eyebrow: "text-emerald-800",
+        title: "Fits your selected vehicle",
+        body: `${vehicleLabel}${vehicleDetail ? ` · ${vehicleDetail}` : ""}`
       }
-    : {
-        icon: <CircleHelp className="h-5 w-5" />,
-        panel: "border-black/10 bg-[#F8FAFC]",
-        iconBox: "bg-signal text-white",
-        eyebrow: "text-signal",
-        title: "This product is vehicle specific",
-        body: "Select your vehicle to check fitment."
-      };
+    : status === "not-listed"
+      ? {
+        icon: <AlertTriangle className="h-5 w-5" />,
+        panel: "border-red-700/20 bg-red-50",
+        iconBox: "bg-red-700 text-white",
+        eyebrow: "text-red-800",
+        title: "Not listed for your selected vehicle",
+        body: `${vehicleLabel}${vehicleDetail ? ` · ${vehicleDetail}` : ""}`
+      }
+      : status === "unavailable"
+        ? {
+            icon: <AlertTriangle className="h-5 w-5" />,
+            panel: "border-amber-700/20 bg-amber-50",
+            iconBox: "bg-amber-600 text-white",
+            eyebrow: "text-amber-800",
+            title: "Vehicle fitment check is temporarily unavailable",
+            body: `${vehicleLabel}${vehicleDetail ? ` · ${vehicleDetail}` : ""}`
+          }
+        : {
+            icon: <CircleHelp className="h-5 w-5" />,
+            panel: "border-black/10 bg-[#F8FAFC]",
+            iconBox: "bg-signal text-white",
+            eyebrow: "text-signal",
+            title: "This product is vehicle specific",
+            body: "Select your vehicle to check fitment."
+          };
 
   return (
     <section className={`rounded-lg border p-3 ${visual.panel}`}>
@@ -148,6 +183,24 @@ function CompatibilityPanel({ selected, vehicleLabel, vehicleDetail }: { selecte
       </div>
     </section>
   );
+}
+
+function VehicleCompatibilityCopy({ status, vehicleLabel, vehicleDetail }: {
+  status: ProductVehicleFitmentStatus | "not-selected";
+  vehicleLabel: string;
+  vehicleDetail: string;
+}) {
+  const selectedVehicle = `${vehicleLabel}${vehicleDetail ? ` · ${vehicleDetail}` : ""}`;
+  if (status === "fits") {
+    return <p>This filter has a published fitment relationship for {selectedVehicle}.</p>;
+  }
+  if (status === "not-listed") {
+    return <p>This filter is not published as a confirmed match for {selectedVehicle}. Check the removed filter or contact us before ordering.</p>;
+  }
+  if (status === "unavailable") {
+    return <p>The fitment catalogue could not be checked for {selectedVehicle}. Please try again or contact us before ordering.</p>;
+  }
+  return <p>Select your vehicle to check this filter against the dedicated fitment catalogue.</p>;
 }
 
 function splitOilFilterTitle(title: string) {
