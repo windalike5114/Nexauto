@@ -65,29 +65,6 @@ export function CompatiblePartsBrowser({ products, wiperSet, wiperHref, rearLeng
 
   return (
     <>
-      <section className="border-b border-black/10 bg-white" aria-label="Part category filters">
-        <div className="mx-auto max-w-7xl overflow-x-auto px-2 sm:px-6 lg:px-8">
-          <div className="flex min-w-max items-end gap-1 pt-2" role="tablist" aria-label="Compatible part categories">
-            {tabs.map((tab) => {
-              const active = tab.key === activeTab;
-              return (
-                <button
-                  key={tab.key}
-                  type="button"
-                  role="tab"
-                  aria-selected={active}
-                  onClick={() => selectTab(tab.key)}
-                  className={`border-b-4 px-4 py-3 text-sm font-black transition ${active ? "border-signal text-ink" : "border-transparent text-steel hover:border-black/15 hover:text-ink"}`}
-                >
-                  {tab.label} <span className={`ml-1 rounded-full px-2 py-0.5 text-[11px] ${active ? "bg-signal text-white" : "bg-zinc-100 text-steel"}`}>{counts[tab.key]}</span>
-                  {tab.key === "wipers" && reviewDemo && !wiperSet ? <span className="ml-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] text-amber-800">1 review</span> : null}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
       <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
         {error ? <div className="mb-6 rounded-xl border border-signal/25 bg-red-50 p-4 text-sm font-bold text-signal">{error}</div> : null}
 
@@ -103,7 +80,7 @@ export function CompatiblePartsBrowser({ products, wiperSet, wiperHref, rearLeng
             <h2 className="mt-2 text-2xl font-black sm:text-3xl">Compatible products</h2>
           </div>
           <p className="text-sm font-bold text-steel">
-            {confirmedCount} confirmed listing{confirmedCount === 1 ? "" : "s"}
+            {counts[activeTab]} confirmed listing{counts[activeTab] === 1 ? "" : "s"}
             {showReviewDemo ? " · 1 high-confidence review recommendation" : ""}
           </p>
         </div>

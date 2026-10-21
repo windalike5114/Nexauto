@@ -7,7 +7,7 @@ const footerGroups = [
   {
     title: "Shop",
     links: [
-      ["Shop All", "/shop"],
+      ["All Products", "/shop"],
       ["Wiper Blades", "/parts?category=wipers"],
       ["Oil Filters", "/parts?category=filters"],
       ["Brake Pads", "/parts?category=brakes"],

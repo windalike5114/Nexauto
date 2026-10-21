@@ -73,7 +73,7 @@ export default async function VehiclePartsPage({ searchParams }: { searchParams:
             {vehicleLabel ? `Parts for ${vehicleLabel}` : "Find parts that fit your vehicle"}
           </h1>
           <p className="mt-3 max-w-3xl text-sm font-semibold leading-6 text-white/70 sm:text-base">
-            Select your vehicle once. Browse every confirmed match, then use the category tabs to narrow the results.
+            Select your vehicle once. Browse every confirmed match, then use the main category navigation to narrow the results.
           </p>
         </div>
       </section>

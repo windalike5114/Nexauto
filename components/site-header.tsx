@@ -15,7 +15,7 @@ import {
 import { partsTabRequestedEvent } from "@/lib/parts-navigation";
 
 const categoryLinks = [
-  ["Shop All", "/shop"],
+  ["All Products", "/shop"],
   ["Wiper Blades", "/parts?category=wipers"],
   ["Oil Filters", "/parts?category=filters"],
   ["Brake Pads", "/parts?category=brakes"],
@@ -93,10 +93,21 @@ export function SiteHeader() {
   const vehicleLabel = vehicle ? [vehicle.year, vehicle.make, vehicle.model, vehicle.chassis].filter(Boolean).join(" ") : "";
 
   function handleCategoryNavigation(event: React.MouseEvent<HTMLAnchorElement>, href: string) {
-    if (!vehicle || window.location.pathname !== "/parts" || !href.startsWith("/parts?category=")) return;
-    event.preventDefault();
+    if (selectVehicleCategory(href)) event.preventDefault();
+  }
+
+  function selectVehicleCategory(href: string) {
+    if (!vehicle || window.location.pathname !== "/parts" || !href.startsWith("/parts?category=")) return false;
     const category = new URL(href, window.location.origin).searchParams.get("category");
     window.dispatchEvent(new CustomEvent(partsTabRequestedEvent, { detail: category }));
+    return true;
+  }
+
+  function handleMobileCategoryChange(event: React.ChangeEvent<HTMLSelectElement>) {
+    const href = event.target.value;
+    if (!href) return;
+    if (!selectVehicleCategory(href)) window.location.assign(href);
+    event.target.value = "";
   }
 
   return (
@@ -160,7 +171,7 @@ export function SiteHeader() {
       </div>
 
       <nav className="border-t border-black/10 bg-[#F8FAFC]" aria-label="Product categories">
-        <div className="mx-auto flex max-w-7xl items-center gap-0.5 overflow-x-auto px-2 py-0.5 sm:px-5 lg:gap-1 lg:px-7 lg:py-1.5">
+        <div className="mx-auto hidden max-w-7xl items-center gap-1 px-7 py-1.5 lg:flex">
           {categoryLinks.map(([label, href]) => (
             <Link key={href} href={href} onClick={(event) => handleCategoryNavigation(event, href)} className="shrink-0 rounded-md px-2.5 py-1.5 text-[11px] font-black text-ink transition hover:bg-white hover:text-signal sm:text-sm lg:px-3 lg:py-2">
               {label}
@@ -169,6 +180,22 @@ export function SiteHeader() {
           <Link href="/contact" className="ml-auto shrink-0 rounded-md px-2.5 py-1.5 text-[11px] font-black text-steel hover:bg-white hover:text-ink sm:text-sm lg:px-3 lg:py-2">
             Contact
           </Link>
+        </div>
+        <div className="mx-auto flex max-w-7xl items-center gap-2 px-4 py-2 lg:hidden">
+          <label className="relative min-w-0 flex-1">
+            <span className="sr-only">Product category</span>
+            <select
+              defaultValue=""
+              aria-label="Product category"
+              onChange={handleMobileCategoryChange}
+              className="h-10 w-full appearance-none rounded-lg border border-black/10 bg-white px-3 pr-9 text-sm font-black text-ink outline-none focus:border-ink"
+            >
+              <option value="" disabled>Category</option>
+              {categoryLinks.map(([label, href]) => <option key={href} value={href}>{label}</option>)}
+            </select>
+            <span aria-hidden className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-steel">▼</span>
+          </label>
+          <Link href="/contact" className="inline-flex h-10 shrink-0 items-center rounded-lg px-3 text-sm font-black text-steel hover:bg-white hover:text-ink">Contact</Link>
         </div>
       </nav>
     </header>

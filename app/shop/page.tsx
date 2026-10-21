@@ -29,16 +29,18 @@ const filters = [
   ["Control Arms", "suspension"]
 ] as const;
 
-type ShopParams = { q?: string; category?: string; page?: string };
+type ShopParams = { q?: string; category?: string; page?: string; sort?: string };
 type CatalogItem = { id: string; kind: "wiper"; item: WiperSet } | { id: string; kind: "product"; item: Product };
+type CatalogSort = "featured" | "price-asc" | "price-desc" | "name-asc";
 const PAGE_SIZE = 12;
 
 export default async function ShopPage({ searchParams }: { searchParams: Promise<ShopParams> }) {
   const params = await searchParams;
   const category = filters.some(([, value]) => value === params.category) ? params.category ?? "all" : "all";
   const query = params.q?.trim().toLowerCase() ?? "";
+  const sort = readSort(params.sort);
   const { wiperSets, products, error } = await loadCatalog();
-  const items = buildCatalogItems(wiperSets, products, category, query);
+  const items = sortCatalogItems(buildCatalogItems(wiperSets, products, category, query), sort);
   const totalPages = Math.max(1, Math.ceil(items.length / PAGE_SIZE));
   const currentPage = Math.min(readPage(params.page), totalPages);
   const pageStart = (currentPage - 1) * PAGE_SIZE;
@@ -86,18 +88,26 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
                 : "0 current listings"}
             </p>
           </div>
-          <form action="/shop" className="flex h-11 w-full overflow-hidden rounded-lg border border-black/15 bg-white focus-within:border-ink lg:max-w-lg">
+          <form action="/shop" className="grid w-full gap-2 sm:grid-cols-[minmax(220px,1fr)_170px_auto] lg:max-w-3xl">
             {category !== "all" ? <input type="hidden" name="category" value={category} /> : null}
-            <Search className="ml-3 h-4 w-4 shrink-0 self-center text-steel" aria-hidden />
-            <input
-              name="q"
-              type="search"
-              defaultValue={params.q ?? ""}
-              aria-label={`Search within ${activeCategoryLabel}`}
-              placeholder={`Search within ${activeCategoryLabel}`}
-              className="h-full min-w-0 flex-1 px-3 text-sm font-semibold text-ink outline-none"
-            />
-            <button type="submit" className="shrink-0 bg-ink px-4 text-xs font-black uppercase tracking-[0.08em] text-white hover:bg-black">Search</button>
+            <div className="flex h-11 min-w-0 items-center overflow-hidden rounded-lg border border-black/15 bg-white focus-within:border-ink">
+              <Search className="ml-3 h-4 w-4 shrink-0 text-steel" aria-hidden />
+              <input
+                name="q"
+                type="search"
+                defaultValue={params.q ?? ""}
+                aria-label={`Search within ${activeCategoryLabel}`}
+                placeholder={`Search within ${activeCategoryLabel}`}
+                className="h-full min-w-0 flex-1 px-3 text-sm font-semibold text-ink outline-none"
+              />
+            </div>
+            <select name="sort" defaultValue={sort} aria-label="Sort products" className="h-11 rounded-lg border border-black/15 bg-white px-3 text-sm font-bold text-ink outline-none focus:border-ink">
+              <option value="featured">Sort: Featured</option>
+              <option value="price-asc">Price: Low to high</option>
+              <option value="price-desc">Price: High to low</option>
+              <option value="name-asc">Name: A–Z</option>
+            </select>
+            <button type="submit" className="h-11 shrink-0 rounded-lg bg-ink px-4 text-xs font-black uppercase tracking-[0.08em] text-white hover:bg-black">Apply</button>
           </form>
         </section>
 
@@ -112,6 +122,7 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
                 category={category}
                 currentPage={currentPage}
                 query={params.q?.trim() ?? ""}
+                sort={sort}
                 totalPages={totalPages}
               />
             ) : null}
@@ -178,28 +189,43 @@ function readPage(value?: string) {
   return Number.isFinite(page) && page > 0 ? page : 1;
 }
 
+function readSort(value?: string): CatalogSort {
+  return ["price-asc", "price-desc", "name-asc"].includes(value ?? "") ? value as CatalogSort : "featured";
+}
+
+function sortCatalogItems(items: CatalogItem[], sort: CatalogSort) {
+  if (sort === "featured") return items;
+  return [...items].sort((left, right) => {
+    if (sort === "price-asc") return left.item.price - right.item.price;
+    if (sort === "price-desc") return right.item.price - left.item.price;
+    return catalogItemName(left).localeCompare(catalogItemName(right));
+  });
+}
+
 function Pagination({
   category,
   currentPage,
   query,
+  sort,
   totalPages
 }: {
   category: string;
   currentPage: number;
   query: string;
+  sort: CatalogSort;
   totalPages: number;
 }) {
   const pages = paginationPages(currentPage, totalPages);
 
   return (
     <nav aria-label="Product catalogue pages" className="mt-8 flex flex-wrap items-center justify-center gap-2">
-      <PageLink category={category} disabled={currentPage === 1} label="Previous" page={currentPage - 1} query={query} />
+      <PageLink category={category} disabled={currentPage === 1} label="Previous" page={currentPage - 1} query={query} sort={sort} />
       {pages.map((page, index) => page === "ellipsis" ? (
         <span key={`ellipsis-${index}`} aria-hidden className="px-1 text-sm font-black text-steel">…</span>
       ) : (
         <Link
           key={page}
-          href={shopHref(category, query, page) as never}
+          href={shopHref(category, query, page, sort) as never}
           rel="nofollow"
           aria-current={page === currentPage ? "page" : undefined}
           className={`inline-flex h-10 min-w-10 items-center justify-center rounded-lg border px-3 text-sm font-black ${
@@ -209,7 +235,7 @@ function Pagination({
           {page}
         </Link>
       ))}
-      <PageLink category={category} disabled={currentPage === totalPages} label="Next" page={currentPage + 1} query={query} />
+      <PageLink category={category} disabled={currentPage === totalPages} label="Next" page={currentPage + 1} query={query} sort={sort} />
     </nav>
   );
 }
@@ -219,19 +245,21 @@ function PageLink({
   disabled,
   label,
   page,
-  query
+  query,
+  sort
 }: {
   category: string;
   disabled: boolean;
   label: string;
   page: number;
   query: string;
+  sort: CatalogSort;
 }) {
   if (disabled) {
     return <span aria-disabled="true" className="inline-flex h-10 items-center rounded-lg border border-black/5 bg-black/[0.03] px-4 text-sm font-black text-steel/45">{label}</span>;
   }
 
-  return <Link href={shopHref(category, query, page) as never} rel="nofollow" className="inline-flex h-10 items-center rounded-lg border border-black/10 bg-white px-4 text-sm font-black text-ink hover:border-black/30">{label}</Link>;
+  return <Link href={shopHref(category, query, page, sort) as never} rel="nofollow" className="inline-flex h-10 items-center rounded-lg border border-black/10 bg-white px-4 text-sm font-black text-ink hover:border-black/30">{label}</Link>;
 }
 
 function paginationPages(currentPage: number, totalPages: number): Array<number | "ellipsis"> {
@@ -247,10 +275,11 @@ function paginationPages(currentPage: number, totalPages: number): Array<number 
   return result;
 }
 
-function shopHref(category: string, query: string, page: number) {
+function shopHref(category: string, query: string, page: number, sort: CatalogSort) {
   const search = new URLSearchParams();
   if (category !== "all") search.set("category", category);
   if (query) search.set("q", query);
+  if (sort !== "featured") search.set("sort", sort);
   if (page > 1) search.set("page", String(page));
   const suffix = search.toString();
   return suffix ? `/shop?${suffix}` : "/shop";
@@ -260,7 +289,7 @@ function CatalogCard({ item }: { item: CatalogItem }) {
   const isWiper = item.kind === "wiper";
   const image = isWiper ? getWiperSetPreviewImage(item.item) : productImage(item.item);
   const href = isWiper ? `/wipers/${item.item.sku}` : productHref(item.item);
-  const name = isWiper ? `Front Wiper Pair ${item.item.driverLengthIn}\" + ${item.item.passengerLengthIn}\"` : item.item.name;
+  const name = catalogItemName(item);
   const eyebrow = isWiper ? `SKU ${item.item.sku}` : categoryLabel(item.item.category);
   return (
     <Link href={href as never} className="group overflow-hidden rounded-xl border border-black/10 bg-white shadow-sm hover:-translate-y-0.5 hover:shadow-panel">
@@ -268,6 +297,10 @@ function CatalogCard({ item }: { item: CatalogItem }) {
       <div className="p-4"><p className="text-[11px] font-black uppercase tracking-[0.14em] text-signal">{eyebrow}</p><h3 className="mt-2 min-h-12 text-base font-black leading-6">{name}</h3><div className="mt-4 flex items-center justify-between"><span className="text-xl font-black">{formatMoney(item.item.price)}</span><span className="inline-flex items-center gap-2 text-sm font-black">View <ArrowRight className="h-4 w-4" /></span></div></div>
     </Link>
   );
+}
+
+function catalogItemName(item: CatalogItem) {
+  return item.kind === "wiper" ? `Front Wiper Pair ${item.item.driverLengthIn}\" + ${item.item.passengerLengthIn}\"` : item.item.name;
 }
 
 function categoryLabel(category: string) {

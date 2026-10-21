@@ -14,6 +14,7 @@ const serverVehicleContext = readFileSync("lib/server/vehicle-context.ts", "utf8
 const vehicleContextSynchronizer = readFileSync("components/vehicle-context-synchronizer.tsx", "utf8");
 const layout = readFileSync("app/layout.tsx", "utf8");
 const siteHeader = readFileSync("components/site-header.tsx", "utf8");
+const shopPage = readFileSync("app/shop/page.tsx", "utf8");
 
 test("home vehicle finder reads only the latest NexAuto vehicle library", () => {
   assert.match(vehicleCatalog, /NEXAUTO_V4:%/);
@@ -57,6 +58,11 @@ test("selected vehicle persists across product categories until the customer cha
   assert.match(partsBrowser, /partsTabRequestedEvent/);
   assert.match(siteHeader, /handleCategoryNavigation/);
   assert.match(siteHeader, /new CustomEvent\(partsTabRequestedEvent/);
+  assert.match(siteHeader, /\["All Products", "\/shop"\]/);
+  assert.match(siteHeader, /aria-label="Product category"/);
+  assert.doesNotMatch(partsBrowser, /role="tablist"/);
+  assert.match(shopPage, /aria-label="Product results tools"/);
+  assert.match(shopPage, /aria-label="Sort products"/);
   assert.match(vehicleContextSynchronizer, /saveVehicleContext\(vehicle\)/);
   assert.match(layout, /<VehicleSelectionBar \/>/);
 });
