@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Search } from "lucide-react";
+import { CatalogVehicleSelector } from "@/components/catalog-vehicle-selector";
 import { formatMoney } from "@/lib/catalog";
 import { productHref, productImage } from "@/lib/product-content";
 import { listProducts } from "@/lib/queries/catalog";
@@ -48,27 +49,30 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
   return (
     <main className="bg-[#F8FAFC]">
       <section className="border-b border-black/10 bg-ink text-white">
-        <div className="mx-auto max-w-7xl px-4 py-7 sm:px-6 sm:py-8 lg:px-8">
-          <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs font-bold text-white/55">
-            <Link href="/" className="hover:text-white">Home</Link>
-            <span aria-hidden>/</span>
-            {category === "all" ? (
-              <span className="text-white/80">Shop</span>
-            ) : (
-              <>
-                <Link href="/shop" className="hover:text-white">Shop</Link>
-                <span aria-hidden>/</span>
-                <span className="text-white/80">{activeCategoryLabel}</span>
-              </>
-            )}
-          </nav>
-          <p className="mt-5 text-xs font-black uppercase tracking-[0.18em] text-signal">NexAutoParts catalogue</p>
-          <h1 className="mt-2 text-4xl font-black sm:text-5xl">{pageTitle}</h1>
-          <p className="mt-3 max-w-2xl text-sm font-semibold leading-6 text-white/70 sm:text-base">
-            {category === "all"
-              ? "Browse every current product. Select a category from the main navigation or search the complete catalogue below."
-              : `Browse all current ${activeCategoryLabel.toLowerCase()}. Vehicle-specific fitment can be checked from each product page.`}
-          </p>
+        <div className="mx-auto grid max-w-7xl gap-6 px-4 py-7 sm:px-6 sm:py-8 lg:grid-cols-[1.08fr_0.92fr] lg:items-center lg:px-8">
+          <div>
+            <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs font-bold text-white/55">
+              <Link href="/" className="hover:text-white">Home</Link>
+              <span aria-hidden>/</span>
+              {category === "all" ? (
+                <span className="text-white/80">Shop</span>
+              ) : (
+                <>
+                  <Link href="/shop" className="hover:text-white">Shop</Link>
+                  <span aria-hidden>/</span>
+                  <span className="text-white/80">{activeCategoryLabel}</span>
+                </>
+              )}
+            </nav>
+            <p className="mt-5 text-xs font-black uppercase tracking-[0.18em] text-signal">NexAutoParts catalogue</p>
+            <h1 className="mt-2 text-4xl font-black sm:text-5xl">{pageTitle}</h1>
+            <p className="mt-3 max-w-2xl text-sm font-semibold leading-6 text-white/70 sm:text-base">
+              {category === "all"
+                ? "Browse every current product. Select a category from the main navigation or search the complete catalogue below."
+                : `Browse all current ${activeCategoryLabel.toLowerCase()}. Vehicle-specific fitment can be checked from each product page.`}
+            </p>
+          </div>
+          <CatalogVehicleSelector category={category} categoryLabel={activeCategoryLabel} />
         </div>
       </section>
 
