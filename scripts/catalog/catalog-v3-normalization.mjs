@@ -62,7 +62,7 @@ export function inferBodyStyle(value) {
 export function splitCodes(value) {
   const text = cleanText(value);
   if (!text) return [];
-  return unique(text.split(/\s*[,;]\s*/).map(cleanText).filter(Boolean));
+  return unique(text.split(/\s*[,;|]\s*/).map(cleanText).filter(Boolean));
 }
 
 export function splitBatteryRecommendations(value) {

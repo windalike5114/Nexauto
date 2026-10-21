@@ -15,10 +15,11 @@ const vehicleContextSynchronizer = readFileSync("components/vehicle-context-sync
 const layout = readFileSync("app/layout.tsx", "utf8");
 const siteHeader = readFileSync("components/site-header.tsx", "utf8");
 
-test("home vehicle finder reads only the new NexAuto V3 vehicle backbone", () => {
-  assert.match(vehicleCatalog, /NEXAUTO_V3:%/);
-  assert.match(vehicleCatalog, /\.like\("source_application_key", VEHICLE_CATALOG_V3_SOURCE_PATTERN\)/);
-  assert.match(finder, /vehicleCatalogApiVersion = "v3"/);
+test("home vehicle finder reads only the latest NexAuto vehicle library", () => {
+  assert.match(vehicleCatalog, /NEXAUTO_V4:%/);
+  assert.match(vehicleCatalog, /\.like\("source_application_key", VEHICLE_CATALOG_SOURCE_PATTERN\)/);
+  assert.match(finder, /vehicleCatalogApiVersion = "v4"/);
+  assert.match(vehicleContext, /nexauto\.vehicle-context\.v3/);
 });
 
 test("selected vehicles filter products through published canonical fitments", () => {
@@ -35,6 +36,8 @@ test("finder follows the latest vehicle backbone fields through an exact applica
   assert.match(applicationRoute, /listVehicleCatalogApplications/);
   assert.match(finder, /Chassis \/ code/);
   assert.match(finder, /Body \/ drivetrain/);
+  assert.match(finder, /getApplicationChassisLabel/);
+  assert.match(finder, /new Map<string, VehicleApplicationOption>/);
   assert.match(finder, /applicationId: selectedApplication\.id/);
   assert.match(finder, /router\.push\(partsHref/);
 });

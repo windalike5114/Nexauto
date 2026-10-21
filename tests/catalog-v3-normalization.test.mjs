@@ -21,6 +21,11 @@ test("creates an independent vehicle hierarchy record from the new backbone", ()
   assert.match(row.variant_key, /hatchback/);
 });
 
+test("splits pipe-delimited chassis codes from the latest vehicle library", () => {
+  const row = parseVehicleRow(["2", "Audi", "A6", "4B2|4B4", "Sedan FWD", "1.8L AWT", "1997", "2005"], 3);
+  assert.deepEqual(row.chassis_codes, ["4B2", "4B4"]);
+});
+
 test("keeps a vehicle with missing chassis for review instead of silently dropping it", () => {
   const row = parseVehicleRow(["2", "Toyota", "Corolla", "", "Sedan", "2ZR-FE", "2013", "2018"], 3);
   assert.equal(row.parse_status, "review");

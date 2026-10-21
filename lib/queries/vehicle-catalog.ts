@@ -18,7 +18,7 @@ export type VehicleCatalogApplicationOption = {
   yearEnd: number | null;
 };
 
-export const VEHICLE_CATALOG_V3_SOURCE_PATTERN = "NEXAUTO_V3:%";
+export const VEHICLE_CATALOG_SOURCE_PATTERN = "NEXAUTO_V4:%";
 
 type VehicleMake = VehicleCatalogOption;
 type VehicleModel = VehicleCatalogOption & {
@@ -125,7 +125,7 @@ export const listVehicleCatalogMakes = unstable_cache(async () => {
     if (identity) makes.set(identity.make.id, { id: identity.make.id, name: identity.make.name });
   }
   return sortMakesForNz([...makes.values()]);
-}, ["vehicle-catalog-v3-makes"], { revalidate: 3600, tags: ["vehicle-catalog-v3"] });
+}, ["vehicle-catalog-v4-makes"], { revalidate: 3600, tags: ["vehicle-catalog-v4"] });
 
 export const listVehicleCatalogIndex = unstable_cache(async (): Promise<VehicleCatalogIndexMake[]> => {
   const rows = await loadPublishedVehicleIdentities();
@@ -154,7 +154,7 @@ export const listVehicleCatalogIndex = unstable_cache(async (): Promise<VehicleC
       .map((model) => ({ ...model.option, years: [...model.years].sort((left, right) => right - left) }))
       .sort((left, right) => left.name.localeCompare(right.name))
   })));
-}, ["vehicle-catalog-v3-index"], { revalidate: 3600, tags: ["vehicle-catalog-v3"] });
+}, ["vehicle-catalog-v4-index"], { revalidate: 3600, tags: ["vehicle-catalog-v4"] });
 
 export const listVehicleCatalogModels = unstable_cache(async (makeId: string) => {
   const rows = await loadPublishedVehicleIdentities({ makeId });
@@ -164,7 +164,7 @@ export const listVehicleCatalogModels = unstable_cache(async (makeId: string) =>
     if (identity?.make.id === makeId) models.set(identity.model.id, { id: identity.model.id, name: identity.model.name });
   }
   return [...models.values()].sort((left, right) => left.name.localeCompare(right.name));
-}, ["vehicle-catalog-v3-models"], { revalidate: 3600, tags: ["vehicle-catalog-v3"] });
+}, ["vehicle-catalog-v4-models"], { revalidate: 3600, tags: ["vehicle-catalog-v4"] });
 
 export const listVehicleCatalogYears = unstable_cache(async (makeId: string, modelId: string) => {
   const rows = await loadPublishedVehicleIdentities({ makeId, modelId });
@@ -179,7 +179,7 @@ export const listVehicleCatalogYears = unstable_cache(async (makeId: string, mod
   }
 
   return [...years].sort((left, right) => right - left);
-}, ["vehicle-catalog-v3-years"], { revalidate: 3600, tags: ["vehicle-catalog-v3"] });
+}, ["vehicle-catalog-v4-years"], { revalidate: 3600, tags: ["vehicle-catalog-v4"] });
 
 export async function listVehicleCatalogApplicationIds(makeId: string, modelId: string, year: number) {
   const applications = await listVehicleCatalogApplications(makeId, modelId, year);
@@ -199,7 +199,7 @@ export const listVehicleCatalogApplications = unstable_cache(async (makeId: stri
     .map(mapApplicationOption)
     .filter((option): option is VehicleCatalogApplicationOption => Boolean(option))
     .sort(compareApplicationOptions);
-}, ["vehicle-catalog-v3-applications"], { revalidate: 900, tags: ["vehicle-catalog-v3"] });
+}, ["vehicle-catalog-v4-applications"], { revalidate: 900, tags: ["vehicle-catalog-v4"] });
 
 type VehicleQueryFilters = { makeId?: string; modelId?: string; year?: number };
 
@@ -208,7 +208,7 @@ async function loadPublishedVehicleIdentities(filters: VehicleQueryFilters = {})
   let query = supabase
     .from("vehicle_fitment_applications")
     .select(VEHICLE_IDENTITY_SELECT)
-    .like("source_application_key", VEHICLE_CATALOG_V3_SOURCE_PATTERN)
+    .like("source_application_key", VEHICLE_CATALOG_SOURCE_PATTERN)
     .eq("fitment_status", "published")
     .eq("active", true)
     .eq("vehicle_generations.active", true);
@@ -224,7 +224,7 @@ async function loadPublishedVehicleApplications(filters: VehicleQueryFilters = {
   let query = supabase
     .from("vehicle_fitment_applications")
     .select(VEHICLE_APPLICATION_SELECT)
-    .like("source_application_key", VEHICLE_CATALOG_V3_SOURCE_PATTERN)
+    .like("source_application_key", VEHICLE_CATALOG_SOURCE_PATTERN)
     .eq("fitment_status", "published")
     .eq("active", true)
     .eq("vehicle_generations.active", true)

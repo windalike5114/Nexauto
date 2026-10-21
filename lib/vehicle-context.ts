@@ -1,5 +1,5 @@
-export const vehicleContextStorageKey = "nexauto.vehicle-context.v2";
-export const vehicleContextCookieKey = "nexauto_vehicle_context_v2";
+export const vehicleContextStorageKey = "nexauto.vehicle-context.v3";
+export const vehicleContextCookieKey = "nexauto_vehicle_context_v3";
 export const vehicleContextChangedEvent = "nexauto:vehicle-context-changed";
 
 export type VehicleContext = {

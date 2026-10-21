@@ -21,7 +21,7 @@ type VehicleApplicationOption = {
   yearEnd: number | null;
 };
 
-const vehicleCatalogApiVersion = "v3";
+const vehicleCatalogApiVersion = "v4";
 const vehicleRequestCache = new Map<string, Promise<unknown>>();
 
 export function VehiclePartsFinder({ compact = false, category }: { compact?: boolean; category?: string } = {}) {
@@ -34,7 +34,7 @@ export function VehiclePartsFinder({ compact = false, category }: { compact?: bo
   const [makeId, setMakeId] = useState("");
   const [modelId, setModelId] = useState("");
   const [year, setYear] = useState("");
-  const [generationId, setGenerationId] = useState("");
+  const [chassisSelection, setChassisSelection] = useState("");
   const [bodyConfiguration, setBodyConfiguration] = useState("");
   const [applicationId, setApplicationId] = useState("");
   const [loading, setLoading] = useState("makes");
@@ -106,8 +106,8 @@ export function VehiclePartsFinder({ compact = false, category }: { compact?: bo
       .then((data) => {
         if (!active) return;
         setApplications(data.applications);
-        const generationIds = [...new Set(data.applications.map((entry) => entry.generationId))];
-        setGenerationId(generationIds.length === 1 ? generationIds[0] : "");
+        const chassisLabels = [...new Set(data.applications.map(getApplicationChassisLabel))];
+        setChassisSelection(chassisLabels.length === 1 ? chassisLabels[0] : "");
         if (data.applications.length === 0) setError("No published vehicle configuration was found for this year.");
       })
       .catch((nextError) => {
@@ -122,25 +122,31 @@ export function VehiclePartsFinder({ compact = false, category }: { compact?: bo
   }, [makeId, modelId, year]);
 
   const chassisOptions = useMemo(() => {
-    const options = new Map<string, string>();
+    const options = new Set<string>();
     for (const application of applications) {
-      options.set(application.generationId, application.chassisCodes.join(" / ") || application.generationName);
+      options.add(getApplicationChassisLabel(application));
     }
-    return [...options].map(([id, name]) => ({ id, name })).sort((left, right) => left.name.localeCompare(right.name));
+    return [...options].map((name) => ({ id: name, name })).sort((left, right) => left.name.localeCompare(right.name));
   }, [applications]);
 
   const bodyOptions = useMemo(() => {
     const options = new Set(
       applications
-        .filter((entry) => entry.generationId === generationId)
+        .filter((entry) => getApplicationChassisLabel(entry) === chassisSelection)
         .map((entry) => entry.bodyConfiguration)
     );
     return [...options].sort((left, right) => left.localeCompare(right));
-  }, [applications, generationId]);
+  }, [applications, chassisSelection]);
 
-  const engineOptions = useMemo(() => applications
-    .filter((entry) => entry.generationId === generationId && entry.bodyConfiguration === bodyConfiguration)
-    .sort((left, right) => left.engine.localeCompare(right.engine)), [applications, bodyConfiguration, generationId]);
+  const engineOptions = useMemo(() => {
+    const options = new Map<string, VehicleApplicationOption>();
+    for (const application of applications
+      .filter((entry) => getApplicationChassisLabel(entry) === chassisSelection && entry.bodyConfiguration === bodyConfiguration)
+      .sort((left, right) => left.engine.localeCompare(right.engine))) {
+      if (!options.has(application.engine)) options.set(application.engine, application);
+    }
+    return [...options.values()];
+  }, [applications, bodyConfiguration, chassisSelection]);
 
   useEffect(() => {
     setApplicationId("");
@@ -154,7 +160,7 @@ export function VehiclePartsFinder({ compact = false, category }: { compact?: bo
   const selectedMake = useMemo(() => makes.find((entry) => entry.id === makeId)?.name ?? "", [makeId, makes]);
   const selectedModel = useMemo(() => models.find((entry) => entry.id === modelId)?.name ?? "", [modelId, models]);
   const selectedApplication = useMemo(() => applications.find((entry) => entry.id === applicationId) ?? null, [applicationId, applications]);
-  const selectedChassis = selectedApplication?.chassisCodes.join(" / ") || selectedApplication?.generationName || "";
+  const selectedChassis = selectedApplication ? getApplicationChassisLabel(selectedApplication) : "";
   const vehicleReady = Boolean(makeId && modelId && year && selectedApplication);
   const partsHref = useMemo(
     () => buildVehiclePartsHref(getSelectedVehicleContext(), category),
@@ -191,7 +197,7 @@ export function VehiclePartsFinder({ compact = false, category }: { compact?: bo
 
   function resetApplicationSelection() {
     setApplications([]);
-    setGenerationId("");
+    setChassisSelection("");
     setBodyConfiguration("");
     setApplicationId("");
   }
@@ -223,11 +229,11 @@ export function VehiclePartsFinder({ compact = false, category }: { compact?: bo
           <option value="">Select year</option>
           {years.map((entry) => <option key={entry} value={String(entry)}>{entry}</option>)}
         </SelectControl>
-        <SelectControl compact={compact} label="Chassis / code" value={generationId} disabled={!year || loading === "applications" || chassisOptions.length === 0} onChange={setGenerationId}>
+        <SelectControl compact={compact} label="Chassis / code" value={chassisSelection} disabled={!year || loading === "applications" || chassisOptions.length === 0} onChange={setChassisSelection}>
           <option value="">Select chassis</option>
           {chassisOptions.map((entry) => <option key={entry.id} value={entry.id}>{entry.name}</option>)}
         </SelectControl>
-        <SelectControl compact={compact} label="Body / drivetrain" value={bodyConfiguration} disabled={!generationId || bodyOptions.length === 0} onChange={setBodyConfiguration}>
+        <SelectControl compact={compact} label="Body / drivetrain" value={bodyConfiguration} disabled={!chassisSelection || bodyOptions.length === 0} onChange={setBodyConfiguration}>
           <option value="">Select body / drivetrain</option>
           {bodyOptions.map((entry) => <option key={entry} value={entry}>{entry}</option>)}
         </SelectControl>
@@ -276,6 +282,10 @@ function fetchJsonCached<T>(url: string): Promise<T> {
   });
   vehicleRequestCache.set(url, request);
   return request;
+}
+
+function getApplicationChassisLabel(application: VehicleApplicationOption) {
+  return application.chassisCodes.join(" / ") || application.generationName;
 }
 
 export function buildVehiclePartsHref(context: VehicleContext | null, category?: string) {
