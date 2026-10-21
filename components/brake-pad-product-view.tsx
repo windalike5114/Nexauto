@@ -7,15 +7,27 @@ import {
   type BrakePadFitment
 } from "@/lib/brake-pad";
 import { formatMoney } from "@/lib/catalog";
+import { getProductFitmentStatusForVehicle, type ProductVehicleFitmentStatus } from "@/lib/queries/vehicle-product-fitment";
 import { readStoredVehicleContext } from "@/lib/server/vehicle-context";
 
 export async function BrakePadProductView({ detail }: { detail: BrakePadDetail }) {
   const vehicle = await readStoredVehicleContext();
   const vehicleLabel = vehicle ? [vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(" ") : "";
   const vehicleDetail = vehicle ? [vehicle.chassis, vehicle.bodyConfiguration, vehicle.engine].filter(Boolean).join(" · ") : "";
-  // Product-description rows are display-only. A separate vehicle-fitment table
-  // will become the sole source for Fits / Not fit decisions once supplied.
-  const vehicleFitmentStatus = vehicle ? "unavailable" : "not-selected";
+  let vehicleFitmentStatus: ProductVehicleFitmentStatus | "not-selected" = "not-selected";
+  if (vehicle) {
+    try {
+      vehicleFitmentStatus = await getProductFitmentStatusForVehicle(detail.partNumber, {
+        makeId: vehicle.makeId,
+        modelId: vehicle.modelId,
+        year: Number(vehicle.year),
+        applicationId: vehicle.applicationId,
+        applicationIds: vehicle.applicationIds
+      });
+    } catch {
+      vehicleFitmentStatus = "unavailable";
+    }
+  }
   const displayTitle = splitBrakePadDisplayTitle(detail.title);
   const jsonLd = {
     "@context": "https://schema.org",

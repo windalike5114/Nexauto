@@ -45,10 +45,17 @@ export function prepareFitmentV6(packageDir = DEFAULT_PACKAGE_DIR) {
   ];
   if (missingCatalogSkus.length) throw new Error(`Fitments reference missing catalogue SKUs: ${missingCatalogSkus.join(", ")}`);
 
-  const productFitments = [...brake, ...oil].map((row) => ({
-    ...row,
-    fitment_status: row.match_confidence === "low" ? "review" : "published"
-  }));
+  const productFitments = [
+    ...classifyBrakePadFitments(brake),
+    ...oil.map((row) => {
+      const published = row.match_confidence === "high" && row.review_status === "auto_accepted";
+      return {
+        ...row,
+        fitment_status: published ? "published" : "review",
+        fitment_status_reason: published ? "confirmed_high_confidence" : "source_review_required"
+      };
+    })
+  ];
   const wiperRows = wiper.map((row) => ({
     ...row,
     driver_in: Number(row.driver_in),
@@ -321,8 +328,60 @@ function productNotes(row) {
     `source_fitment=${row.source_fitment_id}`,
     `source_row=${row.source_row}`,
     `reference=${row.product_reference_match}`,
-    `review=${row.review_status}`
+    `review=${row.review_status}`,
+    row.fitment_status_reason ? `publication=${row.fitment_status_reason}` : ""
   ].filter(Boolean).join("; ");
+}
+
+export function classifyBrakePadFitments(rows) {
+  const candidatesByApplicationPosition = groupBy(rows, (row) => `${row.application_id}:${row.position}`);
+  const publishedKeys = new Set();
+
+  for (const group of candidatesByApplicationPosition.values()) {
+    const eligible = group.filter(isConfirmedBrakePadCandidate);
+    if (!eligible.length) continue;
+
+    const highestScore = Math.max(...eligible.map((row) => Number(row.match_score)));
+    const best = eligible.filter((row) => Number(row.match_score) === highestScore);
+    const bestSkus = new Set(best.map((row) => row.sku));
+
+    // More than one pad shape at the same best score means the source does not
+    // contain enough brake-system detail to call either one a confirmed match.
+    if (bestSkus.size !== 1) continue;
+    for (const row of best) publishedKeys.add(brakePadFitmentKey(row));
+  }
+
+  return rows.map((row) => {
+    const published = publishedKeys.has(brakePadFitmentKey(row));
+    return {
+      ...row,
+      fitment_status: published ? "published" : "review",
+      fitment_status_reason: published ? "confirmed_unique_best_series_match" : brakePadReviewReason(row)
+    };
+  });
+}
+
+function isConfirmedBrakePadCandidate(row) {
+  return row.match_confidence === "high"
+    && row.review_status === "auto_accepted"
+    && String(row.position_conflict) === "0"
+    && (!row.series_name || matchedOnIncludes(row, "series"));
+}
+
+function brakePadReviewReason(row) {
+  if (row.match_confidence !== "high") return "confidence_review_required";
+  if (row.review_status !== "auto_accepted") return "source_review_required";
+  if (String(row.position_conflict) !== "0") return "position_conflict";
+  if (row.series_name && !matchedOnIncludes(row, "series")) return "series_not_confirmed";
+  return "ambiguous_best_candidate";
+}
+
+function matchedOnIncludes(row, discriminator) {
+  return String(row.matched_on ?? "").split("+").includes(discriminator);
+}
+
+function brakePadFitmentKey(row) {
+  return `${row.sku}:${row.application_id}:${row.position}`;
 }
 
 function wiperNotes(row, sellable) {
