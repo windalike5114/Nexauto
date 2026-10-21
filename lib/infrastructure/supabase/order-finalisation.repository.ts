@@ -166,8 +166,6 @@ async function upsertOrderItems(supabase: ReturnType<typeof getAdmin>, orderId: 
     line_discount: item.line_discount ?? item.bundle_discount ?? 0,
     line_total: item.line_total,
     source_line_key: sourceLineKeys[index],
-    vehicle_application_id: getVehicleApplicationId(item),
-    vehicle_fitment_application_id: getVehicleFitmentApplicationId(item),
     vehicle_catalog_application_id: getVehicleCatalogApplicationId(item),
     wiper_set_id: item.product_id === "wiper_set" && isLooseUuid(item.variant_id) ? item.variant_id : null,
     vehicle_snapshot: item.vehicle_snapshot ?? buildVehicleSnapshot(item),
@@ -196,8 +194,6 @@ async function insertVehicleSnapshotIfNeeded(supabase: ReturnType<typeof getAdmi
 
   const { error } = await supabase.from("order_vehicle_snapshots").insert({
     order_id: orderId,
-    vehicle_application_id: vehicle.k !== "canonical" && typeof vehicle.a === "string" && isLooseUuid(vehicle.a) ? vehicle.a : null,
-    vehicle_fitment_application_id: vehicle.k === "canonical" && typeof vehicle.a === "string" && isLooseUuid(vehicle.a) ? vehicle.a : null,
     vehicle_catalog_application_id: vehicle.k === "canonical" && isVehicleCatalogApplicationId(vehicle.a) ? vehicle.a : null,
     make_snapshot: String(vehicle.make),
     model_snapshot: String(vehicle.model),
@@ -227,8 +223,6 @@ async function insertFulfilmentIfNeeded(
       return {
         order_id: orderId,
         order_item_id: orderItem?.id ?? null,
-        vehicle_application_id: getVehicleApplicationId(item),
-        vehicle_fitment_application_id: getVehicleFitmentApplicationId(item),
         vehicle_catalog_application_id: getVehicleCatalogApplicationId(item),
         wiper_set_id: isLooseUuid(item.variant_id) ? item.variant_id : null,
         driver_length_in: parseLength(item.attributes.driver_length),

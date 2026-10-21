@@ -85,8 +85,6 @@ export function createSupabaseCheckoutOrderRepository(): CheckoutOrderRepository
           line_discount: item.bundleDiscount ?? 0,
           line_total: item.checkoutLineTotal ?? item.price * item.cartItem.qty,
           source_line_key: sourceLineKey,
-          vehicle_application_id: getVehicleApplicationId(item.attributes),
-          vehicle_fitment_application_id: getVehicleFitmentApplicationId(item.attributes),
           vehicle_catalog_application_id: getVehicleCatalogApplicationId(item.attributes),
           wiper_set_id: item.productId === "wiper_set" && isLooseUuid(item.id) ? item.id : null,
           vehicle_snapshot: buildVehicleSnapshot(item.attributes),
@@ -100,8 +98,6 @@ export function createSupabaseCheckoutOrderRepository(): CheckoutOrderRepository
       if (input.vehicle?.a && input.vehicle.make && input.vehicle.model && input.vehicle.year) {
         const { error: vehicleError } = await supabase.from("order_vehicle_snapshots").insert({
           order_id: orderId,
-          vehicle_application_id: input.vehicle.k !== "canonical" && isLooseUuid(String(input.vehicle.a)) ? input.vehicle.a : null,
-          vehicle_fitment_application_id: input.vehicle.k === "canonical" && isLooseUuid(String(input.vehicle.a)) ? input.vehicle.a : null,
           vehicle_catalog_application_id: input.vehicle.k === "canonical" && isVehicleCatalogApplicationId(String(input.vehicle.a)) ? input.vehicle.a : null,
           make_snapshot: String(input.vehicle.make),
           model_snapshot: String(input.vehicle.model),

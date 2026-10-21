@@ -47,8 +47,6 @@ type ItemRow = {
   line_subtotal: string | number | null;
   line_discount: string | number | null;
   line_total: string | number;
-  vehicle_application_id: string | null;
-  vehicle_fitment_application_id: string | null;
   vehicle_catalog_application_id: string | null;
   wiper_set_id: string | null;
   source_line_key?: string | null;
@@ -60,8 +58,6 @@ type ItemRow = {
 type VehicleRow = {
   id: string;
   order_id: string;
-  vehicle_application_id: string | null;
-  vehicle_fitment_application_id: string | null;
   vehicle_catalog_application_id: string | null;
   customer_vehicle_id: string | null;
   make_snapshot: string | null;
@@ -76,8 +72,6 @@ type FulfilmentRow = {
   id: string;
   order_id: string;
   order_item_id: string | null;
-  vehicle_application_id: string | null;
-  vehicle_fitment_application_id: string | null;
   vehicle_catalog_application_id: string | null;
   wiper_set_id: string | null;
   driver_length_in: string | number | null;
@@ -201,13 +195,13 @@ async function loadOrder(supabase: SupabaseClient, orderId: string): Promise<Adm
 
 async function loadItems(supabase: SupabaseClient, orderId: string) {
   const select =
-    "id,order_id,product_id,variant_id,sku,product_name,attributes,qty,unit_price,line_subtotal,line_discount,line_total,vehicle_application_id,vehicle_fitment_application_id,vehicle_catalog_application_id,wiper_set_id,source_line_key,vehicle_snapshot,product_snapshot,created_at";
+    "id,order_id,product_id,variant_id,sku,product_name,attributes,qty,unit_price,line_subtotal,line_discount,line_total,vehicle_catalog_application_id,wiper_set_id,source_line_key,vehicle_snapshot,product_snapshot,created_at";
   const initial = await supabase.from("order_items").select(select).eq("order_id", orderId).order("created_at", { ascending: true });
   let data: unknown = initial.data;
   let error: typeof initial.error = initial.error;
   if (isMissingColumn(error, "source_line_key")) {
     const fallbackSelect =
-      "id,order_id,product_id,variant_id,sku,product_name,attributes,qty,unit_price,line_subtotal,line_discount,line_total,vehicle_application_id,vehicle_fitment_application_id,vehicle_catalog_application_id,wiper_set_id,vehicle_snapshot,product_snapshot,created_at";
+      "id,order_id,product_id,variant_id,sku,product_name,attributes,qty,unit_price,line_subtotal,line_discount,line_total,vehicle_catalog_application_id,wiper_set_id,vehicle_snapshot,product_snapshot,created_at";
     const fallback = await supabase.from("order_items").select(fallbackSelect).eq("order_id", orderId).order("created_at", { ascending: true });
     data = fallback.data;
     error = fallback.error;
@@ -219,7 +213,7 @@ async function loadItems(supabase: SupabaseClient, orderId: string) {
 async function loadVehicleSnapshots(supabase: SupabaseClient, orderId: string) {
   const { data, error } = await supabase
     .from("order_vehicle_snapshots")
-    .select("id,order_id,vehicle_application_id,vehicle_fitment_application_id,vehicle_catalog_application_id,customer_vehicle_id,make_snapshot,model_snapshot,year,start_raw,end_raw,created_at")
+    .select("id,order_id,vehicle_catalog_application_id,customer_vehicle_id,make_snapshot,model_snapshot,year,start_raw,end_raw,created_at")
     .eq("order_id", orderId)
     .order("created_at", { ascending: true });
   if (error) throw error;
@@ -230,7 +224,7 @@ async function loadFulfilments(supabase: SupabaseClient, orderId: string) {
   const { data, error } = await supabase
     .from("order_wiper_fulfillment")
     .select(
-      "id,order_id,order_item_id,vehicle_application_id,vehicle_fitment_application_id,vehicle_catalog_application_id,wiper_set_id,driver_length_in,passenger_length_in,rear_length_in,driver_connector,passenger_connector,rear_connector,connector_status,admin_note,created_at,updated_at"
+      "id,order_id,order_item_id,vehicle_catalog_application_id,wiper_set_id,driver_length_in,passenger_length_in,rear_length_in,driver_connector,passenger_connector,rear_connector,connector_status,admin_note,created_at,updated_at"
     )
     .eq("order_id", orderId)
     .order("created_at", { ascending: true });
@@ -319,7 +313,7 @@ function mapItem(row: ItemRow): AdminOrderDetailItemRow {
     lineSubtotal: toNullableNumber(row.line_subtotal),
     lineDiscount: toNullableNumber(row.line_discount),
     lineTotal: Number(row.line_total),
-    vehicleApplicationId: row.vehicle_catalog_application_id ?? row.vehicle_fitment_application_id ?? row.vehicle_application_id,
+    vehicleApplicationId: row.vehicle_catalog_application_id,
     wiperSetId: row.wiper_set_id,
     sourceLineKey: row.source_line_key ?? null,
     vehicleSnapshot: row.vehicle_snapshot ?? {},
@@ -332,7 +326,7 @@ function mapVehicle(row: VehicleRow): AdminOrderDetailVehicleSnapshotRow {
   return {
     id: row.id,
     orderId: row.order_id,
-    vehicleApplicationId: row.vehicle_catalog_application_id ?? row.vehicle_fitment_application_id ?? row.vehicle_application_id,
+    vehicleApplicationId: row.vehicle_catalog_application_id,
     customerVehicleId: row.customer_vehicle_id,
     make: row.make_snapshot,
     model: row.model_snapshot,
@@ -348,7 +342,7 @@ function mapFulfilment(row: FulfilmentRow): AdminOrderDetailFulfilmentRow {
     id: row.id,
     orderId: row.order_id,
     orderItemId: row.order_item_id,
-    vehicleApplicationId: row.vehicle_catalog_application_id ?? row.vehicle_fitment_application_id ?? row.vehicle_application_id,
+    vehicleApplicationId: row.vehicle_catalog_application_id,
     wiperSetId: row.wiper_set_id,
     driverLengthIn: toNullableNumber(row.driver_length_in),
     passengerLengthIn: toNullableNumber(row.passenger_length_in),

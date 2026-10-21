@@ -33,8 +33,6 @@ type OrderRow = {
 
 type VehicleRow = {
   id: string;
-  vehicle_application_id: string | null;
-  vehicle_fitment_application_id: string | null;
   vehicle_catalog_application_id: string | null;
   label: string | null;
   make_snapshot: string;
@@ -67,8 +65,6 @@ type AddressRow = {
 type VehicleSnapshotRow = {
   id: string;
   order_id: string;
-  vehicle_application_id: string | null;
-  vehicle_fitment_application_id: string | null;
   vehicle_catalog_application_id: string | null;
   customer_vehicle_id: string | null;
   make_snapshot: string;
@@ -108,7 +104,7 @@ export function createAdminCustomerDetailRepository(): AdminCustomerDetailReposi
         listOrdersForProfile(customerProfileId, profile.email),
         supabase
           .from("customer_vehicles")
-          .select("id,vehicle_application_id,vehicle_fitment_application_id,vehicle_catalog_application_id,label,make_snapshot,model_snapshot,year,source,is_default,last_used_at,created_at")
+          .select("id,vehicle_catalog_application_id,label,make_snapshot,model_snapshot,year,source,is_default,last_used_at,created_at")
           .eq("customer_profile_id", customerProfileId)
           .order("is_default", { ascending: false })
           .order("last_used_at", { ascending: false })
@@ -175,7 +171,7 @@ async function listVehicleSnapshots(orderIds: string[]) {
   if (!orderIds.length) return [];
   const { data, error } = await getAdminOrThrow()
     .from("order_vehicle_snapshots")
-    .select("id,order_id,vehicle_application_id,vehicle_fitment_application_id,vehicle_catalog_application_id,customer_vehicle_id,make_snapshot,model_snapshot,year,created_at")
+    .select("id,order_id,vehicle_catalog_application_id,customer_vehicle_id,make_snapshot,model_snapshot,year,created_at")
     .in("order_id", orderIds)
     .order("created_at", { ascending: false });
 
@@ -210,7 +206,7 @@ function mapOrder(row: OrderRow): AdminCustomerDetailOrderRow {
 function mapVehicle(row: VehicleRow): AdminCustomerDetailVehicleRow {
   return {
     id: row.id,
-    applicationId: row.vehicle_catalog_application_id ?? row.vehicle_fitment_application_id ?? row.vehicle_application_id,
+    applicationId: row.vehicle_catalog_application_id,
     label: row.label,
     make: row.make_snapshot,
     model: row.model_snapshot,
@@ -246,7 +242,7 @@ function mapVehicleSnapshot(row: VehicleSnapshotRow): AdminCustomerDetailVehicle
   return {
     id: row.id,
     orderId: row.order_id,
-    vehicleApplicationId: row.vehicle_catalog_application_id ?? row.vehicle_fitment_application_id ?? row.vehicle_application_id,
+    vehicleApplicationId: row.vehicle_catalog_application_id,
     customerVehicleId: row.customer_vehicle_id,
     make: row.make_snapshot,
     model: row.model_snapshot,

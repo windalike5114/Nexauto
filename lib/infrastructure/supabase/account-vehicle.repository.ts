@@ -7,8 +7,6 @@ import { isVehicleCatalogApplicationId } from "@/lib/domain/shared/vehicle-catal
 
 type VehicleRow = {
   id: string;
-  vehicle_application_id: string | null;
-  vehicle_fitment_application_id: string | null;
   vehicle_catalog_application_id: string | null;
   label: string | null;
   make_snapshot: string;
@@ -78,7 +76,7 @@ export function createSupabaseAccountVehicleRepository(): CustomerVehicleReposit
 function mapVehicle(row: VehicleRow): CustomerVehicle {
   return {
     id: row.id,
-    applicationId: row.vehicle_catalog_application_id ?? row.vehicle_fitment_application_id ?? row.vehicle_application_id,
+    applicationId: row.vehicle_catalog_application_id,
     label: row.label,
     make: row.make_snapshot,
     model: row.model_snapshot,
