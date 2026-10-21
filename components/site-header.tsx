@@ -21,7 +21,6 @@ const categoryLinks = [
   ["Brake Pads", "/parts?category=brakes"],
   ["Light Bulbs", "/parts?category=bulbs"],
   ["Batteries", "/parts?category=batteries"],
-  ["Control Arms", "/parts?category=suspension"],
   ["Weekly Deals", "/specials"]
 ] as const;
 

@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { ArrowRight, BatteryCharging, Eye, Gauge, Headphones, Mail, PackageCheck, SearchCheck, Truck, Wrench } from "lucide-react";
+import { ArrowRight, BatteryCharging, Disc3, Eye, Gauge, Headphones, Mail, PackageCheck, SearchCheck, Truck } from "lucide-react";
 import { HomeNewsletterSignup } from "@/components/home-newsletter-signup";
 import { HomeHeroCarousel } from "@/components/home-hero-carousel";
 import { HomeProductTabs, type ProductTabGroup, type StorefrontProductCard } from "@/components/home-product-tabs";
@@ -20,15 +20,15 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Auto Parts for New Zealand Drivers",
-  description: "Shop wiper blades, oil filters, light bulbs, batteries and control arms with vehicle fitment support from NexAutoParts."
+  description: "Shop wiper blades, oil filters, brake pads, light bulbs and batteries with vehicle fitment support from NexAutoParts."
 };
 
 const categories = [
   { title: "Wiper Blades", description: "Front pairs, rear blades and fitting support", href: "/parts?category=wipers", image: "/products/wiper-blade.png" },
   { title: "Oil Filters", description: "Engine-specific filters and part-number matching", href: "/parts?category=filters", image: "/products/vehicle-oil-filter.png" },
+  { title: "Brake Pads", description: "Front and rear axle sets with application details", href: "/parts?category=brakes", image: "/products/brake-pads-category.png" },
   { title: "Light Bulbs", description: "Headlight, fog and exterior replacement bulbs", href: "/parts?category=bulbs", image: "/products/halogen-bulb.png" },
   { title: "Batteries", description: "Case size, terminal layout, Ah and CCA matching", href: "/parts?category=batteries", image: "/products/vehicle-battery.png" },
-  { title: "Control Arms", description: "Position-specific arms, ball joints and bushes", href: "/parts?category=suspension", image: "/products/control-arm-v2.png" },
   { title: "Need Help Finding a Part?", description: "Send your vehicle and part details for confirmation", href: "/contact", image: "/home/parts-support-hero.png" }
 ] as const;
 
@@ -36,7 +36,7 @@ const needs = [
   { title: "Improve visibility", description: "Clearer wet-weather driving with correctly sized wipers.", href: "/parts?category=wipers", action: "Shop wipers", icon: Eye },
   { title: "Routine engine service", description: "Start with the vehicle, then confirm the engine-specific filter.", href: "/parts?category=filters", action: "Find filters", icon: Gauge },
   { title: "Starting problems", description: "Match case size, terminal layout, Ah and cold-cranking amps.", href: "/parts?category=batteries", action: "Check batteries", icon: BatteryCharging },
-  { title: "Suspension noise", description: "Identify the axle, side and exact control-arm position first.", href: "/parts?category=suspension", action: "Find suspension parts", icon: Wrench }
+  { title: "Brake wear or noise", description: "Check the axle position and exact vehicle application before ordering.", href: "/parts?category=brakes", action: "Find brake pads", icon: Disc3 }
 ] as const;
 
 const guides = [
@@ -148,7 +148,7 @@ async function loadHomeData() {
   try {
     const [wiperSets, databaseProducts] = await Promise.all([listWiperSets(), listProducts()]);
     const products = [
-      ...databaseProducts.filter((product) => product.category !== "filter"),
+      ...databaseProducts.filter((product) => !["filter", "suspension"].includes(product.category)),
       ...listOilFilterCatalogProducts()
     ];
     return { wiperSets, products };

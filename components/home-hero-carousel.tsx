@@ -11,8 +11,8 @@ const slides = [
     eyebrow: "Automotive parts for New Zealand",
     title: <>Parts that fit.<br />Service you can trust.</>,
     description: "Shop dependable replacement parts, or start with your vehicle and let each product category confirm the details it needs.",
-    image: "/home/parts-hero-v2.png",
-    imageAlt: "NexAutoParts wipers, oil filter, light bulbs, battery and control arm",
+    image: "/home/parts-hero-brake-pads.png",
+    imageAlt: "NexAutoParts wipers, oil filter, light bulbs, battery and brake pads",
     parallax: { x: 0, y: 1 },
     primary: { label: "Shop Parts", href: "/shop" },
     secondary: { label: "Find Parts for My Vehicle", href: "/#vehicle-finder" }
