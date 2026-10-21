@@ -5,6 +5,7 @@ const FITMENT_RATE_LIMIT = 90;
 const FITMENT_RATE_WINDOW_MS = 60_000;
 const MAX_REQUEST_URL_LENGTH = 2_048;
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const VEHICLE_CATALOG_ID_PATTERN = /^(?:mk|md|ap)_[0-9a-f]{20}$/;
 
 type SharedFitmentState = typeof globalThis & {
   __nexAutoFitmentRateLimiter?: FixedWindowRateLimiter;
@@ -58,7 +59,7 @@ export function fitmentJson(body: unknown, guard: FitmentApiGuard, init: Respons
 }
 
 export function parseFitmentId(value: string | null) {
-  if (!value || value.length > 64 || !UUID_PATTERN.test(value)) return null;
+  if (!value || value.length > 64 || (!UUID_PATTERN.test(value) && !VEHICLE_CATALOG_ID_PATTERN.test(value))) return null;
   return value;
 }
 

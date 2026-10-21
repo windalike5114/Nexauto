@@ -9,6 +9,7 @@ export type VehicleContext = {
   make: string;
   model: string;
   applicationId?: string;
+  applicationIds?: string[];
   generationId?: string;
   variantId?: string;
   chassis?: string;
@@ -29,6 +30,7 @@ export function parseVehicleContext(value: string | null): VehicleContext | null
       make: parsed.make,
       model: parsed.model,
       applicationId: parsed.applicationId,
+      applicationIds: Array.isArray(parsed.applicationIds) ? parsed.applicationIds.filter((id): id is string => typeof id === "string") : undefined,
       generationId: parsed.generationId,
       variantId: parsed.variantId,
       chassis: parsed.chassis,

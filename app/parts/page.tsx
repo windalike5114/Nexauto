@@ -8,7 +8,8 @@ import { VehicleContextSynchronizer } from "@/components/vehicle-context-synchro
 import { VehiclePartsFinder } from "@/components/vehicle-parts-finder";
 import { listAllProductsForVehicle } from "@/lib/queries/vehicle-product-fitment";
 import { getWiperSetByLengths } from "@/lib/queries/wiper-commerce";
-import { findWiperLengthFitments, type WiperFitmentResult } from "@/lib/queries/wiper-fitment";
+import type { WiperFitmentResult } from "@/lib/queries/wiper-fitment";
+import { findCatalogWiperFitments } from "@/lib/queries/vehicle-catalog-wiper-fitment";
 import { readStoredVehicleContext } from "@/lib/server/vehicle-context";
 import type { Product, WiperSet } from "@/lib/types";
 import type { VehicleContext } from "@/lib/vehicle-context";
@@ -29,6 +30,7 @@ type PartsSearchParams = {
   make?: string;
   model?: string;
   applicationId?: string;
+  applicationIds?: string;
   generationId?: string;
   variantId?: string;
   chassis?: string;
@@ -36,7 +38,7 @@ type PartsSearchParams = {
   engine?: string;
 };
 
-type VehicleSelection = { makeId: string; modelId: string; year: number; applicationId: string };
+type VehicleSelection = { makeId: string; modelId: string; year: number; applicationId: string; applicationIds: string[] };
 type CompatibleParts = { products: Product[]; wiperSet: WiperSet | null; wiperFitment: WiperFitmentResult | null; error: string };
 
 export default async function VehiclePartsPage({ searchParams }: { searchParams: Promise<PartsSearchParams> }) {
@@ -127,22 +129,30 @@ export default async function VehiclePartsPage({ searchParams }: { searchParams:
 }
 
 async function loadCompatibleParts(selection: VehicleSelection): Promise<CompatibleParts> {
+  const [productResult, wiperResult] = await Promise.allSettled([
+    listAllProductsForVehicle(selection),
+    findCatalogWiperFitments(selection.applicationIds)
+  ]);
   try {
-    const [products, wiperFitments] = await Promise.all([
-      listAllProductsForVehicle(selection),
-      findWiperLengthFitments(selection.makeId, selection.modelId, selection.year, {
-        applicationId: selection.applicationId,
-        applicationKind: "canonical"
-      })
-    ]);
+    const products = productResult.status === "fulfilled" ? productResult.value : [];
+    const wiperFitments = wiperResult.status === "fulfilled" ? wiperResult.value : [];
     const wiperFitment = wiperFitments[0] ?? null;
     const wiperSet = wiperFitment?.driverLengthIn && wiperFitment.passengerLengthIn
       ? await getWiperSetByLengths(wiperFitment.driverLengthIn, wiperFitment.passengerLengthIn)
       : null;
-    return { products, wiperSet, wiperFitment, error: "" };
+    return {
+      products, wiperSet, wiperFitment,
+      error: productResult.status === "rejected" ? getErrorMessage(productResult.reason, "Could not load compatible products.") : ""
+    };
   } catch (error) {
     return { ...emptyCompatibleParts(), error: error instanceof Error ? error.message : "Could not load compatible parts." };
   }
+}
+
+function getErrorMessage(error: unknown, fallback: string) {
+  if (error instanceof Error) return error.message;
+  if (error && typeof error === "object" && "message" in error && typeof error.message === "string") return error.message;
+  return fallback;
 }
 
 function emptyCompatibleParts(): CompatibleParts {
@@ -152,7 +162,8 @@ function emptyCompatibleParts(): CompatibleParts {
 function parseVehicleSelection(vehicle: PartsSearchParams): VehicleSelection | null {
   const year = Number(vehicle.year);
   if (!vehicle.makeId || !vehicle.modelId || !vehicle.applicationId || !Number.isInteger(year)) return null;
-  return { makeId: vehicle.makeId, modelId: vehicle.modelId, applicationId: vehicle.applicationId, year };
+  const applicationIds = (vehicle.applicationIds ?? vehicle.applicationId).split(",").filter((id) => /^ap_[0-9a-f]{20}$/.test(id));
+  return { makeId: vehicle.makeId, modelId: vehicle.modelId, applicationId: vehicle.applicationId, applicationIds, year };
 }
 
 function toPartsSearchParams(vehicle: VehicleContext | null): PartsSearchParams {
@@ -164,6 +175,7 @@ function toPartsSearchParams(vehicle: VehicleContext | null): PartsSearchParams 
     make: vehicle.make,
     model: vehicle.model,
     applicationId: vehicle.applicationId,
+    applicationIds: vehicle.applicationIds?.join(","),
     generationId: vehicle.generationId,
     variantId: vehicle.variantId,
     chassis: vehicle.chassis,
@@ -181,6 +193,7 @@ function toExactVehicleContext(vehicle: PartsSearchParams): VehicleContext | nul
     make: vehicle.make,
     model: vehicle.model,
     applicationId: vehicle.applicationId,
+    applicationIds: vehicle.applicationIds?.split(",").filter(Boolean),
     generationId: vehicle.generationId,
     variantId: vehicle.variantId,
     chassis: vehicle.chassis,

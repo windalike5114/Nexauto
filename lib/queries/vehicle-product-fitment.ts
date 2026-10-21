@@ -8,18 +8,19 @@ type VariantRow = { id: string; product_id: string };
 
 export async function listProductsForVehicle(
   categorySlug: string,
-  selection: { makeId: string; modelId: string; year: number; applicationId?: string }
+  selection: { makeId: string; modelId: string; year: number; applicationId?: string; applicationIds?: string[] }
 ): Promise<Product[]> {
   const products = await listAllProductsForVehicle(selection);
   return products.filter((product) => product.category === categorySlug);
 }
 
 export async function listAllProductsForVehicle(
-  selection: { makeId: string; modelId: string; year: number; applicationId?: string }
+  selection: { makeId: string; modelId: string; year: number; applicationId?: string; applicationIds?: string[] }
 ): Promise<Product[]> {
   const matchingApplicationIds = await listVehicleCatalogApplicationIds(selection.makeId, selection.modelId, selection.year);
-  const applicationIds = selection.applicationId
-    ? matchingApplicationIds.filter((id) => id === selection.applicationId)
+  const selectedIds = selection.applicationIds?.length ? selection.applicationIds : selection.applicationId ? [selection.applicationId] : [];
+  const applicationIds = selectedIds.length
+    ? matchingApplicationIds.filter((id) => selectedIds.includes(id))
     : matchingApplicationIds;
   if (applicationIds.length === 0) return [];
 
@@ -27,9 +28,9 @@ export async function listAllProductsForVehicle(
   if (!supabase) throw new Error("Supabase is not configured for vehicle product lookup.");
 
   const { data: fitmentData, error: fitmentError } = await supabase
-    .from("vehicle_product_fitments")
+    .from("vehicle_catalog_product_fitments")
     .select("product_variant_id")
-    .in("vehicle_application_id", applicationIds)
+    .in("application_id", applicationIds)
     .eq("fitment_status", "published");
   if (fitmentError) throw fitmentError;
 

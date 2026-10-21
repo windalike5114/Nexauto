@@ -4,99 +4,17 @@ import { createSupabaseServerClient } from "@/lib/supabase";
 export type VehicleCatalogOption = { id: string; name: string };
 export type VehicleCatalogIndexModel = VehicleCatalogOption & { years: number[] };
 export type VehicleCatalogIndexMake = VehicleCatalogOption & { models: VehicleCatalogIndexModel[] };
-
 export type VehicleCatalogApplicationOption = {
-  id: string;
-  generationId: string;
-  variantId: string;
-  chassisCodes: string[];
-  generationName: string;
-  bodyConfiguration: string;
-  bodyStyle: string;
-  engine: string;
-  yearStart: number;
-  yearEnd: number | null;
+  id: string; seriesId: string | null; seriesName: string; powertrainId: string; engine: string;
+  variantId: string; variantName: string; bodyStyle: string; driveType: string; vehicleClass: string;
 };
-
-export const VEHICLE_CATALOG_SOURCE_PATTERN = "NEXAUTO_V4:%";
-
-type VehicleMake = VehicleCatalogOption;
-type VehicleModel = VehicleCatalogOption & {
-  make_id: string;
-  vehicle_makes: VehicleMake | VehicleMake[] | null;
+type CatalogIndexRow = { make_id: string; make_name: string; model_id: string; model_name: string; years: number[] };
+type SearchRow = {
+  application_id: string; series_id: string | null; series_name: string; powertrain_id: string;
+  engine_name: string; variant_id: string; variant_name: string; body_style: string | null;
+  drive_type: string | null; vehicle_class: string | null;
 };
-type VehicleGeneration = VehicleCatalogOption & {
-  active: boolean;
-  vehicle_models: VehicleModel | VehicleModel[] | null;
-  vehicle_chassis_assignments: Array<{
-    variant_id: string | null;
-    is_primary: boolean;
-    vehicle_chassis_codes: { code: string } | Array<{ code: string }> | null;
-  }>;
-};
-
-type VehicleVariant = VehicleCatalogOption & {
-  body_style: string;
-  engine_code: string | null;
-  active: boolean;
-};
-
-type VehicleApplicationRow = {
-  id: string;
-  variant_id: string | null;
-  year_start: number | null;
-  year_end: number | null;
-  vehicle_generations: VehicleGeneration | VehicleGeneration[] | null;
-  vehicle_variants: VehicleVariant | VehicleVariant[] | null;
-};
-
 const PRIORITY_NZ_MAKES = ["Toyota", "Ford", "Mazda", "Nissan", "Mitsubishi", "Honda", "Subaru", "Hyundai", "Kia", "Suzuki"];
-
-const VEHICLE_APPLICATION_SELECT = `
-  id,
-  variant_id,
-  year_start,
-  year_end,
-  vehicle_variants!inner(
-    id,
-    name,
-    body_style,
-    engine_code,
-    active
-  ),
-  vehicle_generations!inner(
-    id,
-    name,
-    active,
-    vehicle_chassis_assignments(
-      variant_id,
-      is_primary,
-      vehicle_chassis_codes(code)
-    ),
-    vehicle_models!inner(
-      id,
-      name,
-      make_id,
-      vehicle_makes!inner(id,name)
-    )
-  )
-`;
-
-const VEHICLE_IDENTITY_SELECT = `
-  id,
-  year_start,
-  year_end,
-  vehicle_generations!inner(
-    id,
-    active,
-    vehicle_models!inner(
-      id,
-      name,
-      make_id,
-      vehicle_makes!inner(id,name)
-    )
-  )
-`;
 
 function getSupabaseOrThrow() {
   const supabase = createSupabaseServerClient();
@@ -104,200 +22,65 @@ function getSupabaseOrThrow() {
   return supabase;
 }
 
-function single<T>(value: T | T[] | null | undefined) {
-  if (Array.isArray(value)) return value[0] ?? null;
-  return value ?? null;
-}
-
-function getIdentity(row: VehicleApplicationRow) {
-  const generation = single(row.vehicle_generations);
-  const model = single(generation?.vehicle_models);
-  const make = single(model?.vehicle_makes);
-  if (!generation || !model || !make) return null;
-  return { application: row, generation, model, make };
-}
-
-export const listVehicleCatalogMakes = unstable_cache(async () => {
-  const rows = await loadPublishedVehicleIdentities();
-  const makes = new Map<string, VehicleCatalogOption>();
-  for (const row of rows) {
-    const identity = getIdentity(row);
-    if (identity) makes.set(identity.make.id, { id: identity.make.id, name: identity.make.name });
-  }
-  return sortMakesForNz([...makes.values()]);
-}, ["vehicle-catalog-v4-makes"], { revalidate: 3600, tags: ["vehicle-catalog-v4"] });
-
 export const listVehicleCatalogIndex = unstable_cache(async (): Promise<VehicleCatalogIndexMake[]> => {
-  const rows = await loadPublishedVehicleIdentities();
-  const makes = new Map<string, { option: VehicleCatalogOption; models: Map<string, { option: VehicleCatalogOption; years: Set<number> }> }>();
-  const currentYear = new Date().getFullYear();
-
-  for (const row of rows) {
-    const identity = getIdentity(row);
-    if (!identity || !row.year_start) continue;
-    const make = makes.get(identity.make.id) ?? {
-      option: { id: identity.make.id, name: identity.make.name },
-      models: new Map()
-    };
-    const model = make.models.get(identity.model.id) ?? {
-      option: { id: identity.model.id, name: identity.model.name },
-      years: new Set<number>()
-    };
-    for (let year = row.year_start; year <= (row.year_end ?? currentYear); year += 1) model.years.add(year);
-    make.models.set(identity.model.id, model);
-    makes.set(identity.make.id, make);
+  const result = await selectAll<CatalogIndexRow>(getSupabaseOrThrow().from("vehicle_catalog_index")
+    .select("make_id,make_name,model_id,model_name,years").order("make_id").order("model_id"));
+  if (result.error) throw result.error;
+  const makes = new Map<string, { name: string; models: Map<string, { name: string; years: Set<number> }> }>();
+  for (const row of result.data) {
+    const make = makes.get(row.make_id) ?? { name: row.make_name, models: new Map() };
+    const model = make.models.get(row.model_id) ?? { name: row.model_name, years: new Set<number>() };
+    for (const year of row.years) model.years.add(year);
+    make.models.set(row.model_id, model);
+    makes.set(row.make_id, make);
   }
-
-  return sortMakesForNz([...makes.values()].map(({ option, models }) => ({
-    ...option,
-    models: [...models.values()]
-      .map((model) => ({ ...model.option, years: [...model.years].sort((left, right) => right - left) }))
-      .sort((left, right) => left.name.localeCompare(right.name))
+  return sortMakesForNz([...makes].map(([id, make]) => ({
+    id, name: make.name,
+    models: [...make.models].map(([modelId, model]) => ({ id: modelId, name: model.name, years: [...model.years].sort((a, b) => b - a) }))
+      .sort((a, b) => a.name.localeCompare(b.name))
   })));
-}, ["vehicle-catalog-v4-index"], { revalidate: 3600, tags: ["vehicle-catalog-v4"] });
+}, ["vehicle-catalog-v5-index"], { revalidate: 3600, tags: ["vehicle-catalog-v5"] });
 
-export const listVehicleCatalogModels = unstable_cache(async (makeId: string) => {
-  const rows = await loadPublishedVehicleIdentities({ makeId });
-  const models = new Map<string, VehicleCatalogOption>();
-  for (const row of rows) {
-    const identity = getIdentity(row);
-    if (identity?.make.id === makeId) models.set(identity.model.id, { id: identity.model.id, name: identity.model.name });
-  }
-  return [...models.values()].sort((left, right) => left.name.localeCompare(right.name));
-}, ["vehicle-catalog-v4-models"], { revalidate: 3600, tags: ["vehicle-catalog-v4"] });
+export async function listVehicleCatalogMakes() {
+  return (await listVehicleCatalogIndex()).map(({ id, name }) => ({ id, name }));
+}
 
-export const listVehicleCatalogYears = unstable_cache(async (makeId: string, modelId: string) => {
-  const rows = await loadPublishedVehicleIdentities({ makeId, modelId });
-  const years = new Set<number>();
-  const currentYear = new Date().getFullYear();
+export async function listVehicleCatalogModels(makeId: string) {
+  return (await listVehicleCatalogIndex()).find((make) => make.id === makeId)?.models.map(({ id, name }) => ({ id, name })) ?? [];
+}
 
-  for (const row of rows) {
-    const identity = getIdentity(row);
-    if (!identity || identity.make.id !== makeId || identity.model.id !== modelId || !row.year_start) continue;
-    const endYear = row.year_end ?? currentYear;
-    for (let year = row.year_start; year <= endYear; year += 1) years.add(year);
-  }
+export async function listVehicleCatalogYears(makeId: string, modelId: string) {
+  return (await listVehicleCatalogIndex()).find((make) => make.id === makeId)?.models.find((model) => model.id === modelId)?.years ?? [];
+}
 
-  return [...years].sort((left, right) => right - left);
-}, ["vehicle-catalog-v4-years"], { revalidate: 3600, tags: ["vehicle-catalog-v4"] });
+export const listVehicleCatalogApplications = unstable_cache(async (makeId: string, modelId: string, year: number): Promise<VehicleCatalogApplicationOption[]> => {
+  if (!/^mk_[0-9a-f]{20}$/.test(makeId) || !/^md_[0-9a-f]{20}$/.test(modelId) || !Number.isInteger(year) || year < 1886 || year > 2100) return [];
+  const result = await selectAll<SearchRow>(getSupabaseOrThrow().from("vehicle_catalog_search")
+    .select("application_id,series_id,series_name,powertrain_id,engine_name,variant_id,variant_name,body_style,drive_type,vehicle_class")
+    .eq("make_id", makeId).eq("model_id", modelId).eq("model_year", year));
+  if (result.error) throw result.error;
+  return result.data.map((row) => ({
+    id: row.application_id, seriesId: row.series_id, seriesName: row.series_name,
+    powertrainId: row.powertrain_id, engine: row.engine_name, variantId: row.variant_id,
+    variantName: row.variant_name, bodyStyle: row.body_style ?? "", driveType: row.drive_type ?? "",
+    vehicleClass: row.vehicle_class ?? ""
+  })).sort(compareApplications);
+}, ["vehicle-catalog-v5-applications"], { revalidate: 900, tags: ["vehicle-catalog-v5"] });
 
 export async function listVehicleCatalogApplicationIds(makeId: string, modelId: string, year: number) {
-  const applications = await listVehicleCatalogApplications(makeId, modelId, year);
-  return applications.map((application) => application.id);
+  return (await listVehicleCatalogApplications(makeId, modelId, year)).map((row) => row.id);
 }
-
-export const listVehicleCatalogApplications = unstable_cache(async (makeId: string, modelId: string, year: number) => {
-  if (!Number.isInteger(year) || year < 1886 || year > 2100) return [];
-
-  const rows = await loadPublishedVehicleApplications({ makeId, modelId, year });
-  return rows
-    .filter((row) => {
-      const identity = getIdentity(row);
-      if (!identity || identity.make.id !== makeId || identity.model.id !== modelId || !row.year_start) return false;
-      return row.year_start <= year && (row.year_end === null || row.year_end >= year);
-    })
-    .map(mapApplicationOption)
-    .filter((option): option is VehicleCatalogApplicationOption => Boolean(option))
-    .sort(compareApplicationOptions);
-}, ["vehicle-catalog-v4-applications"], { revalidate: 900, tags: ["vehicle-catalog-v4"] });
-
-type VehicleQueryFilters = { makeId?: string; modelId?: string; year?: number };
-
-async function loadPublishedVehicleIdentities(filters: VehicleQueryFilters = {}) {
-  const supabase = getSupabaseOrThrow();
-  let query = supabase
-    .from("vehicle_fitment_applications")
-    .select(VEHICLE_IDENTITY_SELECT)
-    .like("source_application_key", VEHICLE_CATALOG_SOURCE_PATTERN)
-    .eq("fitment_status", "published")
-    .eq("active", true)
-    .eq("vehicle_generations.active", true);
-
-  query = applyIdentityFilters(query, filters);
-  const result = await selectAll(query);
-  if (result.error) throw result.error;
-  return (result.data ?? []) as unknown as VehicleApplicationRow[];
+function compareApplications(a: VehicleCatalogApplicationOption, b: VehicleCatalogApplicationOption) {
+  return a.seriesName.localeCompare(b.seriesName) || a.engine.localeCompare(b.engine) || a.variantName.localeCompare(b.variantName) || a.id.localeCompare(b.id);
 }
-
-async function loadPublishedVehicleApplications(filters: VehicleQueryFilters = {}) {
-  const supabase = getSupabaseOrThrow();
-  let query = supabase
-    .from("vehicle_fitment_applications")
-    .select(VEHICLE_APPLICATION_SELECT)
-    .like("source_application_key", VEHICLE_CATALOG_SOURCE_PATTERN)
-    .eq("fitment_status", "published")
-    .eq("active", true)
-    .eq("vehicle_generations.active", true)
-    .eq("vehicle_variants.active", true);
-
-  query = applyIdentityFilters(query, filters);
-  const result = await selectAll(query);
-  if (result.error) throw result.error;
-  return (result.data ?? []) as unknown as VehicleApplicationRow[];
-}
-
-function applyIdentityFilters<T extends { eq: (column: string, value: string | number) => T; lte: (column: string, value: number) => T; or: (filters: string) => T }>(query: T, filters: VehicleQueryFilters) {
-  if (filters.makeId) query = query.eq("vehicle_generations.vehicle_models.make_id", filters.makeId);
-  if (filters.modelId) query = query.eq("vehicle_generations.vehicle_models.id", filters.modelId);
-  if (filters.year) {
-    query = query.lte("year_start", filters.year);
-    query = query.or(`year_end.is.null,year_end.gte.${filters.year}`);
-  }
-  return query;
-}
-
-function mapApplicationOption(row: VehicleApplicationRow): VehicleCatalogApplicationOption | null {
-  const generation = single(row.vehicle_generations);
-  const variant = single(row.vehicle_variants);
-  if (!generation || !variant || !row.year_start) return null;
-
-  const chassisCodes = generation.vehicle_chassis_assignments
-    .filter((assignment) => !assignment.variant_id || assignment.variant_id === variant.id)
-    .sort((left, right) => Number(right.is_primary) - Number(left.is_primary))
-    .map((assignment) => single(assignment.vehicle_chassis_codes)?.code?.trim() ?? "")
-    .filter(Boolean);
-  const engine = variant.engine_code?.trim() ?? "Engine not specified";
-  const engineSuffix = variant.engine_code ? ` · ${variant.engine_code}` : "";
-  const bodyConfiguration = engineSuffix && variant.name.endsWith(engineSuffix)
-    ? variant.name.slice(0, -engineSuffix.length).trim()
-    : variant.body_style;
-
-  return {
-    id: row.id,
-    generationId: generation.id,
-    variantId: variant.id,
-    chassisCodes: [...new Set(chassisCodes)],
-    generationName: generation.name,
-    bodyConfiguration,
-    bodyStyle: variant.body_style,
-    engine,
-    yearStart: row.year_start,
-    yearEnd: row.year_end
-  };
-}
-
-function compareApplicationOptions(left: VehicleCatalogApplicationOption, right: VehicleCatalogApplicationOption) {
-  return getChassisLabel(left).localeCompare(getChassisLabel(right))
-    || left.bodyConfiguration.localeCompare(right.bodyConfiguration)
-    || left.engine.localeCompare(right.engine);
-}
-
-function getChassisLabel(application: VehicleCatalogApplicationOption) {
-  return application.chassisCodes.join(" / ") || application.generationName;
-}
-
 function sortMakesForNz<T extends VehicleCatalogOption>(makes: T[]): T[] {
   const priority = new Map(PRIORITY_NZ_MAKES.map((name, index) => [name.toLowerCase(), index]));
-  return [...makes].sort((left, right) => {
-    const leftPriority = priority.get(left.name.toLowerCase());
-    const rightPriority = priority.get(right.name.toLowerCase());
-    if (leftPriority !== undefined || rightPriority !== undefined) {
-      return (leftPriority ?? Number.MAX_SAFE_INTEGER) - (rightPriority ?? Number.MAX_SAFE_INTEGER);
-    }
-    return left.name.localeCompare(right.name);
+  return [...makes].sort((a, b) => {
+    const ai = priority.get(a.name.toLowerCase());
+    const bi = priority.get(b.name.toLowerCase());
+    return ai !== undefined || bi !== undefined ? (ai ?? 999) - (bi ?? 999) : a.name.localeCompare(b.name);
   });
 }
-
 async function selectAll<T>(query: { range: (from: number, to: number) => PromiseLike<{ data: T[] | null; error: unknown }> }, size = 1000) {
   const data: T[] = [];
   for (let from = 0; ; from += size) {

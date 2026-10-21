@@ -1,4 +1,5 @@
-import { createSupabaseServerClient } from "@/lib/supabase";
+import { listVehicleCatalogApplications, listVehicleCatalogIndex } from "@/lib/queries/vehicle-catalog";
+import { findCatalogWiperFitments } from "@/lib/queries/vehicle-catalog-wiper-fitment";
 
 export type WiperFitmentMake = { id: string; name: string };
 export type WiperFitmentModel = { id: string; name: string };
@@ -45,44 +46,6 @@ export type PublicWiperFitmentResult = Pick<
 > & {
   yearRange: string;
 };
-
-const PRIORITY_NZ_MAKES = ["Toyota", "Ford", "Mazda", "Nissan", "Mitsubishi", "Honda", "Subaru", "Hyundai", "Kia", "Suzuki"];
-
-const CANONICAL_FITMENT_SELECT = `
-  id,
-  fitment_status,
-  vehicle_fitment_applications!inner(
-    id,
-    year_start,
-    year_end,
-    fitment_status,
-    active,
-    vehicle_variants(id,name,body_style),
-    vehicle_generations!inner(
-      id,
-      name,
-      active,
-      vehicle_chassis_assignments(
-        id,
-        variant_id,
-        is_primary,
-        vehicle_chassis_codes(code)
-      ),
-      vehicle_models!inner(
-        id,
-        name,
-        make_id,
-        vehicle_makes!inner(id,name)
-      )
-    )
-  ),
-  wiper_configurations!inner(
-    id,
-    configuration_status,
-    rear_status,
-    wiper_configuration_blades(position,length_in)
-  )
-`;
 
 type CanonicalModel = {
   id: string;
@@ -135,63 +98,23 @@ export type CanonicalFitmentRow = {
   wiper_configurations: CanonicalConfiguration | CanonicalConfiguration[] | null;
 };
 
-function getSupabaseOrThrow() {
-  const supabase = createSupabaseServerClient();
-  if (!supabase) throw new Error("Supabase is not configured for fitment lookup.");
-  return supabase;
-}
-
 function single<T>(value: T | T[] | null | undefined) {
   if (Array.isArray(value)) return value[0] ?? null;
   return value ?? null;
 }
 
 export async function listWiperFitmentMakes() {
-  const supabase = getSupabaseOrThrow();
-  const canonical = await loadPublishedCanonicalFitments(supabase);
-  if (canonical.error) throw canonical.error;
-
-  const makes = new Map<string, WiperFitmentMake>();
-  for (const row of canonical.data) {
-    const identity = getCanonicalIdentity(row);
-    if (identity) makes.set(identity.make.id, identity.make);
-  }
-  return sortMakesForNzFinder([...makes.values()]);
+  return (await listVehicleCatalogIndex()).map(({ id, name }) => ({ id, name }));
 }
 
 export async function listWiperFitmentModels(makeId: string) {
-  const supabase = getSupabaseOrThrow();
-  const [canonical, masterCatalog] = await Promise.all([
-    loadPublishedCanonicalFitments(supabase),
-    loadMachterMasterModels(supabase, makeId)
-  ]);
-  if (canonical.error) throw canonical.error;
-
-  const models = new Map<string, WiperFitmentModel>();
-  for (const row of canonical.data) {
-    const identity = getCanonicalIdentity(row);
-    if (identity?.make.id === makeId) models.set(identity.model.id, identity.model);
-  }
-  return groupWiperFitmentModelsUsingMaster([...models.values()], masterCatalog.models, masterCatalog.requestedMakeName);
+  const make = (await listVehicleCatalogIndex()).find((entry) => entry.id === makeId);
+  return (make?.models ?? []).map(({ id, name }) => ({ id, name, aliases: [name], modelIds: [id] }));
 }
 
 export async function listWiperFitmentYears(makeId: string, modelId: string) {
-  const group = await resolveWiperFitmentModelGroup(makeId, modelId);
-  if (!group) return [];
-
-  const supabase = getSupabaseOrThrow();
-  const canonical = await loadPublishedCanonicalFitments(supabase);
-  if (canonical.error) throw canonical.error;
-
-  const years = new Set<number>();
-  const modelIds = new Set(group.modelIds);
-  for (const row of canonical.data) {
-    const identity = getCanonicalIdentity(row);
-    if (identity?.make.id === makeId && modelIds.has(identity.model.id)) {
-      addYears(years, identity.application.year_start, identity.application.year_end, true);
-    }
-  }
-  return [...years].sort((a, b) => b - a);
+  const make = (await listVehicleCatalogIndex()).find((entry) => entry.id === makeId);
+  return make?.models.find((entry) => entry.id === modelId)?.years ?? [];
 }
 
 export async function listWiperFitmentVariants(makeId: string, modelId: string, year: number) {
@@ -216,20 +139,27 @@ async function loadWiperLengthFitments(
   year: number,
   selection?: { applicationId: string; applicationKind: WiperFitmentApplicationKind }
 ) {
-  const group = await resolveWiperFitmentModelGroup(makeId, modelId);
-  if (!group) return { group: null, results: [] as WiperFitmentResult[] };
-
-  const supabase = getSupabaseOrThrow();
-  const canonical = await loadPublishedCanonicalFitments(supabase);
-  if (canonical.error) throw canonical.error;
-
-  const modelIds = new Set(group.modelIds);
-  const canonicalResults = canonical.data
-    .filter((row) => canonicalFitsVehicle(row, makeId, modelIds, year))
-    .map(mapCanonicalFitmentRow)
-    .filter((entry): entry is WiperFitmentResult => Boolean(entry));
-
-  const results = canonicalResults
+  const index = await listVehicleCatalogIndex();
+  const make = index.find((entry) => entry.id === makeId);
+  const model = make?.models.find((entry) => entry.id === modelId);
+  if (!make || !model) return { group: null, results: [] as WiperFitmentResult[] };
+  const group: WiperFitmentModelGroup = { id: model.id, name: model.name, aliases: [model.name], modelIds: [model.id] };
+  const applications = await listVehicleCatalogApplications(makeId, modelId, year);
+  const applicationById = new Map(applications.map((application) => [application.id, application]));
+  const fits = await findCatalogWiperFitments(applications.map((application) => application.id));
+  const catalogResults = fits.map((fit): WiperFitmentResult | null => {
+    const application = applicationById.get(fit.applicationId);
+    if (!application) return null;
+    return {
+      ...fit, make: make.name, model: model.name,
+      generationName: application.seriesName || null,
+      chassisCodes: application.seriesName ? [application.seriesName] : [],
+      variantName: application.variantName || null,
+      bodyStyle: application.bodyStyle || null,
+      startRaw: String(year), endRaw: String(year), startYear: year, endYear: year
+    };
+  }).filter((result): result is WiperFitmentResult => Boolean(result));
+  const results = catalogResults
     .filter((entry) => !selection || (entry.applicationId === selection.applicationId && entry.applicationKind === selection.applicationKind))
     .sort((left, right) => compareFitments(left, right, group.name));
 
@@ -285,64 +215,6 @@ function canonicalFitsVehicle(row: CanonicalFitmentRow, makeId: string, modelIds
   if (!identity || identity.make.id !== makeId || !modelIds.has(identity.model.id)) return false;
   const { year_start: start, year_end: end } = identity.application;
   return (!start || start <= year) && (!end || end >= year);
-}
-
-async function loadPublishedCanonicalFitments(supabase: ReturnType<typeof getSupabaseOrThrow>) {
-  const result = await selectAll(
-    supabase
-      .from("vehicle_wiper_fitments")
-      .select(CANONICAL_FITMENT_SELECT)
-      .eq("fitment_status", "published")
-      .eq("vehicle_fitment_applications.fitment_status", "published")
-      .eq("vehicle_fitment_applications.active", true)
-      .eq("vehicle_fitment_applications.vehicle_generations.active", true)
-      .eq("wiper_configurations.configuration_status", "published")
-  );
-  return { data: (result.data ?? []) as unknown as CanonicalFitmentRow[], error: result.error };
-}
-
-async function loadMachterMasterModels(supabase: ReturnType<typeof getSupabaseOrThrow>, makeId: string) {
-  const [{ data: source, error: sourceError }, { data: makes, error: makesError }] = await Promise.all([
-    supabase.from("catalog_data_sources").select("id").eq("code", "MACHTER_VEHICLE_CATALOG").eq("active", true).maybeSingle(),
-    supabase.from("vehicle_makes").select("id,name")
-  ]);
-  if (sourceError) throw sourceError;
-  if (makesError) throw makesError;
-  const requestedMake = (makes ?? []).find((make) => make.id === makeId) ?? null;
-  const targetMakeKey = requestedMake ? canonicalMakeNameKey(requestedMake.name) : "";
-  const makeCandidates = requestedMake
-    ? (makes ?? []).filter((make) => canonicalMakeNameKey(make.name) === targetMakeKey)
-    : [];
-  const canonicalMake = requestedMake
-    ? makeCandidates.find((make) => normalizeModelName(make.name).toLowerCase() === targetMakeKey) ?? makeCandidates[0] ?? requestedMake
-    : null;
-  if (!source || !canonicalMake) return { models: [], requestedMakeName: requestedMake?.name ?? "" };
-
-  const [aliases, models] = await Promise.all([
-    selectAll(
-      supabase
-        .from("vehicle_entity_aliases")
-        .select("model_id")
-        .eq("data_source_id", source.id)
-        .eq("entity_type", "model")
-        .eq("alias_kind", "name")
-    ),
-    supabase.from("vehicle_models").select("id,name").eq("make_id", canonicalMake.id)
-  ]);
-  if (aliases.error) throw aliases.error;
-  if (models.error) throw models.error;
-  const masterIds = new Set((aliases.data ?? []).map((alias: { model_id: string | null }) => alias.model_id).filter(Boolean));
-  return {
-    models: ((models.data ?? []) as WiperFitmentModel[]).filter((model) => masterIds.has(model.id)),
-    requestedMakeName: requestedMake?.name ?? ""
-  };
-}
-
-function addYears(years: Set<number>, start: number | null, end: number | null, allowOpenEnded: boolean) {
-  if (!start) return;
-  const finalYear = end ?? (allowOpenEnded ? new Date().getFullYear() : null);
-  if (!finalYear) return;
-  for (let year = start; year <= finalYear; year += 1) years.add(year);
 }
 
 export function toPublicWiperFitmentResult(fitment: WiperFitmentResult): PublicWiperFitmentResult {
@@ -594,18 +466,6 @@ function normalizeMasterKey(value: string) {
   return normalizeModelName(value).normalize("NFKC").toLowerCase().replace(/[^\p{L}\p{N}]+/gu, "");
 }
 
-function canonicalMakeNameKey(value: string) {
-  const key = normalizeModelName(value).toLowerCase();
-  const aliases: Record<string, string> = {
-    fpv: "ford",
-    "ford fpv": "ford",
-    mercedes: "mercedes benz",
-    "mazda eunos": "eunos",
-    "range rover": "land rover"
-  };
-  return aliases[key] ?? key;
-}
-
 function escapeRegExp(value: string) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
@@ -635,26 +495,4 @@ function toNumber(value: string | number | null) {
   if (value === null) return null;
   const number = Number(value);
   return Number.isFinite(number) ? number : null;
-}
-
-function sortMakesForNzFinder(makes: WiperFitmentMake[]) {
-  const priority = new Map(PRIORITY_NZ_MAKES.map((name, index) => [name.toLowerCase(), index]));
-  return [...makes].sort((left, right) => {
-    const leftPriority = priority.get(left.name.toLowerCase());
-    const rightPriority = priority.get(right.name.toLowerCase());
-    if (leftPriority !== undefined || rightPriority !== undefined) {
-      return (leftPriority ?? Number.MAX_SAFE_INTEGER) - (rightPriority ?? Number.MAX_SAFE_INTEGER);
-    }
-    return left.name.localeCompare(right.name);
-  });
-}
-
-async function selectAll<T>(query: { range: (from: number, to: number) => PromiseLike<{ data: T[] | null; error: unknown }> }, size = 1000) {
-  const data: T[] = [];
-  for (let from = 0; ; from += size) {
-    const result = await query.range(from, from + size - 1);
-    if (result.error) return { data, error: result.error };
-    data.push(...(result.data ?? []));
-    if (!result.data || result.data.length < size) return { data, error: null };
-  }
 }

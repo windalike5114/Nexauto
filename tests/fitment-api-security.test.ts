@@ -33,8 +33,9 @@ test("fitment rate limiter blocks excess requests and resets deterministically",
   assert.equal(limiter.consume("client", 6_000).allowed, true);
 });
 
-test("fitment request validation accepts only UUIDs, bounded years, and known parameters", () => {
+test("fitment request validation accepts UUIDs and V5 catalogue IDs, bounded years, and known parameters", () => {
   assert.equal(parseFitmentId(UUID), UUID);
+  assert.equal(parseFitmentId("ap_1234567890abcdef1234"), "ap_1234567890abcdef1234");
   assert.equal(parseFitmentId("legacy:" + UUID), null);
   assert.equal(parseFitmentId("not-an-id"), null);
   assert.equal(parseVehicleYear("2024", 2026), 2024);
@@ -100,7 +101,8 @@ test("public wiper lookup reads only the canonical vehicle catalogue", () => {
   const querySource = readFileSync("lib/queries/wiper-fitment.ts", "utf8");
   const resultsRoute = readFileSync("app/api/fitment/wipers/results/route.ts", "utf8");
 
-  assert.match(querySource, /\.from\("vehicle_wiper_fitments"\)/);
+  assert.match(querySource, /findCatalogWiperFitments/);
+  assert.doesNotMatch(querySource, /\.from\("vehicle_wiper_fitments"\)/);
   assert.doesNotMatch(querySource, /\.from\("vehicle_applications"\)/);
   assert.doesNotMatch(querySource, /\.from\("wiper_length_fitments"\)/);
   assert.match(resultsRoute, /applicationKind === "canonical"/);
