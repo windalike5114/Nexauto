@@ -7,7 +7,7 @@ import { createClient } from "@supabase/supabase-js";
 import XLSX from "xlsx";
 import { VEHICLE_APPLICATION_YEAR_CAPS } from "./vehicle-catalog-safety.mjs";
 
-const SOURCE_CODE = "NEXAUTO_FITMENT_V6_2026_10_22";
+export const SOURCE_CODE = "NEXAUTO_FITMENT_V6_2026_10_22";
 const EXPECTED_VEHICLE_RELEASE_HASH = "ea51cdaebe629afa9edf096bbcd0de18dbdc1e919d2a9051ec96c34421812e46";
 const DEFAULT_PACKAGE_DIR = path.resolve("data/fitment-v6");
 const APPROVED_FRONT_SIZES = new Set([14, 15, 16, 17, 18, 19, 20, 21, 22, 24, 26, 28, 30]);
@@ -645,7 +645,7 @@ async function verifyVehicleApplicationYearCaps(db) {
   return results;
 }
 
-function productNotes(row) {
+export function productNotes(row) {
   return [
     `confidence=${row.match_confidence}`,
     `score=${row.match_score}`,

@@ -56,6 +56,8 @@
     "fitment-v4:check": "node scripts/catalog/check-production-fitment-v4.mjs",
     "fitment-v6:report": "node scripts/catalog/deploy-fitment-v6.mjs --report-only",
     "fitment-v6:apply": "node scripts/catalog/deploy-fitment-v6.mjs --apply",
+    "fitment-v6:reviewed-report": "node scripts/catalog/apply-reviewed-fitments-v6.mjs --report-only",
+    "fitment-v6:reviewed-apply": "node scripts/catalog/apply-reviewed-fitments-v6.mjs --apply",
     "test:fitment-v6": "node --test --test-isolation=none tests/fitment-v6-package.test.mjs && node --import tsx --test --test-isolation=none tests/wiper-small-first-sku.test.ts",
     "wiper-review:export": "node scripts/catalog/export-wiper-cross-year-review.mjs",
     "test:fitment-v4": "node --test --test-isolation=none tests/fitment-v4-matcher.test.mjs",
