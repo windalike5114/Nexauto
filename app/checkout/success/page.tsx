@@ -5,23 +5,26 @@ import { formatMoney } from "@/lib/catalog";
 import { getOrderNumberFromSnapshot } from "@/lib/order-number";
 import { createSupabaseAdminClient } from "@/lib/supabase";
 import { createClient } from "@/utils/supabase/server";
+import { verifyCheckoutPayment } from "@/lib/application/checkout/verify-checkout-payment";
 
-export default async function CheckoutSuccessPage({ searchParams }: { searchParams: Promise<{ session_id?: string }> }) {
-  const { session_id: sessionId } = await searchParams;
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
+export default async function CheckoutSuccessPage({ searchParams }: { searchParams: Promise<{ session_id?: string | string[] }> }) {
+  const { session_id: rawSessionId } = await searchParams;
+  const sessionId = typeof rawSessionId === "string" ? rawSessionId : undefined;
   const [checkoutSession, signedIn] = await Promise.all([
     loadCheckoutSession(sessionId),
     isSignedIn()
   ]);
-  const order = await loadOrderByStripeSession(sessionId);
+  const paymentConfirmed = checkoutSession !== null;
+  const order = paymentConfirmed ? await loadOrderByStripeSession(sessionId).catch(() => null) : null;
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-16 text-center sm:px-6 lg:px-8">
       <div className="rounded-lg border border-black/10 bg-white p-8 shadow-panel">
-        <p className="text-sm font-black uppercase tracking-[0.18em] text-mint">Payment received</p>
-        <h1 className="mt-3 text-4xl font-black">Order confirmed</h1>
-        <p className="mt-4 leading-7 text-steel">
-          Your payment has been received. Your order is independent from account registration and will be recorded by email.
-        </p>
+        <p className="text-sm font-black uppercase tracking-[0.18em] text-mint">{paymentConfirmed ? "Payment received" : "Payment pending confirmation"}</p>
+        <h1 className="mt-3 text-4xl font-black">{paymentConfirmed ? "Payment confirmed" : "Awaiting payment confirmation"}</h1>
         {order ? (
           <div className="mt-6 rounded border border-black/10 bg-zinc-50 p-4 text-left">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -43,15 +46,17 @@ export default async function CheckoutSuccessPage({ searchParams }: { searchPara
           </div>
         ) : (
           <p className="mt-5 rounded border border-amber-200 bg-amber-50 p-3 text-sm font-bold text-amber-900">
-            Your payment is confirmed. The order record may take a moment to appear while Stripe finishes syncing.
+            {paymentConfirmed
+              ? "Payment received · Preparing order details"
+              : "We could not confirm your payment. Your cart has been kept. If you have already paid, please check again shortly or contact us before paying again."}
           </p>
         )}
-        <CheckoutSuccessActions
-          sessionId={sessionId}
+        {paymentConfirmed ? <CheckoutSuccessActions
+          paymentConfirmed={paymentConfirmed}
           customerEmail={order?.email ?? checkoutSession?.customerEmail ?? ""}
           customerName={order?.customerName ?? checkoutSession?.customerName ?? ""}
           signedIn={signedIn}
-        />
+        /> : <Link href="/contact" className="mt-6 inline-flex rounded border border-black/10 px-5 py-3 font-black">Contact us</Link>}
         <Link href="/shop" className="mt-6 inline-flex rounded bg-ink px-5 py-3 font-black text-white">
           Keep shopping
         </Link>
@@ -84,12 +89,16 @@ async function loadOrderByStripeSession(sessionId: string | undefined) {
 }
 
 async function isSignedIn() {
-  const supabase = await createClient();
-  const {
-    data: { user }
-  } = await supabase.auth.getUser();
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user }
+    } = await supabase.auth.getUser();
 
-  return Boolean(user);
+    return Boolean(user);
+  } catch {
+    return false;
+  }
 }
 
 async function loadCheckoutSession(sessionId: string | undefined) {
@@ -99,9 +108,10 @@ async function loadCheckoutSession(sessionId: string | undefined) {
 
   try {
     const stripe = new Stripe(secretKey);
-    const session = await stripe.checkout.sessions.retrieve(sessionId, {
+    const session = await verifyCheckoutPayment(sessionId, (id) => stripe.checkout.sessions.retrieve(id, {
       expand: ["invoice"]
-    });
+    }));
+    if (!session) return null;
     const invoice = typeof session.invoice === "object" && session.invoice ? session.invoice : null;
 
     return {

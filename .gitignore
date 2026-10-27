@@ -1,4 +1,13 @@
 .next
+.next-security-audit
+.next-security-remediation
+.next-storefront-optimization
+/.next*/
+/.artifact-work/
+/outputs/
+/deliverables/
+__pycache__/
+*.pyc
 node_modules
 .env
 .env*.local
@@ -10,3 +19,4 @@ coverage
 .env*
 !.env.example
 tmp/
+supabase/.temp/

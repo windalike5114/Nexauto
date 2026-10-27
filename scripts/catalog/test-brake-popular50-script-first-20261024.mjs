@@ -1,0 +1,52 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import crypto from 'node:crypto';
+import path from 'node:path';
+import {assessYear,assessPosition,driveSet,matchPlatform} from './brake-popular50-script-first-policy.mjs';
+const root=path.resolve('outputs/brake-popular50-script-first-20261024/deliverable');
+const read=f=>JSON.parse(fs.readFileSync(path.join(root,f),'utf8'));
+const jl=f=>fs.readFileSync(path.join(root,f),'utf8').trim().split(/\r?\n/).map(JSON.parse);
+const tests=[];
+const a={application_id:'QA',rank:1,group:'QA',make:'FORD',model:'RANGER',series:'PJ',body:'Utility',drive:'2WD',variant:'',
+ engine:'',engine_codes:[],displacement_cc:2500,years:[2010],all_years:[1999,2010],model_id:'m',series_id:'s',variant_id:'v',powertrain_id:'p'};
+const src={source_id:'B:QA',family:'FORD|RANGER',tokens:['PJ'],position:'front',db:'DB1',body:'pickup',drive:'rwd',
+ engine_codes:[],displacement_cc:null,from:1999,to:2012,year_kind:'closed',series:'Ranger PJ'};
+assert.deepEqual(driveSet('4x2'),['fwd','rwd']);assert.deepEqual(driveSet('4WD'),['awd']);
+assert.equal(assessYear(a,'front',2010,[{...src,drive:'awd'}]).status,'no_source_for_year');
+assert.equal(assessYear(a,'rear',2010,[src]).status,'no_source_for_year');tests.push('2WD/4WD contradiction and front/rear isolation');
+assert.equal(assessYear(a,'front',2010,[{...src,to:0,year_kind:'unknown_end'}]).status,'unknown_end_only');
+assert.equal(assessYear(a,'front',2010,[src,{...src,source_id:'U',db:'DB2',to:0,year_kind:'unknown_end'}]).status,'multiple_db');
+assert.equal(assessYear(a,'front',2010,[src,{...src,source_id:'U',to:0,year_kind:'unknown_end'}]).status,'unique_supported');tests.push('Unknown end never proves applicability or disappears as a competing candidate');
+assert.equal(assessYear(a,'front',2010,[{...src,bridge_years:[2009]}]).status,'no_source_for_year');
+assert.equal(matchPlatform({...a,series:'PX'},src),false);tests.push('Identity bridges remain year-bounded; known other chassis cannot be erased');
+const pm=new Map([['DB1|front',[{sku:'NBP1',id:'pid'}]]]);
+assert.equal(assessPosition(a,'front',[src],{productsByDB:pm}).status,'ready');
+assert.equal(assessPosition(a,'front',[{...src,from:2000}],{productsByDB:pm}).status,'review_year_or_config');
+assert.equal(assessPosition(a,'front',[src],{productsByDB:pm,existing:[{position:'front',fitment_status:'published',db:'DB2',sku:'NBP2'}]}).status,'review_published_conflict');
+assert.equal(assessPosition(a,'front',[src],{productsByDB:pm,identityFlags:[{risk:true}]}).status,'review_identity_risk');
+assert.equal(assessPosition(a,'front',[src],{productsByDB:pm,existing:[{position:'front',fitment_status:'rejected',db:'DB1'}]}).status,'review_prior_rejection');
+assert.equal(assessPosition(a,'front',[src],{productsByDB:new Map([['DB1|front',[{sku:'NBP1',id:'1'},{sku:'NBP2',id:'2'}]]])}).status,'db_unique_product_mapping_pending');
+tests.push('Full application years, published conflicts, identity risks, rejections and SKU ambiguity are respected');
+const s=read('summary.json'),all=jl('all-position-audit.jsonl'),ready=jl('ready-to-import.jsonl');
+assert.equal(all.length,7002);assert.equal(new Set(all.map(c=>c.application_id)).size,3501);
+assert.equal(new Set(all.map(c=>c.case_id)).size,7002);assert.equal(ready.length,45);
+assert.equal(read('models.json').reduce((n,m)=>n+m.application_years,0),20059);
+for(const r of ready){assert.equal(r.candidate_db.length,1);assert.equal(r.candidate_db[0],r.proposed_db);
+ assert.ok(r.proposed_sku&&r.product_variant_id&&!r.identity_flags.length&&!r.current_published_sku.length);
+ assert.ok(r.year_segments.every(y=>y.status==='unique_supported'&&y.db===r.proposed_db));}
+assert.equal(all.find(r=>r.application_id==='ap_24337f2d92a71242a875'&&r.position==='front').proposed_db,'DB1366');
+tests.push('All50/3501/20059 scope reconciles,45 ready rows valid; Ranger PJ regression stays DB1366');
+for(const [p,h] of Object.entries(s.input_hashes))assert.equal(crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex'),h);
+tests.push('Every input hash unchanged; original data and production untouched');
+const bank=read('AI_DB_ONLY/index.json'),first=read('AI_DB_ONLY/first10.json'),shared=read('shared-problems.json');
+assert.equal(bank.length,73);assert.equal(shared.length,149);assert.equal(first.length,10);
+for(const q of bank){assert.equal(q.dispatch_lane,'ai_direct_db');assert.ok(q.candidate_db.length>=1&&q.candidate_db.length<=4);
+ const full=read(`AI_DB_ONLY/questions/${q.question_id}.json`);assert.ok(full.configurations.length<=12);
+ assert.ok(!q.issue_types.includes('review_identity_risk'));}
+const targetIds=shared.flatMap(q=>read(`local-data/shared-targets/${q.question_id}.json`).case_ids);
+const expected=all.filter(c=>c.status.startsWith('review_')&&!c.current_published_sku.length).map(c=>c.case_id);
+assert.deepEqual(targetIds.sort(),expected.sort());
+tests.push('Remaining search cases owned exactly once; only73 DB questions executable,10 initially, no identity-only dispatch');
+assert.equal(s.production_changed,false);assert.equal(s.counts.current_run_ai_queries,0);
+const report={valid:true,tests,production_changed:false,ai_queries_executed:0,evidence_truth_checked_by_script:false};
+fs.writeFileSync(path.join(root,'qa.json'),JSON.stringify(report,null,2));console.log(JSON.stringify(report,null,2));

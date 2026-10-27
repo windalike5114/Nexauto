@@ -11,8 +11,10 @@ import { OrdersSection } from "@/components/account/orders-section";
 import { RewardsSection } from "@/components/account/rewards-section";
 import { SettingsSection } from "@/components/account/settings-section";
 import { VehiclesSection } from "@/components/account/vehicles-section";
-import type { AccountMode, AccountResponse, AccountSectionId, AccountVehicle, FitmentResult } from "@/components/account/account-types";
-import { sameText, vehicleLabel } from "@/components/account/account-types";
+import type { AccountMode, AccountResponse, AccountSectionId, AccountVehicle } from "@/components/account/account-types";
+import { sameText } from "@/components/account/account-types";
+import { useVehicleContext } from '@/components/vehicle-context-provider';
+import { groupFriendlyApplications, sharedVehicleDetails, type FriendlyApplication } from '@/lib/vehicle-variants';
 import { getSafeAuthErrorMessage } from "@/lib/domain/account/auth-errors";
 import {
   getAuthCallbackUrl,
@@ -25,6 +27,7 @@ import { createClient } from "@/utils/supabase/client";
 
 export function AccountAuth({ initialMode = "sign-in" }: { initialMode?: AccountMode }) {
   const router = useRouter();
+  const { selectVehicle } = useVehicleContext();
   const [mode, setMode] = useState<AccountMode>(initialMode);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -200,49 +203,17 @@ export function AccountAuth({ initialMode = "sign-in" }: { initialMode?: Account
     setMessage("");
 
     try {
-      const makes = await fetchJson<{ makes: Array<{ id: string; name: string }> }>("/api/fitment/wipers/makes");
-      const make = makes.makes.find((entry) => sameText(entry.name, vehicle.make));
-      if (!make) throw new Error("Could not match vehicle make.");
-
-      const models = await fetchJson<{ models: Array<{ id: string; name: string; aliases: string[] }> }>(`/api/fitment/wipers/models?makeId=${make.id}`);
-      const model = models.models.find(
-        (entry) => sameText(entry.name, vehicle.model) || entry.aliases.some((alias) => sameText(alias, vehicle.model))
-      );
-      if (!model) throw new Error("Could not match vehicle model.");
-
-      const variants = await fetchJson<{
-        variants: Array<{ id: string; key: string; name: string; applicationKind: "legacy" | "canonical" }>;
-        automaticVariant: { id: string; key: string; name: string; applicationKind: "legacy" | "canonical" } | null;
-        requiresSelection: boolean;
-      }>(`/api/fitment/wipers/variants?makeId=${make.id}&modelId=${model.id}&year=${vehicle.year}`);
-      const selectedVariant = variants.variants.find((entry) => entry.id === vehicle.applicationId) ?? variants.automaticVariant;
-      if (!selectedVariant) throw new Error("Please confirm this vehicle's version in the vehicle finder.");
-
-      const query = new URLSearchParams({
-        makeId: make.id,
-        modelId: model.id,
-        year: String(vehicle.year),
-        applicationId: selectedVariant.id,
-        applicationKind: selectedVariant.applicationKind
-      });
-      const data = await fetchJson<{ fitments: FitmentResult[] }>(
-        `/api/fitment/wipers/results?${query}`
-      );
-      const fitment = data.fitments.find((entry) => entry.frontPair);
-
-      if (!fitment?.frontPair) throw new Error("No active wiper kit exists for this vehicle yet.");
-
-      const params = new URLSearchParams({
-        vehicle: vehicleLabel(vehicle),
-        applicationId: fitment.applicationId,
-        applicationKind: selectedVariant.applicationKind,
-        make: vehicle.make,
-        model: vehicle.model,
-        year: String(vehicle.year),
-        bodyChassis: selectedVariant.name
-      });
-      if (fitment.rearAddon) params.set("rearAddonId", fitment.rearAddon.id);
-      router.push(`/wipers/${fitment.frontPair.sku}?${params.toString()}` as never);
+      const catalogue = await fetchJson<{makes:Array<{id:string;name:string}>}>('/api/vehicles/catalog');
+      const make = catalogue.makes.find(entry=>sameText(entry.name,vehicle.make));
+      if (!make) throw new Error('Please confirm this vehicle using Change vehicle.');
+      const {models} = await fetchJson<{models:Array<{id:string;name:string;aliases:string[]}>}>(`/api/vehicles/catalog?makeId=${encodeURIComponent(make.id)}`);
+      const model = models.find(entry=>sameText(entry.name,vehicle.model)||entry.aliases.some(alias=>sameText(alias,vehicle.model)));
+      if (!make || !model) throw new Error('Please confirm this vehicle using Change vehicle.');
+      const { applications } = await fetchJson<{applications:FriendlyApplication[]}>(`/api/vehicles/applications?makeId=${make.id}&modelId=${model.id}&year=${vehicle.year}`);
+      const exact = applications.find(app=>app.id===vehicle.applicationId);
+      if (!exact) throw new Error('Please confirm this vehicle using Change vehicle.');
+      const versionLabel = groupFriendlyApplications([exact])[0].name;
+      selectVehicle({makeId:make.id,modelId:model.id,make:make.name,model:model.name,year:String(vehicle.year),applicationId:exact.id,applicationIds:[exact.id],generationId:exact.seriesId??undefined,variantId:exact.variantId,versionLabel,bodyConfiguration:versionLabel,...sharedVehicleDetails([exact])},'/parts?category=wipers');
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Could not find wipers.");
     } finally {

@@ -6,21 +6,14 @@ import { useEffect, useRef, useState } from "react";
 import { CarFront, Menu, Search, UserRound, X } from "lucide-react";
 import { CartLink } from "@/components/cart-link";
 import { blobMediaAssets } from "@/lib/blob-media-assets";
-import {
-  parseVehicleContext,
-  vehicleContextChangedEvent,
-  vehicleContextStorageKey,
-  type VehicleContext
-} from "@/lib/vehicle-context";
-import { partsTabRequestedEvent } from "@/lib/parts-navigation";
+import { useVehicleContext } from '@/components/vehicle-context-provider';
 
 const categoryLinks = [
   ["All Products", "/shop"],
-  ["Wiper Blades", "/parts?category=wipers"],
-  ["Oil Filters", "/parts?category=filters"],
-  ["Brake Pads", "/parts?category=brakes"],
-  ["Light Bulbs", "/parts?category=bulbs"],
-  ["Batteries", "/parts?category=batteries"],
+  ["Wiper Blades", "/shop?category=wipers"],
+  ["Oil Filters", "/shop?category=filters"],
+  ["Brake Pads", "/shop?category=brakes"],
+  ["Light Bulbs", "/shop?category=bulbs"],
   ["Weekly Deals", "/specials"]
 ] as const;
 
@@ -31,22 +24,7 @@ export function SiteHeader() {
   const [headerHeight, setHeaderHeight] = useState(0);
   const [isFixed, setIsFixed] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [vehicle, setVehicle] = useState<VehicleContext | null>(null);
-
-  useEffect(() => {
-    const syncVehicle = () => setVehicle(parseVehicleContext(window.localStorage.getItem(vehicleContextStorageKey)));
-    const onStorage = (event: StorageEvent) => {
-      if (event.key === vehicleContextStorageKey) syncVehicle();
-    };
-
-    syncVehicle();
-    window.addEventListener("storage", onStorage);
-    window.addEventListener(vehicleContextChangedEvent, syncVehicle);
-    return () => {
-      window.removeEventListener("storage", onStorage);
-      window.removeEventListener(vehicleContextChangedEvent, syncVehicle);
-    };
-  }, []);
+  const { vehicle, changeVehicle } = useVehicleContext();
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -97,10 +75,8 @@ export function SiteHeader() {
   }
 
   function selectVehicleCategory(href: string) {
-    if (!vehicle || window.location.pathname !== "/parts" || !href.startsWith("/parts?category=")) return false;
-    const category = new URL(href, window.location.origin).searchParams.get("category");
-    window.dispatchEvent(new CustomEvent(partsTabRequestedEvent, { detail: category }));
-    return true;
+    // Global category links always open the complete catalogue, independently of saved vehicle state.
+    return false;
   }
 
   function handleMobileCategoryChange(event: React.ChangeEvent<HTMLSelectElement>) {
@@ -141,7 +117,7 @@ export function SiteHeader() {
         </div>
 
         {menuOpen ? <nav id="mobile-site-menu" aria-label="Mobile menu" className="absolute left-4 right-4 top-[58px] z-50 grid gap-1 rounded-xl border border-black/10 bg-white p-2 shadow-panel lg:hidden">
-          <Link href="/parts#change-vehicle" onClick={() => setMenuOpen(false)} className="flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm font-black hover:bg-[#F3F5F7]"><CarFront className="h-4 w-4 text-signal" /> My Vehicle</Link>
+          {vehicle?<a href="#current-vehicle" onClick={()=>setMenuOpen(false)} className="flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm font-black hover:bg-[#F3F5F7]"><CarFront className="h-4 w-4 text-signal"/>{vehicleLabel}</a>:<button type="button" onClick={()=>{setMenuOpen(false);changeVehicle();}} className="flex min-h-11 items-center gap-3 rounded-lg px-3 text-left text-sm font-black hover:bg-[#F3F5F7]"><CarFront className="h-4 w-4 text-signal"/>My Vehicle</button>}
           <Link href="/account" onClick={() => setMenuOpen(false)} className="flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm font-black hover:bg-[#F3F5F7]"><UserRound className="h-4 w-4" /> Account</Link>
           <Link href="/contact" onClick={() => setMenuOpen(false)} className="flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm font-black hover:bg-[#F3F5F7]">Contact & Fitment Help</Link>
           <Link href="/shipping" onClick={() => setMenuOpen(false)} className="flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm font-black hover:bg-[#F3F5F7]">Shipping Information</Link>
@@ -155,10 +131,10 @@ export function SiteHeader() {
           <SearchForm className="flex" />
 
           <div className="flex items-center justify-end gap-1 text-xs font-black text-ink sm:gap-2 sm:text-sm">
-            <Link href="/parts#change-vehicle" className="inline-flex h-10 items-center gap-2 rounded-lg px-2 hover:bg-black/5 sm:px-3">
+            <button type="button" onClick={()=>vehicle?document.getElementById('current-vehicle')?.scrollIntoView({block:'center',behavior:'smooth'}):changeVehicle()} className="inline-flex h-10 items-center gap-2 rounded-lg px-2 hover:bg-black/5 sm:px-3">
               <CarFront className="h-4 w-4 text-signal" />
               <span className="hidden max-w-[220px] truncate sm:inline">{vehicle ? vehicleLabel : "My Vehicle"}</span>
-            </Link>
+            </button>
             <Link href="/account" className="inline-flex h-10 items-center gap-2 rounded-lg px-2 hover:bg-black/5 sm:px-3">
               <UserRound className="h-4 w-4" />
               <span className="hidden md:inline">Account</span>
@@ -167,7 +143,7 @@ export function SiteHeader() {
           </div>
         </div>
 
-        {!vehicle ? <SearchForm className={`${isFixed ? "hidden" : "mt-2 flex"} lg:hidden`} compact /> : null}
+        <SearchForm className="mt-2 flex lg:hidden" compact />
       </div>
 
       <nav className="border-t border-black/10 bg-[#F8FAFC]" aria-label="Product categories">

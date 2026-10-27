@@ -59,7 +59,7 @@ for (const row of productRows) {
     sku,
     topstarRef,
     supplierRef,
-    title: `${supplierRef} Oil Filter ${category} Fits ${brands}`,
+    title: `NexAuto ${category} Oil Filter - ${sku}`,
     priceNzd,
     category,
     brands,

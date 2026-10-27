@@ -82,7 +82,7 @@ function createProduct(row: OilFilterCatalogRow): Product {
     name: row.title,
     category: "filter",
     price: row.priceNzd,
-    description: `${row.supplierRef}. Mostly for ${row.mostlyFor}. Catalogue image reference ${row.topstarRef}.`,
+    description: `Mostly for ${row.mostlyFor}.`,
     detailSections: [],
     videoUrl: null,
     images: [row.imageUrl],

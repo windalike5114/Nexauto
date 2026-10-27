@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: { params: Promise<{ sku: stri
 
   return {
     title: detail.title,
-    description: `${detail.title}. Supplier ref ${detail.supplierRef}. Dimensions and vehicle fitment details for New Zealand drivers.`,
+    description: `${detail.title}. Dimensions and vehicle fitment details for New Zealand drivers.`,
     alternates: { canonical: `/brake-pads/${encodeURIComponent(detail.partNumber)}` }
   };
 }

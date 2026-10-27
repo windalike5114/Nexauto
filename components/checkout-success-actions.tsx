@@ -10,12 +10,12 @@ import { getAuthCallbackUrl, getFirstValidationMessage, parseSignUpInput } from 
 import { useCart } from "./cart-provider";
 
 export function CheckoutSuccessActions({
-  sessionId,
+  paymentConfirmed,
   customerEmail,
   customerName,
   signedIn
 }: {
-  sessionId?: string;
+  paymentConfirmed: boolean;
   customerEmail: string;
   customerName: string;
   signedIn: boolean;
@@ -31,12 +31,12 @@ export function CheckoutSuccessActions({
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (clearedRef.current) return;
+    if (!paymentConfirmed || clearedRef.current) return;
     clearedRef.current = true;
     window.localStorage.setItem("nexauto-cart", "[]");
     window.dispatchEvent(new Event("nexauto:checkout-complete"));
     clearCart();
-  }, [clearCart]);
+  }, [clearCart, paymentConfirmed]);
 
   async function createAccount(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -72,6 +72,8 @@ export function CheckoutSuccessActions({
     }
   }
 
+  if (!paymentConfirmed) return null;
+
   return (
     <div className="mt-6 space-y-4 text-left">
       <div className="rounded border border-mint/20 bg-emerald-50 p-4">
@@ -79,10 +81,6 @@ export function CheckoutSuccessActions({
           <CheckCircle className="mt-0.5 h-5 w-5 text-mint" />
           <div>
             <p className="font-black text-ink">Payment complete</p>
-            <p className="mt-1 text-sm font-bold leading-6 text-steel">
-              Your cart has been cleared. The order is saved against the checkout email, so account registration stays optional.
-            </p>
-            {sessionId ? <p className="mt-2 font-mono text-xs font-bold text-steel">Session: {sessionId}</p> : null}
           </div>
         </div>
         <div className="mt-4 flex flex-wrap gap-2">
@@ -103,9 +101,6 @@ export function CheckoutSuccessActions({
             </span>
             <div>
               <p className="font-black text-ink">Create an Account</p>
-              <p className="mt-1 text-sm font-bold leading-6 text-steel">
-                Optional: create an account to view this order, save vehicles, save addresses, and reorder later. Previous orders with the same email will link automatically.
-              </p>
             </div>
           </div>
 

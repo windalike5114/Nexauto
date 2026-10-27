@@ -12,6 +12,7 @@ type FinderOption = {
 
 type FinderModelOption = FinderOption & {
   aliases: string[];
+  modelIds?: string[];
 };
 
 type FinderVariantOption = FinderOption & {
@@ -150,7 +151,8 @@ export function WiperFitmentFinder({
         if (!active) return;
         setModels(data.models);
         const initialModelId = prefillRef.current?.makeId === makeId ? prefillRef.current.modelId : undefined;
-        if (initialModelId && data.models.some((entry) => entry.id === initialModelId)) setModelId(initialModelId);
+        const initialModel = data.models.find((entry) => entry.id === initialModelId || entry.modelIds?.includes(initialModelId ?? ""));
+        if (initialModel) setModelId(initialModel.id);
       })
       .catch((nextError) => {
         if (active) setError(nextError.message);
@@ -359,9 +361,6 @@ export function WiperFitmentFinder({
             Wiper fitment
           </div>
           <h2 className={`${compact ? "mt-2 text-2xl" : "mt-3 text-2xl sm:text-3xl"} font-black leading-tight`}>{title}</h2>
-          <p className="mt-2 max-w-2xl text-sm font-bold leading-6 text-steel">
-            {description}
-          </p>
         </div>
         <div className="hidden h-12 w-12 shrink-0 place-items-center rounded-xl bg-ink text-white shadow-sm sm:grid">
           {busy ? <Loader2 className="h-5 w-5 animate-spin" /> : <Search className="h-5 w-5" />}
@@ -413,11 +412,6 @@ export function WiperFitmentFinder({
         </p>
       ) : null}
 
-      {requiresVariantSelection ? (
-        <p className="mt-3 text-xs font-bold leading-5 text-steel">
-          This year has more than one possible fitment. Choose the body, chassis, or generation shown for your vehicle.
-        </p>
-      ) : null}
 
       {directToProduct ? (
         <button
@@ -431,14 +425,11 @@ export function WiperFitmentFinder({
         </button>
       ) : null}
 
-      {footnote ? <p className="mt-3 text-xs font-bold leading-6 text-steel">{footnote}</p> : null}
 
       <p className="mt-3 text-xs font-bold leading-6 text-steel">
-        Can't find your vehicle?{" "}
         <Link href="/contact" className="font-black text-signal underline underline-offset-4 hover:no-underline">
-          Contact us for fitment help
+          Find my vehicle
         </Link>
-        .
       </p>
 
       {error ? <div className="mt-4 rounded border border-signal/30 bg-red-50 p-3 text-sm font-bold text-signal">{error}</div> : null}

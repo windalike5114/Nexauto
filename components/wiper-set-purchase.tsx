@@ -6,6 +6,10 @@ import { formatMoney } from "@/lib/catalog";
 import type { WiperRearAddon, WiperSet } from "@/lib/types";
 import { getWiperSetPreviewImage } from "@/lib/wiper-product-images";
 import { useCart } from "./cart-provider";
+import type { VehicleContext } from '@/lib/vehicle-context';
+import { vehicleCartAttributes } from '@/lib/vehicle-cart';
+import { useVehicleContext } from '@/components/vehicle-context-provider';
+import { sameVehicleContext, vehicleContextLabel, vehicleContextDetails } from '@/lib/vehicle-context';
 
 export function WiperSetPurchase({
   wiperSet,
@@ -17,17 +21,21 @@ export function WiperSetPurchase({
   rearAddon: WiperRearAddon | null;
   vehicle: string;
   vehicleContext: {
-    applicationId: string;
+    applicationId?: string;
     applicationKind: "legacy" | "canonical";
     make: string;
     model: string;
     year: number;
     bodyChassis: string;
+    selection?: VehicleContext;
   } | null;
 }) {
   const [includeRear, setIncludeRear] = useState(Boolean(rearAddon));
   const [added, setAdded] = useState(false);
   const { addItem } = useCart();
+  const { vehicle: currentVehicle } = useVehicleContext();
+  const confirmed = vehicleContext && sameVehicleContext(currentVehicle,vehicleContext.selection??null) ? vehicleContext : null;
+  const currentVehicleLabel = currentVehicle ? [vehicleContextLabel(currentVehicle),vehicleContextDetails(currentVehicle)].filter(Boolean).join(' · ') : '';
   const wiperImage = getWiperSetPreviewImage(wiperSet);
 
   function handleAdd() {
@@ -45,16 +53,15 @@ export function WiperSetPurchase({
       attributes: {
         driver_length: `${wiperSet.driverLengthIn}"`,
         passenger_length: `${wiperSet.passengerLengthIn}"`,
-        ...(vehicle ? { vehicle } : {}),
-        ...(vehicleContext
+        ...(currentVehicleLabel ? { vehicle:currentVehicleLabel } : {}),
+        ...vehicleCartAttributes(currentVehicle, confirmed ? 'fits' : 'not-listed'),
+        ...(confirmed?.applicationId
           ? {
-              ...(vehicleContext.applicationKind === "canonical"
-                ? { vehicle_fitment_application_id: vehicleContext.applicationId }
-                : { vehicle_application_id: vehicleContext.applicationId }),
-              vehicle_make: vehicleContext.make,
-              vehicle_model: vehicleContext.model,
-              vehicle_year: vehicleContext.year,
-              ...(vehicleContext.bodyChassis ? { vehicle_body_chassis: vehicleContext.bodyChassis } : {})
+              vehicle_fitment_application_id: confirmed.applicationId,
+              vehicle_make: confirmed.make,
+              vehicle_model: confirmed.model,
+              vehicle_year: confirmed.year,
+              ...(confirmed.bodyChassis ? { vehicle_body_chassis: confirmed.bodyChassis } : {})
             }
           : {})
       }
@@ -73,16 +80,15 @@ export function WiperSetPurchase({
         bundleEligible: false,
         attributes: {
           rear_length: `${rearAddon.rearLengthIn}"`,
-          ...(vehicle ? { vehicle } : {}),
-          ...(vehicleContext
+          ...(currentVehicleLabel ? { vehicle:currentVehicleLabel } : {}),
+          ...vehicleCartAttributes(currentVehicle, confirmed ? 'fits' : 'not-listed'),
+          ...(confirmed?.applicationId
             ? {
-                ...(vehicleContext.applicationKind === "canonical"
-                  ? { vehicle_fitment_application_id: vehicleContext.applicationId }
-                  : { vehicle_application_id: vehicleContext.applicationId }),
-                vehicle_make: vehicleContext.make,
-                vehicle_model: vehicleContext.model,
-                vehicle_year: vehicleContext.year,
-                ...(vehicleContext.bodyChassis ? { vehicle_body_chassis: vehicleContext.bodyChassis } : {})
+                vehicle_fitment_application_id: confirmed.applicationId,
+                vehicle_make: confirmed.make,
+                vehicle_model: confirmed.model,
+                vehicle_year: confirmed.year,
+                ...(confirmed.bodyChassis ? { vehicle_body_chassis: confirmed.bodyChassis } : {})
               }
             : {})
         }

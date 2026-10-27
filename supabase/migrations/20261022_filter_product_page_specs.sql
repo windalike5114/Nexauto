@@ -36,30 +36,7 @@ alter table public.product_identifiers
     verification_status in ('verified', 'supplier_only', 'conflict', 'rejected')
   );
 
--- J-415 is the reviewed design sample. The dimensions come from the supplied
--- TopStar specification; the R2703P relationship remains blocked for review
--- because its published height conflicts with the supplier-listed value.
-update public.filter_variant_specs specs
-set
-  construction_type = 'cartridge',
-  height_mm = 154,
-  outside_diameter_mm = 46,
-  inside_diameter_top_mm = 21,
-  inside_diameter_bottom_mm = 21,
-  seal_ring_dimensions = array['52 × 3.5 mm', '14 × 3.5 mm', '7.5 × 3.5 mm'],
-  pack_quantity = 1,
-  verification_status = 'review',
-  updated_at = now()
-from public.product_variants variants
-where specs.product_variant_id = variants.id
-  and variants.sku = 'TOPSTAR-J415';
-
-update public.product_identifiers identifiers
-set verification_status = case
-  when identifiers.normalized_value = 'R2703P' then 'conflict'
-  else 'supplier_only'
-end
-from public.product_variants variants
-where identifiers.product_variant_id = variants.id
-  and variants.sku = 'TOPSTAR-J415'
-  and identifiers.identifier_type = 'cross_reference';
+-- Product rows and external identifiers are populated by the idempotent
+-- oil-filter normalization importer after this additive schema migration.
+-- Shared cross-references are valid many-to-many mappings and are not
+-- classified as conflicts solely because more than one NexAuto SKU uses them.

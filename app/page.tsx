@@ -1,12 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { ArrowRight, BatteryCharging, Disc3, Eye, Gauge, Headphones, Mail, PackageCheck, SearchCheck, Truck } from "lucide-react";
+import { ArrowRight, Disc3, Eye, Gauge, Headphones, Mail, PackageCheck, SearchCheck, Truck } from "lucide-react";
 import { HomeNewsletterSignup } from "@/components/home-newsletter-signup";
 import { HomeHeroCarousel } from "@/components/home-hero-carousel";
 import { HomeProductTabs, type ProductTabGroup, type StorefrontProductCard } from "@/components/home-product-tabs";
 import { ScrollReveal } from "@/components/scroll-reveal";
-import { VehiclePartsFinder } from "@/components/vehicle-parts-finder";
+import { HomeVehicleFinder } from "@/components/vehicle-parts-finder";
 import { formatMoney } from "@/lib/catalog";
 import { productHref, productImage } from "@/lib/product-content";
 import { wiperPairPricing } from "@/lib/pricing";
@@ -20,23 +20,21 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Auto Parts for New Zealand Drivers",
-  description: "Shop wiper blades, oil filters, brake pads, light bulbs and batteries with vehicle fitment support from NexAutoParts."
+  description: "Shop wiper blades, oil filters, brake pads and light bulbs with vehicle fitment support from NexAutoParts."
 };
 
 const categories = [
-  { title: "Wiper Blades", description: "Front pairs, rear blades and fitting support", href: "/parts?category=wipers", image: "/products/wiper-blade.png" },
-  { title: "Oil Filters", description: "Engine-specific filters and part-number matching", href: "/parts?category=filters", image: "/products/vehicle-oil-filter.png" },
-  { title: "Brake Pads", description: "Front and rear axle sets with application details", href: "/parts?category=brakes", image: "/products/brake-pads-category.png" },
-  { title: "Light Bulbs", description: "Headlight, fog and exterior replacement bulbs", href: "/parts?category=bulbs", image: "/products/halogen-bulb.png" },
-  { title: "Batteries", description: "Case size, terminal layout, Ah and CCA matching", href: "/parts?category=batteries", image: "/products/vehicle-battery.png" },
+  { title: "Wiper Blades", description: "Front pairs, rear blades and fitting support", href: "/shop?category=wipers", image: "/products/wiper-blade.png" },
+  { title: "Oil Filters", description: "Engine-specific filters and part-number matching", href: "/shop?category=filters", image: "/products/vehicle-oil-filter.png" },
+  { title: "Brake Pads", description: "Front and rear axle sets with application details", href: "/shop?category=brakes", image: "/products/brake-pads-category.png" },
+  { title: "Light Bulbs", description: "Headlight, fog and exterior replacement bulbs", href: "/shop?category=bulbs", image: "/products/halogen-bulb.png" },
   { title: "Need Help Finding a Part?", description: "Send your vehicle and part details for confirmation", href: "/contact", image: "/home/parts-support-hero.png" }
 ] as const;
 
 const needs = [
-  { title: "Improve visibility", description: "Clearer wet-weather driving with correctly sized wipers.", href: "/parts?category=wipers", action: "Shop wipers", icon: Eye },
-  { title: "Routine engine service", description: "Start with the vehicle, then confirm the engine-specific filter.", href: "/parts?category=filters", action: "Find filters", icon: Gauge },
-  { title: "Starting problems", description: "Match case size, terminal layout, Ah and cold-cranking amps.", href: "/parts?category=batteries", action: "Check batteries", icon: BatteryCharging },
-  { title: "Brake wear or noise", description: "Check the axle position and exact vehicle application before ordering.", href: "/parts?category=brakes", action: "Find brake pads", icon: Disc3 }
+  { title: "Improve visibility", description: "Clearer wet-weather driving with correctly sized wipers.", href: "/shop?category=wipers", action: "Shop wipers", icon: Eye },
+  { title: "Routine engine service", description: "Start with the vehicle, then confirm the engine-specific filter.", href: "/shop?category=filters", action: "Find filters", icon: Gauge },
+  { title: "Brake wear or noise", description: "Check the axle position and exact vehicle application before ordering.", href: "/shop?category=brakes", action: "Find brake pads", icon: Disc3 }
 ] as const;
 
 const guides = [
@@ -56,15 +54,13 @@ export default async function HomePage() {
     <main className="bg-white">
       <HomeHeroCarousel />
 
-      <section id="vehicle-finder" className="scroll-mt-40 border-b border-black/10 bg-[#EEF2F5]">
-        <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8"><VehiclePartsFinder /></div>
-      </section>
+      <HomeVehicleFinder />
 
       <section id="part-categories" className="scroll-mt-40 bg-white">
         <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
           <ScrollReveal>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-              <div><p className="text-sm font-black uppercase tracking-[0.18em] text-signal">Shop by category</p><h2 className="mt-2 text-3xl font-black sm:text-4xl">Everything starts with the right part.</h2></div>
+              <div><h2 className="text-3xl font-black sm:text-4xl">Shop by category</h2></div>
               <Link href="/shop" className="inline-flex items-center gap-2 text-sm font-black text-ink hover:text-signal">Shop all products <ArrowRight className="h-4 w-4" /></Link>
             </div>
           </ScrollReveal>
@@ -78,20 +74,20 @@ export default async function HomePage() {
         <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
           <ScrollReveal>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-              <div><p className="text-sm font-black uppercase tracking-[0.18em] text-signal">Weekly Deals</p><h2 className="mt-2 text-3xl font-black sm:text-4xl">Useful parts. Better value this week.</h2><p className="mt-2 text-sm font-bold text-steel">Current offers use real products and prices from our catalogue.</p></div>
+              <div><h2 className="text-3xl font-black sm:text-4xl">Weekly Deals</h2></div>
               <Link href="/specials" className="inline-flex items-center gap-2 text-sm font-black text-ink hover:text-signal">View All Weekly Deals <ArrowRight className="h-4 w-4" /></Link>
             </div>
           </ScrollReveal>
           <div className="mt-7 grid gap-4 lg:grid-cols-2">
             {featuredWiper ? <ScrollReveal><DealBanner eyebrow="Wiper bundle offer" title={`Two front wiper pairs for ${formatMoney(wiperPairPricing.bundleTotals[2])}`} description={`Choose any two eligible front wiper pairs. Save ${formatMoney(wiperPairPricing.salePrice * 2 - wiperPairPricing.bundleTotals[2])} against two current single-pair prices.`} href="/parts?category=wipers" action="Choose my wipers" image={getWiperSetPreviewImage(featuredWiper)} /></ScrollReveal> : null}
-            {bulbBundle ? <ScrollReveal delayMs={80}><DealBanner eyebrow="Bulb bundle offer" title={bulbBundle.name} description={`A current lighting bundle at ${formatMoney(bulbBundle.price)}. Product contents and specifications are shown on the detail page.`} href={`/products/${bulbBundle.slug}`} action="View bulb bundle" image={productImage(bulbBundle)} /></ScrollReveal> : null}
+            {bulbBundle ? <ScrollReveal delayMs={80}><DealBanner eyebrow="Bulb bundle offer" title={bulbBundle.name} description={`4 × H11 + licence plate bulbs · ${formatMoney(bulbBundle.price)}`} href={`/products/${bulbBundle.slug}`} action="View bulb bundle" image={productImage(bulbBundle)} /></ScrollReveal> : null}
           </div>
         </div>
       </section> : null}
 
       {productGroups.some((group) => group.items.length > 0) ? <section className="bg-white">
         <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
-          <ScrollReveal><div><p className="text-sm font-black uppercase tracking-[0.18em] text-signal">Shop current products</p><h2 className="mt-2 text-3xl font-black sm:text-4xl">Choose what you need next.</h2><p className="mt-2 text-sm font-bold text-steel">Current products, newly listed items and genuine offers from our catalogue.</p></div></ScrollReveal>
+          <ScrollReveal><h2 className="text-3xl font-black sm:text-4xl">Shop products</h2></ScrollReveal>
           <ScrollReveal delayMs={80} className="mt-7"><HomeProductTabs groups={productGroups} /></ScrollReveal>
         </div>
       </section> : null}
@@ -99,7 +95,7 @@ export default async function HomePage() {
       <section className="border-y border-black/10 bg-[#F8FAFC]">
         <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
           <ScrollReveal><p className="text-sm font-black uppercase tracking-[0.18em] text-signal">Shop by maintenance need</p><h2 className="mt-2 text-3xl font-black sm:text-4xl">What does your car need today?</h2></ScrollReveal>
-          <div className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {needs.map((need, index) => {
               const Icon = need.icon;
               return <ScrollReveal key={need.title} delayMs={index * 60}><Link href={need.href as never} className="group block h-full rounded-xl border border-black/10 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:border-signal/40 hover:shadow-panel"><span className="grid h-11 w-11 place-items-center rounded-lg bg-ink text-white"><Icon className="h-5 w-5" /></span><h3 className="mt-5 text-xl font-black">{need.title}</h3><p className="mt-2 min-h-[72px] text-sm font-semibold leading-6 text-steel">{need.description}</p><span className="mt-5 inline-flex items-center gap-2 text-sm font-black text-signal">{need.action} <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" /></span></Link></ScrollReveal>;
@@ -110,10 +106,10 @@ export default async function HomePage() {
 
       <section className="bg-white">
         <div className="mx-auto grid max-w-7xl gap-4 px-4 py-10 sm:grid-cols-2 sm:px-6 lg:grid-cols-4 lg:px-8 lg:py-14">
-          <TrustCard icon={<SearchCheck className="h-5 w-5" />} title="Fitment support" text="Category-specific checks before a compatibility claim." />
-          <TrustCard icon={<PackageCheck className="h-5 w-5" />} title="Clear product details" text="Pack quantity, size and key specifications shown upfront." />
-          <TrustCard icon={<Truck className="h-5 w-5" />} title="NZ-wide delivery" text="Dispatch and delivery details shown by product type." />
-          <TrustCard icon={<Headphones className="h-5 w-5" />} title="Local help" text="Auckland-based support when more vehicle detail is needed." />
+          <TrustCard icon={<SearchCheck className="h-5 w-5" />} title="Fitment support" text="Vehicle matching" />
+          <TrustCard icon={<PackageCheck className="h-5 w-5" />} title="Product details" text="Sizes & specifications" />
+          <TrustCard icon={<Truck className="h-5 w-5" />} title="NZ-wide delivery" text="From Auckland" />
+          <TrustCard icon={<Headphones className="h-5 w-5" />} title="Local help" text="New Zealand team" />
         </div>
       </section>
 

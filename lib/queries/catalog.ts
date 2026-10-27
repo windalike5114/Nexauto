@@ -1,5 +1,6 @@
 import { createSupabaseServerClient } from "@/lib/supabase";
 import type { Category, Product, ProductAttributes, ProductDetailSection, ProductVariant } from "@/lib/types";
+import { isStorefrontCategoryVisible } from '@/lib/storefront-visibility';
 
 type ProductRow = {
   id: string;
@@ -98,7 +99,7 @@ export async function listCategories() {
   const { data, error } = await supabase.from("categories").select("slug,name,description").order("sort_order");
 
   if (error) throw error;
-  return (data as CategoryRow[]).map(mapCategory);
+  return (data as CategoryRow[]).filter(row => isStorefrontCategoryVisible(row.slug)).map(mapCategory);
 }
 
 export async function listProducts(categorySlug?: string) {
@@ -118,7 +119,7 @@ export async function listProducts(categorySlug?: string) {
   }
 
   if (error) throw error;
-  return (data as ProductRow[]).map(mapProduct);
+  return (data as ProductRow[]).filter(row => isStorefrontCategoryVisible(row.category_slug)).map(mapProduct);
 }
 
 export async function getProductBySlug(slug: string) {
@@ -150,7 +151,8 @@ export async function getProductBySlug(slug: string) {
     throw error;
   }
 
-  return mapProduct(data as ProductRow);
+  const product = mapProduct(data as ProductRow);
+  return isStorefrontCategoryVisible(product.category) ? product : null;
 }
 
 export async function getProductAttributes(productId: string) {

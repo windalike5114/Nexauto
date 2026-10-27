@@ -22,7 +22,8 @@ export async function BrakePadProductView({ detail }: { detail: BrakePadDetail }
         modelId: vehicle.modelId,
         year: Number(vehicle.year),
         applicationId: vehicle.applicationId,
-        applicationIds: vehicle.applicationIds
+        applicationIds: vehicle.applicationIds,
+        variantGroup: vehicle.variantGroup
       });
     } catch {
       vehicleFitmentStatus = "unavailable";
@@ -66,11 +67,9 @@ export async function BrakePadProductView({ detail }: { detail: BrakePadDetail }
             ) : null}
             <div className="mt-3 space-y-0.5 text-sm font-bold text-steel">
               <p>SKU: {detail.partNumber}</p>
-              <p className="text-xs">Supplier ref: {detail.supplierRef}</p>
             </div>
             <div className="mt-4">
               <p className="text-3xl font-black sm:text-4xl">{formatMoney(detail.variant.price)}</p>
-              <p className="mt-1 text-xs font-bold text-steel">GST incl. · Price shown for one listed set</p>
             </div>
           </header>
 
@@ -78,6 +77,7 @@ export async function BrakePadProductView({ detail }: { detail: BrakePadDetail }
             detail={detail}
             vehicleFitmentStatus={vehicleFitmentStatus}
             vehicleLabel={[vehicleLabel, vehicleDetail].filter(Boolean).join(" · ")}
+            vehicle={vehicle}
           />
         </section>
       </section>
@@ -85,28 +85,15 @@ export async function BrakePadProductView({ detail }: { detail: BrakePadDetail }
       <section className="border-t border-black/10 bg-white">
         <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
           <div className="mb-4">
-            <p className="text-sm font-black uppercase tracking-[0.18em] text-signal">Product description</p>
-            <h2 className="mt-1 text-2xl font-black sm:text-3xl">Product Specifications</h2>
-            <p className="mt-2 text-sm font-bold leading-6 text-steel">
-              Dimensions are generated from the uploaded brake-pad catalogue. Vehicle fitment remains blank where no detailed records were supplied.
-            </p>
+            <h2 className="text-2xl font-black sm:text-3xl">Product Specifications</h2>
           </div>
 
           <div className="divide-y divide-black/10 overflow-hidden rounded-lg border border-black/10 bg-white">
             <AccordionItem title={`Dimensions and fitment · ${detail.partNumber}`} open>
-              <p className="mb-5">{detail.packDescription}. Confirm the pad shape, dimensions and brake system before installation.</p>
+              <p className="mb-5">{detail.packDescription}</p>
               <DimensionsTable detail={detail} />
               <FitmentTable fitments={detail.fitments} />
             </AccordionItem>
-
-            {detail.fitments.length > 0 ? (
-              <AccordionItem title="Vehicle Compatibility" open={Boolean(vehicle)}>
-                <p>
-                  The application rows shown in Product Specifications are informational only and are not used to decide Fits / Not fit.
-                  {vehicle ? ` Compatibility for ${vehicleLabel}${vehicleDetail ? ` · ${vehicleDetail}` : ""} will be checked against the separate vehicle-fitment table.` : " Select a vehicle to prepare a compatibility check against the separate vehicle-fitment table."}
-                </p>
-              </AccordionItem>
-            ) : null}
 
             <AccordionItem title="Installation & Bedding-in Notes">
               Brake pads are safety-critical parts and should be installed by a suitably qualified person. Inspect the discs, caliper slides and related hardware, follow the vehicle manufacturer&apos;s torque procedure, then complete the pad maker&apos;s bedding-in process before normal use.

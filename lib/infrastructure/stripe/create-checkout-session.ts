@@ -72,6 +72,7 @@ export function buildStripeSessionParams(input: StripeCheckoutSessionAdapterInpu
         product_data: {
           name: item.name,
           description: `${item.sku} | ${Object.entries(item.attributes)
+            .filter(([key]) => !['vehicle_selection','vehicle_fitment_status','vehicle_fitment_application_id','vehicle_application_id','supplier_ref','supplier_part_number'].includes(key))
             .map(([key, value]) => `${key}: ${value}`)
             .join(", ")}`,
           metadata: {

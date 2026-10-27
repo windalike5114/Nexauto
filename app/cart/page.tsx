@@ -61,9 +61,6 @@ export default function CartPage() {
               <section className="rounded-lg border border-black/10 bg-zinc-50 p-5">
                 <p className="text-xs font-black uppercase tracking-[0.14em] text-signal">Selected vehicle</p>
                 <p className="mt-2 text-2xl font-black text-ink">{selectedVehicle}</p>
-                <p className="mt-2 text-sm font-bold text-steel">
-                  This vehicle will be included with the order for fitment and connector fulfillment.
-                </p>
               </section>
             ) : null}
 
@@ -113,9 +110,6 @@ export default function CartPage() {
             <section className="rounded-lg border border-black/10 bg-[#F8FAFC] p-5 shadow-sm">
               <p className="text-xs font-black uppercase tracking-[0.14em] text-signal">Vehicle finder</p>
               <h2 className="mt-2 text-2xl font-black text-ink">Shop parts for another vehicle</h2>
-              <p className="mt-2 text-sm font-bold leading-6 text-steel">
-                Use the vehicle finder to add another matched front pair without losing the current cart.
-              </p>
               <Link href="/#vehicle-finder" className="mt-4 inline-flex h-11 items-center justify-center rounded bg-ink px-4 text-sm font-black text-white hover:bg-black">
                 Go to vehicle finder
               </Link>
@@ -163,9 +157,6 @@ export default function CartPage() {
                 </div>
               ) : null}
               {couponError ? <p className="mt-3 text-xs font-bold text-signal">{couponError}</p> : null}
-              <p className="mt-3 text-xs font-bold leading-5 text-steel">
-                Coupon codes are checked before checkout and revalidated securely at payment.
-              </p>
             </div>
             {welcomeRewardStatus === "available" || welcomeRewardStatus === "applied" ? (
               <div className="mt-4 rounded-lg border border-red-100 bg-red-50 p-4">
@@ -202,7 +193,6 @@ export default function CartPage() {
               {totals.discount > 0 ? <SummaryRow label="Discount" value={`-${formatMoney(totals.discount)}`} highlight /> : null}
               <SummaryRow label="Grand total" value={`NZD ${formatMoney(totals.grandTotal)}`} strong />
             </div>
-            <p className="mt-3 text-sm leading-6 text-steel">GST is included where applicable. Delivery address is confirmed before payment.</p>
             <button
               type="button"
               onClick={checkout}
@@ -245,7 +235,7 @@ function SummaryRow({ label, value, highlight = false, strong = false }: { label
 }
 
 function isCustomerVisibleAttribute(key: string) {
-  return !["vehicle", "vehicle_application_id", "vehicle_fitment_application_id", "vehicle_make", "vehicle_model", "vehicle_year", "vehicle_series", "vehicle_body", "vehicle_body_chassis"].includes(key);
+  return !["vehicle_selection", "vehicle_fitment_status", "supplier_ref", "vehicle", "vehicle_application_id", "vehicle_fitment_application_id", "vehicle_make", "vehicle_model", "vehicle_year", "vehicle_series", "vehicle_body", "vehicle_body_chassis"].includes(key);
 }
 
 function getVehicleLabel(item: ReturnType<typeof useCart>["items"][number]) {

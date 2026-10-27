@@ -15,7 +15,7 @@ import { getWiperRearAddonByLength, getWiperSetByLengths } from "@/lib/queries/w
 const MAX_PUBLIC_RESULTS = 20;
 
 export async function GET(request: Request) {
-  const guard = guardFitmentApiRequest(request);
+  const guard = await guardFitmentApiRequest(request);
   if (guard.response) return guard.response;
 
   const { searchParams } = new URL(request.url);

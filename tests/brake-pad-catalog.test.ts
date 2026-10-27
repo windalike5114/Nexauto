@@ -9,7 +9,8 @@ test("uploaded brake-pad catalogue is complete and keeps public output PN/year f
   const first = catalog.find((product) => product.sku === "NBP1200");
   assert.ok(first);
   assert.equal(first.supplierRef, "DB1802");
-  assert.equal(first.priceNzd, 50);
+  // The October 26 price update doubled this original $50 catalogue price.
+  assert.equal(first.priceNzd, 100);
   assert.equal(first.position, "Front (Axle Set - 4 Pads)");
   assert.deepEqual([first.lengthMm, first.widthMm, first.thicknessMm], [139.2, 55.5, 17.3]);
   assert.equal(first.imageUrl, "/products/brake-pads/catalog/NBP1200.jpg");

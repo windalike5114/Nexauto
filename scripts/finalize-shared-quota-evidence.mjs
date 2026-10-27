@@ -1,0 +1,30 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
+const dir='outputs/security-quota-20261028';
+const read=f=>JSON.parse(fs.readFileSync(`${dir}/${f}`,'utf8').replace(/^\uFEFF/,''));
+const hash=b=>createHash('sha256').update(b).digest('hex');
+const manifest=read('release-manifest.json'),alias=read('production-alias-after.json');
+const rollup=JSON.parse(fs.readFileSync('outputs/production-rollup-20261028/release-manifest.json','utf8'));
+assert.equal(alias.deployment.id,rollup.deployment.id);
+for(const f of manifest.files){
+  const actual=hash(fs.readFileSync(path.join(rollup.source,f.file)));
+  assert.equal(actual,hash(fs.readFileSync(f.file)),f.file);
+  f.after_sha256=actual;
+}
+manifest.productionChanged=true;
+manifest.productionChangedByThisPublisher=false;
+manifest.releaseMethod='Adopted independently published production rollup after all 15 security source files matched; stale candidate promotion was blocked.';
+manifest.productionDeployment=rollup.deployment;manifest.activeSource=rollup.source;manifest.rollback=rollup.rollback;
+fs.writeFileSync(`${dir}/release-manifest.json`,JSON.stringify(manifest,null,2));
+const prod=read('production-http-verification.json'),candidate=read('candidate-http-verification.json'),boundaries=read('entrypoint-boundary-verification.json'),probes=read('entrypoint-probes-after.json'),browser=read('browser-verification.json'),acl=read('database-permissions-after.json');
+assert.ok(prod.passed&&candidate.passed&&boundaries.passed&&probes.inventoryComplete);
+assert.equal(browser.cartItems,1);assert.ok(browser.pendingPaymentShown);assert.ok(acl.tables.every(t=>t.rls&&!t.anon_select&&!t.authenticated_select&&t.service_select));
+const errors=fs.readFileSync(`${dir}/production-quota-errors.jsonl`,'utf8').trim().split(/\r?\n/).filter(Boolean).map(l=>JSON.parse(l)).filter(r=>r.type==='log');
+const proofLogs=fs.readFileSync(`${dir}/trusted-header-verification.jsonl`,'utf8').trim().split(/\r?\n/).filter(Boolean).map(l=>JSON.parse(l)).filter(r=>r.type==='log').map(r=>JSON.parse(r.data.message));
+assert.equal(new Set(proofLogs.map(m=>m.networkToken)).size,1);
+fs.writeFileSync(`${dir}/preview-anonymous-verification.json`,JSON.stringify({checkedAt:boundaries.checkedAt,checks:boundaries.checks.filter(r=>r.base===boundaries.preview)},null,2));
+const summary={checkedAt:new Date().toISOString(),productionDeployment:alias.deployment,sharedStoragePermissionsVerified:true,unitTestsPassed:31,typecheckPassed:true,candidateBuild:'READY',candidateHttpChecks:candidate.checks.length,productionHttpChecks:prod.checks.length,hosts:probes.hostCount,anonymousRequests:probes.rows.length,boundaryChecks:boundaries.checks.length,proofLogRequests:proofLogs.length,proofNetworkIdentities:1,productionQuotaErrorRecords:errors.length,errorLogWindow:'30m only',browser,remaining:['Default home/cart/checkout are reachable: complete origin isolation not established','Vercel automation bypass credential should be rotated by owner after accidental private operation output','Account quotas, byte-volume quotas, challenge integration and long-term performance/false-positive metrics not yet verified','Real payment/webhook and A/B customer permission tests remain separate'],planSha256:hash(fs.readFileSync('NexAuto_Security_Plan_Audit_2026-10-27.md'))};
+fs.writeFileSync(`${dir}/verification-summary.json`,JSON.stringify(summary,null,2));
+console.log(JSON.stringify({production:alias.deployment.id,sourceFilesMatched:manifest.files.length,unitTests:31,httpChecks:prod.checks.length,hosts:probes.hostCount,anonymousRequests:probes.rows.length,boundaryChecks:boundaries.checks.length,productionQuotaErrors:errors.length,cartItems:browser.cartItems}));

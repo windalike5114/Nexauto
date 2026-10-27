@@ -127,5 +127,6 @@ function readPosition(value: string): BrakePadPosition {
 }
 
 function normalizeKey(value: string) {
-  return value.toUpperCase().replace(/[^A-Z0-9]/g, "");
+  // Preserve links created before these three Bendix references were corrected.
+  return value.toUpperCase().replace(/[^A-Z0-9]/g, "").replace(/^(DB(?:1405|1849|2193))W$/, "$1");
 }

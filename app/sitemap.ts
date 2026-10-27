@@ -3,6 +3,7 @@ import { blogArticles } from "@/lib/blog";
 import { listBrakePadCatalogSkus } from "@/lib/queries/brake-pad-catalog";
 import { listOilFilterCatalogSkus } from "@/lib/queries/oil-filter-catalog";
 import { listWiperSets } from "@/lib/queries/wiper-commerce";
+import { listBulbCatalogSkus } from "@/lib/queries/bulb-catalog";
 
 const siteUrl = "https://nexautoparts.co.nz";
 
@@ -63,6 +64,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   dynamicEntries.push(...listBrakePadCatalogSkus().map((sku) => ({
     url: `${siteUrl}/brake-pads/${encodeURIComponent(sku)}`,
+    lastModified: now,
+    changeFrequency: "weekly" as const,
+    priority: 0.7
+  })));
+
+  dynamicEntries.push(...(await listBulbCatalogSkus()).map((sku) => ({
+    url: `${siteUrl}/bulbs/${sku}`,
     lastModified: now,
     changeFrequency: "weekly" as const,
     priority: 0.7

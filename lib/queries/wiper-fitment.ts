@@ -109,12 +109,12 @@ export async function listWiperFitmentMakes() {
 
 export async function listWiperFitmentModels(makeId: string) {
   const make = (await listVehicleCatalogIndex()).find((entry) => entry.id === makeId);
-  return (make?.models ?? []).map(({ id, name }) => ({ id, name, aliases: [name], modelIds: [id] }));
+  return (make?.models ?? []).map(({ id, name, aliases, modelIds }) => ({ id, name, aliases, modelIds }));
 }
 
 export async function listWiperFitmentYears(makeId: string, modelId: string) {
   const make = (await listVehicleCatalogIndex()).find((entry) => entry.id === makeId);
-  return make?.models.find((entry) => entry.id === modelId)?.years ?? [];
+  return make?.models.find((entry) => entry.modelIds.includes(modelId))?.years ?? [];
 }
 
 export async function listWiperFitmentVariants(makeId: string, modelId: string, year: number) {
@@ -141,9 +141,9 @@ async function loadWiperLengthFitments(
 ) {
   const index = await listVehicleCatalogIndex();
   const make = index.find((entry) => entry.id === makeId);
-  const model = make?.models.find((entry) => entry.id === modelId);
+  const model = make?.models.find((entry) => entry.modelIds.includes(modelId));
   if (!make || !model) return { group: null, results: [] as WiperFitmentResult[] };
-  const group: WiperFitmentModelGroup = { id: model.id, name: model.name, aliases: [model.name], modelIds: [model.id] };
+  const group: WiperFitmentModelGroup = { id: model.id, name: model.name, aliases: model.aliases, modelIds: model.modelIds };
   const applications = await listVehicleCatalogApplications(makeId, modelId, year);
   const applicationById = new Map(applications.map((application) => [application.id, application]));
   const fits = await findCatalogWiperFitments(applications.map((application) => application.id));

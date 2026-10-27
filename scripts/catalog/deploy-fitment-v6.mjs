@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 import { createClient } from "@supabase/supabase-js";
 import XLSX from "xlsx";
 import { VEHICLE_APPLICATION_YEAR_CAPS } from "./vehicle-catalog-safety.mjs";
+import { canonicalOilFilterName } from "./normalize-oil-filter-catalog.mjs";
 
 export const SOURCE_CODE = "NEXAUTO_FITMENT_V6_2026_10_22";
 const EXPECTED_VEHICLE_RELEASE_HASH = "ea51cdaebe629afa9edf096bbcd0de18dbdc1e919d2a9051ec96c34421812e46";
@@ -301,7 +302,7 @@ async function upsertCatalogues(db, prepared) {
       sku: row.sku,
       product: {
         slug: `oil-filter-${row.sku.toLowerCase()}`,
-        name: row.title,
+        name: canonicalOilFilterName(row),
         category_slug: "filter",
         price: row.priceNzd,
         description: `${row.supplierRef}. Mostly for ${row.mostlyFor}.`,

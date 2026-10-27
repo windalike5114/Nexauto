@@ -69,7 +69,7 @@ export function CompatiblePartsBrowser({ products, wiperSet, wiperHref, rearLeng
         {error ? <div className="mb-6 rounded-xl border border-signal/25 bg-red-50 p-4 text-sm font-bold text-signal">{error}</div> : null}
 
         <div className="grid gap-2 rounded-xl border border-black/10 bg-white p-3 text-xs font-black shadow-sm min-[480px]:grid-cols-3 sm:text-sm">
-          <ServicePill icon={<CheckCircle2 className="h-4 w-4" />} label="Fitment status clearly labelled" />
+          <ServicePill icon={<CheckCircle2 className="h-4 w-4" />} label="Vehicle fitment" />
           <ServicePill icon={<Truck className="h-4 w-4" />} label="NZ-wide delivery" />
           <ServicePill icon={<ShieldCheck className="h-4 w-4" />} label="Fitment support" />
         </div>
@@ -95,7 +95,7 @@ export function CompatiblePartsBrowser({ products, wiperSet, wiperHref, rearLeng
           <div className="mt-6 rounded-2xl border border-black/10 bg-white p-7 shadow-sm" role="tabpanel">
             <SearchX className="h-8 w-8 text-signal" />
             <h3 className="mt-4 text-2xl font-black">No confirmed {activeTab === "all" ? "parts" : tabs.find((tab) => tab.key === activeTab)?.label.toLowerCase()} yet</h3>
-            <p className="mt-3 max-w-2xl text-sm font-semibold leading-6 text-steel">We will not show a generic product as compatible without a published fitment relationship. Send us the chassis, engine or existing part number and we can review the missing match.</p>
+            <Link href="/parts#change-vehicle" className="mt-5 mr-3 inline-flex h-11 items-center justify-center rounded-lg border border-black/10 px-5 text-sm font-black">Change vehicle</Link>
             <Link href={buildHelpHref(vehicleLabel) as never} className="mt-5 inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-signal px-5 text-sm font-black text-white hover:bg-red-700">Request fitment help <ArrowRight className="h-4 w-4" /></Link>
           </div>
         )}

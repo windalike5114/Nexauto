@@ -1,0 +1,38 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {reviewedRule,buildPlan} from '../scripts/catalog/publish-returned-brake-results-20261025.mjs';
+import {enrich} from '../scripts/catalog/process-brake-alias-review-20261025.mjs';
+const d=JSON.parse(fs.readFileSync('outputs/brake-returned-results-import-20261025/before-snapshot.json'));
+const candidates=JSON.parse(fs.readFileSync('outputs/brake-returned-results-inspection-20261025/application-candidates.json'));
+const apps=new Map(enrich(d).map(a=>[a.application_id,a]));
+const plan=buildPlan(d);
+assert.equal(plan.counts.approved,22);
+assert.equal(plan.counts.restore,20);
+assert.equal(plan.counts.insert,2);
+assert.equal(plan.counts.already,4);
+assert.equal(plan.counts.remaining,158);
+for(const r of plan.approved){
+ const a=apps.get(r.application_id);
+ assert(reviewedRule(a,r));
+ assert.equal(reviewedRule({...a,engine_codes:['UNPROVEN_ENGINE']},r),null);
+ assert.equal(reviewedRule(a,{...r,candidate_db:['DB99999']}),null);
+ assert(!a.published.some(f=>f.position===r.position));
+ assert.deepEqual(a.all_years,r.finding_years);
+ assert(r.proofs.length>0);
+ assert.equal(r.product_candidates.length,1);
+}
+const hybrid=plan.approved.find(r=>r.rule_id==='HILUX_GUN126_48V_CABCHASSIS_FRONT');
+assert.equal(reviewedRule({...apps.get(hybrid.application_id),body:'Utility'},hybrid),null);
+const hatch=plan.approved.find(r=>r.rule_id==='COROLLA_ZWE211_HATCH_EXPLICIT_YEAR_ROWS');
+assert.equal(reviewedRule({...apps.get(hatch.application_id),body:'Sedan'},hatch),null);
+const hilux=plan.approved.find(r=>r.rule_id==='HILUX_VI_EXACT_CHASSIS_ENGINE_DB1149');
+assert.equal(reviewedRule({...apps.get(hilux.application_id),drive:'RWD'},hilux),null);
+assert(plan.remaining.some(r=>r.model==='A4'));
+assert(plan.remaining.some(r=>r.model==='COMMODORE'));
+assert(plan.remaining.some(r=>r.candidate_db.includes('DB308')));
+assert(!plan.approved.some(r=>r.make==='FORD'&&r.series==='PJ'));
+assert.equal(plan.before.applications,plan.projected.applications);
+assert.equal(plan.before.application_years,plan.projected.application_years);
+assert.equal(plan.projected.covered_application_years-plan.before.covered_application_years,61);
+assert.equal(plan.approved.length+plan.remaining.length+plan.already.length,candidates.length);
+console.log('Passed: 22 explicit approvals, evidence checks, 184 target accounting, body/engine/drive/DB negative cases, 48V body guard, unchanged denominator, +61 application-years.');

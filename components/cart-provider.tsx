@@ -485,9 +485,6 @@ function CartDrawer({ recentlyAdded }: { recentlyAdded: CartItem | null }) {
           <section className="mt-4 rounded-lg border border-black/10 bg-[#F8FAFC] p-4">
             <p className="text-xs font-black uppercase tracking-[0.14em] text-signal">Vehicle finder</p>
             <h3 className="mt-1 text-lg font-black text-ink">Shop parts for another vehicle</h3>
-            <p className="mt-2 text-sm font-bold leading-6 text-steel">
-              Open the vehicle finder to search another car while keeping this cart.
-            </p>
             <Link href="/#vehicle-finder" onClick={closeDrawer} className="mt-3 inline-flex h-10 items-center justify-center rounded bg-ink px-4 text-sm font-black text-white hover:bg-black">
               Go to vehicle finder
             </Link>
@@ -801,5 +798,5 @@ function getVehicleLabel(item: CartItem) {
 }
 
 function isCustomerVisibleAttribute(key: string) {
-  return !["vehicle", "vehicle_application_id", "vehicle_fitment_application_id", "vehicle_make", "vehicle_model", "vehicle_year", "vehicle_series", "vehicle_body", "vehicle_body_chassis"].includes(key);
+  return !["vehicle_selection", "vehicle_fitment_status", "supplier_ref", "vehicle", "vehicle_application_id", "vehicle_fitment_application_id", "vehicle_make", "vehicle_model", "vehicle_year", "vehicle_series", "vehicle_body", "vehicle_body_chassis"].includes(key);
 }

@@ -10,6 +10,8 @@ import {
 } from "@/lib/catalog";
 import type { Product, ProductAttributes, ProductVariant, SelectedAttributes } from "@/lib/types";
 import { useCart } from "./cart-provider";
+import { useVehicleContext } from '@/components/vehicle-context-provider';
+import { vehicleCartAttributes } from '@/lib/vehicle-cart';
 
 export function ProductConfigurator({
   product,
@@ -24,6 +26,7 @@ export function ProductConfigurator({
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
   const { addItem } = useCart();
+  const { vehicle } = useVehicleContext();
 
   const variant = useMemo(() => findMatchingVariant(variants, selected), [selected, variants]);
   const available = Boolean(variant && variant.stock > 0);
@@ -41,7 +44,7 @@ export function ProductConfigurator({
       price: variant.price,
       imageUrl: product.images[0],
       bundleEligible: false,
-      attributes: variant.attributes
+      attributes: {...variant.attributes,...vehicleCartAttributes(vehicle)}
     });
     setAdded(true);
     window.setTimeout(() => setAdded(false), 1600);

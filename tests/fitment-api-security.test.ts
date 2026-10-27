@@ -2,12 +2,13 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 import {
-  guardFitmentApiRequest,
   hasOnlySearchParams,
   parseFitmentId,
   parseVehicleYear
 } from "../lib/application/fitment/public-api";
 import { FixedWindowRateLimiter } from "../lib/application/fitment/request-rate-limit";
+import {fixtureGuard} from './helpers/quota-fixture';
+const guardFitmentApiRequest=fixtureGuard();
 import {
   formatWiperFitmentVariantLabel,
   toPublicWiperFitmentResult,
@@ -45,8 +46,8 @@ test("fitment request validation accepts UUIDs and V5 catalogue IDs, bounded yea
   assert.equal(hasOnlySearchParams(new URLSearchParams({ makeId: UUID, export: "all" }), ["makeId"]), false);
 });
 
-test("fitment API guard rejects explicit cross-site browser requests and sets defensive headers", () => {
-  const crossSite = guardFitmentApiRequest(new Request("https://example.test/api/fitment/wipers/makes", {
+test("fitment API guard rejects explicit cross-site browser requests and sets defensive headers", async () => {
+  const crossSite = await guardFitmentApiRequest(new Request("https://example.test/api/fitment/wipers/makes", {
     headers: { "sec-fetch-site": "cross-site", "x-forwarded-for": "192.0.2.10" }
   }));
   assert.equal(crossSite.response?.status, 403);
@@ -54,7 +55,7 @@ test("fitment API guard rejects explicit cross-site browser requests and sets de
   assert.equal(crossSite.headers.get("Cross-Origin-Resource-Policy"), "same-origin");
   assert.equal(crossSite.headers.get("X-Robots-Tag"), "noindex, nofollow, noarchive");
 
-  const sameOrigin = guardFitmentApiRequest(new Request("https://example.test/api/fitment/wipers/makes", {
+  const sameOrigin = await guardFitmentApiRequest(new Request("https://example.test/api/fitment/wipers/makes", {
     headers: { "sec-fetch-site": "same-origin", "x-forwarded-for": "192.0.2.11" }
   }));
   assert.equal(sameOrigin.response, null);

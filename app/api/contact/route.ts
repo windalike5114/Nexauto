@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { sendContactEmails } from "@/lib/email/templates/contact";
 import { createSupabaseAdminClient } from "@/lib/supabase";
+import { readStoredVehicleContext } from '@/lib/server/vehicle-context';
+import { contactMessageWithVehicle } from '@/lib/contact-vehicle';
 
 type ContactRequest = {
   name?: string;
@@ -12,6 +14,7 @@ type ContactRequest = {
   productName?: string;
   productSku?: string;
   company?: string;
+  vehicle?: string;
 };
 
 const attempts = new Map<string, { count: number; resetAt: number }>();
@@ -50,11 +53,13 @@ export async function POST(request: Request) {
   }
 
   try {
+    const currentVehicle = await readStoredVehicleContext();
+    const enquiryMessage = contactMessageWithVehicle(message, currentVehicle, sanitizeText(payload.vehicle, 500));
     await saveContactEnquiry({
       name,
       email,
       partOrSku,
-      message,
+      message: enquiryMessage,
       sourcePage,
       sourceUrl,
       productName,
@@ -65,7 +70,7 @@ export async function POST(request: Request) {
       name,
       email,
       partOrSku,
-      message,
+      message: enquiryMessage,
       sourcePage,
       sourceUrl,
       productName,

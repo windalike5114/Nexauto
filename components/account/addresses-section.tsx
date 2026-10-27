@@ -210,8 +210,7 @@ export function AccountAddressesSection({ email }: { email: string }) {
 
       {legacyAddresses.length > 0 && addresses.length > 0 && !migrationComplete ? (
         <div className="mb-5 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm font-bold text-amber-900">
-          <p>Local saved addresses were found on this browser.</p>
-          <button type="button" onClick={() => void importLegacyAddresses()} className="mt-3 h-10 rounded bg-ink px-4 text-xs font-black text-white">
+          <button type="button" onClick={() => void importLegacyAddresses()} className="h-10 rounded bg-ink px-4 text-xs font-black text-white">
             Import saved addresses
           </button>
         </div>

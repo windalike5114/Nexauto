@@ -1,54 +1,22 @@
 "use client";
 
-import Link from "next/link";
-import { CarFront } from "lucide-react";
-import { useEffect, useState } from "react";
-import {
-  persistVehicleContextCookie,
-  readVehicleContextFromBrowser,
-  vehicleContextChangedEvent,
-  vehicleContextStorageKey,
-  type VehicleContext
-} from "@/lib/vehicle-context";
+import { CarFront } from 'lucide-react';
+import { useVehicleContext } from '@/components/vehicle-context-provider';
+import { vehicleContextDetails, vehicleContextLabel } from '@/lib/vehicle-context';
+import { VehicleFinderForm } from '@/components/friendly-vehicle-parts-finder';
 
 export function VehicleSelectionBar() {
-  const [vehicle, setVehicle] = useState<VehicleContext | null>(null);
-
-  useEffect(() => {
-    const syncVehicle = () => {
-      const storedVehicle = readVehicleContextFromBrowser();
-      if (storedVehicle) persistVehicleContextCookie(storedVehicle);
-      setVehicle(storedVehicle);
-    };
-    const onStorage = (event: StorageEvent) => {
-      if (event.key === vehicleContextStorageKey) syncVehicle();
-    };
-
-    syncVehicle();
-    window.addEventListener("storage", onStorage);
-    window.addEventListener(vehicleContextChangedEvent, syncVehicle);
-    return () => {
-      window.removeEventListener("storage", onStorage);
-      window.removeEventListener(vehicleContextChangedEvent, syncVehicle);
-    };
-  }, []);
-
-  if (!vehicle) return null;
-
-  const title = [vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(" ");
-  const detail = [vehicle.chassis, vehicle.bodyConfiguration, vehicle.engine].filter(Boolean).join(" · ");
-
-  return (
-    <div className="border-b border-emerald-900/15 bg-emerald-50 text-ink">
-      <div className="mx-auto flex min-h-9 max-w-7xl items-center gap-2 px-4 py-1.5 sm:px-6 lg:px-8">
-        <CarFront className="h-4 w-4 shrink-0 text-emerald-700" aria-hidden />
-        <span className="min-w-0 flex-1 truncate text-xs font-black sm:text-sm">
-          {title}{detail ? <span className="hidden text-[11px] font-semibold text-steel lg:inline"> · {detail}</span> : null}
-        </span>
-        <Link href="/parts#change-vehicle" className="shrink-0 text-[11px] font-black uppercase tracking-[0.08em] text-signal hover:text-red-700">
-          Change vehicle
-        </Link>
-      </div>
+  const { vehicle, changing, selectionSession, changeVehicle, cancelChange, selectVehicle, clearVehicle } = useVehicleContext();
+  if (!vehicle && !changing) return null;
+  return <section id="current-vehicle" aria-label="Current vehicle" className="scroll-mt-40 border-b border-black/10 bg-[#F3F5F7] text-ink">
+    <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 sm:px-6 lg:px-8">
+      <CarFront className="h-5 w-5 shrink-0 text-signal" aria-hidden/>
+      <div className="min-w-0 flex-1"><p className="text-[10px] font-black uppercase tracking-[0.12em] text-steel">{vehicle?'Current vehicle':'My vehicle'}</p><p className="mt-0.5 text-sm font-black">{vehicle?vehicleContextLabel(vehicle):'Choose your vehicle'}</p>{vehicle?<p className="mt-0.5 text-xs font-semibold text-steel">{vehicleContextDetails(vehicle)}</p>:null}</div>
+      <button type="button" onClick={changing?cancelChange:changeVehicle} aria-expanded={changing} aria-controls="global-vehicle-editor" className="inline-flex min-h-11 shrink-0 items-center rounded-lg border border-black/15 bg-white px-3 text-xs font-black text-signal hover:border-signal">{changing?'Cancel':'Change vehicle'}</button>
     </div>
-  );
+    {changing?<div id="global-vehicle-editor" className="mx-auto max-w-7xl border-t border-black/10 px-4 py-5 sm:px-6 lg:px-8">
+      <VehicleFinderForm embedded key={selectionSession} initialVehicle={vehicle} onSelect={selection=>selectVehicle(selection)}/>
+      {vehicle?<div className="mt-3 text-right"><button type="button" onClick={()=>clearVehicle()} className="min-h-10 text-xs font-bold text-steel underline">Clear vehicle</button></div>:null}
+    </div>:null}
+  </section>;
 }

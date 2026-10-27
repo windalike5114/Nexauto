@@ -8,11 +8,10 @@ const footerGroups = [
     title: "Shop",
     links: [
       ["All Products", "/shop"],
-      ["Wiper Blades", "/parts?category=wipers"],
-      ["Oil Filters", "/parts?category=filters"],
-      ["Brake Pads", "/parts?category=brakes"],
-      ["Light Bulbs", "/parts?category=bulbs"],
-      ["Batteries", "/parts?category=batteries"],
+      ["Wiper Blades", "/shop?category=wipers"],
+      ["Oil Filters", "/shop?category=filters"],
+      ["Brake Pads", "/shop?category=brakes"],
+      ["Light Bulbs", "/shop?category=bulbs"],
       ["Weekly Deals", "/specials"]
     ]
   },

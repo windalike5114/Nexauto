@@ -9,7 +9,7 @@ import { listWiperFitmentModels } from "@/lib/queries/wiper-fitment";
 const MAX_PUBLIC_MODELS = 250;
 
 export async function GET(request: Request) {
-  const guard = guardFitmentApiRequest(request);
+  const guard = await guardFitmentApiRequest(request);
   if (guard.response) return guard.response;
 
   const { searchParams } = new URL(request.url);
@@ -22,7 +22,7 @@ export async function GET(request: Request) {
   try {
     const models = await listWiperFitmentModels(makeId);
     return fitmentJson({
-      models: models.slice(0, MAX_PUBLIC_MODELS).map(({ id, name, aliases }) => ({ id, name, aliases }))
+      models: models.slice(0, MAX_PUBLIC_MODELS).map(({ id, name, aliases, modelIds }) => ({ id, name, aliases, modelIds }))
     }, guard);
   } catch {
     return fitmentJson({ error: "Could not load vehicle models." }, guard, { status: 500 });

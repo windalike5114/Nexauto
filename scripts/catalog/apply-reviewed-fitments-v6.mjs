@@ -20,15 +20,18 @@ function normalizeRef(value) {
   return String(value ?? "").trim().toUpperCase();
 }
 
-export function readReviewedDecisions(file, productType) {
+export function readReviewedDecisions(file, productType, { allowBlank = false } = {}) {
   if (!fs.existsSync(file)) throw new Error(`Missing reviewed workbook: ${file}`);
   const workbook = XLSX.readFile(file, { raw: false });
   const sheet = workbook.Sheets[workbook.SheetNames[0]];
   const rows = XLSX.utils.sheet_to_json(sheet, { range: 4, defval: "", raw: false });
-  return rows.filter((row) => row.review_id).map((row) => {
+  return rows.filter((row) => row.review_id).flatMap((row) => {
     const decision = normalizeRef(row.verified_supplier_ref);
-    if (!decision) throw new Error(`Blank decision in ${file}: ${row.review_id}`);
-    return {
+    if (!decision) {
+      if (allowBlank) return [];
+      throw new Error(`Blank decision in ${file}: ${row.review_id}`);
+    }
+    return [{
       review_id: String(row.review_id).trim(),
       application_id: String(row.application_id).trim(),
       product_type: productType,
@@ -40,7 +43,7 @@ export function readReviewedDecisions(file, productType) {
       selected_refs: decision === "NONE"
         ? []
         : String(row.verified_supplier_ref).split(/\s*\|\s*/).map(normalizeRef).filter(Boolean)
-    };
+    }];
   });
 }
 
@@ -70,7 +73,13 @@ export function applyReviewedDecisions(prepared, decisions) {
     const decisionKey = fitmentGroupKey(decision);
     if (decisionByKey.has(decisionKey)) throw new Error(`Duplicate reviewed decision: ${decisionKey}`);
     const group = groups.get(decisionKey);
-    if (!group?.length) throw new Error(`Reviewed decision has no current fitment candidates: ${decision.review_id}`);
+    if (!group?.length) {
+      if (decision.decision === "NONE") {
+        decisionByKey.set(decisionKey, decision);
+        continue;
+      }
+      throw new Error(`Reviewed decision has no current fitment candidates: ${decision.review_id}`);
+    }
     for (const supplierRef of decision.selected_refs) {
       if (!decision.candidates.includes(supplierRef)) {
         throw new Error(`${decision.review_id} selected ${supplierRef}, which is not a listed candidate.`);
@@ -251,6 +260,26 @@ function groupBy(rows, keyFn) {
   return result;
 }
 
+export function mergeReviewedDecisions(baseDecisions, updateDecisions) {
+  const merged = new Map(baseDecisions.map((decision) => [fitmentGroupKey(decision), decision]));
+  const overrides = [];
+  for (const decision of updateDecisions) {
+    const key = fitmentGroupKey(decision);
+    const previous = merged.get(key);
+    if (previous) {
+      overrides.push({
+        key,
+        previous_review_id: previous.review_id,
+        previous_decision: previous.decision,
+        updated_review_id: decision.review_id,
+        updated_decision: decision.decision
+      });
+    }
+    merged.set(key, decision);
+  }
+  return { decisions: [...merged.values()], overrides };
+}
+
 function chunks(rows, size = 500) {
   const result = [];
   for (let index = 0; index < rows.length; index += size) result.push(rows.slice(index, index + size));
@@ -319,14 +348,34 @@ if (isCli) {
   };
   const brakeFile = valueAfter("--brake", DEFAULT_BRAKE_FILE);
   const oilFile = valueAfter("--oil", DEFAULT_OIL_FILE);
+  const baseBrakeFile = valueAfter("--base-brake", "");
+  const baseOilFile = valueAfter("--base-oil", "");
+  const allowBlank = process.argv.includes("--allow-blank");
   const prepared = prepareFitmentV6();
-  const decisions = [
-    ...readReviewedDecisions(brakeFile, "brake_pad"),
-    ...readReviewedDecisions(oilFile, "oil_filter")
+  const baseDecisions = [
+    ...(baseBrakeFile ? readReviewedDecisions(baseBrakeFile, "brake_pad") : []),
+    ...(baseOilFile ? readReviewedDecisions(baseOilFile, "oil_filter") : [])
   ];
+  const updateDecisions = [
+    ...readReviewedDecisions(brakeFile, "brake_pad", { allowBlank }),
+    ...readReviewedDecisions(oilFile, "oil_filter", { allowBlank })
+  ];
+  const merged = mergeReviewedDecisions(baseDecisions, updateDecisions);
+  const decisions = merged.decisions;
   const reviewed = applyReviewedDecisions(prepared, decisions);
   const report = buildReport(prepared, reviewed, decisions, brakeFile, oilFile);
-  console.log(JSON.stringify({ ...report, brakeReviews: undefined, oilReviews: undefined }, null, 2));
+  console.log(JSON.stringify({
+    ...report,
+    brakeReviews: undefined,
+    oilReviews: undefined,
+    partial_import: {
+      allow_blank: allowBlank,
+      base_decisions: baseDecisions.length,
+      update_decisions: updateDecisions.length,
+      overrides: merged.overrides.length,
+      override_details: merged.overrides
+    }
+  }, null, 2));
 
   loadEnv(path.resolve(".env.local"));
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) throw new Error("Missing Supabase service credentials.");

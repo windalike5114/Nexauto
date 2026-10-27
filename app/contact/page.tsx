@@ -16,9 +16,6 @@ export default async function ContactPage({ searchParams }: { searchParams: Prom
       <section>
         <p className="text-sm font-black uppercase tracking-[0.18em] text-signal">Contact us</p>
         <h1 className="mt-3 text-4xl font-black sm:text-5xl">Need help choosing a part?</h1>
-        <p className="mt-5 leading-8 text-steel">
-          Send your vehicle details, product type, visible specification, and any SKU or part number you already have. Our New Zealand-based team will help where possible before or after purchase.
-        </p>
         <div className="mt-8 grid gap-4">
           <ContactItem icon={<MapPin className="h-5 w-5" />} title="Location" text="Auckland, New Zealand" />
           <ContactItem icon={<Mail className="h-5 w-5" />} title="Email" text="support@nexautoparts.co.nz" />

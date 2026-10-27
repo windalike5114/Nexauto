@@ -4,6 +4,8 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { VehicleSelectionBar } from "@/components/vehicle-selection-bar";
 import { WelcomeRewardWidget } from "@/components/welcome-reward-widget";
+import { VehicleContextProvider } from '@/components/vehicle-context-provider';
+import { readStoredVehicleContext } from '@/lib/server/vehicle-context';
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -26,11 +28,12 @@ export const metadata: Metadata = {
   }
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const vehicle = await readStoredVehicleContext();
   return (
     <html lang="en">
       <body>
-        <CartProvider>
+        <VehicleContextProvider initialVehicle={vehicle}><CartProvider>
           <div className="min-h-screen">
             <SiteHeader />
             <VehicleSelectionBar />
@@ -38,7 +41,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             <SiteFooter />
             <WelcomeRewardWidget />
           </div>
-        </CartProvider>
+        </CartProvider></VehicleContextProvider>
       </body>
     </html>
   );

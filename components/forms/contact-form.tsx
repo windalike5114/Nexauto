@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useVehicleContext } from '@/components/vehicle-context-provider';
+import { vehicleContextLabel, vehicleContextDetails } from '@/lib/vehicle-context';
 
 type ContactFormProps = {
   sourcePage: string;
@@ -14,6 +16,8 @@ const successMessage = "Thanks for getting in touch. We've received your enquiry
 const errorMessage = "We couldn't send your enquiry. Please try again or email support@nexautoparts.co.nz.";
 
 export function ContactForm({ sourcePage, productName, productSku, defaultPartOrSku = "", defaultVehicle = "" }: ContactFormProps) {
+  const { vehicle: currentVehicle } = useVehicleContext();
+  const currentVehicleLabel = currentVehicle ? [vehicleContextLabel(currentVehicle),vehicleContextDetails(currentVehicle)].filter(Boolean).join(' · ') : '';
   const [sourceUrl, setSourceUrl] = useState("https://nexautoparts.co.nz");
   const [partOrSku, setPartOrSku] = useState(defaultPartOrSku);
   const [submitting, setSubmitting] = useState(false);
@@ -31,6 +35,7 @@ export function ContactForm({ sourcePage, productName, productSku, defaultPartOr
     setStatus(null);
 
     const formData = new FormData(event.currentTarget);
+    const form = event.currentTarget;
     const name = String(formData.get("name") ?? "").trim();
     const email = String(formData.get("email") ?? "").trim();
     const message = String(formData.get("message") ?? "").trim();
@@ -51,7 +56,8 @@ export function ContactForm({ sourcePage, productName, productSku, defaultPartOr
           name,
           email,
           partOrSku,
-          message: vehicle ? `Vehicle: ${vehicle}\n\n${message}` : message,
+          message,
+          vehicle,
           company,
           sourcePage,
           sourceUrl,
@@ -63,7 +69,7 @@ export function ContactForm({ sourcePage, productName, productSku, defaultPartOr
       if (!response.ok) throw new Error("Contact request failed.");
 
       setStatus({ type: "success", message: successMessage });
-      event.currentTarget.reset();
+      form.reset();
       setPartOrSku(defaultPartOrSku);
     } catch {
       setStatus({ type: "error", message: errorMessage });
@@ -118,7 +124,9 @@ export function ContactForm({ sourcePage, productName, productSku, defaultPartOr
           <input
             id="contact-vehicle"
             name="vehicle"
-            defaultValue={defaultVehicle}
+            key={currentVehicle?.applicationId??`manual:${defaultVehicle}`}
+            defaultValue={currentVehicleLabel || defaultVehicle}
+            readOnly={Boolean(currentVehicle)}
             maxLength={240}
             className="mt-2 h-12 w-full rounded border border-black/10 px-3 text-base outline-none focus:border-ink"
             placeholder="Year, make, model, engine or chassis"

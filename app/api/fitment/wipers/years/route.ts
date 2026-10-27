@@ -7,7 +7,7 @@ import {
 import { listWiperFitmentYears } from "@/lib/queries/wiper-fitment";
 
 export async function GET(request: Request) {
-  const guard = guardFitmentApiRequest(request);
+  const guard = await guardFitmentApiRequest(request);
   if (guard.response) return guard.response;
 
   const { searchParams } = new URL(request.url);

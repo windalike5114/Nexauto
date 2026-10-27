@@ -1,10 +1,8 @@
 import { notFound, redirect } from "next/navigation";
 
 const supportedCategories: Record<string, string> = {
-  batteries: "batteries",
   filters: "filters",
-  bulbs: "bulbs",
-  suspension: "suspension"
+  bulbs: "bulbs"
 };
 
 export default async function LegacyPartCategoryPage({

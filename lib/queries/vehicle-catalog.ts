@@ -1,19 +1,14 @@
 import { unstable_cache } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase";
+import { groupCatalogModels, type CatalogModelGroup } from "@/lib/vehicle-catalog-display";
+import { mapVehicleApplications, vehicleApplicationProjection, type JoinedVehicleApplication, type VehicleCatalogApplicationOption } from '@/lib/application/fitment/vehicle-application-data';
+import { timeVehicleLookup } from '@/lib/application/fitment/vehicle-lookup-timing';
+export type { VehicleCatalogApplicationOption } from '@/lib/application/fitment/vehicle-application-data';
 
 export type VehicleCatalogOption = { id: string; name: string };
-export type VehicleCatalogIndexModel = VehicleCatalogOption & { years: number[] };
+export type VehicleCatalogIndexModel = CatalogModelGroup;
 export type VehicleCatalogIndexMake = VehicleCatalogOption & { models: VehicleCatalogIndexModel[] };
-export type VehicleCatalogApplicationOption = {
-  id: string; seriesId: string | null; seriesName: string; powertrainId: string; engine: string;
-  variantId: string; variantName: string; bodyStyle: string; driveType: string; vehicleClass: string;
-};
 type CatalogIndexRow = { make_id: string; make_name: string; model_id: string; model_name: string; years: number[] };
-type SearchRow = {
-  application_id: string; series_id: string | null; series_name: string; powertrain_id: string;
-  engine_name: string; variant_id: string; variant_name: string; body_style: string | null;
-  drive_type: string | null; vehicle_class: string | null;
-};
 const PRIORITY_NZ_MAKES = ["Toyota", "Ford", "Mazda", "Nissan", "Mitsubishi", "Honda", "Subaru", "Hyundai", "Kia", "Suzuki"];
 
 function getSupabaseOrThrow() {
@@ -36,42 +31,43 @@ export const listVehicleCatalogIndex = unstable_cache(async (): Promise<VehicleC
   }
   return sortMakesForNz([...makes].map(([id, make]) => ({
     id, name: make.name,
-    models: [...make.models].map(([modelId, model]) => ({ id: modelId, name: model.name, years: [...model.years].sort((a, b) => b - a) }))
-      .sort((a, b) => a.name.localeCompare(b.name))
+    models: groupCatalogModels(make.name, [...make.models].map(([modelId, model]) => ({ id: modelId, name: model.name, years: [...model.years] })))
   })));
-}, ["vehicle-catalog-v5-index"], { revalidate: 3600, tags: ["vehicle-catalog-v5"] });
+}, ["vehicle-catalog-v5-display-index-20261026-r2"], { revalidate: 3600, tags: ["vehicle-catalog-v5"] });
 
 export async function listVehicleCatalogMakes() {
   return (await listVehicleCatalogIndex()).map(({ id, name }) => ({ id, name }));
 }
 
 export async function listVehicleCatalogModels(makeId: string) {
-  return (await listVehicleCatalogIndex()).find((make) => make.id === makeId)?.models.map(({ id, name }) => ({ id, name })) ?? [];
+  return (await listVehicleCatalogIndex()).find((make) => make.id === makeId)?.models ?? [];
 }
 
 export async function listVehicleCatalogYears(makeId: string, modelId: string) {
-  return (await listVehicleCatalogIndex()).find((make) => make.id === makeId)?.models.find((model) => model.id === modelId)?.years ?? [];
+  return (await listVehicleCatalogIndex()).find((make) => make.id === makeId)?.models.find((model) => model.modelIds.includes(modelId))?.years ?? [];
 }
 
 export const listVehicleCatalogApplications = unstable_cache(async (makeId: string, modelId: string, year: number): Promise<VehicleCatalogApplicationOption[]> => {
   if (!/^mk_[0-9a-f]{20}$/.test(makeId) || !/^md_[0-9a-f]{20}$/.test(modelId) || !Number.isInteger(year) || year < 1886 || year > 2100) return [];
-  const result = await selectAll<SearchRow>(getSupabaseOrThrow().from("vehicle_catalog_search")
-    .select("application_id,series_id,series_name,powertrain_id,engine_name,variant_id,variant_name,body_style,drive_type,vehicle_class")
-    .eq("make_id", makeId).eq("model_id", modelId).eq("model_year", year));
-  if (result.error) throw result.error;
-  return result.data.map((row) => ({
-    id: row.application_id, seriesId: row.series_id, seriesName: row.series_name,
-    powertrainId: row.powertrain_id, engine: row.engine_name, variantId: row.variant_id,
-    variantName: row.variant_name, bodyStyle: row.body_style ?? "", driveType: row.drive_type ?? "",
-    vehicleClass: row.vehicle_class ?? ""
-  })).sort(compareApplications);
-}, ["vehicle-catalog-v5-applications"], { revalidate: 900, tags: ["vehicle-catalog-v5"] });
+  const { listPublicVehicleModels } = await import('@/lib/queries/public-vehicle-catalog');
+  const models = await timeVehicleLookup('applications.model-scope', () => listPublicVehicleModels(makeId));
+  const model = models.find(entry => entry.modelIds.includes(modelId));
+  if (!model) return [];
+  const result = await timeVehicleLookup('applications.database', async () => {
+    const response = await getSupabaseOrThrow()
+      .from('vehicle_catalog_application_years').select(vehicleApplicationProjection)
+      .eq('model_year', year).in('application.model_id', model.modelIds)
+      .eq('application.status', 'active').eq('application.model.status', 'active')
+      .eq('application.model.make_id', makeId).eq('application.model.make.status', 'active')
+      .order('application_id').limit(501);
+    if (response.error) throw response.error;
+    return response;
+  });
+  return mapVehicleApplications((result.data ?? []) as unknown as JoinedVehicleApplication[]);
+}, ["vehicle-catalog-v5-friendly-applications-scoped-join-r2"], { revalidate: 900, tags: ["vehicle-catalog-v5"] });
 
 export async function listVehicleCatalogApplicationIds(makeId: string, modelId: string, year: number) {
   return (await listVehicleCatalogApplications(makeId, modelId, year)).map((row) => row.id);
-}
-function compareApplications(a: VehicleCatalogApplicationOption, b: VehicleCatalogApplicationOption) {
-  return a.seriesName.localeCompare(b.seriesName) || a.engine.localeCompare(b.engine) || a.variantName.localeCompare(b.variantName) || a.id.localeCompare(b.id);
 }
 function sortMakesForNz<T extends VehicleCatalogOption>(makes: T[]): T[] {
   const priority = new Map(PRIORITY_NZ_MAKES.map((name, index) => [name.toLowerCase(), index]));

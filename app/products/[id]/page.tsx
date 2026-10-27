@@ -1,8 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { ProductConfigurator } from "@/components/product-configurator";
-import { WiperFitmentFinder } from "@/components/wiper-fitment-finder";
+import { VehiclePartsFinder } from "@/components/vehicle-parts-finder";
 import { BrakePadProductView } from "@/components/brake-pad-product-view";
 import { formatMoney } from "@/lib/catalog";
 import { productDetailContent, productImage } from "@/lib/product-content";
@@ -16,6 +16,10 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
   const product = await getProductBySlug(id);
 
   if (!product) notFound();
+
+  if (product.category === "bulb" && /^bulb-nbl\d{4}$/i.test(product.slug)) {
+    redirect(`/bulbs/${product.slug.replace(/^bulb-/i, "").toUpperCase()}`);
+  }
 
   if (product.category === "filter") {
     notFound();
@@ -68,10 +72,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
           </div>
           {!product.purchasable ? (
             <section className="rounded-lg border border-amber-300 bg-amber-50 p-5">
-              <p className="text-sm font-black text-ink">Catalogue preview — purchasing is disabled.</p>
-              <p className="mt-2 text-sm font-bold leading-6 text-steel">
-                This product page is being reviewed for specifications, fitment, pricing, and stock. It cannot be added to the cart or purchased yet.
-              </p>
+              <p className="text-sm font-black text-ink">Currently unavailable</p>
               <Link
                 href={`/contact?part=${encodeURIComponent(product.name)}`}
                 className="mt-4 inline-flex h-11 items-center justify-center rounded bg-ink px-4 text-sm font-black text-white transition hover:-translate-y-0.5 hover:bg-black"
@@ -82,9 +83,6 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
           ) : needsContactSupport ? (
             <section className="rounded-lg border border-signal/20 bg-[#F8FAFC] p-5">
               <p className="text-sm font-black text-ink">Vehicle-specific fitment requires confirmation.</p>
-              <p className="mt-2 text-sm font-bold leading-6 text-steel">
-                Contact us with your make, model, year, and engine details before ordering so we can confirm the correct part.
-              </p>
               <Link
                 href={`/contact?part=${encodeURIComponent(product.name)}`}
                 className="mt-4 inline-flex h-11 items-center justify-center rounded bg-ink px-4 text-sm font-black text-white transition hover:-translate-y-0.5 hover:bg-black"
@@ -115,7 +113,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
                 </span>
               ))}
             </div>
-            {product.category === "wiper" ? <div className="mt-4"><WiperFitmentFinder compact /></div> : null}
+            {product.category === "wiper" ? <div className="mt-4"><VehiclePartsFinder compact category="wipers" /></div> : null}
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">

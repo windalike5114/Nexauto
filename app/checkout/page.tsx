@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
-import { ArrowLeft, CheckCircle2, Loader2, MapPin, Search, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Loader2, MapPin, Search } from "lucide-react";
 import { useCart } from "@/components/cart-provider";
 import { formatMoney } from "@/lib/catalog";
 import { calculateCartPricing, calculateOrderTotals } from "@/lib/pricing";
@@ -186,7 +186,6 @@ export default function CheckoutPage() {
         <div className="rounded-2xl border border-black/10 bg-white p-8 text-center shadow-panel">
           <p className="text-sm font-black uppercase tracking-[0.18em] text-signal">Checkout</p>
           <h1 className="mt-3 text-3xl font-black text-ink">Your cart is empty</h1>
-          <p className="mt-3 text-sm font-bold text-steel">Add the correct parts first, then return here to confirm delivery.</p>
           <Link href="/shop" className="mt-6 inline-flex h-11 items-center justify-center rounded bg-ink px-5 text-sm font-black text-white hover:bg-black">
             Browse parts
           </Link>
@@ -205,10 +204,7 @@ export default function CheckoutPage() {
         <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_380px]">
           <section className="rounded-2xl border border-black/10 bg-white p-5 shadow-panel sm:p-7">
             <p className="text-sm font-black uppercase tracking-[0.18em] text-signal">Delivery details</p>
-            <h1 className="mt-2 text-3xl font-black text-ink sm:text-4xl">Confirm your NZ shipping address</h1>
-            <p className="mt-3 max-w-2xl text-sm font-bold leading-6 text-steel">
-              Enter the delivery address here. Wallet addresses from Apple Pay or other payment methods are not used for fulfilment.
-            </p>
+            <h1 className="mt-2 text-3xl font-black text-ink sm:text-4xl">Shipping address</h1>
 
             <div className="mt-6 grid gap-4 sm:grid-cols-2">
               <TextField label="Email address" type="email" value={email} onChange={setEmail} autoComplete="email" required />
@@ -235,9 +231,6 @@ export default function CheckoutPage() {
                 />
                 {loadingSuggestions ? <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-steel" /> : null}
               </div>
-              {!autocompleteConfigured ? (
-                <p className="mt-2 text-xs font-bold text-steel">Manual entry is available. Add GEOAPIFY_API_KEY to enable NZ address suggestions.</p>
-              ) : null}
               {suggestions.length ? (
                 <div className="absolute z-20 mt-2 max-h-72 w-full overflow-y-auto rounded-xl border border-black/10 bg-white shadow-xl">
                   {suggestions.map((suggestion) => (
@@ -265,12 +258,6 @@ export default function CheckoutPage() {
               <TextField label="Postcode" value={address.postcode} onChange={(value) => setAddressField("postcode", value, setAddress)} autoComplete="postal-code" required />
             </div>
 
-            <div className="mt-6 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-bold leading-6 text-emerald-900">
-              <div className="flex gap-3">
-                <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0" />
-                <p>Stripe will securely handle payment. This delivery address stays attached to your NexAutoParts order for dispatch.</p>
-              </div>
-            </div>
 
             {submitError ? <p className="mt-4 rounded-lg border border-red-100 bg-red-50 p-3 text-sm font-bold text-signal">{submitError}</p> : null}
           </section>
@@ -315,10 +302,6 @@ export default function CheckoutPage() {
                 "Continue to secure payment"
               )}
             </button>
-            <div className="mt-4 flex items-start gap-2 text-xs font-bold leading-5 text-steel">
-              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
-              <p>Address is checked before payment and saved with your order snapshot.</p>
-            </div>
           </aside>
         </div>
       </div>

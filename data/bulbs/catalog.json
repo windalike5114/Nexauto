@@ -1,0 +1,4553 @@
+[
+  {
+    "sku": "NBL5001",
+    "supplierRef": "H1BLUE12V",
+    "title": "H1 12V 55W Xenon Halogen Bulb – 4300K 1550LM Super Bright Headlight & Fog Light (Blue / Super White)",
+    "subtitle": "Headlight",
+    "priceNzd": 20,
+    "features": [
+      "H1 xenon halogen bulb; 12V 55W; blue quartz glass filtration.",
+      "4300K super white beam; output up to 1550 lumens for nighttime road and hazard visibility.",
+      "P14.5s single-pin base; direct OEM socket replacement without tools.",
+      "Factory-standard electrical load and operating temperature; compatible with stock wiring harnesses."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "H1"
+      },
+      {
+        "label": "Technology",
+        "value": "Xenon"
+      },
+      {
+        "label": "Voltage",
+        "value": "12V"
+      },
+      {
+        "label": "Power",
+        "value": "55W"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "4300K"
+      },
+      {
+        "label": "Luminous flux",
+        "value": "1550 Lumens"
+      },
+      {
+        "label": "Socket / base",
+        "value": "H1"
+      },
+      {
+        "label": "Application",
+        "value": "Headlight"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5001-1.jpg",
+      "/products/bulbs/catalog/NBL5001-2.jpg",
+      "/products/bulbs/catalog/NBL5001-3.jpg",
+      "/products/bulbs/catalog/NBL5001-4.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6733-clean.png?v=1791870553",
+    "sourceUrl": "https://geekauto.co.nz/products/h1-12v-55w-super-white-halogen-bulb",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5002",
+    "supplierRef": "H1CLEAR12V",
+    "title": "H1 12V 55W Xenon Halogen Bulb – 3200K 1550LM Super Bright Headlight & Fog Light (Clear)",
+    "subtitle": "Headlight",
+    "priceNzd": 16,
+    "features": [
+      "H1 xenon gas-filled halogen bulb; 12V 55W; durable filament construction.",
+      "Clear quartz glass without tint; 1550 lumens output with no tint-related transmission loss.",
+      "3200K warm white light for headlight and fog light use in rain or mist.",
+      "Direct electrical connection; standard factory harness load and operating temperature."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "H1"
+      },
+      {
+        "label": "Technology",
+        "value": "Xenon"
+      },
+      {
+        "label": "Voltage",
+        "value": "12V"
+      },
+      {
+        "label": "Power",
+        "value": "55W"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "3200K"
+      },
+      {
+        "label": "Luminous flux",
+        "value": "1550 Lumens"
+      },
+      {
+        "label": "Socket / base",
+        "value": "H1"
+      },
+      {
+        "label": "Application",
+        "value": "Headlight"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5002-1.jpg",
+      "/products/bulbs/catalog/NBL5002-2.jpg",
+      "/products/bulbs/catalog/NBL5002-3.jpg",
+      "/products/bulbs/catalog/NBL5002-4.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6731-clean.png?v=1791870533",
+    "sourceUrl": "https://geekauto.co.nz/products/h1-12v-55w-clear-halogen-bulb",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5003",
+    "supplierRef": "H10CLEAR12V",
+    "title": "H10 PY20d 12V Xenon Halogen Bulbs – 3200K Clear Quartz Glass 850LM (Direct OEM Fit)",
+    "subtitle": "Fog Light or Auxiliary Headlight / DRL",
+    "priceNzd": 36,
+    "features": [
+      "H10 / 9145 PY20d xenon halogen bulb; 12V; actual consumption 42W.",
+      "OEM-standard socket dimensions with integrated right-angle connector; airtight moisture seal and vibration-resistant lock; precise focus in factory fog light or auxiliary headlight housings.",
+      "3200K warm white beam for thick fog or heavy rain; also applicable to mist and road spray; with reduced reflected glare and eye strain.",
+      "850 lumens focused output for the lower road surface and shoulders plus lane markers; nighttime driving application.",
+      "Actual 42W thermal load suitable for compact fog lamp enclosures; protection against wiring harness heat damage and housing lens warping.",
+      "Heavy-duty UV-cut quartz glass; resistance to rapid ambient temperature changes; high internal pressure and continuous vibration.",
+      "1:1 replacement in factory H10 / 9145 sockets; no rewiring or relay modifications; no external ballasts."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "H10"
+      },
+      {
+        "label": "Technology",
+        "value": "Xenon Halogen"
+      },
+      {
+        "label": "Voltage",
+        "value": "12V DC (Passenger Vehicles Only)"
+      },
+      {
+        "label": "Power",
+        "value": "42W"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "3200K (Clear / Warm White)"
+      },
+      {
+        "label": "Luminous flux",
+        "value": "850 Lumens"
+      },
+      {
+        "label": "Socket / base",
+        "value": "H10 (Base: PY20d / Cross-compatible: 9145 / 9140)"
+      },
+      {
+        "label": "Application",
+        "value": "Fog Light or Auxiliary Headlight / DRL"
+      },
+      {
+        "label": "Glass finish",
+        "value": "High-Transparency Clear Quartz Glass"
+      },
+      {
+        "label": "Installation type",
+        "value": "Direct OEM Replacement (Plug & Play)"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5003-1.jpg",
+      "/products/bulbs/catalog/NBL5003-2.jpg",
+      "/products/bulbs/catalog/NBL5003-3.jpg",
+      "/products/bulbs/catalog/NBL5003-4.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6803-clean.png?v=1791874742",
+    "sourceUrl": "https://geekauto.co.nz/products/h10-12v-42w-clear-halogen-bulb",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5004",
+    "supplierRef": "H11BLUE12V",
+    "title": "H11 PGJ19-2 12V 55W Xenon Halogen Light Bulbs – 4300K Super White Blue Quartz Glass (1350LM OEM Fit)",
+    "subtitle": "Headlight (Low Beam) or Fog Light",
+    "priceNzd": 40,
+    "features": [
+      "H11 PGJ19-2 xenon halogen bulb; 12V 55W; blue quartz glass.",
+      "OEM-sized base with original-style right-angle connector; airtight moisture seal and vibration-resistant lock; defined beam cutoff in projector or reflector assemblies.",
+      "Optical blue coating filters yellow tones; 4300K super white beam improves contrast on road signs and lane markings or obstacles.",
+      "1350 lumens focused output; wider peripheral visibility and extended useful road lighting for safer reaction times.",
+      "Actual 55W consumption matches manufacturer ratings for 12V factory wiring; no melted sockets or harness overheating; no dashboard bulb-out warnings.",
+      "Heavy-duty UV-cut quartz glass; resistance to rapid ambient temperature changes; high internal gas pressure and rough-road vibration.",
+      "1:1 replacement in standard H11 sockets; no wire splicing or additional relay harnesses; no external ballasts."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "H11"
+      },
+      {
+        "label": "Technology",
+        "value": "Xenon Halogen"
+      },
+      {
+        "label": "Voltage",
+        "value": "12V DC (Passenger Vehicles Only)"
+      },
+      {
+        "label": "Power",
+        "value": "55W"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "4300K (Super White / Crisp Daylight Look)"
+      },
+      {
+        "label": "Luminous flux",
+        "value": "1350 Lumens"
+      },
+      {
+        "label": "Socket / base",
+        "value": "H11 (Base: PGJ19-2)"
+      },
+      {
+        "label": "Application",
+        "value": "Headlight (Low Beam) or Fog Light"
+      },
+      {
+        "label": "Glass finish",
+        "value": "Optical Blue Tinted Quartz Glass"
+      },
+      {
+        "label": "Installation type",
+        "value": "Direct OEM Replacement (Plug & Play)"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5004-1.jpg",
+      "/products/bulbs/catalog/NBL5004-2.jpg",
+      "/products/bulbs/catalog/NBL5004-3.jpg",
+      "/products/bulbs/catalog/NBL5004-4.jpg",
+      "/products/bulbs/catalog/NBL5004-5.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6817-clean.png?v=1791874711",
+    "sourceUrl": "https://geekauto.co.nz/products/h11-12v-55w-super-white-halogen-bulb",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5005",
+    "supplierRef": "H11CLEAR12V",
+    "title": "H11 PGJ19-2 12V 55W Xenon Halogen Light Bulbs – 3200K Clear Quartz Glass (1350LM OEM Replacement)",
+    "subtitle": "Headlight (Low Beam) or Fog Light",
+    "priceNzd": 36,
+    "features": [
+      "H11 PGJ19-2 xenon halogen bulb; 12V 55W; clear quartz glass.",
+      "OEM-standard socket dimensions with original-style right-angle connector; airtight moisture seal and vibration-resistant lock; defined cutoff in reflector or projector assemblies.",
+      "3200K warm white beam for thick fog or heavy rain; also applicable to mist and road spray; with less reflected glare and eye fatigue than cool white bulbs.",
+      "1350 lumens focused output; wider peripheral visibility and earlier recognition of down-road hazards or lane markers and road edges.",
+      "Actual 55W load for standard 12V circuits; no wiring loom damage or melted connectors; no dashboard bulb-out fault codes.",
+      "Heavy-duty UV-cut quartz glass; resistance to rapid ambient temperature changes; high internal gas pressure and continuous vibration.",
+      "1:1 replacement in factory H11 sockets; no rewiring or additional relay harnesses; no external ballasts."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "H11"
+      },
+      {
+        "label": "Technology",
+        "value": "Xenon Halogen"
+      },
+      {
+        "label": "Voltage",
+        "value": "12V DC (Passenger Vehicles Only)"
+      },
+      {
+        "label": "Power",
+        "value": "55W"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "3200K (Clear / Warm White)"
+      },
+      {
+        "label": "Luminous flux",
+        "value": "1350 Lumens"
+      },
+      {
+        "label": "Socket / base",
+        "value": "H11 (Base: PGJ19-2)"
+      },
+      {
+        "label": "Application",
+        "value": "Headlight (Low Beam) or Fog Light"
+      },
+      {
+        "label": "Glass finish",
+        "value": "High-Transparency Clear Quartz Glass"
+      },
+      {
+        "label": "Installation type",
+        "value": "Direct OEM Replacement (Plug & Play)"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5005-1.jpg",
+      "/products/bulbs/catalog/NBL5005-2.jpg",
+      "/products/bulbs/catalog/NBL5005-3.jpg",
+      "/products/bulbs/catalog/NBL5005-4.jpg",
+      "/products/bulbs/catalog/NBL5005-5.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6809-clean.png?v=1791874729",
+    "sourceUrl": "https://geekauto.co.nz/products/h11-12v-55w-clear-halogen-bulb",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5006",
+    "supplierRef": "H15CLEAR12V",
+    "title": "H15 PGJ23t-1 12V 15/55W Dual Filament Xenon Halogen Bulbs – 3200K Clear 260/1350LM OEM Fit",
+    "subtitle": "Headlight (Low/High Beam)",
+    "priceNzd": 130,
+    "features": [
+      "H15 PGJ23t-1 dual-filament xenon halogen bulb; 12V 15/55W.",
+      "Precision-wound filaments; daytime running light: 15W (260LM) for daytime safety; high beam: 55W (1350LM) for extended nighttime reach.",
+      "OEM-dimensional 3-pin twist-and-lock base; airtight moisture seal without movement; original beam alignment.",
+      "3200K warm white light for rain or mist and dense fog; less reflected glare and driver fatigue than high-kelvin bulbs.",
+      "Actual 15/55W load matches factory circuit ratings; no socket melting or harness overheating; no CANBus daytime running light fault warnings.",
+      "High-grade clear UV-cut quartz glass; resistance to high operating temperatures; internal pressurised xenon gas and rough-road vibration.",
+      "1:1 OEM replacement in standard H15 headlight housings; no rewiring or relays; no CANBus decoders."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "H15"
+      },
+      {
+        "label": "Technology",
+        "value": "Xenon Halogen (Dual Filament)"
+      },
+      {
+        "label": "Voltage",
+        "value": "12V DC (Passenger Vehicles Only)"
+      },
+      {
+        "label": "Power",
+        "value": "15W (DRL) / 55W (High Beam)"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "3200K (Clear / Warm White)"
+      },
+      {
+        "label": "Luminous flux",
+        "value": "260 Lumens (DRL) / 1350 Lumens (High Beam)"
+      },
+      {
+        "label": "Socket / base",
+        "value": "H15 (Base: PGJ23t-1, 3-Pin)"
+      },
+      {
+        "label": "Application",
+        "value": "Headlight (Low/High Beam)"
+      },
+      {
+        "label": "Glass finish",
+        "value": "High-Transparency Clear Quartz Glass"
+      },
+      {
+        "label": "Installation type",
+        "value": "Direct OEM Replacement (Plug & Play)"
+      },
+      {
+        "label": "Dual beam application",
+        "value": "Daytime Running Light (DRL) & High Beam / Main Beam"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5006-1.jpg",
+      "/products/bulbs/catalog/NBL5006-2.jpg",
+      "/products/bulbs/catalog/NBL5006-3.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6823-clean.png?v=1791874698",
+    "sourceUrl": "https://geekauto.co.nz/products/h15-12v-15-55w-clear-halogen-bulb",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5007",
+    "supplierRef": "H16CLEAR12V",
+    "title": "H16 PGJ19-3 12V 19W Xenon Halogen Light Bulbs – 3200K Clear Quartz Fog Lamp Replacement (500LM)",
+    "subtitle": "Front Fog Light or Auxiliary Driving Light",
+    "priceNzd": 80,
+    "features": [
+      "H16 PGJ19-3 xenon halogen fog lamp bulb; 12V 19W.",
+      "OEM-dimensional base with dedicated right-angle connector; tight moisture-sealed seating with vibration resistance in factory fog light assemblies.",
+      "Actual 19W consumption with low operating temperature; thermal protection against warping or melting of compact plastic fog lamp lenses and reflectors.",
+      "3200K warm white beam for heavy rain or road spray; also applicable to mist and dense fog; with reduced reflected glare and eye strain.",
+      "500 lumens controlled output; peripheral spread across curbs and shoulders plus lane markings; with limited glare.",
+      "High-purity clear quartz glass; resistance to rapid ambient temperature changes; internal gas pressure and continuous vibration.",
+      "1:1 OEM replacement in factory H16 sockets; no rewiring or external relays; no modifications."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "H16"
+      },
+      {
+        "label": "Technology",
+        "value": "Xenon Halogen"
+      },
+      {
+        "label": "Voltage",
+        "value": "12V DC (Passenger Vehicles Only)"
+      },
+      {
+        "label": "Power",
+        "value": "19W"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "3200K (Clear / Warm White)"
+      },
+      {
+        "label": "Luminous flux",
+        "value": "500 Lumens"
+      },
+      {
+        "label": "Socket / base",
+        "value": "H16 (Base: PGJ19-3)"
+      },
+      {
+        "label": "Application",
+        "value": "Front Fog Light or Auxiliary Driving Light"
+      },
+      {
+        "label": "Glass finish",
+        "value": "High-Transparency Clear Quartz Glass"
+      },
+      {
+        "label": "Installation type",
+        "value": "Direct OEM Replacement (Plug & Play)"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5007-1.jpg",
+      "/products/bulbs/catalog/NBL5007-2.jpg",
+      "/products/bulbs/catalog/NBL5007-3.jpg",
+      "/products/bulbs/catalog/NBL5007-4.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6828-clean.png?v=1791874686",
+    "sourceUrl": "https://geekauto.co.nz/products/h16-12v-19w-clear-halogen-bulb",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5008",
+    "supplierRef": "H27",
+    "title": "H27 880 881 12V 27W Xenon Halogen Light Bulbs – 3200K Clear Quartz Fog Lamp OEM Fit (477LM)",
+    "subtitle": "Fog Light, Auxiliary Driving Light, or Headlight / DRL",
+    "priceNzd": 50,
+    "features": [
+      "H27 xenon halogen bulb; 12V 27W; 880 / 881 compatibility.",
+      "OEM-dimensioned fitting with integrated rubber O-ring; airtight moisture seal and vibration-resistant seating in compact factory housings.",
+      "3200K warm white beam for fog or heavy rain; also applicable to mist and road spray; with reduced reflected glare and eye strain.",
+      "477 lumens controlled output; peripheral coverage of curbs and road gutters plus lane markers.",
+      "Actual 27W consumption; thermal load suitable for small plastic fog lamp reflectors and lenses without housing distortion or harness overheating.",
+      "Heavy-duty UV-cut quartz glass; resistance to rapid ambient temperature changes; internal gas pressure and sustained vibration.",
+      "1:1 OEM replacement at factory H27 harness plugs; no wire splicing or external relays; no ballast retrofit."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "H27"
+      },
+      {
+        "label": "Technology",
+        "value": "Xenon Halogen"
+      },
+      {
+        "label": "Voltage",
+        "value": "12V DC (Passenger Vehicles Only)"
+      },
+      {
+        "label": "Power",
+        "value": "27W"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "3200K (Clear / Warm White)"
+      },
+      {
+        "label": "Luminous flux",
+        "value": "477 Lumens"
+      },
+      {
+        "label": "Socket / base",
+        "value": "H27 (Cross-compatible: 880 / 881 / PG13 / PGJ13)"
+      },
+      {
+        "label": "Application",
+        "value": "Fog Light, Auxiliary Driving Light, or Headlight / DRL"
+      },
+      {
+        "label": "Glass finish",
+        "value": "High-Transparency Clear Quartz Glass"
+      },
+      {
+        "label": "Installation type",
+        "value": "Direct OEM Replacement (Plug & Play)"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5008-1.jpg",
+      "/products/bulbs/catalog/NBL5008-2.jpg",
+      "/products/bulbs/catalog/NBL5008-3.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6900-clean.png?v=1791873313",
+    "sourceUrl": "https://geekauto.co.nz/products/h27-12v-27w-clear-halogen-bulb",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5009",
+    "supplierRef": "H324VCLEAR",
+    "title": "H3 PK22s 24V 70W Heavy Duty Xenon Halogen Bulbs – 3200K Clear 1900LM Truck OEM Replacement",
+    "subtitle": "Auxiliary Driving Lights, Fog Lamps, Searchlights, or Work Lamps",
+    "priceNzd": 24,
+    "features": [
+      "H3 PK22s xenon halogen bulb; 24V 70W for 24-volt commercial electrical systems.",
+      "Applications include semi-trucks or lorries; buses and plant machinery; agricultural tractors or off-highway heavy equipment.",
+      "1900 lumens focused long-range output for highway shoulders and unlit haul routes; visibility of unexpected road hazards.",
+      "3200K warm white light for dense fog or heavy rain; also applicable to mist and road dust; with reduced reflected glare and fatigue on long shifts.",
+      "Reinforced tungsten filament winding; resistance to sustained commercial vehicle vibration and rough-terrain shocks; including chassis rattling.",
+      "OEM-standard H3 PK22s fitting with flexible insulated pigtail and spade connector; direct connection in factory auxiliary driving lamps; fog lights or work lights.",
+      "Factory-standard 24V 70W circuit load; no wiring loom overload or connector melting; no electrical circuit faults."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "H3"
+      },
+      {
+        "label": "Technology",
+        "value": "Heavy-Duty Xenon Halogen"
+      },
+      {
+        "label": "Voltage",
+        "value": "24V DC (Commercial / Heavy Vehicles Only)"
+      },
+      {
+        "label": "Power",
+        "value": "70W"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "3200K (Clear / Warm White)"
+      },
+      {
+        "label": "Luminous flux",
+        "value": "1900 Lumens"
+      },
+      {
+        "label": "Socket / base",
+        "value": "H3 (Base: PK22s, with insulated lead wire)"
+      },
+      {
+        "label": "Application",
+        "value": "Auxiliary Driving Lights, Fog Lamps, Searchlights, or Work Lamps"
+      },
+      {
+        "label": "Glass finish",
+        "value": "High-Transparency Clear Quartz Glass"
+      },
+      {
+        "label": "Installation type",
+        "value": "Direct OEM Replacement (Plug & Play)"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5009-1.jpg",
+      "/products/bulbs/catalog/NBL5009-2.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6862-clean.png?v=1791874001",
+    "sourceUrl": "https://geekauto.co.nz/products/h3-24v-70w-clear-halogen-bulb",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5010",
+    "supplierRef": "H3BLUE12V",
+    "title": "H3 Super Bright Xenon Halogen Bulbs 12V 55W – Super White 4300K (Blue Coating, 1550LM)",
+    "subtitle": "Headlight (Low / High Beam) or Fog Light",
+    "priceNzd": 20,
+    "features": [
+      "H3 xenon halogen bulb; 12V 55W; blue coating.",
+      "Precision blue coating filters yellow tones; 4300K super white light improves contrast on road signs and lane markers.",
+      "1550 lumens output; wider peripheral visibility and longer down-road reach for nighttime driving.",
+      "Actual 55W consumption matches OEM specifications; no harness melting or relay kit; compatible with CANBus vehicle electrical systems.",
+      "High-strength UV-cut quartz glass; resistance to extreme temperature changes and vibration; resistance to moisture intrusion inside the light housing.",
+      "Factory replacement fitting; no wire cutting or ballasts; no special adapters."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "H3"
+      },
+      {
+        "label": "Technology",
+        "value": "Xenon Halogen"
+      },
+      {
+        "label": "Voltage",
+        "value": "12V DC (Passenger Vehicles Only)"
+      },
+      {
+        "label": "Power",
+        "value": "55W"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "4300K (Super White / Crisp Daylight Look)"
+      },
+      {
+        "label": "Luminous flux",
+        "value": "1550 Lumens"
+      },
+      {
+        "label": "Application",
+        "value": "Headlight (Low / High Beam) or Fog Light"
+      },
+      {
+        "label": "Glass finish",
+        "value": "Optical Blue Tinted Quartz Glass"
+      },
+      {
+        "label": "Installation type",
+        "value": "Direct OEM Replacement (Plug & Play)"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5010-1.jpg",
+      "/products/bulbs/catalog/NBL5010-2.jpg",
+      "/products/bulbs/catalog/NBL5010-3.jpg",
+      "/products/bulbs/catalog/NBL5010-4.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6755-clean.png?v=1791875182",
+    "sourceUrl": "https://geekauto.co.nz/products/h3-12v-55w-super-white-halogen-bulb",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5011",
+    "supplierRef": "H3CLEAR12V",
+    "title": "H3 12V 55W Xenon Halogen Headlight & Fog Light Bulb - Clear (1x Globe)",
+    "subtitle": "Headlight",
+    "priceNzd": 16,
+    "features": [
+      "H3 xenon halogen headlight or fog light bulb; 12V 55W.",
+      "1550 Lumens output; wider field of view and longer forward visibility for earlier hazard recognition.",
+      "3200K warm white beam for rain or mist and fog; reduced reflected glare and eye fatigue.",
+      "Actual 55W rating matches 12V vehicle circuits; no harness overheating or blown fuses; no OBC dashboard warnings.",
+      "Optically clear quartz glass with resistance to thermal shock and vibration; maximum light transmission without colour distortion.",
+      "Standard replacement fitting for existing housings; no rewiring or relays; no ballast modifications."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "H3"
+      },
+      {
+        "label": "Technology",
+        "value": "Xenon"
+      },
+      {
+        "label": "Voltage",
+        "value": "12V"
+      },
+      {
+        "label": "Power",
+        "value": "55W"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "3200K"
+      },
+      {
+        "label": "Luminous flux",
+        "value": "1550 Lumens"
+      },
+      {
+        "label": "Socket / base",
+        "value": "H3"
+      },
+      {
+        "label": "Application",
+        "value": "Headlight"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5011-1.jpg",
+      "/products/bulbs/catalog/NBL5011-2.jpg",
+      "/products/bulbs/catalog/NBL5011-3.jpg",
+      "/products/bulbs/catalog/NBL5011-4.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6749-clean.png?v=1791875196",
+    "sourceUrl": "https://geekauto.co.nz/products/h3-12v-55w-clear-halogen-bulb",
+    "packLabel": "1 bulb",
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5012",
+    "supplierRef": "H3CCLEAR12V",
+    "title": "H3C 12V 55W Xenon Halogen Light Bulbs – 3200K Clear Quartz Glass 1450LM (Headlight & Fog Light)",
+    "subtitle": "Headlight (Low / High Beam) or Fog Light",
+    "priceNzd": 24,
+    "features": [
+      "H3C xenon halogen bulb for headlight or fog light use; 12V 55W.",
+      "3200K clear warm white output for rain or mist and dense fog; better adverse-weather visibility than high-kelvin blue/white light; with reduced eye strain and road reflection.",
+      "1450 lumens focused output; wider field of view and longer forward reach for earlier recognition of road debris or animals.",
+      "Actual 55W load compatible with 12V wiring looms; no harness melting or socket discolouration; no dashboard bulb warning errors.",
+      "High-purity clear quartz glass; resistance to high internal gas pressure; heavy vibration and rapid temperature changes.",
+      "OEM replacement form factor; installation in minutes without ballasts or relay harnesses; no wiring modifications."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "H3C"
+      },
+      {
+        "label": "Technology",
+        "value": "Xenon Halogen"
+      },
+      {
+        "label": "Voltage",
+        "value": "12V DC (Passenger Vehicles Only)"
+      },
+      {
+        "label": "Power",
+        "value": "55W"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "3200K (Clear / Warm White)"
+      },
+      {
+        "label": "Luminous flux",
+        "value": "1450 Lumens"
+      },
+      {
+        "label": "Application",
+        "value": "Headlight (Low / High Beam) or Fog Light"
+      },
+      {
+        "label": "Glass finish",
+        "value": "High-Transparency Clear Quartz Glass"
+      },
+      {
+        "label": "Installation type",
+        "value": "Direct OEM Replacement (Plug & Play)"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5012-1.jpg",
+      "/products/bulbs/catalog/NBL5012-2.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6758-clean.png?v=1791875158",
+    "sourceUrl": "https://geekauto.co.nz/products/h3c-12v-55w-clear-halogen-bulb",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5013",
+    "supplierRef": "H424VCLEAR",
+    "title": "H4 P43t 24V 75/70W Heavy Duty Xenon Halogen Bulbs – 3200K Clear Dual Filament Truck OEM Replacement",
+    "subtitle": "Headlight (High Beam & Low Beam) or Auxiliary Driving Lamp",
+    "priceNzd": 28,
+    "features": [
+      "H4 P43t dual-filament xenon halogen bulb; 24V 75/70W for 24-volt commercial vehicles.",
+      "High beam: 1900 Lumens (75W) for long-distance lighting on unlit highways; low beam: 1200 Lumens (70W) with wide coverage and controlled glare.",
+      "Applications include long-haul semi-trucks or lorries; intercity buses and construction haulers; agricultural tractors or heavy fleet machinery.",
+      "Reinforced filament coil supports; resistance to continuous diesel vibration and rough haul-road impacts; limiting premature failure.",
+      "3200K warm white light for dense fog or heavy rain; also applicable to snow and mist or road spray; with reduced reflected glare and eye fatigue on long night shifts.",
+      "OEM-standard 3-prong locking base; moisture seal without focal movement; correct beam geometry in factory reflector or projector assemblies.",
+      "Factory-standard 24V 75/70W circuit load; no harness overheating or ceramic plug melting; no vehicle circuit faults."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "H4"
+      },
+      {
+        "label": "Technology",
+        "value": "Heavy-Duty Xenon Halogen (Dual Filament)"
+      },
+      {
+        "label": "Voltage",
+        "value": "24V DC (Commercial / Heavy Vehicles Only)"
+      },
+      {
+        "label": "Power",
+        "value": "75W (High Beam) / 70W (Low Beam)"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "3200K (Clear / Warm White)"
+      },
+      {
+        "label": "Luminous flux",
+        "value": "1900 Lumens (High Beam) / 1200 Lumens (Low Beam)"
+      },
+      {
+        "label": "Socket / base",
+        "value": "H4 (Base: P43t, 3-Prong)"
+      },
+      {
+        "label": "Application",
+        "value": "Headlight (High Beam & Low Beam) or Auxiliary Driving Lamp"
+      },
+      {
+        "label": "Glass finish",
+        "value": "High-Transparency Clear Quartz Glass"
+      },
+      {
+        "label": "Installation type",
+        "value": "Direct OEM Replacement (Plug & Play)"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5013-1.jpg",
+      "/products/bulbs/catalog/NBL5013-2.jpg",
+      "/products/bulbs/catalog/NBL5013-3.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6865-clean.png?v=1791873988",
+    "sourceUrl": "https://geekauto.co.nz/products/h4-24v-75-70w-clear-halogen-bulb",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5014",
+    "supplierRef": "H4BLUE12V",
+    "title": "H4 12V 60/55W Dual Beam Xenon Halogen Bulbs – 4300K Super White Blue Glass (High/Low OEM Fit)",
+    "subtitle": "Headlight (Low/High Beam)",
+    "priceNzd": 24,
+    "features": [
+      "H4 dual-filament xenon halogen bulb for dual-beam headlights; 12V 60/55W; blue glass.",
+      "High beam: 1650 Lumens (60W) for long-range projection; low beam: 1000 Lumens (55W) with focused coverage and limited glare.",
+      "Precision optical blue coating filters yellow undertones; 4300K super white light improves contrast on road signs and street markers or lane striping.",
+      "Factory-standard 60/55W load for 12V automotive circuits; no harness melting or relay kit; no CANBus dashboard fault codes.",
+      "High-strength UV-cut quartz glass; resistance to intense operating temperatures; high internal gas pressure and rough-road vibration.",
+      "Factory replacement form factor for existing headlight assemblies; no wire cutting or external ballasts; no special adapters."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "H4"
+      },
+      {
+        "label": "Technology",
+        "value": "Xenon Halogen (Dual Filament)"
+      },
+      {
+        "label": "Voltage",
+        "value": "12V DC (Passenger Vehicles Only)"
+      },
+      {
+        "label": "Power",
+        "value": "60W (High Beam) / 55W (Low Beam)"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "4300K (Super White / Crisp Daylight Look)"
+      },
+      {
+        "label": "Luminous flux",
+        "value": "1650 Lumens (High Beam) / 1000 Lumens (Low Beam)"
+      },
+      {
+        "label": "Application",
+        "value": "Headlight (Low/High Beam)"
+      },
+      {
+        "label": "Glass finish",
+        "value": "Optical Blue Tinted Quartz Glass"
+      },
+      {
+        "label": "Beam function",
+        "value": "Dual Beam (High Beam & Low Beam)"
+      },
+      {
+        "label": "Installation type",
+        "value": "Direct OEM Replacement (Plug & Play)"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5014-1.jpg",
+      "/products/bulbs/catalog/NBL5014-2.jpg",
+      "/products/bulbs/catalog/NBL5014-3.jpg",
+      "/products/bulbs/catalog/NBL5014-4.jpg",
+      "/products/bulbs/catalog/NBL5014-5.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6765-clean.png?v=1791875094",
+    "sourceUrl": "https://geekauto.co.nz/products/h4-12v-60-55w-super-white-halogen-bulb",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5015",
+    "supplierRef": "H4CLEAR12V",
+    "title": "H4 12V 60/55W Dual Beam Xenon Halogen Bulbs – 3200K Clear 1650/1000LM OEM Replacement",
+    "subtitle": "Headlight (Low/High Beam)",
+    "priceNzd": 20,
+    "features": [
+      "H4 dual-filament xenon halogen bulb for integrated dual-beam headlights; 12V 60/55W.",
+      "High beam: 1650 Lumens (60W) for long-distance projection; low beam: 1000 Lumens (55W) with wide-angle coverage and controlled glare.",
+      "3200K warm white light for rain or snow; also applicable to mist and dense fog; with less glare and eye fatigue than cool white bulbs.",
+      "Factory-standard 60/55W load for 12V vehicle circuits; no wiring loom overload or melted sockets; no dashboard bulb-out warnings.",
+      "Heavy-duty clear UV-cut quartz glass; resistance to extreme temperature changes; high internal pressure and continuous vibration.",
+      "OEM form factor for direct installation; no rewiring or relays; no ballast modifications."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "H4"
+      },
+      {
+        "label": "Technology",
+        "value": "Xenon Halogen (Dual Filament)"
+      },
+      {
+        "label": "Voltage",
+        "value": "12V DC (Passenger Vehicles Only)"
+      },
+      {
+        "label": "Power",
+        "value": "60W (High Beam) / 55W (Low Beam)"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "3200K (Clear / Warm White)"
+      },
+      {
+        "label": "Luminous flux",
+        "value": "1650 Lumens (High Beam) / 1000 Lumens (Low Beam)"
+      },
+      {
+        "label": "Application",
+        "value": "Headlight (Low/High Beam)"
+      },
+      {
+        "label": "Glass finish",
+        "value": "High-Transparency Clear Quartz Glass"
+      },
+      {
+        "label": "Beam function",
+        "value": "High Beam & Low Beam (Dual Function)"
+      },
+      {
+        "label": "Installation type",
+        "value": "Direct OEM Replacement (Plug & Play)"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5015-1.jpg",
+      "/products/bulbs/catalog/NBL5015-2.jpg",
+      "/products/bulbs/catalog/NBL5015-3.jpg",
+      "/products/bulbs/catalog/NBL5015-4.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6761-clean.png?v=1791875109",
+    "sourceUrl": "https://geekauto.co.nz/products/h4-12v-60-55w-clear-halogen-bulb",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5016",
+    "supplierRef": "H4BCLEAR12V",
+    "title": "H4B 12V 60/55W Dual Beam Xenon Halogen Bulbs – 3200K Clear Quartz Glass (1650/1000LM OEM Fit)",
+    "subtitle": "Headlight (Low/High Beam)",
+    "priceNzd": 36,
+    "features": [
+      "H4B dual-filament xenon halogen bulb for dual-beam headlights; 12V 60/55W.",
+      "High beam: 1650 Lumens (60W) for long-distance projection; low beam: 1000 Lumens (55W) with wide-angle coverage and controlled glare.",
+      "3200K warm white light for heavy rain or fog and mist; less reflected glare and eye fatigue than cool white bulbs.",
+      "Factory-standard 60/55W load for 12V circuits; no wiring loom overload or melted sockets; no dashboard bulb-out warnings.",
+      "Heavy-duty clear optical-grade quartz glass; resistance to intense operating temperatures; high internal gas pressure and rough-road vibration.",
+      "OEM form factor for quick direct installation; no wire cutting or external relays; no ballast modifications."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "H4B"
+      },
+      {
+        "label": "Technology",
+        "value": "Xenon Halogen (Dual Filament)"
+      },
+      {
+        "label": "Voltage",
+        "value": "12V DC (Passenger Vehicles Only)"
+      },
+      {
+        "label": "Power",
+        "value": "60W (High Beam) / 55W (Low Beam)"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "3200K (Clear / Warm White)"
+      },
+      {
+        "label": "Luminous flux",
+        "value": "1650 Lumens (High Beam) / 1000 Lumens (Low Beam)"
+      },
+      {
+        "label": "Application",
+        "value": "Headlight (Low/High Beam)"
+      },
+      {
+        "label": "Glass finish",
+        "value": "High-Transparency Clear Quartz Glass"
+      },
+      {
+        "label": "Beam function",
+        "value": "Dual Beam (High Beam & Low Beam)"
+      },
+      {
+        "label": "Installation type",
+        "value": "Direct OEM Replacement (Plug & Play)"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5016-1.jpg",
+      "/products/bulbs/catalog/NBL5016-2.jpg",
+      "/products/bulbs/catalog/NBL5016-3.jpg",
+      "/products/bulbs/catalog/NBL5016-4.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6774-clean.png?v=1791875081",
+    "sourceUrl": "https://geekauto.co.nz/products/h4b-12v-60-55w-clear-halogen-bulb",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5017",
+    "supplierRef": "H724VCLEAR",
+    "title": "H7 PX26d 24V 70W Heavy Duty Xenon Halogen Bulbs – 3200K Clear 1750LM Truck OEM Replacement",
+    "subtitle": "Headlight (Low Beam / High Beam) or Fog Light",
+    "priceNzd": 24,
+    "features": [
+      "H7 PX26d xenon halogen bulb; 24V 70W for 24-volt commercial electrical systems.",
+      "Applications include semi-trucks or lorries; intercity coaches and buses; construction vehicles or agricultural machinery.",
+      "1750 lumens focused output; increased peripheral coverage and forward reach for earlier recognition of road debris or highway hazards.",
+      "OEM-dimensional H7 fitting; 1:1 replacement in factory reflector or projector assemblies with precise focus and no stray glare towards oncoming traffic.",
+      "3200K warm white light for dense fog or torrential rain; also applicable to mist and road dust; with reduced reflected glare and eye strain on long night shifts.",
+      "Reinforced filament coil mounts; resistance to diesel engine vibration and rough pavement impacts; limiting premature filament failure.",
+      "Factory-standard 24V 70W circuit load; thermal protection for original harnesses and switches plus ceramic plugs.",
+      "Direct factory H7 socket connection; no rewiring or external relays; no ballast retrofit."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "H7"
+      },
+      {
+        "label": "Technology",
+        "value": "Heavy-Duty Xenon Halogen"
+      },
+      {
+        "label": "Voltage",
+        "value": "24V DC (Commercial / Heavy Vehicles Only)"
+      },
+      {
+        "label": "Power",
+        "value": "70W"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "3200K (Clear / Warm White)"
+      },
+      {
+        "label": "Luminous flux",
+        "value": "1750 Lumens"
+      },
+      {
+        "label": "Socket / base",
+        "value": "H7 (Base: PX26d)"
+      },
+      {
+        "label": "Application",
+        "value": "Headlight (Low Beam / High Beam) or Fog Light"
+      },
+      {
+        "label": "Glass finish",
+        "value": "High-Transparency Clear Quartz Glass"
+      },
+      {
+        "label": "Installation type",
+        "value": "Direct OEM Replacement (Plug & Play)"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5017-1.jpg",
+      "/products/bulbs/catalog/NBL5017-2.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6869-clean.png?v=1791873971",
+    "sourceUrl": "https://geekauto.co.nz/products/h7-24v-70w-clear-halogen-bulb",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5018",
+    "supplierRef": "H7BLUE12V",
+    "title": "H7 PX26d 12V 55W Xenon Halogen Light Bulbs – 3200K Super White Blue Quartz Glass (1500LM)",
+    "subtitle": "Headlight (Low Beam / High Beam) or Fog Light",
+    "priceNzd": 20,
+    "features": [
+      "H7 PX26d xenon halogen bulb; 12V 55W; blue quartz glass.",
+      "OEM-dimensional fitting for factory H7 projector or reflector assemblies; precise beam focus without stray glare towards oncoming drivers.",
+      "Blue optical coating gives unlit headlights or fog lamps a cool-tinted appearance; illuminated output is a high-contrast 3200K beam.",
+      "1500 lumens focused output; wider field of view and longer forward reach for earlier hazard recognition.",
+      "Actual 55W load matches manufacturer ratings for 12V factory wiring; no melted sockets or harness overheating; no dashboard bulb-out warnings.",
+      "High-strength UV-cut quartz glass; resistance to intense internal gas pressure; heavy vibration and rapid temperature changes.",
+      "Direct replacement in existing H7 sockets; no relays or external ballasts; no wiring modifications."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "H7"
+      },
+      {
+        "label": "Technology",
+        "value": "Xenon Halogen"
+      },
+      {
+        "label": "Voltage",
+        "value": "12V DC (Passenger Vehicles Only)"
+      },
+      {
+        "label": "Power",
+        "value": "55W"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "3200K (Super White / Crisp Contrast)"
+      },
+      {
+        "label": "Luminous flux",
+        "value": "1500 Lumens"
+      },
+      {
+        "label": "Socket / base",
+        "value": "H7 (Base: PX26d)"
+      },
+      {
+        "label": "Application",
+        "value": "Headlight (Low Beam / High Beam) or Fog Light"
+      },
+      {
+        "label": "Glass finish",
+        "value": "Optical Blue Tinted Quartz Glass"
+      },
+      {
+        "label": "Installation type",
+        "value": "Direct OEM Replacement (Plug & Play)"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5018-1.jpg",
+      "/products/bulbs/catalog/NBL5018-2.jpg",
+      "/products/bulbs/catalog/NBL5018-3.jpg",
+      "/products/bulbs/catalog/NBL5018-4.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6786-clean.png?v=1791875036",
+    "sourceUrl": "https://geekauto.co.nz/products/h7-12v-55w-super-white-halogen-bulb",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5019",
+    "supplierRef": "H7CLEAR12V",
+    "title": "H7 12V 55W PX26d Xenon Halogen Light Bulbs – 3200K Clear Quartz Glass (Headlight / Fog Light)",
+    "subtitle": "Headlight (Low Beam / High Beam) or Fog Light",
+    "priceNzd": 16,
+    "features": [
+      "H7 PX26d xenon halogen bulb; 12V 55W; clear quartz glass.",
+      "OEM-dimensional 1:1 fit in factory H7 reflector or projector housings; precise focus without glare towards oncoming traffic.",
+      "3200K warm white beam for rain or snow; also applicable to mist and dense fog; with less glare and eye fatigue than cool white or LED bulbs.",
+      "1500 lumens focused output; wider peripheral visibility and longer down-road reach for earlier hazard recognition.",
+      "Actual 55W load matches manufacturer specifications; no harness overheating or melted H7 sockets; no dashboard error warnings.",
+      "Heavy-duty UV-cut quartz glass; resistance to extreme temperature changes; high internal gas pressure and rough-road vibration.",
+      "Direct replacement in existing H7 sockets; no relays or external ballasts; no wire splicing."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "H7"
+      },
+      {
+        "label": "Technology",
+        "value": "Xenon Halogen"
+      },
+      {
+        "label": "Voltage",
+        "value": "12V DC (Passenger Vehicles Only)"
+      },
+      {
+        "label": "Power",
+        "value": "55W"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "3200K (Clear / Warm White)"
+      },
+      {
+        "label": "Luminous flux",
+        "value": "1500 Lumens"
+      },
+      {
+        "label": "Socket / base",
+        "value": "H7 (Base: PX26d)"
+      },
+      {
+        "label": "Application",
+        "value": "Headlight (Low Beam / High Beam) or Fog Light"
+      },
+      {
+        "label": "Glass finish",
+        "value": "High-Transparency Clear Quartz Glass"
+      },
+      {
+        "label": "Installation type",
+        "value": "Direct OEM Replacement (Plug & Play)"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5019-1.jpg",
+      "/products/bulbs/catalog/NBL5019-2.jpg",
+      "/products/bulbs/catalog/NBL5019-3.jpg",
+      "/products/bulbs/catalog/NBL5019-4.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6788-clean.png?v=1791875064",
+    "sourceUrl": "https://geekauto.co.nz/products/h7-12v-55w-clear-halogen-bulb",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5020",
+    "supplierRef": "H8CLEAR12V",
+    "title": "H8 PGJ19-1 12V 35W Xenon Halogen Light Bulbs – 3200K Clear Quartz Glass (800LM OEM Fit)",
+    "subtitle": "Fog Light or Auxiliary Headlight / DRL",
+    "priceNzd": 36,
+    "features": [
+      "H8 PGJ19-1 xenon halogen bulb; 12V 35W.",
+      "OEM-standard socket dimensions with original-style right-angle connector; airtight seal and vibration-resistant seating; correct beam projection in fog lamp or headlight housings.",
+      "3200K warm white beam for heavy rain or road spray and dense fog; reduced reflected white-out glare and eye strain.",
+      "800 lumens focused output; peripheral coverage of curbs and gutters plus lane markers.",
+      "Factory-standard 35W load for safe 12V circuit operation; thermal protection against warping or melting of plastic fog lamp housings and lenses.",
+      "High-purity clear quartz glass; resistance to internal gas pressure; rapid temperature changes and heavy vibration.",
+      "Direct replacement in standard H8 sockets; no wire splicing or additional relays; no external ballast modules."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "H8"
+      },
+      {
+        "label": "Technology",
+        "value": "Xenon Halogen"
+      },
+      {
+        "label": "Voltage",
+        "value": "12V DC (Passenger Vehicles Only)"
+      },
+      {
+        "label": "Power",
+        "value": "35W"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "3200K (Clear / Warm White)"
+      },
+      {
+        "label": "Luminous flux",
+        "value": "800 Lumens"
+      },
+      {
+        "label": "Socket / base",
+        "value": "H8 (Base: PGJ19-1)"
+      },
+      {
+        "label": "Application",
+        "value": "Fog Light or Auxiliary Headlight / DRL"
+      },
+      {
+        "label": "Glass finish",
+        "value": "High-Transparency Clear Quartz Glass"
+      },
+      {
+        "label": "Installation type",
+        "value": "Direct OEM Replacement (Plug & Play)"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5020-1.jpg",
+      "/products/bulbs/catalog/NBL5020-2.jpg",
+      "/products/bulbs/catalog/NBL5020-3.jpg",
+      "/products/bulbs/catalog/NBL5020-4.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6791-clean.png?v=1791875012",
+    "sourceUrl": "https://geekauto.co.nz/products/h8-12v-35w-clear-halogen-bulb",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5021",
+    "supplierRef": "H9CLEAR12V",
+    "title": "H9 PGJ19-5 12V 65W Xenon Halogen Light Bulbs – 3200K Clear 2100LM OEM Replacement",
+    "subtitle": "Headlight (High Beam / Main Beam)",
+    "priceNzd": 36,
+    "features": [
+      "H9 PGJ19-5 xenon halogen bulb; 12V 65W.",
+      "2100 lumens focused long-range output; extended high-beam reach for earlier recognition of road hazards or wildlife and debris.",
+      "OEM-dimensional base with original-style right-angle connector; airtight seal and vibration resistance; precise focus in reflector or projector assemblies.",
+      "3200K warm white light for rain or mist; also applicable to dust and fog; without the excessive glare and eye strain associated with overly cool-toned bulbs.",
+      "Actual 65W load for 12V automotive circuits; no wiring loom damage or melted connectors; no CANBus dashboard errors.",
+      "Heavy-duty UV-cut quartz glass; resistance to intense operating temperatures; high internal gas pressure and sustained vibration.",
+      "1:1 replacement in factory H9 sockets; no rewiring or additional relays; no ballast retrofit."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "H9"
+      },
+      {
+        "label": "Technology",
+        "value": "Xenon Halogen"
+      },
+      {
+        "label": "Voltage",
+        "value": "12V DC (Passenger Vehicles Only)"
+      },
+      {
+        "label": "Power",
+        "value": "65W"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "3200K (Clear / Warm White)"
+      },
+      {
+        "label": "Luminous flux",
+        "value": "2100 Lumens"
+      },
+      {
+        "label": "Socket / base",
+        "value": "H9 (Base: PGJ19-5)"
+      },
+      {
+        "label": "Application",
+        "value": "Headlight (High Beam / Main Beam)"
+      },
+      {
+        "label": "Glass finish",
+        "value": "High-Transparency Clear Quartz Glass"
+      },
+      {
+        "label": "Installation type",
+        "value": "Direct OEM Replacement (Plug & Play)"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5021-1.jpg",
+      "/products/bulbs/catalog/NBL5021-2.jpg",
+      "/products/bulbs/catalog/NBL5021-3.jpg",
+      "/products/bulbs/catalog/NBL5021-4.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6796-clean.png?v=1791874766",
+    "sourceUrl": "https://geekauto.co.nz/products/h9-12v-65w-clear-halogen-bulb",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5022",
+    "supplierRef": "HB1CLEAR12V",
+    "title": "HB1 9004 P29t 12V 65/45W Dual Filament Xenon Halogen Bulbs – 3200K Clear 1200/700LM OEM Fit",
+    "subtitle": "Headlight (Low/High Beam)",
+    "priceNzd": 36,
+    "features": [
+      "HB1 / 9004 P29t dual-filament xenon halogen bulb; 12V 65/45W.",
+      "Precision-wound filaments; high beam: 1200 Lumens (65W) for long-distance projection; low beam: 700 Lumens (45W) with wide coverage and controlled glare.",
+      "OEM-dimensional 9004 locking collar base; airtight moisture seal and secure seating; correct optical alignment.",
+      "3200K warm white light for heavy rain or fog and mist; less reflected glare and eye fatigue than cool white bulbs.",
+      "Actual 65/45W consumption matches factory circuit ratings; protection for headlight harnesses and switches against overheating or socket melting and electrical load faults.",
+      "Heavy-duty clear UV-cut quartz glass; resistance to intense internal gas pressure; rapid temperature changes and rough-road vibration.",
+      "1:1 OEM replacement in factory 9004 headlamp assemblies; no rewiring or relays; no ballast modifications."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "HB1"
+      },
+      {
+        "label": "Technology",
+        "value": "Xenon Halogen (Dual Filament)"
+      },
+      {
+        "label": "Voltage",
+        "value": "12V DC (Passenger Vehicles Only)"
+      },
+      {
+        "label": "Power",
+        "value": "65W (High Beam) / 45W (Low Beam)"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "3200K (Clear / Warm White)"
+      },
+      {
+        "label": "Luminous flux",
+        "value": "1200 Lumens (High Beam) / 700 Lumens (Low Beam)"
+      },
+      {
+        "label": "Socket / base",
+        "value": "HB1 (9004 / Base: P29t)"
+      },
+      {
+        "label": "Application",
+        "value": "Headlight (Low/High Beam)"
+      },
+      {
+        "label": "Glass finish",
+        "value": "High-Transparency Clear Quartz Glass"
+      },
+      {
+        "label": "Beam function",
+        "value": "High Beam & Low Beam (Dual Function)"
+      },
+      {
+        "label": "Installation type",
+        "value": "Direct OEM Replacement (Plug & Play)"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5022-1.jpg",
+      "/products/bulbs/catalog/NBL5022-2.jpg",
+      "/products/bulbs/catalog/NBL5022-3.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6834-clean.png?v=1791874648",
+    "sourceUrl": "https://geekauto.co.nz/products/hb1-9004-12v-65-45w-clear-halogen-bulb",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5023",
+    "supplierRef": "HB3BLUE12V",
+    "title": "HB3 9005 P20d 12V 65W Xenon Halogen Light Bulbs – 4300K Super White Blue Quartz Glass (1860LM OEM Fit)",
+    "subtitle": "Headlight (High Beam / Main Beam)",
+    "priceNzd": 36,
+    "features": [
+      "HB3 / 9005 P20d xenon halogen bulb; 12V 65W; blue quartz glass.",
+      "Precision optical blue coating filters yellow tones; 4300K super white beam improves contrast at road edges and reflective traffic markers or street signs.",
+      "1860 lumens focused output; wider forward view and longer high-beam reach for earlier recognition of road hazards or animals and debris.",
+      "OEM-dimensional base with standard right-angle locking connector; airtight moisture seal and vibration resistance; precise beam focus in factory housings.",
+      "Factory-standard 65W load for 12V circuits; no wiring loom overload or melted sockets; no dashboard bulb-out fault codes.",
+      "Heavy-duty UV-cut quartz glass; resistance to intense internal gas pressure; high operating temperatures and sustained vibration.",
+      "1:1 replacement in factory 9005 / HB3 sockets; no wire cutting or external relays; no ballast retrofit."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "HB3"
+      },
+      {
+        "label": "Technology",
+        "value": "Xenon Halogen"
+      },
+      {
+        "label": "Voltage",
+        "value": "12V DC (Passenger Vehicles Only)"
+      },
+      {
+        "label": "Power",
+        "value": "65W"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "4300K (Super White / Crisp Daylight Look)"
+      },
+      {
+        "label": "Luminous flux",
+        "value": "1860 Lumens"
+      },
+      {
+        "label": "Socket / base",
+        "value": "HB3 (9005 / Base: P20d)"
+      },
+      {
+        "label": "Application",
+        "value": "Headlight (High Beam / Main Beam)"
+      },
+      {
+        "label": "Glass finish",
+        "value": "Optical Blue Tinted Quartz Glass"
+      },
+      {
+        "label": "Installation type",
+        "value": "Direct OEM Replacement (Plug & Play)"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5023-1.jpg",
+      "/products/bulbs/catalog/NBL5023-2.jpg",
+      "/products/bulbs/catalog/NBL5023-3.jpg",
+      "/products/bulbs/catalog/NBL5023-4.jpg",
+      "/products/bulbs/catalog/NBL5023-5.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6844-clean.png?v=1791874602",
+    "sourceUrl": "https://geekauto.co.nz/products/hb3-9005-12v-65w-super-white-halogen-bulb",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5024",
+    "supplierRef": "HB3CLEAR12V",
+    "title": "HB3 9005 P20d 12V 65W Xenon Halogen Light Bulbs – 3200K Clear 1860LM High Beam OEM Fit",
+    "subtitle": "Headlight (High Beam / Main Beam)",
+    "priceNzd": 28,
+    "features": [
+      "HB3 / 9005 P20d xenon halogen bulb; 12V 65W; clear quartz glass; high-beam application.",
+      "1860 lumens focused long-range output; wider high-beam coverage for earlier recognition of animals or debris and road hazards.",
+      "OEM-dimensional base with standard right-angle connector; airtight moisture seal and vibration resistance; precise beam focus in factory housings.",
+      "3200K warm white beam for dense fog or rain; also applicable to mist and road dust; with less reflected glare and eye fatigue than cool white bulbs.",
+      "Actual 65W load for standard 12V automotive circuits; no harness overload or melted sockets; no CANBus fault codes.",
+      "Heavy-duty UV-cut quartz glass; resistance to extreme temperature changes; high internal gas pressure and continuous vibration.",
+      "1:1 replacement in factory 9005 / HB3 sockets; no wire cutting or external relays; no ballast modifications."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "HB3"
+      },
+      {
+        "label": "Technology",
+        "value": "Xenon Halogen"
+      },
+      {
+        "label": "Voltage",
+        "value": "12V DC (Passenger Vehicles Only)"
+      },
+      {
+        "label": "Power",
+        "value": "65W"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "3200K (Clear / Warm White)"
+      },
+      {
+        "label": "Luminous flux",
+        "value": "1860 Lumens"
+      },
+      {
+        "label": "Socket / base",
+        "value": "HB3 (9005 / Base: P20d)"
+      },
+      {
+        "label": "Application",
+        "value": "Headlight (High Beam / Main Beam)"
+      },
+      {
+        "label": "Glass finish",
+        "value": "High-Transparency Clear Quartz Glass"
+      },
+      {
+        "label": "Installation type",
+        "value": "Direct OEM Replacement (Plug & Play)"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5024-1.jpg",
+      "/products/bulbs/catalog/NBL5024-2.jpg",
+      "/products/bulbs/catalog/NBL5024-3.jpg",
+      "/products/bulbs/catalog/NBL5024-4.jpg",
+      "/products/bulbs/catalog/NBL5024-5.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6840-clean.png?v=1791874614",
+    "sourceUrl": "https://geekauto.co.nz/products/hb3-9005-12v-65w-clear-halogen-bulb",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5025",
+    "supplierRef": "HB4BLUE12V",
+    "title": "HB4 9006 P22d 12V 55W Xenon Halogen Light Bulbs – 4300K Super White Blue Quartz Glass (1095LM OEM Fit)",
+    "subtitle": "Headlight (Low Beam) or Fog Light",
+    "priceNzd": 36,
+    "features": [
+      "HB4 / 9006 P22d xenon halogen bulb; 12V 55W; blue quartz glass.",
+      "Optical blue coating filters yellow tones; 4300K super white beam improves contrast on signs and reflective lane markers or obstacles.",
+      "1095 lumens controlled output; peripheral coverage of gutters and curbs plus lane edges without dazzling oncoming traffic.",
+      "OEM-dimensional base with integrated right-angle connector; airtight moisture seal and vibration-resistant lock; defined optical cutoff in reflector or projector assemblies.",
+      "Actual 55W load for standard 12V automotive circuits; no harness overload or melted sockets; no dashboard bulb-out fault codes.",
+      "Heavy-duty UV-cut quartz glass; resistance to rapid ambient temperature changes; high internal gas pressure and sustained vibration.",
+      "1:1 OEM replacement in factory 9006 / HB4 sockets; installation in minutes without wire cutting or external relays; no ballast retrofit."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "HB4"
+      },
+      {
+        "label": "Technology",
+        "value": "Xenon Halogen"
+      },
+      {
+        "label": "Voltage",
+        "value": "12V DC (Passenger Vehicles Only)"
+      },
+      {
+        "label": "Power",
+        "value": "55W"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "4300K (Super White / Crisp Daylight Look)"
+      },
+      {
+        "label": "Luminous flux",
+        "value": "1095 Lumens"
+      },
+      {
+        "label": "Socket / base",
+        "value": "HB4 (9006 / Base: P22d)"
+      },
+      {
+        "label": "Application",
+        "value": "Headlight (Low Beam) or Fog Light"
+      },
+      {
+        "label": "Glass finish",
+        "value": "Optical Blue Tinted Quartz Glass"
+      },
+      {
+        "label": "Installation type",
+        "value": "Direct OEM Replacement (Plug & Play)"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5025-1.jpg",
+      "/products/bulbs/catalog/NBL5025-2.jpg",
+      "/products/bulbs/catalog/NBL5025-3.jpg",
+      "/products/bulbs/catalog/NBL5025-4.jpg",
+      "/products/bulbs/catalog/NBL5025-5.jpg",
+      "/products/bulbs/catalog/NBL5025-6.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6857-clean.png?v=1791874015",
+    "sourceUrl": "https://geekauto.co.nz/products/hb4-9006-12v-55w-super-white-halogen-bulb",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5026",
+    "supplierRef": "HB4CLEAR12V",
+    "title": "HB4 9006 P22d 12V 55W Xenon Halogen Light Bulbs – 3200K Clear 1095LM Low Beam OEM Fit",
+    "subtitle": "Headlight (Low Beam) or Fog Light",
+    "priceNzd": 28,
+    "features": [
+      "HB4 / 9006 P22d xenon halogen bulb; 12V 55W; clear quartz glass; low-beam application.",
+      "OEM-dimensional base with integrated right-angle locking connector; moisture seal and vibration-resistant seating; defined optical cutoff in reflector or projector housings.",
+      "3200K warm white beam for heavy rain or mist; also applicable to road spray and dense fog; with less reflected glare and eye fatigue than cool white bulbs.",
+      "1095 lumens controlled output; peripheral coverage of road edges and curbs plus lane striping without dazzling oncoming traffic.",
+      "Actual 55W load for standard 12V automotive circuits; no harness overload or melted sockets; no dashboard fault warnings.",
+      "Heavy-duty UV-cut quartz glass; resistance to rapid ambient temperature changes; high internal gas pressure and continuous vibration.",
+      "1:1 OEM replacement in factory 9006 / HB4 sockets; installation in minutes without rewiring or external relays; no ballast retrofit."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "HB4"
+      },
+      {
+        "label": "Technology",
+        "value": "Xenon Halogen"
+      },
+      {
+        "label": "Voltage",
+        "value": "12V DC (Passenger Vehicles Only)"
+      },
+      {
+        "label": "Power",
+        "value": "55W"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "3200K (Clear / Warm White)"
+      },
+      {
+        "label": "Luminous flux",
+        "value": "1095 Lumens"
+      },
+      {
+        "label": "Socket / base",
+        "value": "HB4 (9006 / Base: P22d)"
+      },
+      {
+        "label": "Application",
+        "value": "Headlight (Low Beam) or Fog Light"
+      },
+      {
+        "label": "Glass finish",
+        "value": "High-Transparency Clear Quartz Glass"
+      },
+      {
+        "label": "Installation type",
+        "value": "Direct OEM Replacement (Plug & Play)"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5026-1.jpg",
+      "/products/bulbs/catalog/NBL5026-2.jpg",
+      "/products/bulbs/catalog/NBL5026-3.jpg",
+      "/products/bulbs/catalog/NBL5026-4.jpg",
+      "/products/bulbs/catalog/NBL5026-5.jpg",
+      "/products/bulbs/catalog/NBL5026-6.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6854-clean.png?v=1791874567",
+    "sourceUrl": "https://geekauto.co.nz/products/hb4-9006-12v-55w-clear-halogen-bulb",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5027",
+    "supplierRef": "PSX24W",
+    "title": "PSX24W 2504 PG20-7 12V 24W Xenon Halogen Light Bulbs – 3200K Clear OEM Fog Lamp Replacement (500LM)",
+    "subtitle": "Fog Light",
+    "priceNzd": 60,
+    "features": [
+      "PSX24W 2504 (PG20-7) xenon halogen fog lamp bulb; 12V 24W, drop-in fit to factory socket.",
+      "3200K warm white output for fog, mist and rain; reduced glare compared to higher-kelvin white/blue light.",
+      "500 lumen rating matched to fog-lamp duty; lights the road edge without dazzling oncoming traffic.",
+      "Factory 24W load; original wiring and bulb-monitoring electronics stay in spec.",
+      "Clear quartz-glass envelope; withstands heat and road vibration for longer service life.",
+      "Direct replacement for the OE bulb; no wiring, ballast or extra parts."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "PSX24W"
+      },
+      {
+        "label": "Technology",
+        "value": "Xenon"
+      },
+      {
+        "label": "Voltage",
+        "value": "12V"
+      },
+      {
+        "label": "Power",
+        "value": "24W"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "3200K"
+      },
+      {
+        "label": "Luminous flux",
+        "value": "500 Lumens"
+      },
+      {
+        "label": "Socket / base",
+        "value": "PSX24W"
+      },
+      {
+        "label": "Application",
+        "value": "Fog Light"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5027-1.jpg",
+      "/products/bulbs/catalog/NBL5027-2.jpg",
+      "/products/bulbs/catalog/NBL5027-3.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6904-clean.png?v=1791873301",
+    "sourceUrl": "https://geekauto.co.nz/products/psx24w-12v-24w-clear-halogen-bulb",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5028",
+    "supplierRef": "T10BLUE",
+    "title": "T10 12V 5W Wedge Bulb – W5W / 501 Super White (Blue Tint Glass) Park, Interior & Number Plate Light",
+    "subtitle": "Interior / Dome Light / License Plate Light",
+    "priceNzd": 8,
+    "features": [
+      "T10 W5W / 501 wedge bulb; 12V 5W; park light; interior light or number plate application.",
+      "Blue-coated glass filters warm tones for a daylight-white appearance.",
+      "Push-in wedge fitting; compatible with standard T10 / W5W / 501 / 194 sockets.",
+      "Standard automotive circuit compatibility without bulb fault codes; installation requires no tools."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "T10"
+      },
+      {
+        "label": "Technology",
+        "value": "xenon"
+      },
+      {
+        "label": "Voltage",
+        "value": "12V"
+      },
+      {
+        "label": "Socket / base",
+        "value": "T10"
+      },
+      {
+        "label": "Application",
+        "value": "Interior / Dome Light / License Plate Light"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5028-1.jpg",
+      "/products/bulbs/catalog/NBL5028-2.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6941-clean.png?v=1791873046",
+    "sourceUrl": "https://geekauto.co.nz/products/t10-12v-5w-super-white-park-interior-bulb",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5101",
+    "supplierRef": "D1R4300K",
+    "title": "D1R 35W HID Xenon Headlight Bulb – 3200LM Super Bright (4300K / 6000K)",
+    "subtitle": "Headlight",
+    "priceNzd": 110.5,
+    "features": [
+      "D1R HID Xenon bulb for factory reflector housing systems, with an integrated igniter base.",
+      "Rated power: 35W; light output: up to 3200 lumens for nighttime road illumination.",
+      "Colour options: factory-standard 4300K for road visibility; 6000K super white.",
+      "Vehicle OEM ballast and wiring harness connections for direct factory D1R replacement."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "D1R"
+      },
+      {
+        "label": "Technology",
+        "value": "HID"
+      },
+      {
+        "label": "Power",
+        "value": "35W"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "4300K"
+      },
+      {
+        "label": "Luminous flux",
+        "value": "3200 Lumens"
+      },
+      {
+        "label": "Socket / base",
+        "value": "D1R"
+      },
+      {
+        "label": "Application",
+        "value": "Headlight"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5101-1.jpg",
+      "/products/bulbs/catalog/NBL5101-2.jpg",
+      "/products/bulbs/catalog/NBL5101-3.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6969-clean.png?v=1791871935",
+    "sourceUrl": "https://geekauto.co.nz/products/d1r-35w-hid-headlight-bulb",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5102",
+    "supplierRef": "D1S4300K",
+    "title": "D1S 35W HID Xenon Headlight Bulb – 3200LM Super Bright (4300K / 6000K)",
+    "subtitle": "Headlight",
+    "priceNzd": 110.5,
+    "features": [
+      "D1S HID Xenon bulb for factory projector lens assemblies, with an integrated igniter base.",
+      "Rated power: 35W; light output: up to 3200 lumens for nighttime road illumination.",
+      "Colour options: factory-standard 4300K for visibility in varied weather; 6000K super white.",
+      "Original ballast harness connection for direct factory D1S replacement."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "D1S"
+      },
+      {
+        "label": "Technology",
+        "value": "HID"
+      },
+      {
+        "label": "Power",
+        "value": "35W"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "4300K"
+      },
+      {
+        "label": "Luminous flux",
+        "value": "3200 Lumens"
+      },
+      {
+        "label": "Socket / base",
+        "value": "D1S"
+      },
+      {
+        "label": "Application",
+        "value": "Headlight"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5102-1.jpg",
+      "/products/bulbs/catalog/NBL5102-2.jpg",
+      "/products/bulbs/catalog/NBL5102-3.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6972-clean.png?v=1791871920",
+    "sourceUrl": "https://geekauto.co.nz/products/d1s-35w-hid-headlight-bulb",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5103",
+    "supplierRef": "D2C4300K",
+    "title": "D2C 35W HID Xenon Headlight Bulb – 3200LM Super Bright (4300K / 6000K)",
+    "subtitle": "Headlight",
+    "priceNzd": 90,
+    "features": [
+      "D2C HID Xenon base compatible with D2S projector housings and D2R reflector housings.",
+      "Actual power: 35W; light output: up to 3200 lumens for long-range nighttime illumination.",
+      "Colour options: factory-standard 4300K for road visibility; 6000K super white.",
+      "Factory D2 ballast and wiring harness connections require no modification."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "D2C"
+      },
+      {
+        "label": "Technology",
+        "value": "HID"
+      },
+      {
+        "label": "Power",
+        "value": "35W"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "4300K"
+      },
+      {
+        "label": "Luminous flux",
+        "value": "3200 Lumens"
+      },
+      {
+        "label": "Socket / base",
+        "value": "D2C"
+      },
+      {
+        "label": "Application",
+        "value": "Headlight"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5103-1.jpg",
+      "/products/bulbs/catalog/NBL5103-2.jpg",
+      "/products/bulbs/catalog/NBL5103-3.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6985-clean.png?v=1791871904",
+    "sourceUrl": "https://geekauto.co.nz/products/d2c-35w-hid-headlight-bulb",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5104",
+    "supplierRef": "D2R4300K",
+    "title": "D2R 35W HID Xenon Headlight Bulb – 3200LM Super Bright (4300K / 6000K / 8000K)",
+    "subtitle": "Headlight",
+    "priceNzd": 90,
+    "features": [
+      "D2R HID Xenon reflector bulb with a factory-standard ceramic shading strip forming the R-type shield for glare control and precise beam formation.",
+      "Actual power: 35W; light output: up to 3200 lumens for nighttime road illumination.",
+      "Colour options: factory-standard 4300K for road visibility; 6000K super white; 8000K crystal blue.",
+      "Original vehicle ballast and igniter connections for direct factory D2R replacement."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "D2R"
+      },
+      {
+        "label": "Technology",
+        "value": "HID"
+      },
+      {
+        "label": "Power",
+        "value": "35W"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "4300K"
+      },
+      {
+        "label": "Luminous flux",
+        "value": "3200 Lumens"
+      },
+      {
+        "label": "Socket / base",
+        "value": "D2R"
+      },
+      {
+        "label": "Application",
+        "value": "Headlight"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5104-1.jpg",
+      "/products/bulbs/catalog/NBL5104-2.jpg",
+      "/products/bulbs/catalog/NBL5104-3.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6991-clean.png?v=1791871888",
+    "sourceUrl": "https://geekauto.co.nz/products/d2r-35w-hid-headlight-bulb",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5105",
+    "supplierRef": "D2S4300K",
+    "title": "D2S 35W HID Xenon Headlight Bulb – 3200LM Super Bright (4300K / 6000K / 8000K)",
+    "subtitle": "Headlight",
+    "priceNzd": 90,
+    "features": [
+      "D2S HID Xenon bulb with a clear glass envelope for projector optics, a defined beam cutoff and stray-glare control.",
+      "Actual power: 35W; light output: up to 3200 lumens for nighttime road illumination.",
+      "Colour options: factory-standard 4300K for visibility in varied weather; 6000K super white; 8000K crystal blue.",
+      "Original vehicle ballast and igniter connections for direct factory D2S replacement."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "D2S"
+      },
+      {
+        "label": "Technology",
+        "value": "HID"
+      },
+      {
+        "label": "Power",
+        "value": "35W"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "4300K"
+      },
+      {
+        "label": "Luminous flux",
+        "value": "3200 Lumens"
+      },
+      {
+        "label": "Socket / base",
+        "value": "D2S"
+      },
+      {
+        "label": "Application",
+        "value": "Headlight"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5105-1.jpg",
+      "/products/bulbs/catalog/NBL5105-2.jpg",
+      "/products/bulbs/catalog/NBL5105-3.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6998-clean.png?v=1791871872",
+    "sourceUrl": "https://geekauto.co.nz/products/d2s-35w-hid-headlight-bulb",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5106",
+    "supplierRef": "D3R4300K",
+    "title": "D3R 35W HID Xenon Headlight Bulb – 3200LM Super Bright (4300K / 6000K)",
+    "subtitle": "Headlight",
+    "priceNzd": 110.5,
+    "features": [
+      "D3R HID Xenon reflector bulb with factory-calibrated R-type anti-glare shielding.",
+      "Factory-standard D3-series square metal base with an integrated igniter for secure direct mounting.",
+      "Actual power: 35W; light output: up to 3200 lumens for nighttime road illumination.",
+      "Colour options: factory-standard 4300K for visibility in varied weather; 6000K super white.",
+      "Original vehicle 42V ballast and harness connections for direct factory D3R replacement."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "D3R"
+      },
+      {
+        "label": "Technology",
+        "value": "HID"
+      },
+      {
+        "label": "Voltage",
+        "value": "42V"
+      },
+      {
+        "label": "Power",
+        "value": "35W"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "4300K"
+      },
+      {
+        "label": "Luminous flux",
+        "value": "3200 Lumens"
+      },
+      {
+        "label": "Socket / base",
+        "value": "D3R"
+      },
+      {
+        "label": "Application",
+        "value": "Headlight"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5106-1.jpg",
+      "/products/bulbs/catalog/NBL5106-2.jpg",
+      "/products/bulbs/catalog/NBL5106-3.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-7007-clean.png?v=1791871850",
+    "sourceUrl": "https://geekauto.co.nz/products/d3r-35w-hid-headlight-bulb",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5107",
+    "supplierRef": "D3S4300K",
+    "title": "D3S 35W HID Xenon Headlight Bulb – 3200LM Super Bright (4300K / 6000K)",
+    "subtitle": "Headlight",
+    "priceNzd": 110.5,
+    "features": [
+      "D3S HID Xenon bulb with a clear optical envelope for projector lens assemblies, a defined beam cutoff and oncoming-glare control.",
+      "Factory-standard D3-series square metal base with an integrated igniter for secure direct mounting.",
+      "Actual power: 35W; light output: up to 3200 lumens for nighttime road illumination.",
+      "Colour options: factory-standard 4300K for visibility in varied weather; 6000K super white.",
+      "Original 42V ballast and harness connections for direct factory D3S replacement."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "D3S"
+      },
+      {
+        "label": "Technology",
+        "value": "HID"
+      },
+      {
+        "label": "Voltage",
+        "value": "42V"
+      },
+      {
+        "label": "Power",
+        "value": "35W"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "4300K"
+      },
+      {
+        "label": "Luminous flux",
+        "value": "3200 Lumens"
+      },
+      {
+        "label": "Socket / base",
+        "value": "D3S"
+      },
+      {
+        "label": "Application",
+        "value": "Headlight"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5107-1.jpg",
+      "/products/bulbs/catalog/NBL5107-2.jpg",
+      "/products/bulbs/catalog/NBL5107-3.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-7012-clean.png?v=1791871836",
+    "sourceUrl": "https://geekauto.co.nz/products/d3s-35w-hid-headlight-bulb",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5108",
+    "supplierRef": "D4C4300K",
+    "title": "D4C 35W HID Xenon Headlight Bulb – 3200LM Super Bright (4300K / 6000K / 8000K)",
+    "subtitle": "Headlight",
+    "priceNzd": 90,
+    "features": [
+      "D4C HID Xenon base compatible with D4S projector housings and D4R reflector housings.",
+      "Mercury-free 42V D4-series configuration for modern factory Xenon systems.",
+      "Actual power: 35W; light output: up to 3200 lumens for long-range nighttime illumination.",
+      "Colour options: factory-standard 4300K for road visibility; 6000K super white; 8000K crystal blue.",
+      "Factory D4 ballast and wiring harness connections require no modification."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "D4C"
+      },
+      {
+        "label": "Technology",
+        "value": "HID"
+      },
+      {
+        "label": "Voltage",
+        "value": "42V"
+      },
+      {
+        "label": "Power",
+        "value": "35W"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "4300K"
+      },
+      {
+        "label": "Luminous flux",
+        "value": "3200 Lumens"
+      },
+      {
+        "label": "Socket / base",
+        "value": "D4C"
+      },
+      {
+        "label": "Application",
+        "value": "Headlight"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5108-1.jpg",
+      "/products/bulbs/catalog/NBL5108-2.jpg",
+      "/products/bulbs/catalog/NBL5108-3.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-7029-clean.png?v=1791871786",
+    "sourceUrl": "https://geekauto.co.nz/products/d4c-35w-hid-headlight-bulb",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5109",
+    "supplierRef": "D4R4300K",
+    "title": "D4R 35W HID Xenon Headlight Bulb – 3200LM Super Bright (4300K / 6000K)",
+    "subtitle": "Headlight",
+    "priceNzd": 90,
+    "features": [
+      "D4R HID Xenon reflector bulb with factory-calibrated R-type ceramic paint shielding for glare control and precise beam formation.",
+      "Mercury-free 42V D4-series configuration for modern factory Xenon systems.",
+      "Actual power: 35W; light output: up to 3200 lumens for nighttime road illumination.",
+      "Colour options: factory-standard 4300K for visibility in varied weather; 6000K super white.",
+      "Original vehicle 42V ballast and harness connections for direct factory D4R replacement."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "D4R"
+      },
+      {
+        "label": "Technology",
+        "value": "HID"
+      },
+      {
+        "label": "Voltage",
+        "value": "42V"
+      },
+      {
+        "label": "Power",
+        "value": "35W"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "4300K"
+      },
+      {
+        "label": "Luminous flux",
+        "value": "3200 Lumens"
+      },
+      {
+        "label": "Socket / base",
+        "value": "D4R"
+      },
+      {
+        "label": "Application",
+        "value": "Headlight"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5109-1.jpg",
+      "/products/bulbs/catalog/NBL5109-2.jpg",
+      "/products/bulbs/catalog/NBL5109-3.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-7017-clean.png?v=1791871818",
+    "sourceUrl": "https://geekauto.co.nz/products/d4r-35w-hid-headlight-bulb",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5110",
+    "supplierRef": "D4S4300K",
+    "title": "D4S 35W HID Xenon Headlight Bulb – 3200LM Super Bright (4300K / 6000K)",
+    "subtitle": "Headlight",
+    "priceNzd": 90,
+    "features": [
+      "D4S HID Xenon bulb with a clear optical envelope for projector lenses, a defined beam cutoff and stray-glare control.",
+      "Mercury-free 42V D4-series configuration for modern factory Xenon systems.",
+      "Actual power: 35W; light output: up to 3200 lumens for nighttime road illumination.",
+      "Colour options: factory-standard 4300K for visibility in varied weather; 6000K super white.",
+      "Original vehicle 42V ballast and harness connections for direct factory D4S replacement."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "D4S"
+      },
+      {
+        "label": "Technology",
+        "value": "HID"
+      },
+      {
+        "label": "Voltage",
+        "value": "42V"
+      },
+      {
+        "label": "Power",
+        "value": "35W"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "4300K"
+      },
+      {
+        "label": "Luminous flux",
+        "value": "3200 Lumens"
+      },
+      {
+        "label": "Socket / base",
+        "value": "D4S"
+      },
+      {
+        "label": "Application",
+        "value": "Headlight"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5110-1.jpg",
+      "/products/bulbs/catalog/NBL5110-2.jpg",
+      "/products/bulbs/catalog/NBL5110-3.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-7023-clean.png?v=1791871801",
+    "sourceUrl": "https://geekauto.co.nz/products/d4s-35w-hid-headlight-bulb",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5111",
+    "supplierRef": "D5S6000K",
+    "title": "D5S 25W HID Xenon Headlight Bulb – 6000K Super White 3200LM",
+    "subtitle": "Headlight",
+    "priceNzd": 208,
+    "features": [
+      "D5S HID Xenon assembly to factory specification, incorporating the igniter and electronic ballast.",
+      "Rated power: 25W; light output: up to 3200 lumens for focused illumination.",
+      "Colour temperature: 6000K super white, with a daylight-white appearance replacing factory yellow light.",
+      "Original wiring connector for factory D5S Xenon headlamp replacement without modification."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "D5S"
+      },
+      {
+        "label": "Technology",
+        "value": "HID"
+      },
+      {
+        "label": "Power",
+        "value": "25W"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "6000K"
+      },
+      {
+        "label": "Luminous flux",
+        "value": "3200 Lumens"
+      },
+      {
+        "label": "Socket / base",
+        "value": "D5S"
+      },
+      {
+        "label": "Application",
+        "value": "Headlight"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5111-1.jpg",
+      "/products/bulbs/catalog/NBL5111-2.jpg",
+      "/products/bulbs/catalog/NBL5111-3.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-7036-clean.png?v=1791871932",
+    "sourceUrl": "https://geekauto.co.nz/products/d5s-25w-hid-headlight-bulb",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5112",
+    "supplierRef": "D8S6000K",
+    "title": "D8S 25W HID Xenon Headlight Bulb – 6000K Super White 3200LM",
+    "subtitle": "Headlight",
+    "priceNzd": 136.5,
+    "features": [
+      "D8S HID Xenon bulb to OEM specification, with an integrated igniter base for secure direct mounting.",
+      "Mercury-free 42V D8-series configuration for modern factory Xenon systems with energy-efficient operation.",
+      "Rated power: 25W; light output: up to 3200 lumens for focused illumination.",
+      "Colour temperature: 6000K super white, with a daylight-white appearance replacing warmer factory light for increased road contrast.",
+      "Original ballast harness connection for factory D8S replacement without modification."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "D8S"
+      },
+      {
+        "label": "Technology",
+        "value": "HID"
+      },
+      {
+        "label": "Voltage",
+        "value": "42V"
+      },
+      {
+        "label": "Power",
+        "value": "25W"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "6000K"
+      },
+      {
+        "label": "Luminous flux",
+        "value": "3200 Lumens"
+      },
+      {
+        "label": "Socket / base",
+        "value": "D8S"
+      },
+      {
+        "label": "Application",
+        "value": "Headlight"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5112-1.jpg",
+      "/products/bulbs/catalog/NBL5112-2.jpg",
+      "/products/bulbs/catalog/NBL5112-3.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-7040-clean.png?v=1791871104",
+    "sourceUrl": "https://geekauto.co.nz/products/d8s-25w-hid-headlight-bulb",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5201",
+    "supplierRef": "LED-H4-6500K",
+    "title": "LED Light Bulb – H4 1000LM 6500K (H4-3030-15) Cool White High / Low Beam Headlight & Fog Light",
+    "subtitle": "Headlight",
+    "priceNzd": 60,
+    "features": [
+      "H4-3030-15 LED bulb with 15x 3030 SMD diodes in a multi-directional arrangement for balanced light distribution and forward visibility.",
+      "Light output: 1000LM; colour temperature: 6500K cool white with a daylight-white appearance and increased road contrast relative to yellow halogen light.",
+      "Dual-filament H4 socket replacement retaining standard high and low beam switching.",
+      "Standard 3-pin P43t H4 base for direct factory headlight and fog light socket installation without wire splicing."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "LED"
+      },
+      {
+        "label": "Technology",
+        "value": "LED"
+      },
+      {
+        "label": "Voltage",
+        "value": "12V"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "6500K"
+      },
+      {
+        "label": "Luminous flux",
+        "value": "1000 Lumens"
+      },
+      {
+        "label": "Socket / base",
+        "value": "LED"
+      },
+      {
+        "label": "Application",
+        "value": "Headlight"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5201-1.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-led-h4-6500k.jpg?v=1791870307",
+    "sourceUrl": "https://geekauto.co.nz/products/h4-led-bulb-1000lm-6500k",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5202",
+    "supplierRef": "T10LED10SMD",
+    "title": "LED – T10 (Pair) 6000K 10SMD Canbus 12V Wedge Bulbs – Super Bright Pure White Park, Interior & Number Plate Lighting",
+    "subtitle": "Interior / Dome Light / License Plate Light",
+    "priceNzd": 40,
+    "features": [
+      "10SMD LED array with a dense 10-chip layout for high-lumen output and 360-degree distribution within the housing.",
+      "Canbus load resistors prevent OBC dashboard warnings and rapid flashing on most 12V systems.",
+      "Colour temperature: 6000K pure white for increased lighting clarity and a white appearance.",
+      "Standard T10 / W5W push-in wedge base for direct factory socket installation without wire cutting.",
+      "Pack quantity: 2 matching bulbs for replacement on both sides, including park, interior or number plate applications."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "LED"
+      },
+      {
+        "label": "Technology",
+        "value": "LED"
+      },
+      {
+        "label": "Voltage",
+        "value": "12V"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "6000K"
+      },
+      {
+        "label": "Socket / base",
+        "value": "LED"
+      },
+      {
+        "label": "Application",
+        "value": "Interior / Dome Light / License Plate Light"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5202-1.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-7062-clean.png?v=1791871399",
+    "sourceUrl": "https://geekauto.co.nz/products/t10-led-bulbs-12v-10smd-6000k-pair",
+    "packLabel": "Pair (2 bulbs)",
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5203",
+    "supplierRef": "T10LED1SMD",
+    "title": "LED – T10 (Pair) 6000K 1SMD Canbus 12V Wedge Bulbs – Pure White Park, Interior & Number Plate Lighting",
+    "subtitle": "Interior / Dome Light / License Plate Light",
+    "priceNzd": 8,
+    "features": [
+      "Canbus load circuitry helps reduce on-board computer (OBC) warnings and flicker in most modern 12V vehicles.",
+      "Low-power 1SMD LED emitter with focused forward illumination.",
+      "Colour temperature: 6000K pure white, replacing factory halogen yellow with a daylight-white appearance.",
+      "Standard T10 / W5W push-in wedge base for direct factory socket installation without tools.",
+      "Pack quantity: 2 matching bulbs for paired applications, including park, interior or number plate lighting."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "LED"
+      },
+      {
+        "label": "Technology",
+        "value": "LED"
+      },
+      {
+        "label": "Voltage",
+        "value": "12V"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "6000K"
+      },
+      {
+        "label": "Socket / base",
+        "value": "LED"
+      },
+      {
+        "label": "Application",
+        "value": "Interior / Dome Light / License Plate Light"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5203-1.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-7073-clean.png?v=1791870798",
+    "sourceUrl": "https://geekauto.co.nz/products/t10-led-bulbs-12v-1smd-6000k-pair",
+    "packLabel": "Pair (2 bulbs)",
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5204",
+    "supplierRef": "T10LED1SMDBLUE",
+    "title": "LED – T10 (Pair) 8000K 1SMD Canbus 12V Park / Interior / Number Plate / Boot lighting【Blue】",
+    "subtitle": "Interior / Dome Light / License Plate Light",
+    "priceNzd": 8,
+    "features": [
+      "Canbus resistance helps reduce on-board computer (OBC) warnings and flicker in most 12V vehicle systems.",
+      "Low-power 1SMD LED emitter with focused forward illumination.",
+      "Colour temperature: 8000K blue / ice-blue for interior styling and vehicle accent lighting.",
+      "Standard T10 / W5W push-in wedge base for direct factory socket installation without tools.",
+      "Pack quantity: 2 matching bulbs for paired applications, including park, interior, number plate or boot lighting."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "LED"
+      },
+      {
+        "label": "Technology",
+        "value": "LED"
+      },
+      {
+        "label": "Voltage",
+        "value": "12V"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "8000K"
+      },
+      {
+        "label": "Socket / base",
+        "value": "LED"
+      },
+      {
+        "label": "Application",
+        "value": "Interior / Dome Light / License Plate Light"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5204-1.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-7072-clean_5cd61292-83f2-443a-83b2-35b7e0e5bf64.png?v=1791871324",
+    "sourceUrl": "https://geekauto.co.nz/products/t10-led-bulbs-12v-1smd-8000k-pair",
+    "packLabel": "Pair (2 bulbs)",
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5205",
+    "supplierRef": "T10LED5SMD",
+    "title": "LED – T10 (Pair) 6000K 5SMD Canbus 12V Wedge Bulbs – Super White Park, Interior & Number Plate Lighting",
+    "subtitle": "Interior / Dome Light / License Plate Light",
+    "priceNzd": 20,
+    "features": [
+      "Canbus resistance helps reduce on-board computer (OBC) errors and flashing in most 12V vehicle systems.",
+      "Efficient 5SMD LED layout with 5 high-output SMD diodes on the top and surrounding sides for balanced omnidirectional illumination.",
+      "Colour temperature: 6000K super white, replacing warm halogen light with a daylight-white appearance.",
+      "Standard T10 / W5W push-in wedge base for direct replacement in factory housings without tools.",
+      "Pack quantity: matching pair of 2x bulbs for park, interior or number plate lighting."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "LED"
+      },
+      {
+        "label": "Technology",
+        "value": "LED"
+      },
+      {
+        "label": "Voltage",
+        "value": "12V"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "6000K"
+      },
+      {
+        "label": "Socket / base",
+        "value": "LED"
+      },
+      {
+        "label": "Application",
+        "value": "Interior / Dome Light / License Plate Light"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5205-1.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-7056-clean.png?v=1791871448",
+    "sourceUrl": "https://geekauto.co.nz/products/t10-led-bulbs-12v-5smd-6000k-pair",
+    "packLabel": "Pair (2 bulbs)",
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5206",
+    "supplierRef": "T10LED8SMD",
+    "title": "LED – T10 (Pair) 6000K 8SMD Canbus 12V Wedge Bulbs – Super White Park, Interior & Number Plate Lighting",
+    "subtitle": "Interior / Dome Light / License Plate Light",
+    "priceNzd": 20,
+    "features": [
+      "Canbus resistance prevents OBC warning lights and hyper-flashing in most modern 12V vehicle systems.",
+      "8SMD LED array with 8 high-output surface mount diodes for 360-degree illumination without dark spots.",
+      "Colour temperature: 6000K super white, replacing factory halogen yellow with a daylight-white appearance.",
+      "Standard T10 / W5W push-in wedge base for direct replacement within minutes without tools.",
+      "Pack quantity: matching pair of 2x bulbs for park, interior or number plate lighting."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "LED"
+      },
+      {
+        "label": "Technology",
+        "value": "LED"
+      },
+      {
+        "label": "Voltage",
+        "value": "12V"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "6000K"
+      },
+      {
+        "label": "Socket / base",
+        "value": "LED"
+      },
+      {
+        "label": "Application",
+        "value": "Interior / Dome Light / License Plate Light"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5206-1.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-7050-clean.png?v=1791871488",
+    "sourceUrl": "https://geekauto.co.nz/products/t10-led-bulbs-12v-8smd-6000k-pair",
+    "packLabel": "Pair (2 bulbs)",
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5301",
+    "supplierRef": "3156",
+    "title": "3156 12V 27W Clear Halogen Bulb – 3200K Turning Signal, Fog Light, Backup Lamp & Clearance Light",
+    "subtitle": "Fog Light / Turn Signal / Indicator / Reverse / Backup Light / Parking / Position Light",
+    "priceNzd": 10,
+    "features": [
+      "3156 / P27W replacement for single-contact plastic wedge sockets.",
+      "27W lamp for signaling and reversing.",
+      "Clear glass envelope with high light transmission; warm white 3200K illumination matching original lighting.",
+      "Push-in wedge mounting in original sockets; tool-free replacement."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "3156"
+      },
+      {
+        "label": "Technology",
+        "value": "Halogen"
+      },
+      {
+        "label": "Voltage",
+        "value": "12V"
+      },
+      {
+        "label": "Power",
+        "value": "27W"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "3200K"
+      },
+      {
+        "label": "Socket / base",
+        "value": "3156"
+      },
+      {
+        "label": "Application",
+        "value": "Fog Light / Turn Signal / Indicator / Reverse / Backup Light / Parking / Position Light"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5301-1.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-3156-clean.png?v=1791869995",
+    "sourceUrl": "https://geekauto.co.nz/products/3156-12v-27w-clear-signal-reverse-bulb",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5302",
+    "supplierRef": "3157",
+    "title": "3157 12V 27/7W Turning Signal / Brake Light / Reverse Light / Tail Light (Clear)",
+    "subtitle": "Brake Light, Tail Light, Turn Signal Light, Reverse / Backup Light, Parking Light",
+    "priceNzd": 10,
+    "features": [
+      "Precision-wound dual filaments rated 27W / 7W; 27W for rapid brake indication, reversing or turn signals and 7W for continuous parking/tail lighting.",
+      "3157 (T25 / W2.5x16q) plastic wedge base to OEM socket specifications; snug engagement with original wiring plugs provides firm electrical contact and vibration resistance.",
+      "Original-equipment 27/7W load; operation with original flashers and body control modules without hyper-flashing, CANBus errors, load resistors or wiring splices.",
+      "High-grade clear glass provides maximum light transmission through red brake/tail lenses, amber indicator lenses or clear reversing lenses.",
+      "Reinforced filament supports withstand daily road vibration, tailgate impacts or rough terrain without filament breakage.",
+      "100% direct push-in wedge replacement for original bulbs; replacement time measured in minutes."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "3157"
+      },
+      {
+        "label": "Technology",
+        "value": "Halogen / Incandescent Miniature Bulb (Dual Filament)"
+      },
+      {
+        "label": "Voltage",
+        "value": "12V DC (Passenger Vehicles Only)"
+      },
+      {
+        "label": "Power",
+        "value": "27W (Major / Signal Filament) / 7W (Minor / Running Filament)"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "3200K (Clear / Warm White)"
+      },
+      {
+        "label": "Socket / base",
+        "value": "3157 (T25 Wedge / Base: W2.5x16q)"
+      },
+      {
+        "label": "Cross references",
+        "value": "3057, 3157A, 3357, 3457, 4057, 4157, T25 Wedge"
+      },
+      {
+        "label": "Application",
+        "value": "Brake Light, Tail Light, Turn Signal Light, Reverse / Backup Light, Parking Light"
+      },
+      {
+        "label": "Glass finish",
+        "value": "High-Transparency Clear Glass"
+      },
+      {
+        "label": "Installation type",
+        "value": "Direct Push-In Wedge OEM Replacement (Plug & Play)"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5302-1.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6875-clean.png?v=1791873956",
+    "sourceUrl": "https://geekauto.co.nz/products/3157-12v-27-7w-clear-brake-tail-bulb",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5303",
+    "supplierRef": "BA15D",
+    "title": "BA15D 1157-Style Parallel Pin (180°) 12V 21/5W Double Contact Bulbs – Clear Glass OEM Fit",
+    "subtitle": "Brake Light, Tail Light, Turn Signal Light, Reverse Light, Interior / Marine Fixtures",
+    "priceNzd": 6,
+    "features": [
+      "Dual-filament 21W / 5W rating; 21W for brake/turn/reverse duties and efficient 5W operation for continuous marker/parking/tail lighting.",
+      "BA15D bayonet base with two bottom solder contacts; level side pins spaced exactly 180° apart provide correct socket keying.",
+      "Original-equipment resistive rating of 21W/5W; operation with mechanical/electronic flashers and vehicle controls without hyper-flashing, CANBus errors, resistors or wire splicing.",
+      "High-transmission clear quartz-grade glass provides full output through clear reversing lenses or red/amber external housings.",
+      "Supported filament mounts resist road vibration, tailgate closing shocks or engine rumble for extended operating life.",
+      "100% direct 1:1 twist-and-lock bayonet replacement for original bulbs; replacement time measured in seconds."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "BA15D"
+      },
+      {
+        "label": "Technology",
+        "value": "Halogen / Incandescent Miniature Bulb (Dual Filament)"
+      },
+      {
+        "label": "Voltage",
+        "value": "12V DC (Passenger Vehicles, Caravans, Marine 12V)"
+      },
+      {
+        "label": "Power",
+        "value": "21W (Major Filament) / 5W (Minor Filament)"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "3200K (Clear / Warm White)"
+      },
+      {
+        "label": "Socket / base",
+        "value": "BA15D (Double Contact, Level Pins)"
+      },
+      {
+        "label": "Part references",
+        "value": "47381 / P21/5W (BA15D variation)"
+      },
+      {
+        "label": "Application",
+        "value": "Brake Light, Tail Light, Turn Signal Light, Reverse Light, Interior / Marine Fixtures"
+      },
+      {
+        "label": "Glass finish",
+        "value": "High-Transparency Clear Glass"
+      },
+      {
+        "label": "Installation type",
+        "value": "Push-and-Twist Bayonet OEM Replacement (Plug & Play)"
+      },
+      {
+        "label": "Base pin configuration",
+        "value": "2 Parallel Lugs (Opposing Sides, 180° apart, same height)"
+      },
+      {
+        "label": "Bottom contact points",
+        "value": "Double Contact (Two Solder Terminals)"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5303-1.jpg",
+      "/products/bulbs/catalog/NBL5303-2.jpg",
+      "/products/bulbs/catalog/NBL5303-3.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6877-clean.png?v=1791873925",
+    "sourceUrl": "https://geekauto.co.nz/products/ba15d-12v-21-5w-clear-brake-tail-bulb-47381",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5304",
+    "supplierRef": "BAU15S",
+    "title": "BAU15S PY21W 47384 12V 21W Amber Halogen Light Bulbs – 150-Degree Offset Pin Indicator Replacement",
+    "subtitle": "Front or Rear Turn Signal / Blinker / Indicator Light",
+    "priceNzd": 10,
+    "features": [
+      "PY21W / BAU15S base to OEM specifications; non-linear 150° side-lug offset keys into original amber indicator sockets.",
+      "Defined 21W amber flashes remain visible in bright daylight or nighttime glare to communicate driving intentions.",
+      "Original-equipment 21W resistive rating; operation with mechanical and electronic flashers without hyper-flashing, CANBus errors, load resistors or wire splicing.",
+      "Optical-grade glass with high-temperature baked amber coating resists fading, flaking or heat discoloration during extended use; suitable for modern clear-lens indicators.",
+      "Reinforced tungsten coil mounts resist severe road vibration, engine rumble or daily driving shocks for long-term filament reliability.",
+      "100% direct 1:1 push-and-twist bayonet replacement for original indicator bulbs; replacement time measured in seconds."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "BAU15S"
+      },
+      {
+        "label": "Technology",
+        "value": "Halogen / Incandescent Miniature Bulb (Single Filament)"
+      },
+      {
+        "label": "Voltage",
+        "value": "12V DC (Passenger Vehicles Only)"
+      },
+      {
+        "label": "Power",
+        "value": "21W"
+      },
+      {
+        "label": "Emitted colour",
+        "value": "Amber / Turn Signal Yellow"
+      },
+      {
+        "label": "Socket / base",
+        "value": "BAU15S (PY21W / Single Contact)"
+      },
+      {
+        "label": "Part references",
+        "value": "47384 / PY21W / 7507 / 1156PY"
+      },
+      {
+        "label": "Application",
+        "value": "Front or Rear Turn Signal / Blinker / Indicator Light"
+      },
+      {
+        "label": "Glass finish",
+        "value": "High-Temperature Amber Coated Glass"
+      },
+      {
+        "label": "Installation type",
+        "value": "Push-and-Twist Bayonet OEM Replacement (Plug & Play)"
+      },
+      {
+        "label": "Base pin configuration",
+        "value": "2 Side Lugs at 150° Offset (Opposing angle, same height)"
+      },
+      {
+        "label": "Bottom contact points",
+        "value": "Single Contact (One Solder Terminal)"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5304-1.jpg",
+      "/products/bulbs/catalog/NBL5304-2.jpg",
+      "/products/bulbs/catalog/NBL5304-3.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6880-clean.png?v=1791873892",
+    "sourceUrl": "https://geekauto.co.nz/products/bau15s-12v-21w-amber-indicator-bulb-47384",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5305",
+    "supplierRef": "BAZ15D",
+    "title": "BAZ15D 12V 21/4W Halogen Light Bulbs – 150-Degree Offset Staggered Pin Double Contact Clear OEM Fit",
+    "subtitle": "Brake / Stop Light, Tail Light, Rear Fog Light, Parking Light",
+    "priceNzd": 10,
+    "features": [
+      "Dual-filament 21W / 4W rating; 21W for immediate brake/rear fog illumination and efficient 4W operation for continuous marker/tail/parking lighting.",
+      "Bayonet base with two bottom solder contacts; side lugs at 150° spacing and staggered heights prevent reversed insertion into original keyed sockets.",
+      "Original-equipment resistive rating of 21W / 4W; CANBus-compatible operation with body control modules (BCM) and bulb detection without dashboard errors, hyper-flashing or load resistors.",
+      "High-transmission clear glass provides full output through red/amber external lenses or clear reverse/fog lenses.",
+      "Reinforced tungsten coil mounts resist continuous road vibration, rough-pavement shocks or tailgate closing impacts for extended service life.",
+      "100% direct 1:1 push-and-twist bayonet replacement for original bulbs; replacement time measured in minutes."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "BAZ15D"
+      },
+      {
+        "label": "Technology",
+        "value": "Halogen / Incandescent Miniature Bulb (Dual Filament)"
+      },
+      {
+        "label": "Voltage",
+        "value": "12V DC (Passenger Vehicles Only)"
+      },
+      {
+        "label": "Power",
+        "value": "21W (Major Filament) / 4W (Minor Filament)"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "3200K (Clear / Warm White)"
+      },
+      {
+        "label": "Socket / base",
+        "value": "BAZ15D / PR21/4W (Double Contact, Offset Pins)"
+      },
+      {
+        "label": "Application",
+        "value": "Brake / Stop Light, Tail Light, Rear Fog Light, Parking Light"
+      },
+      {
+        "label": "Glass finish",
+        "value": "High-Transparency Clear Glass"
+      },
+      {
+        "label": "Installation type",
+        "value": "Push-and-Twist Bayonet OEM Replacement (Plug & Play)"
+      },
+      {
+        "label": "Base pin configuration",
+        "value": "2 Side Lugs at 150° Offset (Staggered / Different Heights)"
+      },
+      {
+        "label": "Bottom contact points",
+        "value": "Double Contact (Two Solder Terminals)"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5305-1.jpg",
+      "/products/bulbs/catalog/NBL5305-2.jpg",
+      "/products/bulbs/catalog/NBL5305-3.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6885-clean.png?v=1791873877",
+    "sourceUrl": "https://geekauto.co.nz/products/baz15d-12v-21-4w-clear-stop-tail-bulb-47386",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5306",
+    "supplierRef": "H21W",
+    "title": "H21W BAY9s 64136 12V 21W Halogen Light Bulbs – 150-Degree Offset Pin Single Contact Clear OEM Fit",
+    "subtitle": "Reverse / Backup Light, Brake Light, Turn Signal Indicator, Daytime Running Light (DRL)",
+    "priceNzd": 12,
+    "features": [
+      "H21W BAY9s base to OEM dimensions; 9mm metal base with 150° offset retention lugs provides correctly keyed, non-binding engagement in original miniature sockets.",
+      "Concentrated 21W output for rearward illumination when reversing or immediate brake/signal visibility.",
+      "Original-equipment 21W resistive load; operation with CANBus, body control modules, onboard monitors or flashers without errors, hyper-flashing, load resistors or wire splicing.",
+      "High-transmission clear quartz-grade miniature glass envelope; unrestricted 360-degree distribution through red brake/tail lenses, amber indicator lenses or clear reversing housings.",
+      "Reinforced tungsten coil mounts resist severe road vibration, rough-pavement shocks or tailgate closing impacts for extended service life.",
+      "100% direct 1:1 push-and-twist bayonet replacement for original bulbs; replacement time measured in seconds."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "H21W"
+      },
+      {
+        "label": "Technology",
+        "value": "Miniature Halogen Bulb (Single Filament)"
+      },
+      {
+        "label": "Voltage",
+        "value": "12V DC (Passenger Vehicles Only)"
+      },
+      {
+        "label": "Power",
+        "value": "21W"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "3200K (Clear / Warm White)"
+      },
+      {
+        "label": "Socket / base",
+        "value": "H21W (Base: BAY9s, 9mm miniature bayonet)"
+      },
+      {
+        "label": "Part references",
+        "value": "64136 / H21W / BAY9s"
+      },
+      {
+        "label": "Application",
+        "value": "Reverse / Backup Light, Brake Light, Turn Signal Indicator, Daytime Running Light (DRL)"
+      },
+      {
+        "label": "Glass finish",
+        "value": "High-Transparency Clear Glass"
+      },
+      {
+        "label": "Installation type",
+        "value": "Push-and-Twist Bayonet OEM Replacement (Plug & Play)"
+      },
+      {
+        "label": "Base pin configuration",
+        "value": "2 Side Lugs at 150° Offset (Opposing angle, same height)"
+      },
+      {
+        "label": "Bottom contact points",
+        "value": "Single Contact (One Solder Terminal)"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5306-1.jpg",
+      "/products/bulbs/catalog/NBL5306-2.jpg",
+      "/products/bulbs/catalog/NBL5306-3.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6898-clean.png?v=1791873840",
+    "sourceUrl": "https://geekauto.co.nz/products/h21w-12v-21w-clear-reverse-indicator-bulb",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5307",
+    "supplierRef": "R5W",
+    "title": "R5W G18 BA15S 5007 12V 5W Halogen Light Bulbs – 180° Parallel Pin Single Contact Clear OEM Fit",
+    "subtitle": "Sidelights, Parking Lights, Tail Lights, License Plate Lights, Interior Courtesy / Glovebox",
+    "priceNzd": 6,
+    "features": [
+      "R5W / G18 (BA15S) to OEM dimensions; 18mm globe diameter and 15mm bayonet base fit confined sidelight, marker or license plate housings.",
+      "Single bottom solder terminal with level side pins spaced 180° apart; single-contact installation without binding.",
+      "Calibrated 5W draw on 12V systems prevents electrical overload, melted plastic housings or false bulb warnings.",
+      "Original-equipment resistive load supports modern body control modules and lighting monitors without CANBus errors.",
+      "High-transmission clear glass; uniform 360-degree distribution through red tail lenses, amber side marker lenses or clear license plate/sidelight covers.",
+      "Reinforced coil supports resist continuous road vibration, rough-pavement bumps or chassis movement for extended operating life.",
+      "100% direct 1:1 push-and-twist bayonet replacement for original bulbs; replacement time measured in seconds."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "R5W"
+      },
+      {
+        "label": "Technology",
+        "value": "Halogen / Incandescent Miniature Bulb (Single Filament)"
+      },
+      {
+        "label": "Voltage",
+        "value": "12V DC (Passenger Vehicles, Motorcycles & Light Commercials)"
+      },
+      {
+        "label": "Power",
+        "value": "5W"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "3200K (Clear / Warm White)"
+      },
+      {
+        "label": "Socket / base",
+        "value": "R5W (Base: BA15S / Globe: G18)"
+      },
+      {
+        "label": "Part references",
+        "value": "5007 / 12821 / R5W / 89"
+      },
+      {
+        "label": "Application",
+        "value": "Sidelights, Parking Lights, Tail Lights, License Plate Lights, Interior Courtesy / Glovebox"
+      },
+      {
+        "label": "Glass finish",
+        "value": "High-Transparency Clear Glass"
+      },
+      {
+        "label": "Installation type",
+        "value": "Push-and-Twist Bayonet OEM Replacement (Plug & Play)"
+      },
+      {
+        "label": "Base pin configuration",
+        "value": "2 Parallel Lugs (Directly Opposing, 180° apart, same height)"
+      },
+      {
+        "label": "Bottom contact points",
+        "value": "Single Contact (One Solder Terminal)"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5307-1.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6889-clean.png?v=1791873862",
+    "sourceUrl": "https://geekauto.co.nz/products/r5w-g18-12v-5w-clear-sidelight-tail-bulb",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5308",
+    "supplierRef": "S25A",
+    "title": "S25A BA15S 1156 7506 12V 21W Amber Halogen Bulbs – 180-Degree Parallel Pin Single Contact OEM Fit",
+    "subtitle": "Front or Rear Turn Signal / Blinker / Indicator, Tail Light (Amber lens housings)",
+    "priceNzd": 6,
+    "features": [
+      "BA15S base to OEM dimensions for 1156 sockets; level opposing side lugs spaced 180° apart provide smooth, secure twist-lock engagement.",
+      "Concentrated 21W amber signaling remains visible in direct sunlight, heavy rain or nighttime glare for immediate notification of surrounding motorists.",
+      "Original-equipment 21W resistive rating; operation with thermal and electronic flashers without hyper-flashing, CANBus errors, load resistors, decoders or wire splicing.",
+      "Baked-on optical amber coating resists high-temperature fading, flaking or chalking during sustained flashing, retaining amber color over years of use.",
+      "Reinforced filament coil mounts resist continuous road vibration, chassis movement or tailgate impacts for extended service life.",
+      "100% direct 1:1 OEM push-and-twist bayonet replacement for original indicator bulbs; replacement time measured in seconds."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "S25A"
+      },
+      {
+        "label": "Technology",
+        "value": "Halogen / Incandescent Miniature Bulb (Single Filament)"
+      },
+      {
+        "label": "Voltage",
+        "value": "12V DC (Passenger Vehicles Only)"
+      },
+      {
+        "label": "Power",
+        "value": "21W"
+      },
+      {
+        "label": "Emitted colour",
+        "value": "Amber / Turn Signal Yellow"
+      },
+      {
+        "label": "Socket / base",
+        "value": "S25A (Base: BA15S / Globe: S25)"
+      },
+      {
+        "label": "Cross references",
+        "value": "1156, 1156A, 7506, P21W (Amber), S25 Amber"
+      },
+      {
+        "label": "Application",
+        "value": "Front or Rear Turn Signal / Blinker / Indicator, Tail Light (Amber lens housings)"
+      },
+      {
+        "label": "Glass finish",
+        "value": "High-Temperature Amber Coated Glass"
+      },
+      {
+        "label": "Installation type",
+        "value": "Push-and-Twist Bayonet OEM Replacement (Plug & Play)"
+      },
+      {
+        "label": "Base pin configuration",
+        "value": "2 Parallel Lugs (Directly Opposing, 180° apart, same height)"
+      },
+      {
+        "label": "Bottom contact points",
+        "value": "Single Contact (One Solder Terminal)"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5308-1.jpg",
+      "/products/bulbs/catalog/NBL5308-2.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6908-clean.png?v=1791873287",
+    "sourceUrl": "https://geekauto.co.nz/products/s25a-ba15s-12v-21w-amber-indicator-bulb",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5309",
+    "supplierRef": "S25D",
+    "title": "S25D BAY15D 1157 P21/5W 47380 12V 21/5W Halogen Light Bulbs – Staggered Pin Double Contact Clear OEM Fit",
+    "subtitle": "Stop Light, Brake Light, Tail Light, Parking Light",
+    "priceNzd": 6,
+    "features": [
+      "Dual-filament 21W / 5W rating; 21W for immediate brake/stop indication and efficient 5W operation for continuous night tail/parking lighting.",
+      "BAY15D (1157) base to OEM dimensions; two bottom solder terminals with side lugs at staggered heights across 180° provide correct keying and prevent reversed insertion.",
+      "Original-equipment resistive rating of 21W / 5W; CANBus-compatible operation with body control modules (BCM) and flashers without dashboard errors, load resistors or wiring changes.",
+      "High-transmission clear quartz-grade glass; unrestricted 360-degree distribution through red/amber lenses or clear covers.",
+      "Supported filament mounts resist rough-road vibration, chassis movement or boot/tailgate impacts for extended service life.",
+      "100% direct 1:1 twist-and-lock bayonet replacement for 1157 / P21/5W bulbs; replacement time measured in seconds."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "S25D"
+      },
+      {
+        "label": "Technology",
+        "value": "Halogen / Incandescent Miniature Bulb (Dual Filament)"
+      },
+      {
+        "label": "Voltage",
+        "value": "12V DC (Passenger Vehicles Only)"
+      },
+      {
+        "label": "Power",
+        "value": "21W (Major / Stop Filament) / 5W (Minor / Tail Filament)"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "3200K (Clear / Warm White)"
+      },
+      {
+        "label": "Socket / base",
+        "value": "S25D (Base: BAY15D / Globe: S25)"
+      },
+      {
+        "label": "Part references",
+        "value": "47380 / 1157 / P21/5W / 7528 / 380"
+      },
+      {
+        "label": "Application",
+        "value": "Stop Light, Brake Light, Tail Light, Parking Light"
+      },
+      {
+        "label": "Glass finish",
+        "value": "High-Transparency Clear Glass"
+      },
+      {
+        "label": "Installation type",
+        "value": "Push-and-Twist Bayonet OEM Replacement (Plug & Play)"
+      },
+      {
+        "label": "Base pin configuration",
+        "value": "2 Staggered Lugs (180° apart, offset vertical heights)"
+      },
+      {
+        "label": "Bottom contact points",
+        "value": "Double Contact (Two Solder Terminals)"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5309-1.jpg",
+      "/products/bulbs/catalog/NBL5309-2.jpg",
+      "/products/bulbs/catalog/NBL5309-3.jpg",
+      "/products/bulbs/catalog/NBL5309-4.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6911-clean.png?v=1791873272",
+    "sourceUrl": "https://geekauto.co.nz/products/s25d-bay15d-12v-21-5w-clear-stop-tail-bulb-47380",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5310",
+    "supplierRef": "S25D24V",
+    "title": "S25D BAY15D 24V 21/5W Heavy Duty Halogen Bulbs – Staggered Pin Double Contact Commercial Truck OEM Fit",
+    "subtitle": "Stop Light, Brake Light, Tail Light, Rear Marker Light",
+    "priceNzd": 8,
+    "features": [
+      "24V lamp for 24-volt commercial systems; applications include semi-trucks, lorries, trailers, coaches, buses, agricultural machinery or heavy plant equipment.",
+      "Dual-filament 21W / 5W rating; 21W for immediate brake/stop indication and efficient 5W operation for continuous night tail/marker lighting.",
+      "BAY15D base to OEM dimensions; two bottom solder terminals with side lugs at staggered heights across 180° prevent reversed insertion into original 24V sockets.",
+      "Reinforced tungsten coil supports withstand diesel engine vibration, continuous trailer shudder or rough-road impacts without premature filament failure.",
+      "Original-equipment 24V resistive load of 21W / 5W; operation with onboard flashers and vehicle controls without dashboard errors or load resistors.",
+      "High-transmission clear quartz-grade glass; unrestricted 360-degree distribution through red or amber external lenses.",
+      "100% direct 1:1 twist-and-lock bayonet replacement for original 24V tail/brake bulbs; replacement time measured in seconds."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "S25D"
+      },
+      {
+        "label": "Technology",
+        "value": "Heavy-Duty Halogen / Incandescent (Dual Filament)"
+      },
+      {
+        "label": "Voltage",
+        "value": "24V DC (Commercial / Heavy Vehicles Only)"
+      },
+      {
+        "label": "Power",
+        "value": "21W (Major / Stop Filament) / 5W (Minor / Tail Filament)"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "3200K (Clear / Warm White)"
+      },
+      {
+        "label": "Socket / base",
+        "value": "S25D (Base: BAY15D / Globe: S25)"
+      },
+      {
+        "label": "Cross references",
+        "value": "24V BAY15D, 24V P21/5W, 24V 1157, 24V 380, 24V S25D"
+      },
+      {
+        "label": "Application",
+        "value": "Stop Light, Brake Light, Tail Light, Rear Marker Light"
+      },
+      {
+        "label": "Glass finish",
+        "value": "High-Transparency Clear Glass"
+      },
+      {
+        "label": "Installation type",
+        "value": "Push-and-Twist Bayonet OEM Replacement (Plug & Play)"
+      },
+      {
+        "label": "Base pin configuration",
+        "value": "2 Staggered Lugs (180° apart, offset vertical heights)"
+      },
+      {
+        "label": "Bottom contact points",
+        "value": "Double Contact (Two Solder Terminals)"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5310-1.jpg",
+      "/products/bulbs/catalog/NBL5310-2.jpg",
+      "/products/bulbs/catalog/NBL5310-3.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6915-clean.png?v=1791873258",
+    "sourceUrl": "https://geekauto.co.nz/products/s25d-bay15d-24v-21-5w-clear-stop-tail-bulb",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5311",
+    "supplierRef": "S25R",
+    "title": "S25R BAY15D PR21/5W 47387 12V 21/5W Red Halogen Light Bulbs – Staggered Pin Double Contact OEM Fit",
+    "subtitle": "Stop Light, Brake Light, Tail Light, Rear Fog Light (Behind clear/smoked lenses)",
+    "priceNzd": 7,
+    "features": [
+      "High-temperature baked optical red coating produces deep red output behind clear, smoked or tinted lenses, retaining legally compliant lamp color.",
+      "Dual-filament 21W / 5W rating; 21W for immediate brake/stop indication and efficient 5W operation for continuous night tail/marker lighting.",
+      "BAY15D base to OEM dimensions; two bottom solder terminals with side lugs at staggered heights across 180° prevent reversed insertion into original sockets.",
+      "Original-equipment resistive rating of 21W / 5W; CANBus-compatible operation with body control modules (BCM) and bulb detection without dashboard errors, load resistors or wire splicing.",
+      "Optical red coating resists fading, flaking, blistering or heat discoloration during prolonged braking cycles, maintaining color over lamp life.",
+      "Supported filament mounts resist rough-road vibration, chassis movement or tailgate impacts for long service life.",
+      "100% direct 1:1 twist-and-lock bayonet replacement for original red brake/tail bulbs; replacement time measured in seconds."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "S25R"
+      },
+      {
+        "label": "Technology",
+        "value": "Halogen / Incandescent Miniature Bulb (Dual Filament)"
+      },
+      {
+        "label": "Voltage",
+        "value": "12V DC (Passenger Vehicles Only)"
+      },
+      {
+        "label": "Power",
+        "value": "21W (Major / Stop Filament) / 5W (Minor / Tail Filament)"
+      },
+      {
+        "label": "Emitted colour",
+        "value": "Red (Brake / Stop / Tail)"
+      },
+      {
+        "label": "Socket / base",
+        "value": "S25R (Base: BAY15D / Globe: S25)"
+      },
+      {
+        "label": "Part references",
+        "value": "47387 / PR21/5W / 1157R / 7528R / 380R"
+      },
+      {
+        "label": "Application",
+        "value": "Stop Light, Brake Light, Tail Light, Rear Fog Light (Behind clear/smoked lenses)"
+      },
+      {
+        "label": "Glass finish",
+        "value": "High-Temperature Optical Red Coated Glass"
+      },
+      {
+        "label": "Installation type",
+        "value": "Push-and-Twist Bayonet OEM Replacement (Plug & Play)"
+      },
+      {
+        "label": "Base pin configuration",
+        "value": "2 Staggered Lugs (180° apart, offset vertical heights)"
+      },
+      {
+        "label": "Bottom contact points",
+        "value": "Double Contact (Two Solder Terminals)"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5311-1.jpg",
+      "/products/bulbs/catalog/NBL5311-2.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6918-clean.png?v=1791873241",
+    "sourceUrl": "https://geekauto.co.nz/products/s25r-bay15d-12v-21-5w-red-stop-tail-bulb-47387",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5312",
+    "supplierRef": "S25S",
+    "title": "S25S BA15S 1156 P21W 47382 12V 21W Halogen Light Bulbs – 180° Parallel Pin Single Contact Clear OEM Fit",
+    "subtitle": "Stop Light, Brake Light, Reverse / Backup Light, Rear Fog Light",
+    "priceNzd": 6,
+    "features": [
+      "BA15S base to OEM dimensions for 1156 sockets; one bottom solder terminal with two level side lugs spaced 180° apart for secure twist-lock engagement without binding.",
+      "Focused 21W output for brake indication through red lenses or driveway illumination through clear reversing housings.",
+      "Original-equipment 21W resistive load; CANBus-compatible operation with body control modules (BCM) and bulb detection, without dashboard errors, load resistors or wiring changes.",
+      "High-transmission clear quartz-grade glass; unrestricted 360-degree light distribution through colored lenses or clear reversing covers.",
+      "Supported filament mounts resist rough-road vibration, chassis movement or boot/tailgate impacts for extended service life.",
+      "100% direct 1:1 twist-and-lock bayonet replacement for 1156 / P21W bulbs; replacement time measured in seconds."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "S25S"
+      },
+      {
+        "label": "Technology",
+        "value": "Halogen / Incandescent Miniature Bulb (Single Filament)"
+      },
+      {
+        "label": "Voltage",
+        "value": "12V DC (Passenger Vehicles Only)"
+      },
+      {
+        "label": "Power",
+        "value": "21W"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "3200K (Clear / Warm White)"
+      },
+      {
+        "label": "Socket / base",
+        "value": "S25S (Base: BA15S / Globe: S25)"
+      },
+      {
+        "label": "Part references",
+        "value": "47382 / 1156 / P21W / 7506 / 382"
+      },
+      {
+        "label": "Application",
+        "value": "Stop Light, Brake Light, Reverse / Backup Light, Rear Fog Light"
+      },
+      {
+        "label": "Glass finish",
+        "value": "High-Transparency Clear Glass"
+      },
+      {
+        "label": "Installation type",
+        "value": "Push-and-Twist Bayonet OEM Replacement (Plug & Play)"
+      },
+      {
+        "label": "Base pin configuration",
+        "value": "2 Parallel Lugs (Directly Opposing, 180° apart, same height)"
+      },
+      {
+        "label": "Bottom contact points",
+        "value": "Single Contact (One Solder Terminal)"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5312-1.jpg",
+      "/products/bulbs/catalog/NBL5312-2.jpg",
+      "/products/bulbs/catalog/NBL5312-3.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6921-clean.png?v=1791873205",
+    "sourceUrl": "https://geekauto.co.nz/products/s25s-ba15s-12v-21w-clear-stop-tail-bulb-47382",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5313",
+    "supplierRef": "S25S24V",
+    "title": "S25S BA15S 24V 21W Heavy Duty Halogen Bulbs – 180° Parallel Pin Single Contact Truck OEM Replacement",
+    "subtitle": "Stop Light, Brake Light, Reverse / Backup Light, Rear Fog Light",
+    "priceNzd": 8,
+    "features": [
+      "24V lamp for 24-volt commercial systems; applications include heavy transport trucks, prime movers, trailers, rigid lorries, buses, coaches or heavy earthmoving equipment.",
+      "Focused 21W output for immediate brake indication through red lenses or loading-bay illumination through clear reversing housings.",
+      "BA15S base to OEM dimensions; one bottom contact with level opposing side pins spaced 180° apart for secure, vibration-resistant engagement in original 24V sockets.",
+      "Reinforced tungsten winding and rigid filament supports withstand continuous diesel vibration, chassis vibration or severe haul-road impacts.",
+      "Original-equipment 24V resistive rating of 21W; operation with commercial flasher relays and body control modules without dashboard errors or load resistors.",
+      "High-transmission clear quartz-grade glass permits full output through clear reversing lenses or colored lamp assemblies.",
+      "100% direct 1:1 twist-and-lock bayonet replacement for original 24V commercial bulbs; replacement time measured in seconds."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "S25S"
+      },
+      {
+        "label": "Technology",
+        "value": "Heavy-Duty Halogen / Incandescent (Single Filament)"
+      },
+      {
+        "label": "Voltage",
+        "value": "24V DC (Commercial / Heavy Vehicles Only)"
+      },
+      {
+        "label": "Power",
+        "value": "21W"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "3200K (Clear / Warm White)"
+      },
+      {
+        "label": "Socket / base",
+        "value": "S25S (Base: BA15S / Globe: S25)"
+      },
+      {
+        "label": "Cross references",
+        "value": "24V BA15S, 24V P21W, 24V 1156, 24V 241, 13498"
+      },
+      {
+        "label": "Application",
+        "value": "Stop Light, Brake Light, Reverse / Backup Light, Rear Fog Light"
+      },
+      {
+        "label": "Glass finish",
+        "value": "High-Transparency Clear Glass"
+      },
+      {
+        "label": "Installation type",
+        "value": "Push-and-Twist Bayonet OEM Replacement (Plug & Play)"
+      },
+      {
+        "label": "Base pin configuration",
+        "value": "2 Parallel Lugs (Directly Opposing, 180° apart, same height)"
+      },
+      {
+        "label": "Bottom contact points",
+        "value": "Single Contact (One Solder Terminal)"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5313-1.jpg",
+      "/products/bulbs/catalog/NBL5313-2.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6924-clean.png?v=1791873193",
+    "sourceUrl": "https://geekauto.co.nz/products/s25s-ba15s-24v-21w-clear-stop-tail-bulb",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5314",
+    "supplierRef": "SV81031",
+    "title": "SV8.5 12V 10W 10×31【47269】Navigation / Interior Lamp Bulbs (Clear)",
+    "subtitle": "Interior Dome Light, Map / Reading Light, Boot / Trunk Light, Courtesy Light, Marine Navigation Lamp",
+    "priceNzd": 8,
+    "features": [
+      "31mm festoon, SV8.5 / 10×31; OEM dimensions of 10mm diameter x 31mm overall length, with conical nickel-plated brass end caps for spring-clip tension and corrosion-resistant contact.",
+      "10W output provides greater cabin coverage and map-reading visibility than standard 5W festoons.",
+      "Warm white 3200K light for car interiors and boat cabins; balanced illumination without harsh glare or eye fatigue.",
+      "Original-equipment 10W resistive load avoids CANBus errors, flicker, lingering glow or false bulb warnings associated with LED conversions lacking resistance.",
+      "Applications: dome lamps, map/reading lamps, gloveboxes, trunk/boot lamps, license plate frames or 12V marine navigation/cabin lighting.",
+      "Reinforced internal coil mounts resist road vibration, rough marine chop or door-closing impacts for extended operating life.",
+      "100% direct snap-in replacement for 31mm double-ended festoons; replacement time measured in seconds."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "SV8.5"
+      },
+      {
+        "label": "Technology",
+        "value": "Halogen / Incandescent Miniature Festoon"
+      },
+      {
+        "label": "Voltage",
+        "value": "12V DC (Passenger Vehicles, Caravans & Marine 12V)"
+      },
+      {
+        "label": "Power",
+        "value": "10W"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "3200K (Clear / Warm White)"
+      },
+      {
+        "label": "Socket / base",
+        "value": "SV8.5 (Festoon / Double-Ended Tubular)"
+      },
+      {
+        "label": "Part references",
+        "value": "47269 / C10W / 269 / 6438 / 31mm Festoon"
+      },
+      {
+        "label": "Application",
+        "value": "Interior Dome Light, Map / Reading Light, Boot / Trunk Light, Courtesy Light, Marine Navigation Lamp"
+      },
+      {
+        "label": "Glass finish",
+        "value": "High-Transparency Clear Glass"
+      },
+      {
+        "label": "Installation type",
+        "value": "Direct Snap-In Spring Clip OEM Replacement (Plug & Play)"
+      },
+      {
+        "label": "Base contact type",
+        "value": "Conical End Caps (Double-Ended Terminal)"
+      },
+      {
+        "label": "Dimensions",
+        "value": "10mm Diameter × 31mm Overall Length (10×31)"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5314-1.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6927-clean.png?v=1791873171",
+    "sourceUrl": "https://geekauto.co.nz/products/sv8-5-12v-10w-31mm-festoon-bulb",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5315",
+    "supplierRef": "SV81036",
+    "title": "SV8.5 C10W 10x36 47825 12V 10W Festoon Light Bulbs – 36mm Double-Ended Marine Navigation & Interior OEM Fit",
+    "subtitle": "Interior Dome Light, Map / Reading Light, Boot / Trunk Light, Courtesy Light, Marine Navigation Lamp",
+    "priceNzd": 8,
+    "features": [
+      "36mm festoon, SV8.5 / 10×36; OEM dimensions of 10mm tube diameter x 36mm tip-to-tip length, with conical nickel-plated end caps for spring-clip retention and corrosion-resistant contact.",
+      "10W output provides greater cabin coverage and map-reading visibility than lower-wattage festoons.",
+      "Warm white 3200K light for car interiors and boat cabins; balanced illumination without harsh glare or eye fatigue.",
+      "Original-equipment 10W resistive load avoids CANBus errors, flicker, residual glow or false bulb warnings associated with LED retrofits lacking resistance.",
+      "Applications: dome lamps, map/reading lamps, vanity mirrors, gloveboxes, trunk/boot lamps, license plate frames or 12V marine navigation/cabin lighting.",
+      "Supported filament mounts resist rough-road vibration, trailer movement or door-closing impacts for extended operating life.",
+      "100% direct snap-in replacement for 36mm double-ended festoons; replacement time measured in seconds."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "SV8.5"
+      },
+      {
+        "label": "Technology",
+        "value": "Halogen / Incandescent Miniature Festoon"
+      },
+      {
+        "label": "Voltage",
+        "value": "12V DC (Passenger Vehicles, Caravans & Marine 12V)"
+      },
+      {
+        "label": "Power",
+        "value": "10W"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "3200K (Clear / Warm White)"
+      },
+      {
+        "label": "Socket / base",
+        "value": "SV8.5 (Festoon / Double-Ended Tubular)"
+      },
+      {
+        "label": "Part references",
+        "value": "47825 / C10W / 239 / 6411 / 6418 / 36mm Festoon"
+      },
+      {
+        "label": "Application",
+        "value": "Interior Dome Light, Map / Reading Light, Boot / Trunk Light, Courtesy Light, Marine Navigation Lamp"
+      },
+      {
+        "label": "Glass finish",
+        "value": "High-Transparency Clear Glass"
+      },
+      {
+        "label": "Installation type",
+        "value": "Direct Snap-In Spring Clip OEM Replacement (Plug & Play)"
+      },
+      {
+        "label": "Base contact type",
+        "value": "Conical End Caps (Double-Ended Terminal)"
+      },
+      {
+        "label": "Dimensions",
+        "value": "10mm Diameter × 36mm Overall Length (10×36)"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5315-1.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6929-clean.png?v=1791873141",
+    "sourceUrl": "https://geekauto.co.nz/products/sv8-5-12v-10w-36mm-festoon-bulb",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5316",
+    "supplierRef": "SV81041",
+    "title": "SV8.5 C10W 10x41 47266 12V 10W Festoon Light Bulbs – 41mm/42mm Double-Ended Marine & Interior OEM Fit",
+    "subtitle": "Interior Dome Light, Map / Reading Light, Boot / Trunk Light, Courtesy Light, Marine Navigation Lamp",
+    "priceNzd": 8,
+    "features": [
+      "41mm festoon, SV8.5 / 10×41; OEM dimensions of 10mm tube diameter x 41mm tip-to-tip length, with conical nickel-plated brass end caps for spring-clip tension and corrosion-resistant contact.",
+      "10W output provides greater cabin coverage, cargo trunk illumination or map-reading visibility than lower-wattage festoons.",
+      "Warm white 3200K light for car interiors and boat cabins; balanced illumination without harsh glare or eye fatigue.",
+      "Original-equipment 10W resistive load avoids CANBus errors, flicker, residual glow or false bulb warnings associated with LED retrofits lacking resistance.",
+      "Applications: large dome lamps, map/reading lamps, rear cargo/boot lamps, license plate frames or 12V marine navigation/cabin lighting.",
+      "Supported filament mounts resist rough-road vibration, trailer movement or tailgate impacts for extended operating life.",
+      "100% direct snap-in replacement for 41mm/42mm double-ended festoons; replacement time measured in seconds."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "SV8.5"
+      },
+      {
+        "label": "Technology",
+        "value": "Halogen / Incandescent Miniature Festoon"
+      },
+      {
+        "label": "Voltage",
+        "value": "12V DC (Passenger Vehicles, Caravans & Marine 12V)"
+      },
+      {
+        "label": "Power",
+        "value": "10W"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "3200K (Clear / Warm White)"
+      },
+      {
+        "label": "Socket / base",
+        "value": "SV8.5 (Festoon / Double-Ended Tubular)"
+      },
+      {
+        "label": "Part references",
+        "value": "47266 / C10W / 264 / 6413 / 6411 (41mm) / 578"
+      },
+      {
+        "label": "Application",
+        "value": "Interior Dome Light, Map / Reading Light, Boot / Trunk Light, Courtesy Light, Marine Navigation Lamp"
+      },
+      {
+        "label": "Glass finish",
+        "value": "High-Transparency Clear Glass"
+      },
+      {
+        "label": "Installation type",
+        "value": "Direct Snap-In Spring Clip OEM Replacement (Plug & Play)"
+      },
+      {
+        "label": "Base contact type",
+        "value": "Conical End Caps (Double-Ended Terminal)"
+      },
+      {
+        "label": "Dimensions",
+        "value": "10mm Diameter × 41mm Overall Length (10×41 / 41–42mm)"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5316-1.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6931-clean.png?v=1791873125",
+    "sourceUrl": "https://geekauto.co.nz/products/sv8-5-12v-10w-41mm-festoon-bulb",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5317",
+    "supplierRef": "T1012VCLEAR",
+    "title": "T10 12V 5W Wedge Bulb (Part #47501) – W5W / 501 Clear 3200K Park, Interior & Number Plate Light",
+    "subtitle": "Interior / Dome Light / License Plate Light",
+    "priceNzd": 4,
+    "features": [
+      "Wedge fitment references: 47501 / W5W / T10 / 501 / 194.",
+      "Original-equipment electrical rating: 12V 5W; operation without bulb errors or hyper-flashing.",
+      "Clear warm white 3200K light with balanced, glare-free illumination.",
+      "W2.1x9.5d push-in base; tool-free socket replacement."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "T10"
+      },
+      {
+        "label": "Voltage",
+        "value": "12V"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "3200K"
+      },
+      {
+        "label": "Socket / base",
+        "value": "T10"
+      },
+      {
+        "label": "Application",
+        "value": "Interior / Dome Light / License Plate Light"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5317-1.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-7049-clean.png?v=1791871532",
+    "sourceUrl": "https://geekauto.co.nz/products/t10-12v-5w-clear-park-interior-bulb-47501",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5318",
+    "supplierRef": "T1024V",
+    "title": "T10 24V 5W Wedge Bulb (Part #47502) – W5W Clear 3200K Park, Interior & Number Plate Light for Trucks & Buses",
+    "subtitle": "Interior / Dome Light / License Plate Light",
+    "priceNzd": 8,
+    "features": [
+      "24V systems only; applications include trucks, buses or commercial fleet vehicles.",
+      "Wedge fitment references: 47502 / W5W / T10 / 501.",
+      "Clear warm white 3200K light matching original lamp color; balanced visibility without glare.",
+      "W2.1x9.5d push-in wedge base; tool-free replacement."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "T10"
+      },
+      {
+        "label": "Voltage",
+        "value": "24V"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "3200K"
+      },
+      {
+        "label": "Socket / base",
+        "value": "T10"
+      },
+      {
+        "label": "Application",
+        "value": "Interior / Dome Light / License Plate Light"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5318-1.jpg",
+      "/products/bulbs/catalog/NBL5318-2.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6939-clean.png?v=1791873062",
+    "sourceUrl": "https://geekauto.co.nz/products/t10-24v-5w-clear-park-interior-bulb-47502",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5319",
+    "supplierRef": "T10AMBER",
+    "title": "T10 12V 5W Amber Wedge Bulb (Part #47510) – WY5W / 501A Side Indicator, Parker & Interior Light",
+    "subtitle": "Turn Signal / Indicator / Interior / Dome Light",
+    "priceNzd": 6,
+    "features": [
+      "Colored amber glass rather than a painted finish; no paint peeling or heat discoloration, with consistent amber output.",
+      "Wedge fitment references: 47510 / WY5W / T10 / 501A / 194NA.",
+      "Original-equipment 12V 5W rating; no flasher relay or resistor issues.",
+      "W2.1x9.5d push-in base; tool-free socket replacement."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "T10"
+      },
+      {
+        "label": "Voltage",
+        "value": "12V"
+      },
+      {
+        "label": "Socket / base",
+        "value": "T10"
+      },
+      {
+        "label": "Application",
+        "value": "Turn Signal / Indicator / Interior / Dome Light"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5319-1.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6943-clean.png?v=1791873032",
+    "sourceUrl": "https://geekauto.co.nz/products/t10-12v-5w-amber-park-interior-bulb-47510",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5320",
+    "supplierRef": "T15CLEAR",
+    "title": "T15 12V 16W Wedge Bulb (Part #47526) – W16W / 921 Clear 3200K Reverse, Side Marker & Interior Light",
+    "subtitle": "Interior / Dome Light / Reverse / Backup Light / Parking / Position Light",
+    "priceNzd": 6,
+    "features": [
+      "16W filament for reversing applications; higher output than standard 5W bulbs.",
+      "Wedge fitment references: 47526 / W16W / T15 / 921 / 912.",
+      "Clear glass optics; warm white 3200K illumination with balanced output and no glare.",
+      "W2.1x9.5d push-in base for 12V automotive systems; tool-free replacement."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "T15"
+      },
+      {
+        "label": "Voltage",
+        "value": "12V"
+      },
+      {
+        "label": "Power",
+        "value": "16W"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "3200K"
+      },
+      {
+        "label": "Socket / base",
+        "value": "T15"
+      },
+      {
+        "label": "Application",
+        "value": "Interior / Dome Light / Reverse / Backup Light / Parking / Position Light"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5320-1.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6945-clean.png?v=1791873020",
+    "sourceUrl": "https://geekauto.co.nz/products/t15-24v-16w-clear-reverse-bulb-47526",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5321",
+    "supplierRef": "T16",
+    "title": "T16 BA15s 12V 5W Bayonet Bulb (Part #47207) – R5W Clear 3200K Park, Tail & Interior Light",
+    "subtitle": "Tail / Brake Light / Interior / Dome Light",
+    "priceNzd": 7,
+    "features": [
+      "Replacement references: 47207 / R5W / 207; compatible BA15s single-contact sockets.",
+      "Metal BA15s bayonet base with one contact and level opposing pins spaced 180° apart.",
+      "Clear glass lens with evenly distributed warm white 3200K light matching original lamp color.",
+      "Wiring remains unchanged in 12V passenger cars, vintage vehicles, trailers or classic dashboards."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "T16"
+      },
+      {
+        "label": "Voltage",
+        "value": "12V"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "3200K"
+      },
+      {
+        "label": "Socket / base",
+        "value": "T16"
+      },
+      {
+        "label": "Application",
+        "value": "Tail / Brake Light / Interior / Dome Light"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5321-1.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6950-clean.png?v=1791873006",
+    "sourceUrl": "https://geekauto.co.nz/products/t16-ba15s-12v-5w-clear-park-interior-bulb-47207",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5322",
+    "supplierRef": "T20A",
+    "title": "T20A 12V 21W Amber Bulb (Part #47532) – Turning Signal & Tail Lighting",
+    "subtitle": "Turn Signal / Indicator / Tail / Brake Light",
+    "priceNzd": 16,
+    "features": [
+      "Replacement reference: 47532 / T20A.",
+      "Single-filament 21W rating for signaling.",
+      "Amber output for signal and tail lamp applications.",
+      "Existing-socket installation on 12V vehicles only."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "T20A"
+      },
+      {
+        "label": "Voltage",
+        "value": "12V"
+      },
+      {
+        "label": "Power",
+        "value": "21W"
+      },
+      {
+        "label": "Socket / base",
+        "value": "T20A"
+      },
+      {
+        "label": "Application",
+        "value": "Turn Signal / Indicator / Tail / Brake Light"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5322-1.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6952-clean.png?v=1791872994",
+    "sourceUrl": "https://geekauto.co.nz/products/t20a-12v-21w-amber-indicator-bulb-47532",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5323",
+    "supplierRef": "T20D12V",
+    "title": "T20D 12V 21/5W Clear Bulb (Part #47534) – Turning Signal, Tail & Brake Lighting",
+    "subtitle": "Turn Signal / Indicator / Tail / Brake Light",
+    "priceNzd": 12,
+    "features": [
+      "Replacement reference: 47534 / T20D.",
+      "Dual-filament 21W / 5W configuration for brake and tail lamps.",
+      "Clear glass envelope for visible lamp output.",
+      "Existing-socket installation on 12V vehicles only."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "T20D"
+      },
+      {
+        "label": "Voltage",
+        "value": "12V"
+      },
+      {
+        "label": "Power",
+        "value": "21W"
+      },
+      {
+        "label": "Socket / base",
+        "value": "T20D"
+      },
+      {
+        "label": "Application",
+        "value": "Turn Signal / Indicator / Tail / Brake Light"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5323-1.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6960-clean.png?v=1791871969",
+    "sourceUrl": "https://geekauto.co.nz/products/t20d-12v-21-5w-clear-brake-tail-bulb-47534",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5324",
+    "supplierRef": "T20R",
+    "title": "T20R 12V 21/5W Red Bulb – Turning Signal, Tail, Side & Brake Lighting",
+    "subtitle": "Turn Signal / Indicator / Tail / Brake Light",
+    "priceNzd": 16,
+    "features": [
+      "T20R replacement for dual-filament fittings.",
+      "Filament ratings: 21W / 5W for combined brake and running tail lamp operation.",
+      "Red output through clear or colored lenses.",
+      "Direct socket installation on 12V vehicles only."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "T20R"
+      },
+      {
+        "label": "Voltage",
+        "value": "12V"
+      },
+      {
+        "label": "Power",
+        "value": "21W"
+      },
+      {
+        "label": "Socket / base",
+        "value": "T20R"
+      },
+      {
+        "label": "Application",
+        "value": "Turn Signal / Indicator / Tail / Brake Light"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5324-1.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6962-clean.png?v=1791871951",
+    "sourceUrl": "https://geekauto.co.nz/products/t20r-12v-21-5w-red-brake-tail-bulb",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5325",
+    "supplierRef": "T20S",
+    "title": "T20S 12V 21W Clear Bulb (Part #47530) – Turning Signal, Tail & Brake Lighting",
+    "subtitle": "Turn Signal / Indicator / Tail / Brake Light",
+    "priceNzd": 12,
+    "features": [
+      "Replacement reference: 47530 / T20S.",
+      "Single filament with actual 21W power rating for lighting and signaling.",
+      "Clear glass envelope for visible lamp output.",
+      "Existing-socket installation on 12V vehicles only."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "T20S"
+      },
+      {
+        "label": "Voltage",
+        "value": "12V"
+      },
+      {
+        "label": "Power",
+        "value": "21W"
+      },
+      {
+        "label": "Socket / base",
+        "value": "T20S"
+      },
+      {
+        "label": "Application",
+        "value": "Turn Signal / Indicator / Tail / Brake Light"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5325-1.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6958-clean.png?v=1791872971",
+    "sourceUrl": "https://geekauto.co.nz/products/t20s-12v-21w-clear-brake-tail-bulb-47530",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5326",
+    "supplierRef": "T5",
+    "title": "T5 73 2721 W2x4.6d 12V 1.2W Miniature Halogen Bulbs – Clear Dashboard & Switch Illumination OEM Fit",
+    "subtitle": "Dashboard Gauges, Speedometer, Warning Indicators, Climate Control, Switch Illumination, Clock Display",
+    "priceNzd": 6,
+    "features": [
+      "T5 (W1.2W / W2x4.6d) dimensions match OEM fittings; folded wire terminals engage original twist-lock instrument sockets or gauge circuit boards.",
+      "Calibrated 1.2W low-current, low-heat rating protects plastic clusters, printed circuit traces or colored indicator films against thermal deformation and heat damage.",
+      "Original dashboard rheostats and dimmer switches provide continuous brightness adjustment without flicker or stepped transitions.",
+      "Warm white 3200K backlighting for speedometers, rev counters, tachometers, fuel gauges or climate control HVAC knobs; even illumination with reduced eye discomfort.",
+      "Original resistive loading avoids CANBus errors, dashboard codes, warning chimes or hyper-flashing associated with LED replacements lacking resistance.",
+      "Other applications include check engine/warning tell-tales, automatic transmission gear selectors or dashboard toggle buttons.",
+      "100% direct push-in replacement for original instrument bulbs; replacement time measured in seconds."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "T5"
+      },
+      {
+        "label": "Technology",
+        "value": "Sub-Miniature Incandescent / Halogen (Single Filament)"
+      },
+      {
+        "label": "Voltage",
+        "value": "12V DC (Passenger Vehicles Only)"
+      },
+      {
+        "label": "Power",
+        "value": "1.2W"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "3200K (Clear / Warm White)"
+      },
+      {
+        "label": "Socket / base",
+        "value": "T5 (Base: W2x4.6d Sub-Miniature Wedge)"
+      },
+      {
+        "label": "Part references",
+        "value": "47286 / W1.2W / 73 / 74 / 2721 / 286 / PC74"
+      },
+      {
+        "label": "Application",
+        "value": "Dashboard Gauges, Speedometer, Warning Indicators, Climate Control, Switch Illumination, Clock Display"
+      },
+      {
+        "label": "Glass finish",
+        "value": "High-Transparency Clear Glass"
+      },
+      {
+        "label": "Installation type",
+        "value": "Direct Push-In Wedge OEM Replacement (Plug & Play)"
+      },
+      {
+        "label": "Dimensions",
+        "value": "Approx. 5mm Diameter × 20mm Overall Length"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5326-1.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6933-clean.png?v=1791873111",
+    "sourceUrl": "https://geekauto.co.nz/products/t5-12v-1-2w-clear-dashboard-bulb-47286",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  },
+  {
+    "sku": "NBL5327",
+    "supplierRef": "BA9S",
+    "title": "T8.5 BA9s 12V 4W Bulb (47233) - 3200K Interior & Dash Light",
+    "subtitle": "Interior / Dome Light",
+    "priceNzd": 6,
+    "features": [
+      "Replacement references: 47233 / BA9s / equivalent T8.5 miniature bayonet bulbs.",
+      "Single filament and single contact; level opposing lugs with 180-degree spacing.",
+      "Warm white 3200K illumination for dashboard clusters and interior lenses without glare.",
+      "Standard 12V automotive socket replacement; no modifications required."
+    ],
+    "specifications": [
+      {
+        "label": "Bulb model",
+        "value": "T8.5"
+      },
+      {
+        "label": "Voltage",
+        "value": "12V"
+      },
+      {
+        "label": "Colour temperature",
+        "value": "3200K"
+      },
+      {
+        "label": "Socket / base",
+        "value": "T8.5"
+      },
+      {
+        "label": "Application",
+        "value": "Interior / Dome Light"
+      }
+    ],
+    "images": [
+      "/products/bulbs/catalog/NBL5327-1.jpg"
+    ],
+    "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0840/6420/7107/files/topstar-bulb-6936-clean.png?v=1791873087",
+    "sourceUrl": "https://geekauto.co.nz/products/t8-5-12v-4w-clear-interior-bulb-47233",
+    "packLabel": null,
+    "orderingEnabled": true,
+    "inventoryQuantity": null,
+    "vehicleFitmentStatus": "not_available"
+  }
+]

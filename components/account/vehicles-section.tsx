@@ -1,4 +1,7 @@
+"use client";
+
 import { CarFront, Plus, Trash2 } from "lucide-react";
+import { useVehicleContext } from '@/components/vehicle-context-provider';
 import { WiperFitmentFinder } from "@/components/wiper-fitment-finder";
 import type { AccountVehicle } from "@/components/account/account-types";
 import { vehicleLabel } from "@/components/account/account-types";
@@ -19,6 +22,7 @@ export function VehiclesSection({
   findWipers: (vehicle: AccountVehicle) => void;
   refresh: () => void;
 }) {
+  const { vehicle: currentVehicle, changing } = useVehicleContext();
   return (
     <section className="mt-6 grid gap-5">
       <Panel title="Saved Vehicles" icon={<CarFront className="h-5 w-5" />}>
@@ -59,9 +63,9 @@ export function VehiclesSection({
         )}
       </Panel>
 
-      <Panel title="Add Another Vehicle" icon={<Plus className="h-5 w-5" />}>
+      {!currentVehicle&&!changing?<Panel title="Add Another Vehicle" icon={<Plus className="h-5 w-5" />}>
         <WiperFitmentFinder compact onVehicleSaved={refresh} />
-      </Panel>
+      </Panel>:null}
     </section>
   );
 }

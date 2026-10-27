@@ -2,14 +2,19 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { CheckCircle2, CircleHelp } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import { WiperSetPurchase } from "@/components/wiper-set-purchase";
 import { WiperProductGallery } from "@/components/wiper-product-gallery";
-import { WiperFitmentFinder } from "@/components/wiper-fitment-finder";
+import { VehiclePartsFinder } from "@/components/vehicle-parts-finder";
 import { formatMoney } from "@/lib/catalog";
 import { blobMediaAssets } from "@/lib/blob-media-assets";
 import { wiperPairPricing } from "@/lib/pricing";
 import { getWiperRearAddonById, getWiperSetBySku } from "@/lib/queries/wiper-commerce";
+import { readStoredVehicleContext } from '@/lib/server/vehicle-context';
+import { resolveVehicleSelection } from '@/lib/server/resolve-vehicle-selection';
+import { matchStorefrontCatalogue } from '@/lib/queries/storefront-catalog';
+import { ProductVehicleFitment } from '@/components/product-vehicle-fitment';
+import { vehicleContextLabel, vehicleContextDetails } from '@/lib/vehicle-context';
 
 export const dynamic = "force-dynamic";
 
@@ -61,25 +66,22 @@ export default async function WiperSkuPage({
 
   if (!wiperSet) notFound();
 
-  const vehicleContext =
-    query.applicationId && query.applicationKind === "canonical" && query.make && query.model && query.year
-      ? {
-          applicationId: query.applicationId,
-          applicationKind: "canonical" as const,
-          make: decodeURIComponent(query.make),
-          model: decodeURIComponent(query.model),
-          year: Number(query.year),
-          bodyChassis: cleanVehicleDetail(query.bodyChassis)
-        }
-      : null;
-  const vehicle = vehicleContext
-    ? [
-        `${vehicleContext.make} ${vehicleContext.model} ${vehicleContext.year}`,
-        vehicleContext.bodyChassis
-      ].filter(Boolean).join(" · ")
-    : query.vehicle
-      ? decodeURIComponent(query.vehicle)
-      : "";
+  const selected = await readStoredVehicleContext();
+  let resolved: Awaited<ReturnType<typeof resolveVehicleSelection>> = null;
+  let fitmentStatus = 'not-listed';
+  try {
+    resolved = await resolveVehicleSelection(selected);
+    if(resolved){
+      const [entry]=await matchStorefrontCatalogue([{id:wiperSet.id,sku:wiperSet.sku,name:wiperSet.name,category:'wipers',price:wiperSet.price,image:'',href:'',purchasable:wiperSet.purchasable,attributes:{driver_length:[`${wiperSet.driverLengthIn}″`],passenger_length:[`${wiperSet.passengerLengthIn}″`]}}],resolved.vehicle,resolved.applications);
+      fitmentStatus=entry.status??'not-listed';
+    }
+  } catch { fitmentStatus='unavailable'; }
+  const vehicleContext = resolved && fitmentStatus==='fits' ? {
+    applicationId:resolved.applications.length===1?resolved.applications[0].id:undefined,
+    applicationKind:'canonical' as const,make:resolved.vehicle.make,model:resolved.vehicle.model,year:Number(resolved.vehicle.year),
+    bodyChassis:resolved.vehicle.versionLabel||resolved.vehicle.bodyConfiguration||'',selection:resolved.vehicle
+  } : null;
+  const vehicle = selected ? [vehicleContextLabel(selected),vehicleContextDetails(selected)].filter(Boolean).join(' · ') : '';
   const title = getWiperSetTitle(wiperSet);
   const galleryImages = productGalleryImages.map((name) => ({
     src: getImageUrl(name),
@@ -117,25 +119,13 @@ export default async function WiperSkuPage({
             </div>
           </div>
 
-          <section className={`rounded-lg border p-3 ${vehicleContext ? "border-emerald-700/20 bg-emerald-50" : "border-amber-700/20 bg-amber-50"}`}>
-            <div className="flex items-center gap-3">
-              {vehicleContext ? <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-700" /> : <CircleHelp className="h-5 w-5 shrink-0 text-amber-700" />}
-              <p className="min-w-0 flex-1 text-sm font-bold leading-5 text-steel">
-                <span className="font-black text-ink">{vehicleContext ? "Fits selected vehicle" : "Compatibility not checked"}</span>
-                {vehicle ? ` · ${vehicle}` : " · Select your vehicle for the safest fitment."}
-              </p>
-              <Link href="/parts#change-vehicle" className="shrink-0 text-xs font-black text-signal hover:underline">{vehicle ? "Change" : "Select"}</Link>
-            </div>
-          </section>
+          <ProductVehicleFitment checkedVehicle={selected} status={fitmentStatus}/>
 
           {wiperSet.purchasable ? (
             <WiperSetPurchase wiperSet={wiperSet} rearAddon={rearAddon} vehicle={vehicle} vehicleContext={vehicleContext} />
           ) : (
             <section className="rounded-lg border border-amber-300 bg-amber-50 p-5">
-              <p className="text-sm font-black text-ink">Catalogue preview — purchasing is disabled.</p>
-              <p className="mt-2 text-sm font-bold leading-6 text-steel">
-                This wiper set is being reviewed for fitment, pricing, and stock. It cannot be added to the cart or purchased yet.
-              </p>
+              <p className="text-sm font-black text-ink">Currently unavailable</p>
               <Link
                 href={`/contact?part=${encodeURIComponent(wiperSet.name)}`}
                 className="mt-4 inline-flex h-11 items-center justify-center rounded bg-ink px-4 text-sm font-black text-white transition hover:-translate-y-0.5 hover:bg-black"
@@ -145,10 +135,10 @@ export default async function WiperSkuPage({
             </section>
           )}
 
-          {!vehicleContext ? (
+          {!selected ? (
             <details className="rounded-lg border border-black/10 bg-[#F8FAFC] p-3">
               <summary className="cursor-pointer text-sm font-black text-ink">Check compatibility</summary>
-              <div className="mt-4"><WiperFitmentFinder compact directToProduct title="Check wiper compatibility" description="Select make, model, year and body or chassis to confirm the correct blade pair." /></div>
+              <div className="mt-4"><VehiclePartsFinder compact category="wipers" /></div>
             </details>
           ) : null}
         </section>
@@ -157,8 +147,7 @@ export default async function WiperSkuPage({
       <section className="border-t border-black/10 bg-white">
         <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
           <div className="mb-4">
-            <p className="text-sm font-black uppercase tracking-[0.18em] text-signal">Product information</p>
-            <h2 className="mt-1 text-2xl font-black sm:text-3xl">Product Specifications</h2>
+            <h2 className="text-2xl font-black sm:text-3xl">Product Specifications</h2>
           </div>
           <dl className="overflow-hidden rounded-lg border border-black/10 text-sm font-bold">
             <SpecificationRow label="Driver side" value={`${wiperSet.driverLengthIn}\" / ${toMillimetres(wiperSet.driverLengthIn)} mm`} />
@@ -184,11 +173,7 @@ export default async function WiperSkuPage({
           <div className="mb-6 max-w-3xl">
             <p className="text-sm font-black uppercase tracking-[0.18em] text-signal">Adapter included</p>
             <h2 className="mt-3 text-3xl font-black">{vehicleContext ? "Correct Adapter Included" : "Adapter Confirmed With Vehicle"}</h2>
-            <p className="mt-4 text-sm font-bold leading-7 text-steel">
-              {vehicleContext
-                ? "Your selected vehicle is matched with the appropriate wiper adapter. You do not need to identify or select the connector manually."
-                : "Adapter styles vary by vehicle. Select your vehicle above before ordering so the appropriate connector can be confirmed."}
-            </p>
+            {!selected ? <Link href="/parts#change-vehicle" className="mt-4 inline-flex h-10 items-center rounded-lg border border-black/10 px-4 text-sm font-black">Check compatibility</Link> : null}
           </div>
           <div className="flex gap-4 overflow-x-auto pb-2">
             {adapterImageNames.map((name, index) => (
@@ -203,11 +188,7 @@ export default async function WiperSkuPage({
               </article>
             ))}
           </div>
-          <p className="mt-4 text-sm font-bold leading-7 text-steel">
-            {vehicleContext
-              ? "Adapter styles shown are examples. The suitable configuration will be supplied for your selected vehicle."
-              : "Adapter styles shown are examples. Compatibility has not been confirmed for a vehicle yet."}
-          </p>
+          <p className="mt-4 text-xs font-bold text-steel">Example adapter styles</p>
         </div>
       </section>
 

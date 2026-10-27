@@ -4,11 +4,16 @@ import { useState } from "react";
 import { Check, Minus, Plus, ShoppingBag } from "lucide-react";
 import { useCart } from "@/components/cart-provider";
 import type { OilFilterDetail } from "@/lib/oil-filter";
+import type { VehicleContext } from '@/lib/vehicle-context';
+import { vehicleCartAttributes } from '@/lib/vehicle-cart';
+import { useVehicleContext } from '@/components/vehicle-context-provider';
+import { sameVehicleContext } from '@/lib/vehicle-context';
 
-export function OilFilterPurchase({ detail }: { detail: OilFilterDetail }) {
+export function OilFilterPurchase({ detail, vehicle, vehicleFitmentStatus }: { detail: OilFilterDetail; vehicle?: VehicleContext | null; vehicleFitmentStatus?: string }) {
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
   const { addItem } = useCart();
+  const { vehicle: currentVehicle } = useVehicleContext();
   const available = detail.product.purchasable && detail.variant.stock > 0;
 
   function addToCart() {
@@ -22,7 +27,7 @@ export function OilFilterPurchase({ detail }: { detail: OilFilterDetail }) {
       qty: quantity,
       price: detail.variant.price,
       imageUrl: detail.imageUrl,
-      attributes: detail.variant.attributes
+      attributes: { ...detail.variant.attributes, ...vehicleCartAttributes(currentVehicle,sameVehicleContext(currentVehicle,vehicle??null)?vehicleFitmentStatus:'unavailable') }
     });
     setAdded(true);
     window.setTimeout(() => setAdded(false), 1600);
@@ -50,11 +55,6 @@ export function OilFilterPurchase({ detail }: { detail: OilFilterDetail }) {
           {added ? "Added" : available ? "Add to Cart" : detail.product.checkoutEnabled ? "Out of stock" : "Price to be set"}
         </button>
       </div>
-      {!detail.product.checkoutEnabled ? (
-        <p className="mt-3 text-xs font-bold leading-5 text-steel">
-          This catalogue item cannot be purchased until price, stock and fitment data have been approved.
-        </p>
-      ) : null}
     </section>
   );
 }
